@@ -1,0 +1,43 @@
+/* ─── Canvas route v0.8.1 (open-notebook spread) ───────────────────────────
+ *
+ * Layout: EditorialPlate chrome wraps the canvas; inside, a flex-positioned
+ * NotebookSpread is centered, with the close button and margin note absolutely
+ * positioned at left/right. The .canvas container is the positioning context
+ * for both side-margin elements.
+ * ────────────────────────────────────────────────────────────────────────── */
+
+.canvas {
+  position: relative;
+  width: 100%;
+  /* Standalone chromeless root — fills the viewport so the notebook
+   * spread vertically centers within a full-page container, with the
+   * SpotlightDotGrid as the only background pattern. EditorialPlate
+   * chrome (column numbers, labels, bleed frame, register marks, grid
+   * rulings) is intentionally absent on this route. */
+  min-height: 100vh;
+  background: var(--paper);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(20px, 4vw, 60px) clamp(60px, 8vw, 120px);
+  box-sizing: border-box;
+
+  /* Single source of truth for the notebook spread's rendered width.
+   * Consumed by NotebookSpread (sets the spread's actual width) and by
+   * CanvasCloseButton (anchors itself relative to the spread's left edge,
+   * not to the canvas — keeps the button outside the notebook regardless
+   * of viewport aspect ratio).
+   *
+   * Note: the formula uses `100vw - 2 * canvas-padding` instead of `100%`.
+   * This matters because the variable is consumed both inside `width:`
+   * (where `100%` means the containing block) AND inside `transform:`
+   * (where `100%` means the element's own size). Using viewport units
+   * makes the value context-independent — same pixels everywhere. */
+  --notebook-width: min(
+    calc(100vw - 2 * clamp(60px, 8vw, 120px)),
+    1400px,
+    calc((100vh - 25vh) * 2600 / 1812)
+  );
+  --canvas-close-gap: 100px;
+}

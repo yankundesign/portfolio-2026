@@ -1,0 +1,202 @@
+/*
+ * ChaiProject — bespoke layout for the CHAI case study.
+ *
+ * The page is structured as a 3-column grid below the header:
+ *
+ *   ┌──────────┬─────────────────────┬──────────┐
+ *   │  rail    │  reading col        │  gutter  │
+ *   │  sticky  │  (--reading-measure)│  (empty) │
+ *   └──────────┴─────────────────────┴──────────┘
+ *
+ * The rail and gutter are roughly equal width so the reading column
+ * sits visually centered within the article. Below 1024px the grid
+ * collapses to a single column and the rail disappears.
+ *
+ * Editorial plates are locked to the reading-column width and stack
+ * vertically — never side-by-side. Including the three Evolution
+ * plates and the Report Analysis sub-beat plates.
+ */
+
+.article {
+  max-width: 78em;
+  margin: 0 auto;
+  padding: 0 1px; /* avoid horizontal collapse of plate shadows */
+}
+
+/* On very wide displays (≥1920px) widen the article to 90em AND bump
+   the reading column from 52em to 64em. Both prose and plates use
+   --reading-measure, so they grow together. The rail and gutter still
+   get meaningful slack because 90em - 64em = 26em split between them.
+   Prose at 64em (1024px) is wider than the editorial ideal (32–38em)
+   but reads cleanly because Fraunces' tracking and the short-sentence
+   voice keep line lengths from feeling lost. */
+
+@media (min-width: 1920px) {
+  .article {
+    max-width: 90em;
+    --reading-measure: 64em;
+  }
+}
+
+/* Body grid -------------------------------------------------- */
+
+.grid {
+  display: grid;
+  /* Rail column has a minimum width (11rem) so the labels never crowd
+     the reading column. If the viewport can't accommodate min rail +
+     reading column, the reading column shrinks first via min(...). */
+  grid-template-columns:
+    minmax(11rem, 1fr)
+    min(var(--reading-measure), 100%)
+    minmax(0, 1fr);
+  column-gap: clamp(1rem, 3vw, 2rem);
+  align-items: start;
+}
+
+.rail {
+  grid-column: 1;
+}
+
+.body {
+  grid-column: 2;
+  min-width: 0;
+}
+
+.gutter {
+  grid-column: 3;
+}
+
+/* Below 1024px the rail can't fit its longest label without crowding
+   the reading column. Hide it and run a single-column layout — case
+   studies read top to bottom on tablet and below. */
+
+@media (max-width: 1023px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+  .rail,
+  .gutter {
+    display: none;
+  }
+}
+
+/* All direct beat sections sit on the reading column. The body grid
+   column already constrains them to --reading-measure; auto margins are
+   kept for safety on browsers that don't honor min(...) in grid-template. */
+
+.beat,
+.proof {
+  max-width: var(--reading-measure);
+  margin: clamp(2.5rem, 5vw, 4rem) auto;
+}
+
+.proof {
+  /* Smart Search · Report Analysis · Devices sit a little further apart
+     than regular beats — they're the load-bearing sections. */
+  margin-top: clamp(4rem, 8vw, 7rem);
+}
+
+/* Inline metrics row (Smart Search 86% / 14%). */
+
+.inlineMetrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(1.5rem, 4vw, 3rem);
+  margin: clamp(2rem, 4vw, 3rem) 0;
+}
+
+/* Evolution row — three plates stacked (1.0 → 2.0 → 3.0).
+   Single column, full width of the reading column. The reader scrolls
+   through the three releases in order; side-by-side comparison is not
+   the move. */
+
+.evolutionRow {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin: clamp(2rem, 4vw, 3rem) 0;
+}
+
+/* Report Analysis sub-beats (6.1, 6.2, 6.3).
+   Sub-headers are smaller than SectionHeader and sit above their prose
+   + plates. A faint horizontal rule above each marks the break without
+   competing with the parent SectionHeader's vertical rule. */
+
+.subBeat {
+  margin: clamp(2.75rem, 5vw, 4rem) 0 0;
+  padding-top: clamp(1.5rem, 3vw, 2rem);
+  border-top: 1px solid var(--ink-faint);
+}
+
+.subBeat:first-of-type {
+  /* The first sub-beat sits directly under the section intro — leave the
+     rule but tighten the top margin so it doesn't double-space. */
+  margin-top: clamp(2rem, 4vw, 3rem);
+}
+
+.subBeatTitle {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(1.25rem, 2.4vw, 1.5rem);
+  line-height: 1.25;
+  letter-spacing: -0.012em;
+  color: var(--ink);
+  margin: 0 0 1rem;
+  font-variation-settings: 'opsz' 96;
+  display: flex;
+  align-items: baseline;
+  gap: 0.85em;
+  flex-wrap: wrap;
+}
+
+.subBeatNumeral {
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  font-weight: 400;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  /* Visual alignment — mono caps sit a hair below the serif baseline. */
+  position: relative;
+  top: -0.05em;
+}
+
+/* Colophon ---------------------------------------------------- */
+
+.colophon {
+  max-width: var(--reading-measure);
+  margin: clamp(3rem, 6vw, 5rem) auto clamp(4rem, 8vw, 6rem);
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--ink-muted);
+}
+
+.colophonLine {
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 0.5rem;
+}
+
+.sep {
+  color: var(--ink-muted);
+}
+
+/* Screen-reader only (section headings are set invisibly for
+   accessibility without disrupting the visual layout). */
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

@@ -1,0 +1,47 @@
+/*
+ * DeskLight — static directional wash on the desk surface.
+ *
+ * Layered gradients:
+ *   - radial warm pool at upper-left (paper-shadow tint, gentle weight)
+ *   - linear ink falloff toward lower-right (directional read)
+ *
+ * Tunables on :root so DevTools editing works without a rebuild. Each var()
+ * carries an explicit fallback so the gradient still renders even if the
+ * :root declaration ever fails to land in cascade.
+ *
+ * Tunables:
+ *   --desk-light-angle      direction of the linear falloff
+ *   --desk-light-warm       upper-left tint (paper-shadow at low alpha)
+ *   --desk-light-cool       lower-right ink wash
+ *   --desk-light-warm-stop  radial pool reach
+ *   --desk-light-cool-start where the linear falloff starts ramping
+ */
+
+:root {
+  --desk-light-angle: 135deg;
+  --desk-light-warm: rgba(221, 214, 194, 0.34);
+  --desk-light-cool: rgba(22, 38, 94, 0.18);
+  --desk-light-warm-stop: 55%;
+  --desk-light-cool-start: 8%;
+}
+
+.light {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  /* Sit above the plate background but below the scene grid (which is in
+   * normal flex flow at z-index: auto and paints in source order after). */
+  z-index: 0;
+  background-image:
+    radial-gradient(
+      ellipse 85% 70% at 8% 4%,
+      var(--desk-light-warm, rgba(221, 214, 194, 0.34)),
+      transparent var(--desk-light-warm-stop, 55%)
+    ),
+    linear-gradient(
+      var(--desk-light-angle, 135deg),
+      transparent 0%,
+      transparent var(--desk-light-cool-start, 8%),
+      var(--desk-light-cool, rgba(22, 38, 94, 0.18)) 100%
+    );
+}

@@ -1,0 +1,10 @@
+@import './tokens.css';
+@import './reset.css';
+@import './typography.css';
+@import './keyframes.css';
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  background: var(--paper);
+}

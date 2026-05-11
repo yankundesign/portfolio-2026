@@ -1,0 +1,242 @@
+/*
+ * CvRole — individual role block with margin year-range and expandable bullets.
+ */
+
+.role {
+  display: grid;
+  grid-template-columns: clamp(5rem, 12%, 9rem) 1fr;
+  gap: clamp(1.5rem, 4vw, 3rem);
+  padding: clamp(2.5rem, 5vw, 4rem) 0;
+  border-top: 1px solid var(--ink-muted);
+  align-items: start;
+}
+
+.role:first-of-type {
+  border-top: none;
+}
+
+/* Margin — mono year range, vertical index number. */
+.margin {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding-top: 0.25rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  letter-spacing: 0.12em;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+}
+
+.index {
+  font-size: 0.75rem;
+  color: var(--ink);
+  font-weight: 400;
+}
+
+.rangeVertical {
+  letter-spacing: 0.1em;
+  line-height: 1.5;
+  color: var(--ink);
+}
+
+.body {
+  min-width: 0;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  background: none;
+  border: none;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+}
+
+.header:focus-visible {
+  outline: 1.5px solid var(--ink);
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+
+.heading {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: clamp(2rem, 4.5vw, 3.75rem);
+  line-height: 0.98;
+  letter-spacing: -0.02em;
+  margin: 0;
+  color: var(--ink);
+  font-variation-settings: 'opsz' 72;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: clamp(0.5rem, 1.5vw, 1rem);
+}
+
+.title {
+  font-style: normal;
+}
+
+/* The "at" is a small roman connector set in mono, hanging low. */
+.at {
+  font-family: var(--font-mono);
+  font-size: 0.26em;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  font-weight: 300;
+  padding: 0 0.25em;
+  transform: translateY(-0.35em);
+}
+
+.company {
+  font-style: italic;
+  font-weight: 400;
+}
+
+/* Toggle mark — a quiet + or —, pinned to the top-right of the header. */
+.toggleMark {
+  font-family: var(--font-mono);
+  font-size: 1.25rem;
+  color: var(--ink-soft);
+  line-height: 1;
+  padding-top: 0.5rem;
+  transition: color var(--duration-hover) var(--ease-out);
+  flex-shrink: 0;
+}
+
+.header:hover .toggleMark,
+.header:focus-visible .toggleMark {
+  color: var(--ink);
+}
+
+/* Meta line — inline dates/location, not a résumé box. */
+.metaLine {
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin: 1rem 0 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.metaDot {
+  color: var(--ink-muted);
+}
+
+.summary {
+  font-family: var(--font-body);
+  font-size: var(--text-body-lg);
+  font-weight: 300;
+  font-style: italic;
+  line-height: 1.5;
+  color: var(--ink);
+  margin: 0 0 1.5rem;
+  max-width: 52ch;
+}
+
+/* Panel — bullets area that unfolds. */
+.panel {
+  overflow: hidden;
+}
+
+.panel[hidden] {
+  display: none;
+}
+
+.bullets {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  border-top: 1px solid var(--ink-muted);
+  padding-top: 1.5rem;
+  max-width: 62ch;
+}
+
+.bullet {
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  font-weight: 300;
+  line-height: 1.6;
+  color: var(--ink);
+  position: relative;
+  padding-left: 1.75rem;
+}
+
+/* Custom bullet mark — a small ink dash in the margin. */
+.bullet::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.75em;
+  width: 1rem;
+  height: 1px;
+  background: var(--ink);
+}
+
+/* Unfold animation — bullets slide in with a slight stagger. */
+@media (prefers-reduced-motion: no-preference) {
+  .role.open .bullet {
+    animation: bullet-in var(--duration-reveal) var(--ease-out) both;
+    animation-delay: var(--bullet-delay, 0ms);
+  }
+}
+
+@keyframes bullet-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Header hover state — faint underline draws in under the heading. */
+.heading {
+  position: relative;
+}
+
+.heading::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -0.35em;
+  width: 0;
+  height: 1px;
+  background: var(--ink);
+  transition: width var(--duration-reveal) var(--ease-out);
+}
+
+.header:hover .heading::after,
+.header:focus-visible .heading::after {
+  width: 64px;
+}
+
+@media (max-width: 640px) {
+  .role {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .margin {
+    flex-direction: row;
+    gap: 1rem;
+  }
+}

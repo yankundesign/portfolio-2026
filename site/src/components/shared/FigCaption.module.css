@@ -1,0 +1,82 @@
+/*
+ * FigCaption — `fig. 0N — name` caption, v0.4 Swiss register.
+ *
+ * The caption is the affordance: the object's parent can wire an underline
+ * on hover by targeting `[data-figcaption-underline]`. Example:
+ *
+ *   .myObject:hover [data-figcaption-underline] {
+ *     transform: scaleX(1);
+ *   }
+ */
+
+.caption {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding-top: 12px;
+  position: relative;
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  font-weight: 400;
+  letter-spacing: var(--chrome-tracking-tight);
+  color: var(--ink-soft);
+  text-transform: lowercase;
+  line-height: 1.3;
+}
+
+/* Short horizontal rule between the object and the caption text. */
+.rule {
+  display: block;
+  width: 32px;
+  height: 1px;
+  background: var(--rule-plate-strong);
+}
+
+.text {
+  display: block;
+  white-space: nowrap;
+}
+
+/* Underline beneath the caption, scale-X on hover of a parent with
+ * `:hover [data-figcaption-underline]`. Starts at scale 0, transitions
+ * 160ms ease-out to scale 1. Origin left for LTR alignment. */
+.underline {
+  display: block;
+  width: 100%;
+  height: 1px;
+  background: var(--ink);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform var(--duration-hover) var(--ease-out);
+}
+
+/* Alignment variants */
+
+.alignLeft {
+  text-align: left;
+  align-items: flex-start;
+}
+
+.alignCenter {
+  text-align: center;
+  align-items: center;
+}
+.alignCenter .underline {
+  transform-origin: center;
+}
+
+.alignRight {
+  text-align: right;
+  align-items: flex-end;
+}
+.alignRight .underline {
+  transform-origin: right center;
+}
+
+/* Reduced motion — snap the underline, no transition. */
+@media (prefers-reduced-motion: reduce) {
+  .underline {
+    transition: none;
+  }
+}

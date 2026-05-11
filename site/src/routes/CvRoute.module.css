@@ -1,0 +1,180 @@
+/*
+ * CvRoute — vertical-scroll editorial page.
+ *
+ * Content column is constrained to the grid max of 1280px with responsive
+ * margins. The download button is pinned inside the column, top-right,
+ * so it sticks while the user scrolls.
+ */
+
+.page {
+  min-height: 100vh;
+  background: var(--paper);
+  color: var(--ink);
+  position: relative;
+}
+
+.topNav {
+  position: absolute;
+  top: clamp(1.5rem, 3vw, 2.25rem);
+  left: clamp(1.5rem, 4vw, 3.75rem);
+  z-index: 20;
+}
+
+.back {
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
+  transition: color var(--duration-hover) var(--ease-out);
+  border-bottom: 1px solid transparent;
+}
+
+.back:hover,
+.back:focus-visible {
+  color: var(--ink);
+  border-bottom-color: var(--ink);
+  outline: none;
+}
+
+.main {
+  padding: clamp(4rem, 8vw, 6rem) clamp(1.5rem, 4vw, 3.75rem) clamp(4rem, 8vw, 6rem);
+  display: flex;
+  justify-content: center;
+}
+
+.contentCol {
+  width: 100%;
+  max-width: var(--grid-max);
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+}
+
+/* The pinned download sits in a zero-height slot above the intro so it can
+ * be positioned absolutely in the top-right of the content column. */
+.pinnedSlot {
+  position: absolute;
+  top: clamp(1.5rem, 4vw, 3rem);
+  right: 0;
+  z-index: 15;
+}
+
+.intro {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-style: italic;
+  font-size: clamp(1.375rem, 2.8vw, 1.875rem);
+  line-height: 1.45;
+  color: var(--ink);
+  margin: clamp(2.5rem, 6vw, 4rem) 0 clamp(3rem, 8vw, 5rem);
+  max-width: 48ch;
+  font-variation-settings: 'opsz' 36;
+  padding-left: clamp(0rem, 8vw, 6rem);
+  border-left: 1px solid var(--ink-muted);
+  padding-inline-start: clamp(1rem, 3vw, 2rem);
+}
+
+.experience {
+  margin-top: clamp(2rem, 4vw, 3rem);
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: baseline;
+  gap: 1.5rem;
+  margin-bottom: clamp(1.5rem, 4vw, 2.5rem);
+  padding-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.sectionNumber {
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  letter-spacing: 0.12em;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+}
+
+.sectionTitle {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: clamp(2.25rem, 5.5vw, 3.5rem);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  margin: 0;
+  color: var(--ink);
+  font-variation-settings: 'opsz' 72;
+}
+
+.sectionTitle em {
+  font-style: italic;
+  font-weight: 400;
+}
+
+.metricsRow {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+  padding-left: clamp(0rem, 12%, 9rem);
+}
+
+.colophon {
+  margin-top: clamp(3rem, 6vw, 5rem);
+  padding-top: clamp(2rem, 4vw, 3rem);
+  border-top: 1px solid var(--ink-muted);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.colophonLine {
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  letter-spacing: 0.12em;
+  color: var(--ink-soft);
+  margin: 0;
+  text-transform: none;
+}
+
+.colophonLine em {
+  font-style: italic;
+  color: var(--ink);
+}
+
+@media (max-width: 720px) {
+  .pinnedSlot {
+    position: static;
+    margin-top: 1.5rem;
+  }
+
+  .topNav {
+    top: 1rem;
+    left: 1rem;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .contentCol > * {
+    animation: content-in 480ms var(--ease-out) both;
+  }
+
+  @keyframes content-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}

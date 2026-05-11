@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Card Hover Prototype — Yankun's portfolio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..500;1,9..144,300..500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+/* ─── Tokens ──────────────────────────────────────────────────────────── */
+:root {
+  --ink: #16265e;
+  --ink-soft: #2a3a7a;
+  --ink-muted: rgba(22, 38, 94, 0.2);
+  --ink-faint: rgba(22, 38, 94, 0.08);
+  --paper: #f4f1ea;
+  --paper-soft: #ebe6d9;
+  --paper-shadow: #ddd6c2;
+  --font-display: 'Fraunces', serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --duration-hover: 240ms;
+  --duration-reveal: 360ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-paper: cubic-bezier(0.34, 1.2, 0.64, 1);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-weight: 300;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  padding: 56px clamp(32px, 6vw, 80px) 80px;
+  max-width: 1280px;
+  margin: 0 auto;
+  position: relative;
+}
+
+/* paper grain */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/></svg>");
+  mix-blend-mode: multiply;
+  pointer-events: none;
+  z-index: 100;
+}
+
+/* ─── Header ──────────────────────────────────────────────────────────── */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--ink-muted);
+  margin-bottom: 32px;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-style: italic;
+  font-size: 30px;
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+
+.bookplate {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.kicker {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-bottom: 10px;
+  display: block;
+}
+
+/* ─── Tabs ────────────────────────────────────────────────────────────── */
+.tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 36px;
+  border-bottom: 1px solid var(--ink-muted);
+}
+
+.tab {
+  background: transparent;
+  border: none;
+  padding: 14px 22px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  cursor: pointer;
+  position: relative;
+  transition: color 200ms var(--ease-out);
+}
+
+.tab:hover { color: var(--ink); }
+
+.tab.active { color: var(--ink); }
+
+.tab.active::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  background: var(--ink);
+}
+
+.tab-num {
+  font-weight: 400;
+  margin-right: 8px;
+  color: var(--ink);
+}
+
+/* ─── Panels ──────────────────────────────────────────────────────────── */
+.panel {
+  display: none;
+}
+.panel.active {
+  display: block;
+  animation: fadeUp 380ms var(--ease-out) both;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.panel-intro {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 48px;
+  margin-bottom: 32px;
+}
+.panel-intro h2 {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-style: italic;
+  font-size: 44px;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.panel-intro p {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: 17px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+  max-width: 560px;
+}
+.panel-intro p + p { margin-top: 12px; }
+
+.tradeoff {
+  margin-top: 14px;
+  padding-left: 14px;
+  border-left: 1px solid var(--ink-muted);
+  font-style: italic;
+  font-size: 15px;
+  color: var(--ink-soft);
+  max-width: 540px;
+}
+
+/* ─── Demo surface — mimics the canvas ───────────────────────────────── */
+.demo {
+  background: var(--paper);
+  border: 1px solid var(--ink-muted);
+  padding: 56px 56px 64px;
+  position: relative;
+  /* faint vertical column rulings, like the canvas */
+  background-image: repeating-linear-gradient(
+    to right,
+    transparent 0,
+    transparent calc(100% / 12 - 1px),
+    rgba(22, 38, 94, 0.05) calc(100% / 12 - 1px),
+    rgba(22, 38, 94, 0.05) calc(100% / 12)
+  );
+  background-size: calc(100% + 1px) 100%;
+}
+
+.demo-hint {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  opacity: 0.7;
+}
+
+/* shared "fake screenshot" art — what's inside each plate */
+.plate-art {
+  position: absolute;
+  inset: 0;
+  background: var(--paper-soft);
+  overflow: hidden;
+}
+
+.plate-art .topbar {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 14%;
+  background: var(--ink);
+}
+.plate-art .topbar::before {
+  content: '';
+  position: absolute;
+  left: 8%;
+  top: 38%;
+  width: 22%;
+  height: 24%;
+  background: var(--paper-soft);
+  opacity: 0.4;
+  border-radius: 1px;
+}
+.plate-art .sidebar {
+  position: absolute;
+  top: 14%;
+  left: 0;
+  bottom: 0;
+  width: 22%;
+  background: rgba(22, 38, 94, 0.06);
+  border-right: 1px solid var(--ink-muted);
+}
+.plate-art .sidebar::before,
+.plate-art .sidebar::after {
+  content: '';
+  position: absolute;
+  left: 12%;
+  width: 70%;
+  height: 4%;
+  background: var(--ink);
+  opacity: 0.5;
+  border-radius: 1px;
+}
+.plate-art .sidebar::before { top: 14%; }
+.plate-art .sidebar::after  { top: 26%; opacity: 0.25; }
+
+.plate-art .body {
+  position: absolute;
+  top: 18%;
+  left: 26%;
+  right: 6%;
+  bottom: 8%;
+}
+.plate-art .body .title {
+  height: 9%;
+  width: 60%;
+  background: var(--ink);
+  opacity: 0.85;
+  border-radius: 1px;
+  margin-bottom: 7%;
+}
+.plate-art .body .row {
+  height: 5%;
+  background: var(--ink);
+  opacity: 0.18;
+  border-radius: 1px;
+  margin-bottom: 4%;
+}
+.plate-art .body .row.short { width: 70%; }
+.plate-art .body .row.med   { width: 90%; }
+.plate-art .body .row.long  { width: 100%; }
+
+.plate-art .hero {
+  position: absolute;
+  right: 6%;
+  bottom: 14%;
+  width: 38%;
+  height: 36%;
+  background: var(--ink);
+  border-radius: 1px;
+}
+.plate-art .hero::before {
+  content: '';
+  position: absolute;
+  left: 12%;
+  bottom: 14%;
+  width: 18%;
+  height: 60%;
+  background: var(--paper-soft);
+  opacity: 0.7;
+}
+.plate-art .hero::after {
+  content: '';
+  position: absolute;
+  left: 38%;
+  bottom: 14%;
+  width: 18%;
+  height: 38%;
+  background: var(--paper-soft);
+  opacity: 0.5;
+}
+
+/* tiny variants so the four plates feel distinct */
+.plate-art.variant-2 .hero { width: 24%; height: 24%; right: 14%; bottom: 28%; }
+.plate-art.variant-2 .body .row.long { width: 60%; }
+.plate-art.variant-3 .sidebar { width: 0; border: none; }
+.plate-art.variant-3 .body { left: 8%; right: 8%; }
+.plate-art.variant-3 .hero { display: none; }
+.plate-art.variant-3 .body .title { width: 80%; }
+.plate-art.variant-4 .topbar { height: 10%; }
+.plate-art.variant-4 .hero { display: none; }
+.plate-art.variant-4 .sidebar { width: 28%; }
+
+/* common plate caption — museum label beneath */
+.label {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.label .fig {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(22, 38, 94, 0.7);
+}
+.label .name {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 300;
+  font-size: 21px;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.label .meta {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-top: 2px;
+}
+
+/* ─── 01 · Lift-and-Loft ─────────────────────────────────────────────── */
+#liftDemo {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 48px 56px;
+  padding-top: 24px;
+}
+.lift-card {
+  position: relative;
+  cursor: pointer;
+  outline: none;
+  transition:
+    transform 380ms var(--ease-paper),
+    z-index 0s 0s,
+    opacity 240ms var(--ease-out);
+  transform-origin: var(--pivot, 50% 100%);
+  z-index: 1;
+}
+.lift-card .plate {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  border: 1px solid var(--ink);
+  background: var(--paper-soft);
+  box-shadow:
+    0 2px 8px rgba(22, 38, 94, 0.10),
+    0 1px 2px rgba(22, 38, 94, 0.06);
+  transition: box-shadow 380ms var(--ease-paper);
+  overflow: hidden;
+}
+.lift-card:hover {
+  transform: scale(1.5) rotate(var(--tilt, -2deg));
+  z-index: 10;
+}
+.lift-card:hover .plate {
+  box-shadow:
+    0 24px 48px rgba(22, 38, 94, 0.20),
+    0 6px 14px rgba(22, 38, 94, 0.10);
+}
+/* dim siblings while one is hovered */
+#liftDemo:hover .lift-card:not(:hover) {
+  opacity: 0.4;
+}
+/* per-card pivot + tilt direction (toward spread center) */
+.lift-card:nth-child(1) { --tilt: 2deg;  --pivot: 100% 100%; }
+.lift-card:nth-child(2) { --tilt: -2deg; --pivot: 0% 100%; }
+.lift-card:nth-child(3) { --tilt: 2.5deg; --pivot: 100% 100%; }
+.lift-card:nth-child(4) { --tilt: -2.5deg; --pivot: 0% 100%; }
+
+/* ─── 02 · Specimen Drawer ───────────────────────────────────────────── */
+#drawerDemo {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding-top: 16px;
+}
+.drawer-card {
+  position: relative;
+  cursor: pointer;
+  outline: none;
+  /* reserve room for the drawer to slide into */
+  padding-bottom: 0;
+  transition: padding-bottom 420ms var(--ease-out);
+}
+.drawer-card:hover { padding-bottom: 290px; }
+.drawer-front {
+  position: relative;
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 24px;
+  align-items: start;
+  z-index: 2;
+  background: var(--paper);
+  padding: 14px 0;
+  border-bottom: 1px solid var(--ink-muted);
+}
+.drawer-front .plate {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  border: 1px solid var(--ink);
+  background: var(--paper-soft);
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(22, 38, 94, 0.08);
+}
+.drawer-front .frontLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 4px;
+}
+.drawer-front .frontLabel .fig {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(22, 38, 94, 0.7);
+}
+.drawer-front .frontLabel .name {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 300;
+  font-size: 26px;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+}
+.drawer-front .frontLabel .meta {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.drawer-front .pull {
+  position: absolute;
+  right: 0;
+  bottom: -10px;
+  width: 56px;
+  height: 12px;
+  background: var(--paper-soft);
+  border: 1px solid var(--ink-muted);
+  border-radius: 0 0 6px 6px;
+  border-top: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  color: var(--ink-soft);
+}
+/* the drawer that slides out from beneath */
+.drawer-pane {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 32px;
+  padding: 28px 28px 32px;
+  background: var(--paper);
+  border: 1px solid var(--ink);
+  border-top: none;
+  box-shadow: inset 0 12px 16px -12px rgba(22, 38, 94, 0.18);
+  transform: translateY(-12px);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform 480ms var(--ease-paper),
+    opacity 320ms var(--ease-out);
+  z-index: 1;
+}
+.drawer-card:hover .drawer-pane {
+  transform: translateY(8px);
+  opacity: 1;
+  pointer-events: auto;
+}
+.drawer-pane .bigPlate {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  border: 1px solid var(--ink);
+  background: var(--paper-soft);
+  overflow: hidden;
+  box-shadow: 0 8px 16px rgba(22, 38, 94, 0.12);
+}
+.drawer-pane .bigLabel h3 {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 300;
+  font-size: 28px;
+  letter-spacing: -0.01em;
+  margin-bottom: 6px;
+}
+.drawer-pane .bigLabel .role {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-bottom: 18px;
+}
+.drawer-pane .bigLabel p {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--ink);
+  margin-bottom: 14px;
+}
+.drawer-pane .impact {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 15px;
+  color: var(--ink-soft);
+  border-top: 1px solid var(--ink-muted);
+  padding-top: 14px;
+}
+
+/* ─── 03 · Loupe ─────────────────────────────────────────────────────── */
+#loupeDemo {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 36px;
+  padding-top: 24px;
+}
+.loupe-card {
+  position: relative;
+}
+.loupe-card .plate {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  border: 1px solid var(--ink);
+  background: var(--paper-soft);
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(22, 38, 94, 0.10);
+  cursor: none; /* the loupe IS the cursor while inside the plate */
+}
+.loupe {
+  position: absolute;
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  pointer-events: none;
+  overflow: hidden;
+  border: 1.5px solid var(--ink);
+  box-shadow:
+    0 12px 28px rgba(22, 38, 94, 0.30),
+    inset 0 0 0 6px var(--paper),
+    inset 0 0 0 7px rgba(22, 38, 94, 0.5);
+  background: var(--paper-soft);
+  opacity: 0;
+  transition: opacity 180ms var(--ease-out);
+  transform: translate(-50%, -50%);
+  /* the stub on the lens for that "real loupe" tell */
+}
+.loupe-card:hover .loupe { opacity: 1; }
+.loupe::after {
+  /* tiny handle stub */
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -16px;
+  width: 6px;
+  height: 22px;
+  background: var(--ink);
+  transform: translateX(-50%) rotate(35deg);
+  transform-origin: center top;
+  border-radius: 1px;
+}
+.loupe .plate-art {
+  /* magnified copy. JS sets transform with translate + scale(2). */
+  position: absolute;
+  inset: 0;
+  transform-origin: 0 0;
+  /* size matches the parent plate dimensions; JS scales it */
+}
+
+/* ─── Footnote ────────────────────────────────────────────────────────── */
+footer.note {
+  margin-top: 48px;
+  padding-top: 18px;
+  border-top: 1px solid var(--ink-muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+  display: flex;
+  justify-content: space-between;
+  text-transform: uppercase;
+}
+
+/* ─── Reduced motion ──────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .lift-card,
+  .lift-card .plate,
+  .drawer-card,
+  .drawer-pane,
+  .loupe { transition-duration: 60ms !important; }
+  .lift-card:hover { transform: none; }
+  #liftDemo:hover .lift-card:not(:hover) { opacity: 0.7; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1 class="title">Card hover — three approaches</h1>
+  <span class="bookplate">Field notes · prototype · 2026-05-04</span>
+</header>
+
+<nav class="tabs" role="tablist" aria-label="Approach">
+  <button class="tab active" data-tab="lift" role="tab" aria-selected="true">
+    <span class="tab-num">01</span>Lift-and-Loft
+  </button>
+  <button class="tab" data-tab="drawer" role="tab" aria-selected="false">
+    <span class="tab-num">02</span>Specimen drawer
+  </button>
+  <button class="tab" data-tab="loupe" role="tab" aria-selected="false">
+    <span class="tab-num">03</span>Loupe
+  </button>
+</nav>
+
+<!-- ─── PANEL 01 ──────────────────────────────────────────────────────── -->
+<section class="panel active" data-panel="lift" role="tabpanel">
+  <div class="panel-intro">
+    <div>
+      <span class="kicker">Option 01 · the obvious one</span>
+      <h2>Lift-and-Loft</h2>
+    </div>
+    <div>
+      <p>Hover scales the plate ~1.5× and tilts it 2–3° toward the spread's center. Neighboring plates dim to 0.4 to clear the eye. The plate hinges from a low pivot so the gesture reads as paper being lifted off the page, not a flat zoom.</p>
+      <p class="tradeoff">Cheapest to ship. Extends the existing tilt-on-hover vocabulary instead of inventing a new gesture. The risk: it doesn't add a new beat to the site's craft inventory — it's the safe answer.</p>
+    </div>
+  </div>
+
+  <div class="demo">
+    <span class="demo-hint">Hover any plate</span>
+    <div id="liftDemo">
+      <div class="lift-card" tabindex="0">
+        <div class="plate">
+          <div class="plate-art">
+            <div class="topbar"></div>
+            <div class="sidebar"></div>
+            <div class="body">
+              <div class="title"></div>
+              <div class="row long"></div>
+              <div class="row med"></div>
+              <div class="row short"></div>
+            </div>
+            <div class="hero"></div>
+          </div>
+        </div>
+        <div class="label">
+          <span class="fig">fig. 01 · featured</span>
+          <span class="name">Control Hub AI</span>
+          <span class="meta">AI assistant · 2024–2025</span>
+        </div>
+      </div>
+
+      <div class="lift-card" tabindex="0">
+        <div class="plate">
+          <div class="plate-art variant-2">
+            <div class="topbar"></div>
+            <div class="sidebar"></div>
+            <div class="body">
+              <div class="title"></div>
+              <div class="row long"></div>
+              <div class="row med"></div>
+              <div class="row med"></div>
+              <div class="row short"></div>
+            </div>
+            <div class="hero"></div>
+          </div>
+        </div>
+        <div class="label">
+          <span class="fig">fig. 02 · main</span>
+          <span class="name">Control Hub Agentic</span>
+          <span class="meta">agentic experience · 2025</span>
+        </div>
+      </div>
+
+      <div class="lift-card" tabindex="0">
+        <div class="plate">
+          <div class="plate-art variant-3">
+            <div class="topbar"></div>
+            <div class="body">
+              <div class="title"></div>
+              <div class="row long"></div>
+              <div class="row med"></div>
+              <div class="row long"></div>
+              <div class="row short"></div>
+            </div>
+          </div>
+        </div>
+        <div class="label">
+          <span class="fig">fig. 03 · standard</span>
+          <span class="name">Write-like-Webex</span>
+          <span class="meta">tone calibration · 2023</span>
+        </div>
+      </div>
+
+      <div class="lift-card" tabindex="0">
+        <div class="plate">
+          <div class="plate-art variant-4">
+            <div class="topbar"></div>
+            <div class="sidebar"></div>
+            <div class="body">
+              <div class="title"></div>
+              <div class="row long"></div>
+              <div class="row long"></div>
+              <div class="row med"></div>
+              <div class="row med"></div>
+              <div class="row short"></div>
+            </div>
+          </div>
+        </div>
+        <div class="label">
+          <span class="fig">fig. 04 · standard</span>
+          <span class="name">SAP Fieldglass</span>
+          <span class="meta">enterprise · 2021–2022</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── PANEL 02 ──────────────────────────────────────────────────────── -->
+<section class="panel" data-panel="drawer" role="tabpanel">
+  <div class="panel-intro">
+    <div>
+      <span class="kicker">Option 02 · the editorial one</span>
+      <h2>Specimen drawer</h2>
+    </div>
+    <div>
+      <p>The card on the page stays put. On hover, a deeper drawer slides out from beneath carrying a full-size plate, the museum label, the impact line, and a bit of body copy. Like a flat-file drawer in a print archive being pulled open.</p>
+      <p class="tradeoff">Editorially correct — the canvas becomes a collection, not a gallery. Costs more layout work: each drawer needs row space to slide into, which forces decisions about how the page reflows.</p>
+    </div>
+  </div>
+
+  <div class="demo">
+    <span class="demo-hint">Hover any specimen</span>
+    <div id="drawerDemo">
+
+      <div class="drawer-card" tabindex="0">
+        <div class="drawer-front">
+          <div class="plate">
+            <div class="plate-art">
+              <div class="topbar"></div>
+              <div class="sidebar"></div>
+              <div class="body">
+                <div class="title"></div>
+                <div class="row long"></div>
+                <div class="row med"></div>
+                <div class="row short"></div>
+              </div>
+              <div class="hero"></div>
+            </div>
+          </div>
+          <div class="frontLabel">
+            <span class="fig">fig. 01 · featured</span>
+            <span class="name">Control Hub AI</span>
+            <span class="meta">AI assistant · 2024–2025</span>
+          </div>
+          <span class="pull">pull ▾</span>
+        </div>
+
+        <div class="drawer-pane">
+          <div class="bigPlate">
+            <div class="plate-art">
+              <div class="topbar"></div>
+              <div class="sidebar"></div>
+              <div class="body">
+                <div class="title"></div>
+                <div class="row long"></div>
+                <div class="row med"></div>
+                <div class="row long"></div>
+                <div class="row short"></div>
+              </div>
+              <div class="hero"></div>
+            </div>
+          </div>
+          <div class="bigLabel">
+            <h3>Control Hub AI</h3>
+            <span class="role">AI assistant for an admin platform · 2024–2025</span>
+            <p>Built an assistant that helps admins read the dashboards they already had. Three months of observation before proposing anything; cut the welcome modal in half, then cut it again.</p>
+            <p class="impact">3% → 18% adoption · 86% no-result drop · 14% entry points</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="drawer-card" tabindex="0">
+        <div class="drawer-front">
+          <div class="plate">
+            <div class="plate-art variant-2">
+              <div class="topbar"></div>
+              <div class="sidebar"></div>
+              <div class="body">
+                <div class="title"></div>
+                <div class="row long"></div>
+                <div class="row med"></div>
+              </div>
+              <div class="hero"></div>
+            </div>
+          </div>
+          <div class="frontLabel">
+            <span class="fig">fig. 02 · main</span>
+            <span class="name">Control Hub Agentic</span>
+            <span class="meta">agentic experience · 2025</span>
+          </div>
+          <span class="pull">pull ▾</span>
+        </div>
+
+        <div class="drawer-pane">
+          <div class="bigPlate">
+            <div class="plate-art variant-2">
+              <div class="topbar"></div>
+              <div class="sidebar"></div>
+              <div class="body">
+                <div class="title"></div>
+                <div class="row long"></div>
+                <div class="row med"></div>
+                <div class="row med"></div>
+              </div>
+              <div class="hero"></div>
+            </div>
+          </div>
+          <div class="bigLabel">
+            <h3>Control Hub Agentic</h3>
+            <span class="role">agentic experience for a platform admin · 2025</span>
+            <p>Took the assistant a step further: from "answer the question" to "do the thing." Designed the trust ledger, the undo affordances, and the stop button people would actually hit.</p>
+            <p class="impact">metric pending · shipped Q1 2025</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ─── PANEL 03 ──────────────────────────────────────────────────────── -->
+<section class="panel" data-panel="loupe" role="tabpanel">
+  <div class="panel-intro">
+    <div>
+      <span class="kicker">Option 03 · the field-notebook one</span>
+      <h2>Loupe</h2>
+    </div>
+    <div>
+      <p>A magnifying loupe — small ink-stroked circle, ~160px — follows the cursor when hovering inside a plate. Within the loupe the plate renders at 2×; outside, at rest size. The cursor effectively becomes a tool, like inspecting a print under a 10× lens.</p>
+      <p class="tradeoff">The most field-notebook gesture on the list. The interaction <em>is</em> the metaphor. Risks: gimmicky if the lens doesn't feel like a real tool, and the user only sees a window into the plate, never the whole thing.</p>
+    </div>
+  </div>
+
+  <div class="demo">
+    <span class="demo-hint">Hover inside any plate</span>
+    <div id="loupeDemo">
+
+      <div class="loupe-card">
+        <div class="plate" data-plate>
+          <div class="plate-art">
+            <div class="topbar"></div>
+            <div class="sidebar"></div>
+            <div class="body">
+              <div class="title"></div>
+              <div class="row long"></div>
+              <div class="row med"></div>
+              <div class="row short"></div>
+            </div>
+            <div class="hero"></div>
+          </div>
+          <div class="loupe">
+            <div class="plate-art">
+              <div class="topbar"></div>
+              <div class="sidebar"></div>
+              <div class="body">
+                <div class="title"></div>
+                <div class="row long"></div>
+                <div class="row med"></div>
+                <div class="row short"></div>
+              </div>
+              <div class="hero"></div>
+            </div>
+          </div>
+        </div>
+        <div class="label">
+          <span class="fig">fig. 01 · featured</span>
+          <span class="name">Control Hub AI</span>
+          <span class="meta">AI assistant · 2024–2025</span>
+        </div>
+      </div>
+
+      <div class="loupe-card">
+        <div class="plate" data-plate>
+          <div class="plate-art variant-2">
+            <div class="topbar"></div>
+            <div class="sidebar"></div>
+            <div class="body">
+              <div class="title"></div>
+              <div class="row long"></div>
+              <div class="row med"></div>
+              <div class="row med"></div>
+              <div class="row short"></div>
+            </div>
+            <div class="hero"></div>
+          </div>
+          <div class="loupe">
+            <div class="plate-art variant-2">
+              <div class="topbar"></div>
+              <div class="sidebar"></div>
+              <div class="body">
+                <div class="title"></div>
+                <div class="row long"></div>
+                <div class="row med"></div>
+                <div class="row med"></div>
+                <div class="row short"></div>
+              </div>
+              <div class="hero"></div>
+            </div>
+          </div>
+        </div>
+        <div class="label">
+          <span class="fig">fig. 02 · main</span>
+          <span class="name">Control Hub Agentic</span>
+          <span class="meta">agentic experience · 2025</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<footer class="note">
+  <span>YANKUN · FIELD NOTES · VOL. V</span>
+  <span>SAVED · 2026-05-04</span>
+</footer>
+
+<script>
+  // ─── Tab switching ──────────────────────────────────────────────────
+  const tabs = document.querySelectorAll('.tab');
+  const panels = document.querySelectorAll('.panel');
+  tabs.forEach(t => {
+    t.addEventListener('click', () => {
+      const target = t.dataset.tab;
+      tabs.forEach(x => {
+        const on = x === t;
+        x.classList.toggle('active', on);
+        x.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+      panels.forEach(p => {
+        p.classList.toggle('active', p.dataset.panel === target);
+      });
+    });
+  });
+
+  // ─── Loupe tracking ────────────────────────────────────────────────
+  // For each plate that contains a .loupe child:
+  //   • on mousemove inside the plate, position the loupe at cursor
+  //   • translate the inner .plate-art (cloned) so the magnified region
+  //     under the loupe is centered on the cursor
+  // Math: at scale(2), point (cx,cy) of the original lives at (2cx,2cy)
+  // in the scaled copy. To bring it to the loupe's center we translate
+  // the scaled copy by (loupeW/2 - 2cx, loupeH/2 - 2cy).
+
+  const SCALE = 2;
+  const LOUPE_R = 80; // half of 160
+  document.querySelectorAll('[data-plate]').forEach(plate => {
+    const loupe = plate.querySelector('.loupe');
+    const innerArt = loupe?.querySelector('.plate-art');
+    if (!loupe || !innerArt) return;
+
+    plate.addEventListener('mousemove', (e) => {
+      const rect = plate.getBoundingClientRect();
+      const cx = e.clientX - rect.left;
+      const cy = e.clientY - rect.top;
+      const w = rect.width;
+      const h = rect.height;
+      // size the cloned art to match the plate exactly
+      innerArt.style.width = w + 'px';
+      innerArt.style.height = h + 'px';
+      // position the loupe centered on cursor (transform: translate(-50%,-50%) handles centering)
+      loupe.style.left = cx + 'px';
+      loupe.style.top  = cy + 'px';
+      // translate the magnified copy so the cursor's region shows in the lens
+      const tx = LOUPE_R - SCALE * cx;
+      const ty = LOUPE_R - SCALE * cy;
+      innerArt.style.transform = `translate(${tx}px, ${ty}px) scale(${SCALE})`;
+    });
+  });
+</script>
+</body>
+</html>

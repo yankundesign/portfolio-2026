@@ -1,0 +1,4 @@
+# Cloudflare Pages SPA fallback.
+# Any path that does not match a static asset is served the React app shell;
+# React Router takes over on the client. The 200 (not 301) keeps the URL intact.
+/*  /index.html  200

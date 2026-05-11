@@ -1,0 +1,222 @@
+/* ─── ProjectCard v0.7 ─────────────────────────────────────────────────────
+ *
+ * Each card has two parts: a plate (the figure rectangle) and a museum-label
+ * caption beneath. The caption sits on the canvas surface, not inside the
+ * card box — the editorial-plate register move.
+ *
+ * Cards are axis-aligned at rest. No absolute positioning — they live inside
+ * the canvas's CSS Grid and span N columns. Aspect ratio drives plate height;
+ * cards differ in height as a result, which is the editorial composition.
+ * Rotation is reserved for interaction states (e.g., hover enlarge), not used
+ * as a static layout move.
+ * ────────────────────────────────────────────────────────────────────────── */
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  outline: none;
+  transition:
+    transform var(--duration-hover) var(--ease-out),
+    opacity var(--duration-reveal) var(--ease-out);
+}
+
+/* Hover lift removed — the card stays put on the plate. Box-shadow still
+ * deepens on hover below as the only elevation signal. */
+
+.wrapper:focus-visible {
+  outline: 1.5px solid var(--ink);
+  outline-offset: 6px;
+}
+
+/* ─── Plate ─── */
+
+.plate {
+  width: 100%;
+  border-radius: 1px;
+  overflow: hidden;
+  position: relative;
+  box-shadow:
+    0 2px 8px rgba(22, 38, 94, 0.10),
+    0 1px 2px rgba(22, 38, 94, 0.06);
+  transition: box-shadow var(--duration-hover) var(--ease-out);
+}
+
+.wrapper:hover .plate {
+  box-shadow:
+    0 12px 24px rgba(22, 38, 94, 0.14),
+    0 4px 8px rgba(22, 38, 94, 0.08);
+}
+
+.platePlaceholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.plateText {
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  letter-spacing: 0.05em;
+}
+
+/* ─── Tier visual register ─── */
+
+.featured {
+  background: var(--ink);
+  box-shadow:
+    0 3px 12px rgba(22, 38, 94, 0.15),
+    0 1px 3px rgba(22, 38, 94, 0.08);
+}
+
+.featured .platePlaceholder {
+  background: var(--ink-soft);
+}
+
+.featured .plateText {
+  color: var(--paper-soft);
+}
+
+.wrapper:hover .featured {
+  box-shadow:
+    0 16px 32px rgba(22, 38, 94, 0.18),
+    0 6px 12px rgba(22, 38, 94, 0.10);
+}
+
+.main {
+  background: var(--paper-soft);
+}
+
+.main .platePlaceholder {
+  background: var(--paper-shadow);
+}
+
+.main .plateText {
+  color: var(--ink-soft);
+}
+
+.standard {
+  background: var(--paper-soft);
+}
+
+.standard .platePlaceholder {
+  background: var(--paper-shadow);
+}
+
+.standard .plateText {
+  color: var(--ink-soft);
+}
+
+/* ─── Museum-label caption ─── */
+
+.label {
+  position: relative; /* anchor for the absolutely-positioned .impact */
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 14px;
+  /* Caption stays a hairline below the plate's left edge — flush with the
+   * plate's column boundary on the grid. */
+}
+
+.fig {
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  letter-spacing: var(--chrome-tracking);
+  text-transform: uppercase;
+  color: rgba(22, 38, 94, 0.7);
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-style: italic;
+  font-size: 22px;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.meta {
+  margin: 2px 0 0;
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.metaSep {
+  color: var(--ink-muted);
+}
+
+/* Impact line — revealed on hover (Pentagram caption move).
+ *
+ * Absolutely positioned below the label so revealing it never resizes the
+ * grid row track. Lives in the row gap below the card; doesn't displace
+ * any neighboring content. Pointer-events disabled so it never intercepts
+ * a click during the fade. */
+
+.impact {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin: 6px 0 0;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 300;
+  font-size: 14px;
+  line-height: 1.3;
+  color: var(--ink-soft);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-hover) var(--ease-out);
+}
+
+.wrapper:hover .impact,
+.wrapper:focus-visible .impact {
+  opacity: 1;
+}
+
+/* ─── Featured tier — slightly larger title for reading hierarchy ─── */
+
+.featured ~ .label .title,
+.wrapper:has(.featured) .title {
+  /* :has() is widely supported in 2026 browsers; falls back gracefully. */
+  font-size: 28px;
+}
+
+/* ─── Entrance animation ─── */
+
+.entering {
+  opacity: 0;
+  transform: translateY(12px);
+}
+
+.entered {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wrapper,
+  .entering,
+  .entered,
+  .impact {
+    transition-duration: 0ms !important;
+    transition-delay: 0ms !important;
+  }
+
+  .entering {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

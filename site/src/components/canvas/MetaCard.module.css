@@ -1,0 +1,213 @@
+/* ─── MetaCard — currently + site-build note, pinned bottom-right ───
+ *
+ * v0.7: rotation removed (canvas is now the editorial-plate register;
+ * no off-grid items, no hand-pinned-paper rotation). Card is axis-aligned;
+ * the washi tape strip kept as the sole physical-paper signal.
+ *
+ * Position changed from `position: absolute` (bottom-right of the canvas
+ * surface) to `position: fixed` so the meta card stays visible as the
+ * canvas scrolls. */
+
+.card {
+  position: fixed;
+  right: 40px;
+  bottom: 64px;
+  width: 260px;
+  padding: 16px 18px 14px;
+  background: var(--paper-soft);
+  border-radius: 1px;
+  box-shadow:
+    0 2px 8px rgba(22, 38, 94, 0.09),
+    0 1px 2px rgba(22, 38, 94, 0.06);
+  z-index: 4;
+  transition:
+    transform var(--duration-hover) var(--ease-out),
+    box-shadow var(--duration-hover) var(--ease-out),
+    opacity var(--duration-reveal) var(--ease-out);
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    0 8px 18px rgba(22, 38, 94, 0.12),
+    0 3px 6px rgba(22, 38, 94, 0.07);
+}
+
+/* ─── Masking-tape strip at the top ─── */
+
+.tape {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  width: 58px;
+  height: 16px;
+  background: rgba(22, 38, 94, 0.16);
+  transform: translateX(-50%);
+  pointer-events: none;
+  /* Soften edges so the strip reads as washi tape, not a painted rectangle. */
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    #000 14%,
+    #000 86%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    #000 14%,
+    #000 86%,
+    transparent 100%
+  );
+}
+
+/* ─── Small "Note" kicker ─── */
+
+.kicker {
+  margin: 0 0 10px;
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+/* ─── Row — one signal ─── */
+
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rowLabel {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.rowBody {
+  margin: 0;
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--ink);
+}
+
+/* ─── Pending placeholder (no lorem ipsum; loud-but-tiny signal) ─── */
+
+.rowPending {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+.pendingDot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ink-muted);
+}
+
+/* ─── Divider between the two signals ─── */
+
+.divider {
+  display: block;
+  width: 40px;
+  height: 1px;
+  margin: 12px 0;
+  background: var(--ink-muted);
+}
+
+/* ─── Colophon link ─── */
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--ink);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  padding-bottom: 1px;
+  align-self: flex-start;
+  transition:
+    border-color var(--duration-hover) var(--ease-out),
+    gap var(--duration-hover) var(--ease-out);
+}
+
+.link:hover,
+.link:focus-visible {
+  border-bottom-color: var(--ink);
+  gap: 10px;
+  outline: none;
+}
+
+.link:focus-visible {
+  outline: 1.5px solid var(--ink);
+  outline-offset: 3px;
+}
+
+.arrow {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0;
+  transform: translateY(-0.5px);
+}
+
+/* ─── Entrance animation ─── */
+
+.entering {
+  opacity: 0;
+  transform: translateY(14px);
+}
+
+.entered {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    transform var(--duration-transition) var(--ease-unfold),
+    opacity var(--duration-transition) var(--ease-out),
+    box-shadow var(--duration-hover) var(--ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .entering,
+  .entered {
+    transition-duration: 0ms !important;
+    transition-delay: 0ms !important;
+  }
+
+  .entering {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ─── Responsive: smaller canvases ─── */
+
+@media (max-width: 720px) {
+  .card {
+    right: 20px;
+    bottom: 56px;
+    width: 220px;
+    padding: 14px 16px 12px;
+  }
+}

@@ -1,0 +1,363 @@
+/*
+ * Cat Roulette — v0.4 Swiss register, restored experience.
+ *
+ * Stacked layers (z-index):
+ *   1  baseDisc      — paper fill + outer rule + inner ring
+ *   2  wheel         — rotating cats + radial dividers
+ *   3  centerBadge   — static paper circle with SPIN IT + rivet
+ *   4  pointer       — static triangle at 12 o'clock
+ *
+ * Specimen card sits absolutely above the disc; reveal does not shift layout.
+ */
+
+.figure {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  margin: 0;
+}
+
+/* Disc region — wraps the disc + specimen card so the card centers on
+ * the disc, not on the figure (which can be wider when the caption wraps).
+ * Sized to its content (the disc) thanks to flex-item shrink-to-fit. */
+.discRegion {
+  position: relative;
+  display: block;
+}
+
+/* ─── Disc ─── */
+
+.disc {
+  position: relative;
+  width: 240px;
+  height: 240px;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  outline: none;
+  transition: transform 320ms var(--ease-out);
+  /* Soft drop shadow — paper disc sits on the desk surface. Slightly
+   * more diffuse than the rectangular objects since the disc is round. */
+  filter: drop-shadow(0 5px 14px rgba(22, 38, 94, 0.11));
+}
+
+.disc:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.disc:disabled {
+  cursor: progress;
+}
+
+.disc:focus-visible {
+  outline: 1.5px solid var(--ink);
+  outline-offset: 4px;
+  border-radius: 50%;
+}
+
+/* While spinning, scale the disc up subtly. Overrides the hover transform. */
+.discScaled {
+  transform: scale(1.1) !important;
+  transition: transform 320ms cubic-bezier(0.34, 1.2, 0.64, 1);
+}
+
+.figure:hover [data-figcaption-underline],
+.figure:focus-within [data-figcaption-underline] {
+  transform: scaleX(1);
+}
+
+/* ─── Layer 1: base paper disc ─── */
+
+.baseDisc {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* ─── Layer 2: rotating wheel ─── */
+
+.wheel {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  will-change: transform;
+}
+
+.dividers {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.segment {
+  position: absolute;
+  inset: 0;
+  transform: rotate(var(--segment-angle));
+  pointer-events: none;
+  transition: opacity 240ms var(--ease-out);
+}
+
+.segmentDimmed {
+  opacity: 0.25;
+}
+
+.catAnchor {
+  position: absolute;
+  top: 14%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 54px;
+  height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.catAnchor img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  mix-blend-mode: multiply;
+}
+
+/* ─── Layer 3: static center badge ─── */
+
+.centerBadge {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 30%;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  pointer-events: none;
+}
+
+.badgeBg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.badgeLabel {
+  position: relative;
+  z-index: 2;
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--ink);
+  text-transform: uppercase;
+  line-height: 1.1;
+}
+
+.badgeRivet {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 2;
+  display: block;
+  width: 4px;
+  height: 4px;
+  margin: 0;
+  border-radius: 50%;
+  background: var(--ink);
+  box-shadow: 0 0 0 1px var(--ink-soft);
+  transform: translate(-50%, -50%);
+}
+
+.badgeSpin {
+  position: absolute;
+  top: calc(50% + 13px);
+  left: 50%;
+  z-index: 2;
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--ink);
+  text-transform: uppercase;
+  line-height: 1;
+  white-space: nowrap;
+  transform: translate(-50%, -50%);
+}
+
+/* ─── Layer 4: pointer triangle at 12 o'clock ─── */
+
+.pointer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 4;
+  pointer-events: none;
+}
+
+/* ─── Specimen card — pops up above the disc on land ─── */
+
+.specimenCard {
+  position: absolute;
+  bottom: calc(100% + 16px);
+  left: 50%;
+  transform: translateX(-50%) translateY(8px);
+  width: 240px;
+  padding: 12px 12px 14px;
+  background: var(--paper);
+  border: 1px solid var(--ink);
+  box-shadow: 0 8px 18px -10px rgba(22, 38, 94, 0.32);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform 480ms cubic-bezier(0.34, 1.2, 0.64, 1),
+    opacity 320ms var(--ease-out);
+  z-index: 5;
+}
+
+.specimenVisible {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+.specimenHidden {
+  transform: translateX(-50%) translateY(8px);
+  opacity: 0;
+}
+
+.specimenImage {
+  width: 180px;
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.specimenImage img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  mix-blend-mode: multiply;
+}
+
+.specimenCaption {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: var(--ink-soft);
+  text-transform: lowercase;
+  text-align: center;
+  line-height: 1.4;
+  padding: 0 4px;
+}
+
+/* ─── Big-screen scale ─── */
+
+@media (min-width: 1600px) {
+  .disc {
+    width: 280px;
+    height: 280px;
+  }
+  .catAnchor {
+    width: 60px;
+    height: 60px;
+  }
+  .specimenCard {
+    width: 280px;
+  }
+  .specimenImage {
+    width: 200px;
+    height: 200px;
+  }
+}
+
+@media (min-width: 2000px) {
+  .disc {
+    width: 320px;
+    height: 320px;
+  }
+  .catAnchor {
+    width: 68px;
+    height: 68px;
+  }
+  .specimenCard {
+    width: 320px;
+  }
+  .specimenImage {
+    width: 220px;
+    height: 220px;
+  }
+}
+
+@media (max-width: 1023px) {
+  .disc {
+    width: 200px;
+    height: 200px;
+  }
+  .catAnchor {
+    width: 46px;
+    height: 46px;
+  }
+  .specimenCard {
+    width: 200px;
+  }
+  .specimenImage {
+    width: 150px;
+    height: 150px;
+  }
+}
+
+@media (max-width: 767px) {
+  .disc {
+    width: 170px;
+    height: 170px;
+  }
+  .catAnchor {
+    width: 40px;
+    height: 40px;
+  }
+  .badgeLabel {
+    font-size: 7.5px;
+  }
+  .badgeSpin {
+    font-size: 6.5px;
+  }
+  .specimenCard {
+    width: 180px;
+  }
+  .specimenImage {
+    width: 130px;
+    height: 130px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .disc,
+  .disc:hover,
+  .discScaled {
+    transition: none;
+    transform: none;
+  }
+  .wheel {
+    transition: none !important;
+  }
+  .specimenCard {
+    transition: opacity 240ms var(--ease-out);
+    transform: translateX(-50%) translateY(0);
+  }
+}

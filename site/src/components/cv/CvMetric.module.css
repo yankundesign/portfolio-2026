@@ -1,0 +1,71 @@
+/*
+ * CvMetric — the pull-out display-XL number.
+ */
+
+.metric {
+  display: grid;
+  grid-template-columns: auto auto;
+  grid-template-rows: auto auto;
+  column-gap: clamp(1rem, 3vw, 2rem);
+  row-gap: 0.5rem;
+  align-items: end;
+  padding: clamp(2rem, 5vw, 3.5rem) 0 clamp(1.5rem, 4vw, 2.5rem);
+  border-top: 1px solid var(--ink-muted);
+  border-bottom: 1px solid var(--ink-muted);
+  margin: clamp(2rem, 5vw, 3.5rem) 0;
+}
+
+.arrow {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(3rem, 8vw, 6rem);
+  line-height: 0.8;
+  color: var(--ink-soft);
+  align-self: end;
+  padding-bottom: 0.2em;
+}
+
+.figure {
+  display: flex;
+  align-items: baseline;
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: clamp(6rem, 18vw, 14rem);
+  line-height: 0.82;
+  letter-spacing: -0.045em;
+  color: var(--ink);
+  font-variation-settings: 'opsz' 144;
+}
+
+.value {
+  font-variant-numeric: tabular-nums;
+  min-width: 1.6em;
+  text-align: left;
+}
+
+.suffix {
+  font-style: italic;
+  font-size: 0.55em;
+  letter-spacing: -0.01em;
+  padding-left: 0.1em;
+  color: var(--ink-soft);
+  font-weight: 300;
+}
+
+.caption {
+  grid-column: 1 / -1;
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  line-height: 1.6;
+  margin: 0;
+  max-width: 52ch;
+}
+
+@media (max-width: 640px) {
+  .metric {
+    grid-template-columns: 1fr;
+  }
+}

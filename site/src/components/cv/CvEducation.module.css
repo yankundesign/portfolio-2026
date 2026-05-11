@@ -1,0 +1,99 @@
+.education {
+  padding: clamp(3rem, 8vw, 6rem) 0;
+  border-top: 1px solid var(--ink-muted);
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: baseline;
+  gap: 1.5rem;
+  margin-bottom: clamp(2rem, 5vw, 3rem);
+}
+
+.sectionNumber {
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  letter-spacing: 0.12em;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+}
+
+.sectionTitle {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: clamp(2rem, 5vw, 3rem);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  margin: 0;
+  color: var(--ink);
+  font-variation-settings: 'opsz' 72;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1.25rem, 3vw, 2rem);
+}
+
+.entry {
+  display: grid;
+  grid-template-columns: 5rem 1fr;
+  gap: clamp(1rem, 3vw, 2rem);
+  align-items: baseline;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--ink-muted);
+}
+
+.year {
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  letter-spacing: 0.12em;
+  color: var(--ink);
+}
+
+.detail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.institution {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(1.25rem, 2.4vw, 1.625rem);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  margin: 0;
+  color: var(--ink);
+  font-variation-settings: 'opsz' 36;
+}
+
+.line {
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  font-weight: 300;
+  color: var(--ink-soft);
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.line em {
+  font-style: italic;
+  color: var(--ink);
+}
+
+.sep {
+  color: var(--ink-muted);
+}
+
+@media (max-width: 640px) {
+  .entry {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,114 @@
+/*
+ * Ephemera — material assets on the desk surface.
+ *
+ * Anchored absolutely inside .scene. Each asset has tunables on :root so
+ * positions and rotations can be tuned in DevTools without a rebuild.
+ *
+ * Tunables (per asset):
+ *   --eph-{name}-top      vertical anchor inside .scene (smaller = higher)
+ *   --eph-{name}-left     horizontal anchor inside .scene
+ *   --eph-{name}-width    width as % of .scene
+ *   --eph-{name}-rotate   rotation in degrees (negative = counter-clockwise)
+ *
+ * Z-stack: ephemera mounts as .scene's first child, so the 5 navigation
+ * objects paint on top. Architectural sketch and blueprint peek out from
+ * behind the notebook; postage stamp doesn't overlap any object.
+ *
+ * Note on rotation: the v0.4 deadpan rule excluded rotation from canvas
+ * project plates and animated motion on desk objects, but slight tilts
+ * on physical material props are part of the desk's "objects on a real
+ * surface" register — these aren't motion, just static placement.
+ */
+
+:root {
+  /* Architectural sketch — tucked behind the notebook upper-left, peeks
+   * out above and to the left of the notebook cover. Slight CCW tilt as
+   * if just placed down. */
+  --eph-sketch-top: -10%;
+  --eph-sketch-left: 28%;
+  --eph-sketch-width: 22%;
+  --eph-sketch-rotate: -2deg;
+
+  /* Postage stamp — sits between the notebook and the CV at the very top
+   * of the spread, around chrome cols 8–9. Doesn't overlap either object.
+   * Stamp asset already carries a baked-in tilt; default extra rotation
+   * is 0. */
+  --eph-postage-top: 0%;
+  --eph-postage-left: 65%;
+  --eph-postage-width: 5.5%;
+  --eph-postage-rotate: 0deg;
+
+  /* Blueprint fragment — tucked behind the notebook right edge, peeks
+   * out toward the CV. Lower than the postage stamp. Slight CW tilt. */
+  --eph-blueprint-top: 32%;
+  --eph-blueprint-left: 52%;
+  --eph-blueprint-width: 12%;
+  --eph-blueprint-rotate: 4deg;
+}
+
+.ephemera {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  /* Behind the slot grid in z-stack (slots use auto z-index; absolute child
+   * with z-index: 0 still paints in source order, so mount this first). */
+  z-index: 0;
+}
+
+.sketch,
+.postage,
+.blueprint {
+  position: absolute;
+  display: block;
+  height: auto;
+  /* Soft drop shadow for material depth on the desk surface. Uses ink at
+   * very low opacity — same paper-shadow vocabulary as the navigation
+   * objects' shadows. */
+  filter: drop-shadow(0 2px 6px rgba(22, 38, 94, 0.08));
+  /* Rotation transforms applied per-element below. Common origin is the
+   * element center so the rotation pivots around the asset's middle. */
+  transform-origin: center center;
+}
+
+.sketch {
+  top: var(--eph-sketch-top);
+  left: var(--eph-sketch-left);
+  width: var(--eph-sketch-width);
+  transform: rotate(var(--eph-sketch-rotate));
+}
+
+.postage {
+  top: var(--eph-postage-top);
+  left: var(--eph-postage-left);
+  width: var(--eph-postage-width);
+  transform: rotate(var(--eph-postage-rotate));
+  /* Postage stamp sits on top of the surface — slightly stronger drop
+   * shadow than the larger paper assets. */
+  filter: drop-shadow(0 1px 3px rgba(22, 38, 94, 0.12));
+}
+
+.blueprint {
+  top: var(--eph-blueprint-top);
+  left: var(--eph-blueprint-left);
+  width: var(--eph-blueprint-width);
+  transform: rotate(var(--eph-blueprint-rotate));
+}
+
+/* ─── Responsive ─── */
+
+@media (max-width: 1279px) {
+  :root {
+    --eph-sketch-width: 20%;
+    --eph-blueprint-width: 11%;
+    --eph-postage-width: 5%;
+  }
+}
+
+/* Below 1024px the scene becomes 6-col and ephemera starts crowding the
+ * navigation objects. Hide for tablet/mobile (matches DeskWayfinder's
+ * mobile fallback pattern). */
+@media (max-width: 1023px) {
+  .ephemera {
+    display: none;
+  }
+}

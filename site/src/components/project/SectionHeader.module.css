@@ -1,0 +1,77 @@
+/*
+ * SectionHeader — vertical ink rule + mono caps label, optional display
+ * title and italic summary stacked beside.
+ *
+ * The vertical rule is the visual anchor for every section on the page.
+ * Compact sections show just the rule + label; full sections add the
+ * display title and summary.
+ */
+
+.header {
+  display: flex;
+  align-items: stretch;
+  gap: clamp(1rem, 1.8vw, 1.5rem);
+  margin: clamp(4rem, 9vw, 6rem) 0 clamp(1.5rem, 3vw, 2.5rem);
+}
+
+/* Compact — for label-only sections (Opening, Context, Reflection, etc.).
+   Tighter top margin since there is less typographic weight in the header. */
+
+.compact {
+  margin: clamp(2.75rem, 6vw, 4rem) 0 clamp(1rem, 2vw, 1.5rem);
+}
+
+/* The vertical ink rule. Stretches the height of the header body so it
+   feels anchored, not floating. min-height covers the label-only case. */
+
+.rule {
+  flex: 0 0 1px;
+  align-self: stretch;
+  min-height: 2.4rem;
+  background: var(--ink);
+}
+
+.body {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  /* Optical alignment so the label cap-height aligns with the rule top. */
+  padding-top: 2px;
+}
+
+.label {
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink);
+  margin: 0;
+  line-height: 1.1;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(1.75rem, 3.6vw, var(--text-display-m));
+  line-height: 1;
+  letter-spacing: -0.018em;
+  color: var(--ink);
+  margin: 0;
+  font-variation-settings: 'opsz' 96;
+}
+
+.summary {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: clamp(1.05rem, 1.8vw, 1.25rem);
+  line-height: 1.4;
+  color: var(--ink-soft);
+  margin: 0;
+  max-width: 50ch;
+}
+
+.summary em {
+  font-style: italic;
+}

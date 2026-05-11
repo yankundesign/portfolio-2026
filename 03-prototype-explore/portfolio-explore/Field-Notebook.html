@@ -1,0 +1,1743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yankun — Field Notebook, Vol. V</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,700;1,9..144,300;1,9..144,400&family=JetBrains+Mono:wght@300;400;500&family=Caveat:wght@400;500;600&family=Archivo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a36b0;
+    --ink-deep: #16265e;
+    --ink-soft: #2a3a7a;
+    --ink-muted: rgba(22, 38, 94, 0.2);
+    --ink-faint: rgba(22, 38, 94, 0.08);
+    --paper: #f4f1ea;
+    --paper-soft: #ebe6d9;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    background: #d9d2bd;
+    color: var(--ink-deep);
+    font-family: 'Fraunces', serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .grain {
+    position: fixed; inset: 0;
+    pointer-events: none; z-index: 999;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.086  0 0 0 0 0.149  0 0 0 0 0.369  0 0 0 0.06 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    mix-blend-mode: multiply;
+    opacity: 0.7;
+  }
+
+  .desk {
+    position: fixed; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    perspective: 2400px;
+    background: radial-gradient(ellipse at 50% 40%, #ece6d6 0%, #ddd4bd 70%, #c9c0aa 100%);
+  }
+
+  /* ---------- COVER ---------- */
+  .cover-wrap {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    transition: opacity 500ms ease, transform 800ms cubic-bezier(0.4, 0.0, 0.2, 1);
+  }
+  .cover-wrap.hide {
+    opacity: 0; pointer-events: none;
+    transform: translateX(-30%) rotateY(-85deg);
+    transform-origin: left center;
+  }
+  .cover {
+    position: relative;
+    width: min(500px, 58vh * 0.74);
+    aspect-ratio: 0.72 / 1;
+    background: linear-gradient(135deg, #1e3bc0 0%, #1a36b0 45%, #13288a 100%);
+    box-shadow: -14px 18px 30px rgba(0,0,0,0.25), -4px 6px 12px rgba(0,0,0,0.18), inset 0 0 90px rgba(0,0,0,0.25);
+    border-radius: 2px 6px 6px 2px;
+    cursor: pointer;
+    transform: rotateY(-6deg) rotateX(2deg);
+    transform-origin: left center;
+    transition: transform 300ms ease;
+  }
+  .cover:hover { transform: rotateY(-4deg) rotateX(1deg) translateY(-4px); }
+  .cover::before {
+    content: ""; position: absolute; inset: 0;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100'><filter id='l'><feTurbulence type='fractalNoise' baseFrequency='2.5' numOctaves='1'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.08 0'/></filter><rect width='100%' height='100%' filter='url(%23l)'/></svg>");
+    mix-blend-mode: overlay; border-radius: inherit;
+  }
+  .cover::after {
+    content: ""; position: absolute;
+    top: 4px; bottom: 4px; right: -6px; width: 8px;
+    background: repeating-linear-gradient(to bottom, #f4f1ea, #f4f1ea 1px, #ece5d3 1px, #ece5d3 2px);
+    box-shadow: 1px 0 2px rgba(0,0,0,0.15);
+  }
+  .cover-label {
+    position: absolute; top: 48px; left: 50%;
+    transform: translateX(-50%) rotate(-0.8deg);
+    background: #f4f1ea; color: var(--ink-deep);
+    padding: 10px 22px 12px;
+    font-family: 'Caveat', cursive; font-size: 20px; line-height: 1;
+    box-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+    text-align: center;
+  }
+  .cover-label small {
+    display: block; font-family: 'JetBrains Mono', monospace;
+    font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase;
+    margin-bottom: 5px; opacity: 0.7;
+  }
+  .elastic {
+    position: absolute; top: -4px; bottom: -4px;
+    right: 32%; width: 5px; background: #2a1a0e;
+  }
+  .cover-center {
+    position: absolute; left: 0; right: 0; top: 40%;
+    text-align: center; color: #f4f1ea;
+  }
+  .cover-name {
+    font-family: 'Archivo', sans-serif;
+    font-weight: 800; font-size: 64px;
+    letter-spacing: -0.03em; line-height: 0.88;
+    text-transform: uppercase;
+  }
+  .cover-sub {
+    font-family: 'Fraunces', serif; font-style: italic;
+    font-size: 15px; margin-top: 14px; opacity: 0.75;
+  }
+  .cover-foot {
+    position: absolute; left: 0; right: 0; bottom: 32px;
+    text-align: center; font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: #f4f1ea; opacity: 0.65;
+  }
+  .cover-corner {
+    position: absolute; bottom: 0; right: 0;
+    width: 26px; height: 26px;
+    background: linear-gradient(135deg, transparent 50%, rgba(0,0,0,0.35) 50%);
+  }
+
+  /* ---------- OPEN BOOK ---------- */
+  .spread-wrap {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 500ms ease 300ms;
+  }
+  .spread-wrap.show { opacity: 1; pointer-events: auto; }
+
+  .book {
+    position: relative;
+    width: min(96vw, 1500px);
+    height: min(88vh, 920px);
+    display: flex;
+    background: var(--paper);
+    box-shadow: 0 24px 60px rgba(0,0,0,0.22), 0 4px 14px rgba(0,0,0,0.12);
+  }
+  .binding {
+    position: absolute; top: 0; bottom: 0; left: 50%;
+    width: 28px; transform: translateX(-50%);
+    background: linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.16) 40%, rgba(0,0,0,0.32) 50%, rgba(0,0,0,0.16) 60%, transparent 100%);
+    pointer-events: none; z-index: 5;
+  }
+  .page {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+  }
+  .pagenum {
+    position: absolute; bottom: 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px; letter-spacing: 0.18em;
+    color: var(--ink-soft); opacity: 0.6;
+    z-index: 20;
+  }
+  .page.left .pagenum { left: 40px; }
+  .page.right .pagenum { right: 40px; }
+
+  .spread-inner {
+    position: relative; width: 100%; height: 100%;
+    display: flex;
+  }
+  .pg {
+    flex: 1; position: relative; overflow: hidden;
+    padding: 56px 56px 70px;
+  }
+  .pg.bleed { padding: 0; }
+
+  /* Turn animation */
+  .turning-out { animation: tOut 420ms cubic-bezier(.4,0,.2,1) forwards; }
+  .turning-in  { animation: tIn  420ms cubic-bezier(.4,0,.2,1) forwards; }
+  @keyframes tOut { from{opacity:1;transform:none} to{opacity:0;transform:translateX(-16px)} }
+  @keyframes tIn  { from{opacity:0;transform:translateX(16px)} to{opacity:1;transform:none} }
+  @media (prefers-reduced-motion: reduce) {
+    .turning-out,.turning-in { animation: none; }
+  }
+
+  /* ---------- HUD ---------- */
+  .hud {
+    position: fixed; bottom: 18px; right: 22px;
+    display: none; align-items: center; gap: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--ink-deep); z-index: 100;
+    background: var(--paper);
+    padding: 8px 14px;
+    border: 1px solid var(--ink-deep);
+    box-shadow: 2px 2px 0 var(--ink-faint);
+  }
+  .hud.on { display: flex; }
+  .hud button {
+    background: none; border: 1px solid var(--ink-deep);
+    padding: 4px 9px; font: inherit; color: inherit;
+    letter-spacing: inherit; text-transform: inherit; cursor: pointer;
+    transition: background 140ms ease;
+  }
+  .hud button:hover { background: var(--ink-deep); color: var(--paper); }
+  .hud-top {
+    position: fixed; top: 18px; left: 24px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--ink-deep); opacity: 0.65; z-index: 100;
+  }
+  .cover-hint {
+    position: fixed; bottom: 32px; left: 50%;
+    transform: translateX(-50%);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--ink-deep); opacity: 0.55;
+    display: flex; align-items: center; gap: 10px;
+    z-index: 50;
+    transition: opacity 300ms ease;
+  }
+  .cover-hint.hide { opacity: 0; pointer-events: none; }
+
+  /* ================= TYPOGRAPHY ================= */
+  .meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: 0.15em;
+    text-transform: uppercase; color: var(--ink-soft);
+  }
+  .hand {
+    font-family: 'Caveat', cursive;
+    color: var(--ink-deep); line-height: 1.15;
+  }
+  .sans-display {
+    font-family: 'Archivo', sans-serif;
+    font-weight: 800; color: var(--ink);
+    text-transform: uppercase; letter-spacing: -0.02em;
+    line-height: 0.92;
+  }
+  .serif-display {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-variation-settings: "opsz" 144;
+    letter-spacing: -0.02em; line-height: 0.95;
+    color: var(--ink-deep);
+  }
+  .serif-display em { font-style: italic; }
+
+  /* ================= CONTENTS SPREAD ================= */
+  .ifc {
+    height: 100%;
+    display: flex; flex-direction: column;
+    padding: 60px 56px 70px;
+    position: relative;
+  }
+  .ifc-top {
+    display: flex; justify-content: space-between;
+    border-bottom: 1px solid var(--ink-deep);
+    padding-bottom: 10px;
+  }
+  .bookplate {
+    border: 1.5px solid var(--ink-deep);
+    padding: 30px 34px 38px;
+    margin-top: 60px;
+    transform: rotate(-0.5deg);
+    background: var(--paper-soft);
+    position: relative;
+  }
+  .bookplate::before {
+    content: ""; position: absolute; inset: 8px;
+    border: 1px solid var(--ink-deep); opacity: 0.35;
+  }
+  .bookplate .kicker {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--ink-soft);
+    margin-bottom: 12px;
+  }
+  .bookplate .signed {
+    font-family: 'Caveat', cursive;
+    font-size: 72px; line-height: 0.9;
+    transform: rotate(-1.5deg); margin: 4px 0 12px;
+  }
+  .bookplate .loc {
+    font-family: 'Fraunces', serif; font-style: italic;
+    font-size: 16px; color: var(--ink-soft);
+  }
+  .ifc-quote {
+    margin-top: auto;
+    font-family: 'Archivo', sans-serif;
+    font-weight: 800;
+    text-transform: uppercase;
+    font-size: 48px;
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+  .ifc-quote em {
+    font-family: 'Fraunces', serif;
+    font-style: italic; font-weight: 300;
+    text-transform: none;
+    letter-spacing: -0.01em;
+    color: var(--ink-deep);
+  }
+
+  .contents {
+    padding: 60px 56px 70px;
+    height: 100%; position: relative;
+  }
+  .contents h1 {
+    font-family: 'Archivo', sans-serif;
+    font-weight: 800; font-size: 64px;
+    text-transform: uppercase;
+    letter-spacing: -0.04em;
+    line-height: 0.85;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+  .contents h1 em {
+    font-family: 'Fraunces', serif;
+    font-style: italic; font-weight: 300;
+    text-transform: none;
+    letter-spacing: -0.02em;
+    color: var(--ink-deep);
+  }
+  .contents .sub {
+    font-family: 'Fraunces', serif; font-style: italic;
+    font-size: 15px; color: var(--ink-soft);
+    margin-bottom: 14px;
+  }
+  .toc { margin-top: 8px; }
+  .toc-row {
+    display: grid;
+    grid-template-columns: 32px 1fr auto;
+    align-items: baseline; gap: 14px;
+    padding: 6px 0;
+    cursor: pointer; position: relative;
+    border-bottom: 1px solid var(--ink-muted);
+    transition: padding 160ms ease, background 160ms ease;
+  }
+  .toc-row:hover { padding-left: 6px; background: var(--paper-soft); }
+  .toc-row .num {
+    font-family: 'Fraunces', serif; font-style: italic;
+    font-size: 14px; color: var(--ink-soft);
+  }
+  .toc-row .ttl {
+    font-family: 'Fraunces', serif; font-size: 17px;
+    color: var(--ink-deep);
+  }
+  .toc-row .pg {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; color: var(--ink-deep);
+  }
+  .toc-row.journal .ttl {
+    font-style: italic; color: var(--ink-soft);
+    padding-left: 20px; font-size: 13px; position: relative;
+  }
+  .toc-row.journal .ttl::before {
+    content: "→"; position: absolute; left: 0;
+    font-family: 'Caveat', cursive; font-size: 18px;
+  }
+  .toc-row .note {
+    position: absolute; right: 80px; top: 50%;
+    transform: translateY(-50%) rotate(-4deg);
+    font-family: 'Caveat', cursive; font-size: 17px;
+    opacity: 0; transition: opacity 180ms ease;
+    pointer-events: none; white-space: nowrap;
+  }
+  .toc-row:hover .note { opacity: 0.85; }
+  .contents-foot {
+    position: absolute; bottom: 36px; left: 56px; right: 56px;
+    display: flex; justify-content: space-between;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+
+  /* ================= CHAI SPREADS ================= */
+  /* --- (a) TYPOGRAPHIC OPENER: left blue field + right title wall --- */
+  .chai-open-l {
+    background: var(--ink);
+    color: var(--paper);
+    height: 100%; padding: 56px 56px 70px;
+    position: relative;
+    display: flex; flex-direction: column;
+  }
+  .chai-open-l .meta { color: rgba(244,241,234,0.7); }
+  .chai-open-l .tag {
+    font-family: 'Archivo', sans-serif;
+    font-weight: 800; text-transform: uppercase;
+    font-size: 100px; line-height: 0.88;
+    letter-spacing: -0.035em;
+    margin-top: auto;
+  }
+  .chai-open-l .tag em {
+    font-family: 'Fraunces', serif; font-style: italic; font-weight: 300;
+    text-transform: none; letter-spacing: -0.02em;
+  }
+  .chai-open-l .bylines {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(244,241,234,0.75);
+    margin-top: 18px;
+    max-width: 340px; line-height: 1.7;
+  }
+  .chai-open-l .num-huge {
+    position: absolute;
+    right: 40px; top: 90px;
+    font-family: 'Archivo', sans-serif;
+    font-weight: 900; font-size: 220px;
+    line-height: 0.8; letter-spacing: -0.05em;
+    color: rgba(244,241,234,0.06);
+    pointer-events: none;
+  }
+
+  .chai-open-r {
+    height: 100%;
+    padding: 56px 56px 70px;
+    display: flex; flex-direction: column;
+    position: relative;
+  }
+  .chai-open-r .kicker { margin-bottom: 30px; }
+  .chai-open-r h1 {
+    font-family: 'Archivo', sans-serif;
+    font-weight: 800; text-transform: uppercase;
+    font-size: 78px; line-height: 0.86;
+    letter-spacing: -0.035em; color: var(--ink);
+  }
+  .chai-open-r h1 em {
+    font-family: 'Fraunces', serif; font-style: italic; font-weight: 300;
+    text-transform: none; letter-spacing: -0.01em;
+    color: var(--ink-deep);
+    display: block;
+    font-size: 56px;
+    margin-top: 6px;
+  }
+  .chai-open-r .lead {
+    font-family: 'Fraunces', serif; font-weight: 300;
+    font-size: 19px; line-height: 1.5;
+    color: var(--ink-deep);
+    margin-top: 28px; max-width: 440px;
+  }
+  .chai-open-r .lead em { font-style: italic; color: var(--ink-soft); }
+
+  .chai-open-r .mark-this {
+    position: absolute; top: 50px; right: 50px;
+    font-family: 'Caveat', cursive; font-size: 22px;
+    color: var(--ink);
+    transform: rotate(-5deg);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .chai-open-r .mark-this .check {
+    font-family: 'Archivo', sans-serif; font-weight: 800; font-size: 26px;
+  }
+  .chai-open-r .meta-bottom {
+    margin-top: auto;
+    display: flex; justify-content: space-between;
+    padding-top: 16px; border-top: 1px solid var(--ink-deep);
+  }
+
+  /* --- (b) PROCESS SPREAD --- */
+  .chai-proc-l {
+    height: 100%; padding: 56px 54px 70px;
+    position: relative;
+  }
+  .proc-head { margin-bottom: 18px; display: flex; justify-content: space-between; }
+  .proc-head h3 {
+    font-family: 'Fraunces', serif; font-weight: 400;
+    font-size: 22px; letter-spacing: -0.01em;
+    font-style: italic;
+  }
+  .collage {
+    position: relative;
+    height: calc(100% - 60px);
+  }
+  .artifact {
+    position: absolute;
+    transition: transform 220ms cubic-bezier(.3,.7,.4,1.2), box-shadow 220ms ease;
+  }
+  .artifact:hover {
+    transform: rotate(0deg) translateY(-4px) !important;
+    z-index: 30;
+    box-shadow: 4px 6px 16px rgba(0,0,0,0.15);
+  }
+
+  .sticky-note {
+    width: 220px;
+    background: #f1e2a8;
+    padding: 16px 16px 18px;
+    font-family: 'Caveat', cursive;
+    font-size: 19px; line-height: 1.2;
+    color: #3a2d0a;
+    box-shadow: 2px 3px 8px rgba(0,0,0,0.15);
+  }
+  .sticky-note small {
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8px; letter-spacing: 0.15em;
+    text-transform: uppercase; color: #6b5518;
+    margin-bottom: 6px;
+  }
+
+  .sketch-card {
+    background: var(--paper-soft);
+    border: 1px solid var(--ink-deep);
+    padding: 8px;
+  }
+  .sketch-card .cap {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--ink-soft);
+    margin-top: 6px;
+  }
+
+  .crossed-idea {
+    width: 220px;
+    font-family: 'Fraunces', serif;
+    font-size: 15px; line-height: 1.4;
+    color: var(--ink-deep);
+  }
+  .crossed-idea .x {
+    text-decoration: line-through;
+    text-decoration-color: rgba(22,38,94,0.6);
+    text-decoration-thickness: 1.5px;
+    color: var(--ink-soft);
+  }
+  .crossed-idea .no {
+    font-family: 'Caveat', cursive;
+    font-size: 26px; color: #a23;
+    margin-left: 6px; display: inline-block;
+    transform: rotate(-10deg);
+  }
+
+  .margin-handnote {
+    font-family: 'Caveat', cursive;
+    font-size: 20px; color: var(--ink-deep);
+    line-height: 1.1;
+  }
+
+  .chai-proc-r {
+    height: 100%; padding: 56px 54px 70px;
+    position: relative;
+    display: flex; flex-direction: column;
+  }
+  .chai-proc-r .big-quote {
+    font-family: 'Archivo', sans-serif;
+    font-weight: 800; text-transform: uppercase;
+    font-size: 64px; line-height: 0.92;
+    letter-spacing: -0.03em;
+    color: var(--ink);
+    margin-top: auto; margin-bottom: auto;
+  }
+  .chai-proc-r .big-quote em {
+    font-family: 'Fraunces', serif; font-style: italic;
+    font-weight: 300; text-transform: none;
+    letter-spacing: -0.01em; color: var(--ink-deep);
+  }
+  .chai-proc-r .attrib {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--ink-soft);
+    margin-top: 26px;
+  }
+  .chai-proc-r .corner-ball {
+    position: absolute; top: 80px; right: 70px;
+    width: 180px; height: 180px;
+    border-radius: 50%;
+    background: var(--ink);
+    opacity: 0.9;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--paper);
+    font-family: 'Archivo', sans-serif;
+    font-weight: 800; font-size: 40px;
+    text-transform: uppercase;
+    text-align: center;
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+    transform: rotate(-4deg);
+  }
+
+  /* --- (c) METRIC + POLISH SPREAD --- */
+  .chai-metric-l {
+    height: 100%; padding: 56px 54px 70px;
+    display: flex; flex-direction: column;
+    position: relative;
+  }
+  .metric-huge {
+    font-family: 'Archivo', sans-serif;
+    font-weight: 900; font-size: 220px;
+    line-height: 0.82; letter-spacing: -0.06em;
+    color: var(--ink);
+    margin-top: auto; margin-bottom: 0;
+  }
+  .metric-huge em {
+    font-family: 'Fraunces', serif; font-style: italic; font-weight: 300;
+    letter-spacing: -0.02em;
+  }
+  .metric-label {
+    font-family: 'Fraunces', serif; font-style: italic;
+    font-size: 22px; line-height: 1.4;
+    color: var(--ink-deep);
+    margin-top: 18px;
+    max-width: 360px;
+  }
+  .metric-deck {
+    position: absolute; top: 56px; left: 54px; right: 54px;
+    display: flex; justify-content: space-between;
+  }
+  .metric-deck .big-pct {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .metric-tiny {
+    position: absolute; bottom: 80px; right: 54px;
+    max-width: 260px; text-align: right;
+  }
+  .metric-tiny .meta { display: block; margin-bottom: 4px; }
+  .metric-tiny .t {
+    font-family: 'Fraunces', serif; font-style: italic;
+    font-size: 14px; color: var(--ink-soft); line-height: 1.4;
+  }
+
+  .chai-metric-r {
+    height: 100%; padding: 56px 54px 70px;
+    display: flex; flex-direction: column; gap: 20px;
+  }
+  .plate {
+    border: 1px solid var(--ink-deep);
+    background: var(--paper-soft);
+    padding: 12px;
+  }
+  .plate .shot {
+    aspect-ratio: 16/9;
+    background: #fff; overflow: hidden;
+    border: 1px solid var(--ink-muted);
+  }
+  .plate .cap {
+    margin-top: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--ink-soft);
+    display: flex; justify-content: space-between;
+  }
+  .short-essay {
+    font-family: 'Fraunces', serif; font-weight: 300;
+    font-size: 15.5px; line-height: 1.55;
+    color: var(--ink-deep);
+  }
+  .short-essay p + p { margin-top: 10px; }
+  .short-essay em { font-style: italic; color: var(--ink-soft); }
+  .credits {
+    display: grid; grid-template-columns: 110px 1fr;
+    row-gap: 3px; column-gap: 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px; padding-top: 12px;
+    border-top: 1px solid var(--ink-deep);
+  }
+  .credits dt {
+    text-transform: uppercase; letter-spacing: 0.15em;
+    color: var(--ink-soft);
+  }
+  .credits dd {
+    font-family: 'Fraunces', serif; font-style: italic;
+    font-size: 13px; color: var(--ink-deep);
+  }
+
+  /* --- (d) OBJECT GRID — tools + textures for CHAI --- */
+  .obj-grid-wrap {
+    height: 100%; padding: 56px 0 70px; position: relative;
+  }
+  .obj-grid-wrap .head {
+    padding: 0 54px 24px;
+    display: flex; justify-content: space-between; align-items: baseline;
+  }
+  .obj-grid-wrap .head h3 {
+    font-family: 'Archivo', sans-serif;
+    font-weight: 800; text-transform: uppercase;
+    font-size: 40px; letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+  .obj-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    padding: 0 44px;
+  }
+  .obj {
+    aspect-ratio: 1;
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .obj .lbl {
+    position: absolute; bottom: 8px; left: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8.5px; letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-deep);
+  }
+
+  /* ================= STUB SPREADS ================= */
+  .stub-l {
+    height: 100%; padding: 56px 54px 70px;
+    display: flex; flex-direction: column;
+    position: relative;
+  }
+  .stub-l .num {
+    font-family: 'Archivo', sans-serif; font-weight: 900;
+    font-size: 240px; line-height: 0.8;
+    letter-spacing: -0.06em; color: var(--ink);
+    margin-top: -10px; margin-bottom: auto;
+    opacity: 0.94;
+  }
+  .stub-l .ttl {
+    font-family: 'Archivo', sans-serif;
+    font-weight: 800; text-transform: uppercase;
+    font-size: 52px; line-height: 0.9;
+    letter-spacing: -0.03em; color: var(--ink-deep);
+  }
+  .stub-l .ttl em {
+    font-family: 'Fraunces', serif; font-style: italic; font-weight: 300;
+    text-transform: none; letter-spacing: -0.01em;
+  }
+  .stub-l .coll {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--ink-soft);
+    margin-top: 12px;
+  }
+  .stub-r {
+    height: 100%; padding: 56px 54px 70px;
+    display: flex; flex-direction: column;
+    position: relative;
+  }
+  .stub-r .lead {
+    font-family: 'Fraunces', serif; font-style: italic;
+    font-weight: 300; font-size: 22px; line-height: 1.45;
+    color: var(--ink-deep); margin-bottom: 24px;
+  }
+  .stub-r .metric-inline {
+    font-family: 'Archivo', sans-serif; font-weight: 900;
+    font-size: 140px; line-height: 0.85;
+    color: var(--ink); letter-spacing: -0.05em;
+    margin: 6px 0 10px;
+  }
+  .stub-r .metric-inline em {
+    font-family: 'Fraunces', serif; font-weight: 300; font-style: italic;
+  }
+  .stub-r .stub-body {
+    font-family: 'Fraunces', serif; font-size: 15px;
+    line-height: 1.55; color: var(--ink-deep);
+    font-weight: 300; max-width: 440px;
+  }
+  .stub-r .stub-body em { font-style: italic; color: var(--ink-soft); }
+  .stub-r .to-come {
+    position: absolute; bottom: 46px; left: 54px; right: 54px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--ink-soft);
+    border-top: 1px solid var(--ink-muted);
+    padding-top: 12px; display: flex; justify-content: space-between;
+  }
+
+  /* ================= JOURNAL ================= */
+  .journal-bleed {
+    position: relative; height: 100%; padding: 0;
+    background: var(--ink);
+    color: var(--paper);
+    display: flex; flex-direction: column;
+    padding: 70px 56px 80px;
+  }
+  .journal-bleed .head {
+    display: flex; justify-content: space-between;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(244,241,234,0.7);
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(244,241,234,0.25);
+    margin-bottom: auto;
+  }
+  .journal-bleed .big {
+    font-family: 'Archivo', sans-serif;
+    font-weight: 800; text-transform: uppercase;
+    font-size: 88px; line-height: 0.88;
+    letter-spacing: -0.035em;
+  }
+  .journal-bleed .big em {
+    font-family: 'Fraunces', serif; font-style: italic; font-weight: 300;
+    text-transform: none; letter-spacing: -0.01em;
+  }
+  .journal-quiet {
+    height: 100%; padding: 80px 56px 80px;
+    display: flex; flex-direction: column;
+  }
+  .journal-quiet p.lead {
+    font-family: 'Fraunces', serif; font-style: italic;
+    font-weight: 300; font-size: 22px; line-height: 1.45;
+    color: var(--ink-deep);
+    max-width: 460px;
+    margin-bottom: 18px;
+  }
+  .journal-quiet p.body {
+    font-family: 'Fraunces', serif; font-size: 16px;
+    line-height: 1.6; max-width: 460px;
+    color: var(--ink-deep); font-weight: 300;
+  }
+  .journal-quiet p.body + p.body { margin-top: 10px; }
+  .journal-quiet p.body em { font-style: italic; color: var(--ink-soft); }
+  .journal-quiet .sig {
+    font-family: 'Caveat', cursive; font-size: 26px;
+    margin-top: 28px; transform: rotate(-3deg);
+    align-self: flex-end;
+  }
+
+  /* ================= COLOPHON ================= */
+  .colo-l {
+    height: 100%; padding: 56px 54px 70px;
+    position: relative; display: flex; flex-direction: column;
+  }
+  .colo-l .big-head {
+    font-family: 'Archivo', sans-serif;
+    font-weight: 800; text-transform: uppercase;
+    font-size: 64px; line-height: 0.9;
+    letter-spacing: -0.03em;
+    color: var(--ink); margin-bottom: 22px;
+  }
+  .colo-l .big-head em {
+    font-family: 'Fraunces', serif; font-style: italic; font-weight: 300;
+    text-transform: none; letter-spacing: -0.01em;
+    color: var(--ink-deep);
+  }
+  .colo-body {
+    font-family: 'Fraunces', serif; font-weight: 300;
+    font-size: 15px; line-height: 1.55;
+    color: var(--ink-deep); max-width: 460px;
+  }
+  .colo-body + .colo-body { margin-top: 10px; }
+  .prompt {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 14px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px; line-height: 1.55;
+    margin: 18px 0;
+    max-width: 460px;
+  }
+  .prompt .label {
+    font-size: 8px; letter-spacing: 0.22em;
+    text-transform: uppercase;
+    opacity: 0.7; display: block; margin-bottom: 6px;
+  }
+  .colo-r {
+    height: 100%; padding: 56px 54px 70px;
+    display: flex; flex-direction: column; position: relative;
+  }
+  .wouldnt {
+    list-style: none; padding: 0;
+  }
+  .wouldnt li {
+    font-family: 'Archivo', sans-serif; font-weight: 800;
+    text-transform: uppercase; font-size: 28px;
+    line-height: 1; letter-spacing: -0.02em;
+    padding: 12px 0; color: var(--ink);
+    border-bottom: 1px solid var(--ink-muted);
+  }
+  .wouldnt li em {
+    font-family: 'Fraunces', serif; font-style: italic;
+    font-weight: 300; text-transform: none;
+    letter-spacing: -0.01em; color: var(--ink-deep);
+  }
+  .colo-r .thanks {
+    margin-top: 24px;
+    font-family: 'Fraunces', serif; font-weight: 300;
+    font-size: 14px; line-height: 1.65;
+    color: var(--ink-deep); max-width: 460px;
+  }
+  .colo-r .thanks em { font-style: italic; color: var(--ink-soft); }
+  .colo-r .bottom {
+    position: absolute; bottom: 46px; left: 54px; right: 54px;
+    display: flex; justify-content: space-between;
+    padding-top: 12px; border-top: 1px solid var(--ink-deep);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: 0.15em;
+    text-transform: uppercase; color: var(--ink-deep);
+  }
+
+  /* ================= 404 ================= */
+  .fourohfour-l {
+    height: 100%; padding: 56px 56px 70px;
+    display: flex; align-items: flex-end; justify-content: flex-start;
+  }
+  .fourohfour-l .num {
+    font-family: 'Archivo', sans-serif; font-weight: 900;
+    font-size: 280px; line-height: 0.78;
+    letter-spacing: -0.06em; color: var(--ink);
+  }
+  .fourohfour-r {
+    height: 100%; padding: 56px 56px 70px;
+    display: flex; flex-direction: column; justify-content: center;
+    align-items: flex-start; text-align: left;
+  }
+  .fourohfour-r h2 {
+    font-family: 'Fraunces', serif; font-style: italic; font-weight: 300;
+    font-size: 42px; line-height: 1; letter-spacing: -0.01em;
+    color: var(--ink-deep);
+  }
+  .fourohfour-r p {
+    font-family: 'Fraunces', serif; font-style: italic; font-weight: 300;
+    font-size: 18px; color: var(--ink-soft); margin-top: 10px;
+  }
+  .fourohfour-r .back {
+    margin-top: 38px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+    background: none; border: 1px solid var(--ink-deep);
+    padding: 10px 18px; cursor: pointer;
+    color: var(--ink-deep);
+  }
+
+  /* ================= TWEAKS ================= */
+  .tweaks {
+    position: fixed; bottom: 18px; left: 22px;
+    background: var(--paper); border: 1px solid var(--ink-deep);
+    padding: 14px 16px; z-index: 200;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--ink-deep); min-width: 220px; display: none;
+    box-shadow: 3px 3px 0 var(--ink-faint);
+  }
+  .tweaks.on { display: block; }
+  .tweaks h4 {
+    font-family: 'Fraunces', serif; font-weight: 400; font-style: italic;
+    font-size: 14px; letter-spacing: 0; text-transform: none;
+    margin-bottom: 10px; padding-bottom: 8px;
+    border-bottom: 1px solid var(--ink-muted);
+  }
+  .tweaks label {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 5px 0; gap: 10px;
+  }
+  .tweaks input[type="range"] { width: 90px; }
+  .tweaks .swatches { display: flex; gap: 6px; }
+  .tweaks .swatch {
+    width: 18px; height: 18px; border: 1px solid var(--ink-deep); cursor: pointer;
+  }
+
+  /* Helpers */
+  .rough-circle {
+    padding: 1px 4px; display: inline-block; position: relative;
+  }
+  .rough-circle::after {
+    content: ""; position: absolute; inset: -2px -4px;
+    border: 1.2px solid var(--ink-deep); border-radius: 50%;
+    transform: rotate(-1.5deg); pointer-events: none;
+  }
+  .stripes-bg {
+    background:
+      repeating-linear-gradient(-45deg,
+        rgba(26,54,176,0.14) 0 6px,
+        transparent 6px 12px);
+  }
+  .wire-shot {
+    padding: 12px; font-family: 'JetBrains Mono', monospace;
+    font-size: 8px; color: var(--ink-deep);
+    display: flex; gap: 10px; height: 100%;
+  }
+  .wire-shot .side {
+    width: 30%; background: #eceae0; padding: 8px;
+    border: 1px solid rgba(22,38,94,0.15);
+  }
+  .wire-shot .li { padding: 2.5px 0; color: var(--ink-soft); letter-spacing: 0.08em; }
+  .wire-shot .li.on { color: var(--ink); border-left: 2px solid var(--ink); padding-left: 6px; margin-left: -8px; font-weight: 500; }
+  .wire-shot .main { flex: 1; background: #fff; padding: 10px; border: 1px solid rgba(22,38,94,0.15); }
+  .wire-shot .t {
+    font-family: 'Fraunces', serif; font-size: 13px; font-weight: 400;
+    letter-spacing: -0.01em; margin-bottom: 4px;
+  }
+  .wire-shot .kpi { display: flex; gap: 6px; margin-top: 6px; }
+  .wire-shot .k {
+    flex: 1; background: var(--paper); padding: 5px 6px;
+    border: 1px solid rgba(22,38,94,0.15);
+  }
+  .wire-shot .k b {
+    font-family: 'Fraunces', serif; font-weight: 400;
+    font-size: 14px; display: block;
+  }
+  .wire-shot .bub {
+    margin-top: 8px; padding-top: 8px;
+    border-top: 1px solid rgba(22,38,94,0.15);
+  }
+  .wire-shot .msg {
+    background: #eef0f8; padding: 4px 6px;
+    border-radius: 6px; margin-bottom: 4px;
+    max-width: 78%; line-height: 1.4;
+    font-size: 8px;
+  }
+  .wire-shot .msg.me {
+    background: var(--ink); color: var(--paper); margin-left: auto;
+  }
+
+  .no-marg .hand:not(.cover-label),
+  .no-marg .margin-handnote,
+  .no-marg .sticky-note,
+  .no-marg .crossed-idea .no,
+  .no-marg .toc-row .note { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="grain"></div>
+
+<div class="hud-top">Field Notebook · Vol. V · 2021—2026</div>
+
+<div class="desk">
+  <div class="cover-wrap" id="coverWrap">
+    <div class="cover" id="cover" tabindex="0" role="button" aria-label="Open notebook">
+      <div class="cover-label">
+        <small>Notebook of</small>
+        Compositions for<br>Complex Systems
+      </div>
+      <div class="elastic"></div>
+      <div class="cover-center">
+        <div class="cover-name" style='font-family: Fraunces'>Yankun</div>
+        <div class="cover-sub">— in progress</div>
+      </div>
+      <div class="cover-foot">Vol. V · 2021–2026 · SF</div>
+      <div class="cover-corner"></div>
+    </div>
+  </div>
+
+  <div class="spread-wrap" id="spreadWrap">
+    <div class="book">
+      <div class="page left">
+        <div class="pagenum" id="pnL">p. 02</div>
+        <div class="spread-inner" id="innerL"><div class="pg" id="pgL"></div></div>
+      </div>
+      <div class="binding"></div>
+      <div class="page right">
+        <div class="pagenum" id="pnR">p. 03</div>
+        <div class="spread-inner" id="innerR"><div class="pg" id="pgR"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="cover-hint" id="coverHint">
+  <span>click · enter · or space to open</span>
+</div>
+
+<div class="hud" id="hud">
+  <button id="prev">← prev</button>
+  <span id="label">spread 1 / 12</span>
+  <button id="next">next →</button>
+  <button id="close" style="margin-left:6px;">close</button>
+</div>
+
+<div class="tweaks" id="tweaks">
+  <h4>Tweaks</h4>
+  <label>Paper tone
+    <div class="swatches">
+      <div class="swatch" data-paper="#f4f1ea" style="background:#f4f1ea"></div>
+      <div class="swatch" data-paper="#efe8d3" style="background:#efe8d3"></div>
+      <div class="swatch" data-paper="#f0ede4" style="background:#f0ede4"></div>
+    </div>
+  </label>
+  <label>Ink hue
+    <div class="swatches">
+      <div class="swatch" data-ink="#1a36b0" style="background:#1a36b0"></div>
+      <div class="swatch" data-ink="#16265e" style="background:#16265e"></div>
+      <div class="swatch" data-ink="#3a1e1a" style="background:#3a1e1a"></div>
+    </div>
+  </label>
+  <label>Grain <input type="range" id="grainR" min="0" max="100" value="70"></label>
+  <label>Marginalia <input type="checkbox" id="margShow" checked></label>
+</div>
+
+<script>
+// ============================================================
+// DATA — one logical "spread unit" = one pair of pages
+// ============================================================
+const UNITS = [
+  { id: 'contents',    pL: 'p. 02', pR: 'p. 03', render: renderContents },
+  { id: 'chai-open',   pL: 'p. 04', pR: 'p. 05', render: renderChaiOpen },
+  { id: 'chai-proc',   pL: 'p. 06', pR: 'p. 07', render: renderChaiProc },
+  { id: 'chai-obj',    pL: 'p. 08', pR: 'p. 09', render: renderChaiObjects },
+  { id: 'chai-metric', pL: 'p. 10', pR: 'p. 11', render: renderChaiMetric },
+  { id: 'smartsearch', pL: 'p. 12', pR: 'p. 13', render: renderSmart },
+  { id: 'journal1',    pL: 'p. 18', pR: 'p. 19', render: renderJournal1 },
+  { id: 'webex',       pL: 'p. 22', pR: 'p. 23', render: renderWebex },
+  { id: 'sap',         pL: 'p. 28', pR: 'p. 29', render: renderSap },
+  { id: 'journal2',    pL: 'p. 34', pR: 'p. 35', render: renderJournal2 },
+  { id: 'colophon',    pL: 'p. 36', pR: 'p. 37', render: renderColophon },
+  { id: 'fourohfour',  pL: '—',      pR: 'p. 404', render: renderFourohfour },
+];
+
+// ============================================================
+// RENDERERS
+// ============================================================
+function renderContents(){
+  return {
+    left: `
+      <div class="ifc">
+        <div class="ifc-top">
+          <span class="meta">Inside front cover · vol. V</span>
+          <span class="meta">YK · 001</span>
+        </div>
+        <div class="bookplate">
+          <div class="kicker">— This notebook belongs to —</div>
+          <div class="signed">Yankun</div>
+          <div class="loc">San Francisco, 2021 – present</div>
+        </div>
+        <div class="ifc-quote">
+          A working<br>document. <em>process<br>on the left,</em><br>polish on the right.
+        </div>
+      </div>
+    `,
+    right: `
+      <div class="contents">
+        <span class="meta">§ Contents</span>
+        <h1>Contents<em>.</em></h1>
+        <div class="sub">Volume V · five notebooks, loosely.</div>
+        <div class="toc">
+          ${tocRow('I.', 'Control Hub AI, from 3% to 15%', '04', 'chai-open', 'the one to open with')}
+          ${tocRow('II.', 'Smart Search, rewritten', '12', 'smartsearch')}
+          ${tocJournal('journal — on search', '18', 'journal1')}
+          ${tocRow('III.', 'Write-like-Webex', '22', 'webex')}
+          ${tocRow('IV.', 'SAP Fieldglass, homepage', '28', 'sap')}
+          ${tocJournal('journal — on endings', '34', 'journal2')}
+          ${tocRow('V.', 'How this was made', '36', 'colophon')}
+        </div>
+        <div class="contents-foot">
+          <span>Last updated — April 18, 2026</span>
+          <span>Turn the page →</span>
+        </div>
+      </div>
+    `
+  };
+}
+function tocRow(n, t, p, go, note){
+  return `<div class="toc-row" data-goto="${go}">
+    <div class="num">${n}</div>
+    <div class="ttl">${t}</div>
+    <div class="pg">p. ${p}</div>
+    ${note ? `<div class="note">${note}</div>` : ''}
+  </div>`;
+}
+function tocJournal(t, p, go){
+  return `<div class="toc-row journal" data-goto="${go}">
+    <div class="num">—</div>
+    <div class="ttl">${t}</div>
+    <div class="pg">p. ${p}</div>
+  </div>`;
+}
+
+// ---------- CHAI opener (A): blue tag page | big serif title ----------
+function renderChaiOpen(){
+  return {
+    left: `
+      <div class="chai-open-l">
+        <span class="meta">Project I · 2024 — 2025</span>
+        <div class="num-huge">01</div>
+        <div class="tag">From<br><em>three percent</em><br>to fifteen.</div>
+        <div class="bylines">
+          CHAI · Cisco Control Hub<br>
+          with Nirav Shah + Kathryn Lee<br>
+          research · ideation · design
+        </div>
+      </div>
+    `,
+    right: `
+      <div class="chai-open-r">
+        <div class="mark-this">
+          <span class="check">✓</span>
+          this one.
+        </div>
+        <span class="meta kicker">— an admin console, handled —</span>
+        <h1>Control<br>Hub AI<em>— continued</em></h1>
+        <p class="lead">Three months inside Control Hub before I proposed anything. Mostly watching. Mostly hearing the same phrase twice a day: <span class="rough-circle">"I can never find it."</span></p>
+        <div class="meta-bottom">
+          <span class="meta">Shipped · Oct 2024</span>
+          <span class="meta">Ongoing · iterating</span>
+        </div>
+      </div>
+    `
+  };
+}
+
+// ---------- CHAI process collage (B) ----------
+function renderChaiProc(){
+  return {
+    left: `
+      <div class="chai-proc-l">
+        <div class="proc-head">
+          <span class="meta">§ Process · sketches</span>
+          <h3 class="hand" style="font-family:'Caveat',cursive; font-size:22px;">before.</h3>
+        </div>
+        <div class="collage">
+          <!-- wireframe sketch -->
+          <div class="artifact sketch-card" style="left:0; top:0; width:260px; transform: rotate(-2.4deg); z-index:6;">
+            <div style="aspect-ratio:16/10; background:var(--paper); position:relative; overflow:hidden;" class="stripes-bg">
+              <svg viewBox="0 0 200 120" style="position:absolute; inset:8px; width:calc(100% - 16px); height:calc(100% - 16px);" fill="none" stroke="#16265e" stroke-width="1.1" stroke-linecap="round">
+                <rect x="4" y="4" width="130" height="110"/>
+                <line x1="14" y1="20" x2="110" y2="20"/>
+                <line x1="14" y1="30" x2="120" y2="30"/>
+                <line x1="14" y1="40" x2="90" y2="40"/>
+                <line x1="14" y1="56" x2="110" y2="56"/>
+                <rect x="148" y="40" width="46" height="24" rx="2"/>
+                <text x="154" y="56" font-family="Caveat" font-size="11" fill="#16265e" stroke="none">ASK CHAI</text>
+                <path d="M 140 50 L 150 52"/>
+                <path d="M 170 74 Q 180 88 190 86"/>
+              </svg>
+            </div>
+            <div class="cap">fig. A · whiteboard, jan '24</div>
+          </div>
+
+          <!-- sticky note -->
+          <div class="artifact" style="right:10px; top:6px; transform: rotate(3.2deg); z-index:14;">
+            <div class="sticky-note">
+              <small>Research · intvw #04</small>
+              "I don't know what half of these tabs do. I just click around until something breaks."
+            </div>
+          </div>
+
+          <!-- crossed idea -->
+          <div class="artifact crossed-idea" style="left:20px; top:232px; transform: rotate(-1.4deg);">
+            <span class="x">v1 — sidebar agent, a tab per admin domain</span>
+            <span class="no">no.</span>
+            <div class="hand" style="margin-top:4px; font-size:16px; color:var(--ink-soft);">too much taxonomy. admins don't think in domains.</div>
+          </div>
+
+          <!-- second sketch -->
+          <div class="artifact sketch-card" style="right:0; bottom:20px; width:240px; transform: rotate(1.8deg); z-index:8;">
+            <div style="aspect-ratio: 16/10; background: var(--paper); position: relative; overflow: hidden;" class="stripes-bg">
+              <svg viewBox="0 0 200 120" style="position:absolute; inset:8px; width:calc(100% - 16px); height:calc(100% - 16px);" fill="none" stroke="#16265e" stroke-width="1.1" stroke-linecap="round">
+                <rect x="6" y="6" width="188" height="16"/>
+                <rect x="6" y="28" width="48" height="84"/>
+                <rect x="60" y="28" width="134" height="40"/>
+                <rect x="60" y="74" width="88" height="38"/>
+                <rect x="154" y="74" width="40" height="38" fill="#1a36b0" opacity="0.18"/>
+                <text x="158" y="98" font-family="Caveat" font-size="11" fill="#16265e" stroke="none">chat</text>
+              </svg>
+            </div>
+            <div class="cap">fig. C · layout exploration</div>
+          </div>
+
+          <!-- margin handwritten note -->
+          <div class="artifact margin-handnote" style="left:290px; top:20px; width:180px; transform:rotate(-2deg);">
+            three months<br>
+            <span style="font-size:16px; color:var(--ink-soft);">before I proposed<br>anything. mostly<br>watching.</span>
+          </div>
+
+          <!-- check -->
+          <div class="artifact hand" style="left: 300px; bottom: 40px; font-size: 26px; transform: rotate(-8deg);">
+            ✓ this one.
+          </div>
+
+          <!-- arrow -->
+          <svg style="position:absolute; left: 240px; top: 160px; width: 90px; height: 50px; color:var(--ink-deep); pointer-events:none;" viewBox="0 0 120 60" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round">
+            <path d="M 4 30 Q 40 8 90 30 T 114 32"/>
+            <path d="M 108 26 L 116 32 L 107 38"/>
+          </svg>
+        </div>
+      </div>
+    `,
+    right: `
+      <div class="chai-proc-r">
+        <span class="meta">§ Thesis</span>
+        <div class="corner-ball">WHERE<br>IS —<br>IT?</div>
+        <div class="big-quote">
+          The labyrinth<br>
+          wasn't <em>navigation —</em><br>
+          it was a <em>taxonomy</em><br>
+          the user didn't own.
+        </div>
+        <div class="attrib">— notebook entry · feb 2024</div>
+      </div>
+    `
+  };
+}
+
+// ---------- CHAI object grid ----------
+function renderChaiObjects(){
+  const cells = [
+    { lbl: 'paper·clip', svg: `<svg viewBox="0 0 80 80" fill="none" stroke="#1a36b0" stroke-width="1.6" stroke-linecap="round"><path d="M 28 16 Q 52 14 52 38 L 52 58 Q 52 70 40 70 Q 30 70 30 58 L 30 28 Q 30 22 36 22 Q 44 22 44 30 L 44 58"/></svg>` , bg: 'var(--paper-soft)'},
+    { lbl: 'post·it', svg: '', bg: '#f1e2a8', extra: `<div style="font-family:'Caveat',cursive; color:#3a2d0a; font-size:16px; line-height:1.15; padding:12px;">Ask CHAI.<br>one button.<br>always.</div>`},
+    { lbl: 'sketch·02', bg: 'var(--paper-soft)', svg: `<svg viewBox="0 0 80 80" fill="none" stroke="#16265e" stroke-width="1.1"><rect x="8" y="12" width="64" height="44"/><line x1="14" y1="22" x2="56" y2="22"/><line x1="14" y1="30" x2="48" y2="30"/><line x1="14" y1="38" x2="60" y2="38"/><rect x="52" y="44" width="16" height="8" fill="#1a36b0" opacity="0.3"/></svg>`},
+    { lbl: 'tape', bg: 'var(--paper)', svg: `<svg viewBox="0 0 80 80" fill="none"><rect x="6" y="30" width="68" height="20" fill="#1a36b0" opacity="0.3" transform="rotate(-6 40 40)"/></svg>`},
+    { lbl: 'printout', bg: '#fff', svg: `<svg viewBox="0 0 80 80"><rect x="8" y="8" width="64" height="64" fill="none" stroke="#16265e" stroke-width="0.8"/><line x1="14" y1="20" x2="50" y2="20" stroke="#16265e" stroke-width="0.7"/><line x1="14" y1="26" x2="64" y2="26" stroke="#16265e" stroke-width="0.7"/><line x1="14" y1="32" x2="56" y2="32" stroke="#16265e" stroke-width="0.7"/><line x1="14" y1="38" x2="60" y2="38" stroke="#16265e" stroke-width="0.7"/><rect x="14" y="48" width="52" height="18" fill="#1a36b0" opacity="0.15"/></svg>`},
+    { lbl: 'user·interview', bg: '#f1e2a8', extra: `<div style="font-family:'Caveat',cursive; color:#3a2d0a; font-size:14px; line-height:1.1; padding:10px;">"I click until<br>something<br>breaks."</div>`},
+    { lbl: 'metric', bg: 'var(--ink)', extra: `<div style="color:var(--paper); font-family:'Archivo',sans-serif; font-weight:900; font-size:34px; letter-spacing:-0.04em; line-height:0.9; padding: 14px;">3%<br><span style="font-family:'Fraunces',serif; font-style:italic; font-weight:300; font-size:18px;">→ 15</span></div>`},
+    { lbl: 'circle', bg: 'var(--paper-soft)', svg: `<svg viewBox="0 0 80 80" fill="none" stroke="#1a36b0" stroke-width="1.4"><circle cx="40" cy="40" r="26"/><circle cx="40" cy="40" r="14"/></svg>`},
+  ];
+  return {
+    left: `
+      <div class="obj-grid-wrap">
+        <div class="head">
+          <h3>Bits &<br>pieces</h3>
+          <span class="meta" style="text-align:right;">§ what didn't<br>make the essay</span>
+        </div>
+        <div class="obj-grid">
+          ${cells.slice(0,4).map(c=>`<div class="obj" style="background:${c.bg};">${c.svg || ''}${c.extra || ''}<span class="lbl">${c.lbl}</span></div>`).join('')}
+          ${cells.slice(4,8).map(c=>`<div class="obj" style="background:${c.bg};">${c.svg || ''}${c.extra || ''}<span class="lbl">${c.lbl}</span></div>`).join('')}
+        </div>
+      </div>
+    `,
+    right: `
+      <div class="journal-bleed" style="padding: 80px 56px;">
+        <div class="head">
+          <span>§ pull-quote</span>
+          <span>CHAI · memo #07</span>
+        </div>
+        <div class="big" style="margin-top: auto; font-size: 74px;">
+          I cut<br>
+          the welcome<br>
+          modal in half<em>—</em><br>
+          and adoption<br>
+          <em>doubled.</em>
+        </div>
+        <div class="meta" style="color:rgba(244,241,234,0.75); margin-top:28px;">— march 2024 · week after launch</div>
+      </div>
+    `
+  };
+}
+
+// ---------- CHAI metric + polish ----------
+function renderChaiMetric(){
+  return {
+    left: `
+      <div class="chai-metric-l">
+        <div class="metric-deck">
+          <span class="big-pct">§ Outcome · 8 months post-launch</span>
+          <span class="big-pct" style="text-align:right;">/ CHAI</span>
+        </div>
+        <div class="metric-huge">3%<em>→</em><br>15%</div>
+        <div class="metric-label">Weekly-active adoption on the embedded assistant. Support tickets with the phrase <em>"where is"</em> fell by a third, quietly.</div>
+        <div class="metric-tiny">
+          <span class="meta">— and a quieter win —</span>
+          <span class="t">— 34% on "where is"<br>support tickets, first quarter</span>
+        </div>
+      </div>
+    `,
+    right: `
+      <div class="chai-metric-r">
+        <span class="meta">§ What shipped</span>
+        <div class="plate">
+          <div class="shot">
+            <div class="wire-shot">
+              <div class="side">
+                <div class="li">Overview</div>
+                <div class="li on">Users</div>
+                <div class="li">Devices</div>
+                <div class="li">Calling</div>
+                <div class="li">Meetings</div>
+                <div class="li">Analytics</div>
+                <div class="li">Troubleshoot</div>
+              </div>
+              <div class="main">
+                <div class="t">Users · 14,238 active</div>
+                <div style="font-size:7.5px; color:var(--ink-soft); letter-spacing:0.1em;">LAST 30 DAYS</div>
+                <div class="kpi">
+                  <div class="k"><b>94%</b>active</div>
+                  <div class="k"><b>12</b>issues</div>
+                  <div class="k"><b>3</b>escalated</div>
+                </div>
+                <div class="bub">
+                  <div class="msg">Why did meeting quality drop in Sydney this week?</div>
+                  <div class="msg me">Packet loss on the APAC media path rose to 4.2%. Open a ticket?</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="cap"><span>fig. 01 · CHAI embedded, users view</span><span>v1.4</span></div>
+        </div>
+        <div class="short-essay">
+          <p>The v1 tested flat. V3 — one button, always visible, in the language the admin already spoke — is what shipped. <em>Kathryn's</em> research kept us honest about whose language that was.</p>
+          <p>What I'm most proud of isn't the number. It's the quiet one: <em>"where is"</em> tickets dropped by a third, without a press release.</p>
+        </div>
+        <dl class="credits">
+          <dt>Produced by</dt><dd>Yankun, 2024–2025</dd>
+          <dt>Product</dt><dd>Nirav Shah</dd>
+          <dt>Research</dt><dd>Kathryn Lee</dd>
+          <dt>Engineering</dt><dd>Nandini, Marco, Jian</dd>
+        </dl>
+      </div>
+    `
+  };
+}
+
+// ---------- STUB: Smart Search ----------
+function renderSmart(){
+  return {
+    left: `
+      <div class="stub-l">
+        <span class="meta">Project II · 2023</span>
+        <div class="num">02</div>
+        <div class="ttl">Smart<br>Search,<br><em>rewritten.</em></div>
+        <div class="coll">with Jasna · Rachael Marr</div>
+      </div>
+    `,
+    right: `
+      <div class="stub-r">
+        <span class="meta">§ Outcome</span>
+        <p class="lead">A 0-result search box was the most honest surface in the product. It said: <em>we don't know what you mean.</em></p>
+        <div class="metric-inline">86%<em>↓</em></div>
+        <span class="meta">No-result rates, before → after</span>
+        <p class="stub-body" style="margin-top:18px;">38% of searches returned nothing. We got to 5.4% — less by fixing ranking than by teaching the UI to <em>admit when it was guessing.</em></p>
+        <div class="to-come">
+          <span>Full spread to follow</span>
+          <span>v1.1</span>
+        </div>
+      </div>
+    `
+  };
+}
+
+// ---------- JOURNAL 1 ----------
+function renderJournal1(){
+  return {
+    left: `
+      <div class="journal-bleed">
+        <div class="head">
+          <span>Journal · Sep 2023</span>
+          <span>SF · coffee, second cup</span>
+        </div>
+        <div class="big" style="margin-top:auto;">On<br>search<em>.</em></div>
+        <div class="meta" style="color:rgba(244,241,234,0.6); margin-top:14px;">— entry 07 · volume V</div>
+      </div>
+    `,
+    right: `
+      <div class="journal-quiet">
+        <p class="lead">Searching is how people admit they don't know where something is. That's a trust moment — and we usually blow it.</p>
+        <p class="body">Before Smart Search I thought my job was to rank results. After, I thought my job was to <em>write the empty state.</em></p>
+        <p class="body">Every tool I've shipped since has started with the same question: what does this product say, out loud, when the user is lost? Not the error message. The <em>tone</em>.</p>
+        <div class="sig">— y.</div>
+      </div>
+    `
+  };
+}
+
+// ---------- STUB: Webex ----------
+function renderWebex(){
+  return {
+    left: `
+      <div class="stub-l">
+        <span class="meta">Project III · 2025 · side project</span>
+        <div class="num">03</div>
+        <div class="ttl">Write-like<em>—</em><br>Webex.</div>
+        <div class="coll">solo · weekends, cursor</div>
+      </div>
+    `,
+    right: `
+      <div class="stub-r">
+        <span class="meta">§ Premise</span>
+        <p class="lead">The content guidelines were a PDF. I moved them into the IDE where the writing happens — as nudges, not gates.</p>
+        <div class="metric-inline">1 PDF<em>→</em>0</div>
+        <span class="meta">guidelines that still live in a drawer</span>
+        <p class="stub-body" style="margin-top:18px;">Built because I was tired of losing arguments about <em>"robust"</em> in PR review. Inline suggestions on passive voice, empty confidence words, proper-noun inconsistencies.</p>
+        <div class="to-come">
+          <span>Full spread to follow</span>
+          <span>v1.1</span>
+        </div>
+      </div>
+    `
+  };
+}
+
+// ---------- STUB: SAP ----------
+function renderSap(){
+  return {
+    left: `
+      <div class="stub-l">
+        <span class="meta">Project IV · 2021 — 2022</span>
+        <div class="num">04</div>
+        <div class="ttl">Fieldglass,<br><em>homepage.</em></div>
+        <div class="coll">SAP · with Anya + Vignesh</div>
+      </div>
+    `,
+    right: `
+      <div class="stub-r">
+        <span class="meta">§ Earlier work, still proud</span>
+        <p class="lead">A homepage for the enterprise tool that runs contingent-workforce procurement. Same move as CHAI, earlier.</p>
+        <div class="metric-inline">4 min<em>→</em>90s</div>
+        <span class="meta">Morning review, before → after</span>
+        <p class="stub-body" style="margin-top:18px;">Tiles, not dashboards. Actions, not menus. The user was a shift manager who had four minutes between meetings — so we designed for four minutes.</p>
+        <div class="to-come">
+          <span>Full spread to follow</span>
+          <span>v1.1</span>
+        </div>
+      </div>
+    `
+  };
+}
+
+// ---------- JOURNAL 2 ----------
+function renderJournal2(){
+  return {
+    left: `
+      <div class="journal-quiet">
+        <p class="lead">Shipping is not the same as ending. I keep forgetting this.</p>
+        <p class="body">CHAI shipped in October. I stopped calling it <em>mine</em> in February — four months of watching the graph, answering questions from support, tweaking prompts I'd rather not have to tweak.</p>
+        <p class="body">The work ends when the thing no longer needs me. <em>That takes longer than anyone plans for.</em></p>
+        <div class="sig">— y.</div>
+      </div>
+    `,
+    right: `
+      <div class="journal-bleed">
+        <div class="head">
+          <span>Journal · Feb 2026</span>
+          <span>SF · desk, 11pm</span>
+        </div>
+        <div class="big" style="margin-top:auto;">On<br>endings<em>.</em></div>
+        <div class="meta" style="color:rgba(244,241,234,0.6); margin-top:14px;">— entry 11 · volume V</div>
+      </div>
+    `
+  };
+}
+
+// ---------- COLOPHON ----------
+function renderColophon(){
+  return {
+    left: `
+      <div class="colo-l">
+        <span class="meta">§ V · How this was made</span>
+        <div class="big-head" style="margin-top: 12px;">How this<br><em>was made.</em></div>
+        <p class="colo-body">I didn't use AI to avoid the work. I used it to do more of it.</p>
+        <p class="colo-body">Drafted in Claude Code and Claude Design, set in Fraunces, Archivo and JetBrains Mono, on a warm off-white I've been staring at for a month.</p>
+        <div class="prompt">
+          <span class="label">Prompt — iteration 4, contents page</span>
+          make the dotted leader feel like a real<br>
+          handwritten table of contents: the dots<br>
+          should feel earned, not generated. if that<br>
+          means they vary, let them vary.
+        </div>
+        <p class="colo-body">Three versions looked like code output. The fourth looked like a notebook. That's the whole loop.</p>
+      </div>
+    `,
+    right: `
+      <div class="colo-r">
+        <span class="meta">§ What I wouldn't let it do</span>
+        <ul class="wouldnt" style="margin-top: 16px;">
+          <li>Write the <em>essays.</em></li>
+          <li>Pick the <em>projects.</em></li>
+          <li>Draw the <em>marks.</em></li>
+          <li>Decide what <em>"senior"</em> looks like.</li>
+        </ul>
+        <p class="thanks">
+          <span class="meta" style="display:block; margin-bottom:8px;">§ thanks</span>
+          To <em>Nirav, Kathryn, Jasna, Rachael, Anya, Vignesh, Jian, Marco, Nandini</em> — my last five years. To <em>Mary Kim</em>, whose <em>Me, Mushroom and the World</em> zine taught me that looseness survives only when it's bounded by discipline.
+        </p>
+        <div class="bottom">
+          <span>hi@yankun.info</span>
+          <span>updated · Apr 18, 2026</span>
+        </div>
+      </div>
+    `
+  };
+}
+
+// ---------- 404 ----------
+function renderFourohfour(){
+  return {
+    left: `
+      <div class="fourohfour-l">
+        <div class="num">404</div>
+      </div>
+    `,
+    right: `
+      <div class="fourohfour-r">
+        <span class="meta" style="margin-bottom:28px;">p. 404 · blank</span>
+        <h2>This page<br>is blank.</h2>
+        <p>— not every idea makes it in.</p>
+        <button class="back" data-goto="contents">← back to contents</button>
+      </div>
+    `
+  };
+}
+
+// ============================================================
+// NAV
+// ============================================================
+let idx = 0;
+let turning = false;
+const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const coverWrap = document.getElementById('coverWrap');
+const spreadWrap = document.getElementById('spreadWrap');
+const pgL = document.getElementById('pgL');
+const pgR = document.getElementById('pgR');
+const pnL = document.getElementById('pnL');
+const pnR = document.getElementById('pnR');
+const hud = document.getElementById('hud');
+const label = document.getElementById('label');
+const coverHint = document.getElementById('coverHint');
+
+function paint(i, dir){
+  const u = UNITS[i];
+  const { left, right } = u.render();
+  const apply = () => {
+    pgL.innerHTML = left;
+    pgR.innerHTML = right;
+    pnL.textContent = u.pL;
+    pnR.textContent = u.pR;
+    label.textContent = `spread ${i + 1} / ${UNITS.length}`;
+    bind();
+  };
+  if (reduced || dir === 0) { apply(); return; }
+  turning = true;
+  pgL.classList.add('turning-out'); pgR.classList.add('turning-out');
+  setTimeout(() => {
+    pgL.classList.remove('turning-out'); pgR.classList.remove('turning-out');
+    apply();
+    pgL.classList.add('turning-in'); pgR.classList.add('turning-in');
+    setTimeout(() => {
+      pgL.classList.remove('turning-in'); pgR.classList.remove('turning-in');
+      turning = false;
+    }, 440);
+  }, 320);
+}
+
+function bind(){
+  document.querySelectorAll('[data-goto]').forEach(el => {
+    el.addEventListener('click', () => {
+      const id = el.getAttribute('data-goto');
+      const j = UNITS.findIndex(u => u.id === id);
+      if (j >= 0) go(j);
+    });
+  });
+}
+
+function go(i){
+  if (turning || i === idx || i < 0 || i >= UNITS.length) return;
+  const dir = i > idx ? 1 : -1;
+  idx = i;
+  try { localStorage.setItem('yk-fn-idx', i); } catch(e){}
+  paint(i, dir);
+}
+
+function openBook(){
+  coverWrap.classList.add('hide');
+  coverHint.classList.add('hide');
+  setTimeout(() => {
+    spreadWrap.classList.add('show');
+    hud.classList.add('on');
+    paint(idx, 0);
+  }, 420);
+}
+function closeBook(){
+  spreadWrap.classList.remove('show');
+  hud.classList.remove('on');
+  setTimeout(() => {
+    coverWrap.classList.remove('hide');
+    coverHint.classList.remove('hide');
+  }, 300);
+}
+
+document.getElementById('cover').addEventListener('click', openBook);
+document.getElementById('cover').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openBook(); }
+});
+document.getElementById('prev').addEventListener('click', () => go(idx - 1));
+document.getElementById('next').addEventListener('click', () => go(idx + 1));
+document.getElementById('close').addEventListener('click', closeBook);
+
+// scroll
+let cd = false;
+window.addEventListener('wheel', (e) => {
+  if (!spreadWrap.classList.contains('show') || cd || turning) return;
+  if (Math.abs(e.deltaY) < 10 && Math.abs(e.deltaX) < 10) return;
+  cd = true;
+  if (e.deltaY > 0 || e.deltaX > 0) go(idx + 1);
+  else go(idx - 1);
+  setTimeout(() => cd = false, 500);
+}, { passive: true });
+
+// keys
+window.addEventListener('keydown', (e) => {
+  if (!spreadWrap.classList.contains('show')) {
+    if (e.key === 'Enter' || e.key === ' ') openBook();
+    return;
+  }
+  if (e.key === 'ArrowRight' || e.key === 'PageDown') go(idx + 1);
+  else if (e.key === 'ArrowLeft' || e.key === 'PageUp') go(idx - 1);
+  else if (e.key === 'Escape') closeBook();
+  else if (e.key === 'Home') go(0);
+});
+
+// restore
+try {
+  const s = localStorage.getItem('yk-fn-idx');
+  if (s !== null && +s >= 0 && +s < UNITS.length) {
+    idx = +s;
+    // auto-open
+    setTimeout(openBook, 80);
+  }
+} catch(e){}
+
+// ============================================================
+// TWEAKS
+// ============================================================
+const TWEAKS = /*EDITMODE-BEGIN*/{
+  "paper": "#f4f1ea",
+  "ink": "#1a36b0",
+  "grain": 70,
+  "marginalia": true
+}/*EDITMODE-END*/;
+let tw = { ...TWEAKS };
+function shade(hex, amt){
+  const n = parseInt(hex.slice(1), 16);
+  let r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+  r = Math.max(0, Math.min(255, Math.round(r + amt*255)));
+  g = Math.max(0, Math.min(255, Math.round(g + amt*255)));
+  b = Math.max(0, Math.min(255, Math.round(b + amt*255)));
+  return '#' + ((r<<16)|(g<<8)|b).toString(16).padStart(6,'0');
+}
+function applyTweaks(){
+  document.documentElement.style.setProperty('--paper', tw.paper);
+  document.documentElement.style.setProperty('--ink', tw.ink);
+  document.documentElement.style.setProperty('--paper-soft', shade(tw.paper, -0.04));
+  document.querySelector('.grain').style.opacity = (tw.grain / 100) * 0.9;
+  document.body.classList.toggle('no-marg', !tw.marginalia);
+}
+applyTweaks();
+
+document.querySelectorAll('[data-paper]').forEach(s => s.addEventListener('click', () => { tw.paper = s.getAttribute('data-paper'); applyTweaks(); persist(); }));
+document.querySelectorAll('[data-ink]').forEach(s => s.addEventListener('click', () => { tw.ink = s.getAttribute('data-ink'); applyTweaks(); persist(); }));
+document.getElementById('grainR').addEventListener('input', e => { tw.grain = +e.target.value; applyTweaks(); persist(); });
+document.getElementById('margShow').addEventListener('change', e => { tw.marginalia = e.target.checked; applyTweaks(); persist(); });
+
+function persist(){
+  try { window.parent.postMessage({ type: '__edit_mode_set_keys', edits: tw }, '*'); } catch(e){}
+}
+
+window.addEventListener('message', (e) => {
+  if (!e.data || typeof e.data !== 'object') return;
+  if (e.data.type === '__activate_edit_mode') document.getElementById('tweaks').classList.add('on');
+  else if (e.data.type === '__deactivate_edit_mode') document.getElementById('tweaks').classList.remove('on');
+});
+try { window.parent.postMessage({ type: '__edit_mode_available' }, '*'); } catch(e){}
+</script>
+
+</body>
+</html>

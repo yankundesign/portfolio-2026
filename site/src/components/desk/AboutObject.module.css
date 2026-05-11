@@ -1,0 +1,85 @@
+/*
+ * About card — fig. 03. Polaroid specimen.
+ *
+ * v0.5: scaled up 1.2× and now bottom-aligns with the notebook + roulette
+ * baseline (placement handled by DeskRoute's .slotAbout).
+ */
+
+.figure {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  margin: 0;
+}
+
+.button {
+  display: block;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  transition: transform var(--duration-hover) var(--ease-out);
+  outline: none;
+}
+
+.button:hover {
+  transform: translateY(-2px);
+}
+
+.button:focus-visible {
+  outline: 1.5px solid var(--ink);
+  outline-offset: 4px;
+}
+
+.figure:hover [data-figcaption-underline],
+.figure:focus-within [data-figcaption-underline] {
+  transform: scaleX(1);
+}
+
+.image {
+  display: block;
+  width: 168px;
+  height: auto;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+@media (min-width: 1600px) {
+  .image {
+    width: 192px;
+  }
+}
+
+@media (min-width: 2000px) {
+  .image {
+    width: 216px;
+  }
+}
+
+@media (max-width: 1279px) {
+  .image {
+    width: 156px;
+  }
+}
+
+@media (max-width: 1023px) {
+  .image {
+    width: 144px;
+  }
+}
+
+@media (max-width: 767px) {
+  .image {
+    width: 156px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .button,
+  .button:hover {
+    transition: none;
+    transform: none;
+  }
+}

@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Desk bg prototype — dot grid + hidden marginalia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,400&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --ink: #16265e;
+    --ink-soft: #2a3a7a;
+    --ink-muted: rgba(22, 38, 94, 0.2);
+    --paper: #f4f1ea;
+    --paper-soft: #ebe6d9;
+    --paper-shadow: #ddd6c2;
+    --desk: #e4dfd1;
+    --sticky: #f1e6b8;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+
+  body {
+    background: var(--desk);
+    color: var(--ink);
+    font-family: 'Fraunces', Georgia, serif;
+    overflow: hidden;
+    cursor: default;
+  }
+
+  .desk {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    background: var(--desk);
+  }
+
+  .grain {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' seed='2'/><feColorMatrix values='0 0 0 0 0.18 0 0 0 0 0.14 0 0 0 0 0.08 0 0 0 0.8 0'/></filter><rect width='220' height='220' filter='url(%23n)'/></svg>");
+    opacity: 0.09;
+    mix-blend-mode: multiply;
+    z-index: 1;
+  }
+
+  .vignette {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    box-shadow: inset 0 0 220px 50px rgba(70, 55, 30, 0.22);
+    z-index: 6;
+  }
+
+  /* -------- dot grid (bullet-journal) -------- */
+  .dot-grid {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  /* -------- placeholder desk objects -------- */
+  .object {
+    position: absolute;
+    background: var(--paper);
+    box-shadow:
+      0 1px 1px rgba(0,0,0,0.04),
+      0 2px 4px rgba(40, 30, 15, 0.05),
+      0 10px 22px rgba(40, 30, 15, 0.09);
+    border: 1px solid rgba(22, 38, 94, 0.07);
+    z-index: 4;
+  }
+
+  .notebook {
+    width: 340px;
+    height: 440px;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%) rotate(-2deg);
+    background: var(--paper-soft);
+    border-radius: 3px;
+    padding: 28px 26px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .notebook h1 {
+    font-weight: 300;
+    font-size: 56px;
+    line-height: 0.88;
+    letter-spacing: -0.025em;
+    font-variation-settings: "opsz" 144;
+  }
+  .notebook h1 em { font-style: italic; font-weight: 300; }
+  .meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 300;
+    letter-spacing: 0.14em;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+  }
+
+  .resume {
+    width: 160px;
+    height: 210px;
+    left: 9%;
+    bottom: 13%;
+    transform: rotate(-8deg);
+    background: #fbf8ef;
+    padding: 12px;
+  }
+  .resume .lines { display: flex; flex-direction: column; gap: 6px; margin-top: 22px; }
+  .resume .lines span { display: block; height: 1px; background: rgba(22, 38, 94, 0.16); }
+  .resume .lines span:nth-child(1) { width: 72%; }
+  .resume .lines span:nth-child(2) { width: 90%; }
+  .resume .lines span:nth-child(3) { width: 60%; }
+  .resume .lines span:nth-child(4) { width: 82%; }
+  .resume .lines span:nth-child(5) { width: 48%; }
+
+  .about {
+    width: 140px;
+    height: 140px;
+    right: 10%;
+    top: 13%;
+    transform: rotate(4deg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-style: italic;
+    font-weight: 300;
+    font-size: 22px;
+    color: var(--ink);
+  }
+
+  .pen {
+    width: 140px;
+    height: 9px;
+    right: 26%;
+    top: 34%;
+    background: var(--ink);
+    border-radius: 4px;
+    transform: rotate(22deg);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.18);
+    z-index: 4;
+  }
+  .pen::after {
+    content: "";
+    position: absolute;
+    right: -10px;
+    top: 0;
+    width: 18px;
+    height: 9px;
+    background: var(--ink);
+    clip-path: polygon(0 0, 100% 50%, 0 100%);
+  }
+
+  .cat {
+    width: 120px;
+    height: 120px;
+    left: 11%;
+    top: 18%;
+    border-radius: 50%;
+    background: var(--paper-soft);
+    border: 1px dashed rgba(22, 38, 94, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Caveat', cursive;
+    font-size: 22px;
+    color: var(--ink);
+    box-shadow: none;
+    z-index: 4;
+  }
+
+  /* -------- marginalia — hidden, revealed on proximity -------- */
+  .marginalia {
+    position: absolute;
+    font-family: 'Caveat', cursive;
+    font-weight: 500;
+    font-size: 24px;
+    color: var(--ink);
+    opacity: 0;
+    pointer-events: none;
+    white-space: nowrap;
+    transform: rotate(var(--rot, 0deg));
+    z-index: 3;
+    transition: opacity 160ms linear;
+    line-height: 1;
+  }
+  .marginalia.italic {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: 28px;
+  }
+  .marginalia.mono {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .marginalia svg {
+    display: block;
+    stroke: var(--ink);
+    fill: none;
+    stroke-width: 1.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* -------- HUD -------- */
+  .hud {
+    position: fixed;
+    left: 24px;
+    bottom: 24px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 300;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    z-index: 10;
+    background: rgba(244, 241, 234, 0.82);
+    padding: 10px 14px;
+    border: 1px solid rgba(22, 38, 94, 0.12);
+    backdrop-filter: blur(4px);
+    max-width: 360px;
+  }
+  .hud strong { font-weight: 400; color: var(--ink); }
+  .hud .line {
+    display: block;
+    margin-top: 6px;
+    font-size: 13px;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 300;
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--ink);
+  }
+
+  .toggle {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 300;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    background: rgba(244, 241, 234, 0.82);
+    padding: 10px 14px;
+    border: 1px solid rgba(22, 38, 94, 0.15);
+    cursor: pointer;
+    backdrop-filter: blur(4px);
+    z-index: 10;
+  }
+  .toggle.on { color: var(--ink); border-color: var(--ink); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .marginalia { opacity: 0.5; transition: none; }
+  }
+</style>
+</head>
+<body>
+  <div class="desk" id="desk">
+    <div class="grain"></div>
+
+    <!-- Dot grid canvas -->
+    <canvas class="dot-grid" id="dot-grid" aria-hidden="true"></canvas>
+
+    <!-- Hidden marginalia (revealed on proximity) -->
+    <span class="marginalia mono" style="left: 3.5%;  top: 4%;"                                data-x="3.5" data-y="4">apr 2026 · yk</span>
+    <span class="marginalia"       style="left: 62%;  top: 30%; --rot: -4deg;"                  data-x="62"  data-y="30">open me →</span>
+    <span class="marginalia italic" style="left: 46%; top: 11%; --rot: 1deg;"                   data-x="46"  data-y="11">tuesday morning</span>
+    <span class="marginalia"       style="left: 24%;  top: 77%; --rot: -3deg;"                  data-x="24"  data-y="77">still drying</span>
+    <span class="marginalia"       style="left: 9%;   top: 44%; --rot: 4deg;"                   data-x="9"   data-y="44">hello!</span>
+    <span class="marginalia italic" style="left: 72%; top: 64%; --rot: -6deg;"                  data-x="72"  data-y="64">ink + paper</span>
+    <span class="marginalia"       style="left: 82%;  top: 80%; --rot: 6deg;"                   data-x="82"  data-y="80">no title yet</span>
+    <span class="marginalia mono"  style="right: 3.5%; bottom: 4%;"                             data-x="96"  data-y="96">field notes — 01</span>
+    <span class="marginalia"       style="left: 55%;  top: 85%; --rot: -2deg;"                  data-x="55"  data-y="85">↓ fold</span>
+    <span class="marginalia"       style="left: 30%;  top: 58%;" aria-hidden="true">
+      <svg width="56" height="22" viewBox="0 0 56 22" aria-hidden="true">
+        <path d="M2 11 C 18 2, 38 2, 52 11" />
+        <path d="M46 6 L52 11 L46 16" />
+      </svg>
+    </span>
+
+    <!-- Placeholder desk objects -->
+    <div class="object notebook">
+      <span class="meta">yankun · 2026</span>
+      <h1>Field<br/><em>Notes</em></h1>
+      <span class="meta">yk-001</span>
+    </div>
+
+    <div class="object resume">
+      <span class="meta">cv</span>
+      <div class="lines"><span></span><span></span><span></span><span></span><span></span></div>
+    </div>
+
+    <div class="object about">hi.</div>
+
+    <div class="pen" aria-hidden="true"></div>
+
+    <div class="object cat">cat</div>
+
+    <div class="vignette"></div>
+  </div>
+
+  <div class="hud">
+    <strong>prototype · dot grid + marginalia</strong>
+    <span class="line">Bullet-journal dot grid printed on the paper — yields around the cursor, settles back. Hidden notes fade in where you look.</span>
+  </div>
+
+  <button class="toggle" id="toggle" aria-pressed="false">Reduced motion · off</button>
+
+<script>
+(() => {
+  // ------------- tuning knobs -------------
+  const SPACING       = 28;    // px between grid points
+  const DOT_RADIUS    = 1.25;  // px (drawn radius)
+  const DOT_ALPHA     = 0.22;  // perceived opacity of each dot on warm paper
+  const REPEL_RADIUS  = 140;   // cursor effect range, px
+  const MAX_PUSH      = 42;    // max displacement at closest, px
+  const EASE          = 0.12;  // settle-back speed (lower = more laggy)
+
+  const canvas = document.getElementById('dot-grid');
+  const ctx = canvas.getContext('2d');
+  const marginalia = Array.from(document.querySelectorAll('.marginalia'));
+  const toggle = document.getElementById('toggle');
+
+  const mediaReduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+  let forceReduced = false;
+  const reduced = () => forceReduced || mediaReduced.matches;
+
+  let cx = -9999, cy = -9999;
+  window.addEventListener('pointermove', e => {
+    cx = e.clientX;
+    cy = e.clientY;
+  }, { passive: true });
+
+  // ------------- dot grid -------------
+  let w = 0, h = 0, dpr = 1;
+  let points = []; // { hx, hy, x, y }
+
+  function sizeAndBuild() {
+    dpr = Math.max(1, window.devicePixelRatio || 1);
+    w = window.innerWidth;
+    h = window.innerHeight;
+    canvas.width  = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+    canvas.style.width  = w + 'px';
+    canvas.style.height = h + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    // Center the grid in the viewport so it doesn't feel aligned to a corner.
+    const cols = Math.floor(w / SPACING);
+    const rows = Math.floor(h / SPACING);
+    const offX = (w - cols * SPACING) / 2 + SPACING / 2;
+    const offY = (h - rows * SPACING) / 2 + SPACING / 2;
+
+    points = new Array(cols * rows);
+    let i = 0;
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const hx = offX + c * SPACING;
+        const hy = offY + r * SPACING;
+        points[i++] = { hx, hy, x: hx, y: hy };
+      }
+    }
+  }
+
+  sizeAndBuild();
+  let resizeTimer = null;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(sizeAndBuild, 150);
+  });
+
+  // ------------- marginalia proximity -------------
+  const REVEAL_RADIUS = 180;
+  function proximityReveal() {
+    for (const el of marginalia) {
+      const rect = el.getBoundingClientRect();
+      const mx = rect.left + rect.width / 2;
+      const my = rect.top + rect.height / 2;
+      const dx = cx - mx;
+      const dy = cy - my;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      let o = 0;
+      if (dist < REVEAL_RADIUS) {
+        const t = 1 - dist / REVEAL_RADIUS;
+        o = Math.min(0.92, t * t * 1.1);
+      }
+      el.style.opacity = o.toFixed(3);
+    }
+  }
+
+  // ------------- intro tease -------------
+  let introDone = false;
+  function intro() {
+    marginalia.forEach((el, i) => {
+      el.style.transition = 'opacity 800ms ease-out';
+      setTimeout(() => { el.style.opacity = '0.32'; }, 280 + i * 55);
+      setTimeout(() => { el.style.opacity = '0';    }, 2100 + i * 40);
+    });
+    setTimeout(() => {
+      marginalia.forEach(el => { el.style.transition = 'opacity 160ms linear'; });
+      introDone = true;
+    }, 3000);
+  }
+  setTimeout(intro, 250);
+
+  // ------------- draw loop -------------
+  // Ink dots rendered directly to canvas. Each dot has a home; within
+  // REPEL_RADIUS of the cursor it's pushed radially outward (eased falloff),
+  // and eases back to home when the cursor leaves. Ink color at low alpha
+  // reads as "printed on the paper" rather than a floating effect.
+  const repel2 = REPEL_RADIUS * REPEL_RADIUS;
+  const fillColor = `rgba(22, 38, 94, ${DOT_ALPHA})`;
+
+  function frame() {
+    ctx.clearRect(0, 0, w, h);
+    ctx.fillStyle = fillColor;
+
+    if (reduced()) {
+      // Static grid — no repulsion, no easing.
+      for (const p of points) {
+        ctx.beginPath();
+        ctx.arc(p.hx, p.hy, DOT_RADIUS, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    } else {
+      for (const p of points) {
+        let tx = p.hx;
+        let ty = p.hy;
+        const dx = tx - cx;
+        const dy = ty - cy;
+        const d2 = dx * dx + dy * dy;
+        if (d2 < repel2 && d2 > 0.0001) {
+          const dist = Math.sqrt(d2);
+          const force = 1 - dist / REPEL_RADIUS;
+          const push = force * force * MAX_PUSH; // eased falloff
+          tx += (dx / dist) * push;
+          ty += (dy / dist) * push;
+        }
+        // ease toward target — creates mass/lag on return
+        p.x += (tx - p.x) * EASE;
+        p.y += (ty - p.y) * EASE;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, DOT_RADIUS, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      if (introDone) proximityReveal();
+    }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  // ------------- reduced-motion toggle -------------
+  toggle.addEventListener('click', () => {
+    forceReduced = !forceReduced;
+    toggle.textContent = 'Reduced motion · ' + (forceReduced ? 'on' : 'off');
+    toggle.classList.toggle('on', forceReduced);
+    toggle.setAttribute('aria-pressed', String(forceReduced));
+    if (forceReduced) {
+      marginalia.forEach(el => { el.style.opacity = '0.5'; el.style.transition = 'none'; });
+      // Reset dot positions to home so the static frame looks right.
+      for (const p of points) { p.x = p.hx; p.y = p.hy; }
+    } else {
+      marginalia.forEach(el => { el.style.opacity = '0'; el.style.transition = 'opacity 160ms linear'; });
+    }
+  });
+})();
+</script>
+</body>
+</html>

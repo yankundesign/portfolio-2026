@@ -1,0 +1,85 @@
+/* ─── WatercolorWash ─────────────────────────────────────────────────────
+ *
+ * Three-layer ink wash modeled on 水墨画. Layers carry data-wash-layer
+ * attributes (mist / primary / core) so consumer CSS can stagger fade-in
+ * and fade-out independently per layer. Attribute selectors aren't scoped
+ * by CSS Modules, which is what lets the consumer reach across the
+ * component boundary.
+ *
+ * Drift animations run continuously at coprime periods so the combined
+ * silhouette never repeats its arrangement. Each layer's opacity is owned
+ * by the consumer (the hover trigger lives in the parent component).
+ *
+ * Channel-1 tuning vars (set on documentElement by WashTunePanel; the
+ * fallbacks below are the hardcoded production values):
+ *   --wash-anim-{mist|primary|core}  — full `animation` shorthand
+ * ────────────────────────────────────────────────────────────────────────── */
+
+.wash {
+  pointer-events: none;
+  /* No transition / opacity here — each layer manages its own fade so the
+   * consumer can stagger them. */
+}
+
+.svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  /* Let the displaced filter edges escape the SVG bounds without clipping. */
+  overflow: visible;
+}
+
+/* ─── Per-layer base ──────────────────────────────────────────────────────
+ *
+ * All layers default to opacity 0; the consumer's :hover rule reveals them.
+ * Drift animations run continuously and aren't gated by hover — each new
+ * hover catches the ink mid-shift, so no two reveals look the same.
+ * Periods are pairwise coprime (8 / 11 / 9s) so the layered silhouettes
+ * keep drifting in and out of phase across many cycles. Mist is fast +
+ * bold (atmospheric churn); primary and core stay calmer but cycle quick
+ * enough that motion registers in a brief hover window. */
+
+[data-wash-layer] {
+  opacity: 0;
+  transform-origin: 50% 50%;
+  will-change: transform;
+}
+
+[data-wash-layer='mist'] {
+  animation: var(--wash-anim-mist, ink-drift-mist 8s ease-in-out infinite);
+}
+
+[data-wash-layer='primary'] {
+  animation: var(--wash-anim-primary, ink-drift-primary 11s ease-in-out infinite);
+}
+
+[data-wash-layer='core'] {
+  animation: var(--wash-anim-core, ink-drift-core 9s ease-in-out infinite);
+}
+
+/* @keyframes definitions live in src/styles/keyframes.css (global) so
+ * that the unscoped name `ink-drift-{layer}` referenced by the var()
+ * fallback above — and by the JS-set --wash-anim-{layer} from the
+ * WashTunePanel — actually finds matching keyframe rules. CSS Modules
+ * scopes @keyframes names to local hashes (e.g. _ink-drift-mist_HASH),
+ * which silently breaks animation-name references inside var(). The
+ * WashTunePanel can still re-emit these keyframe blocks via an injected
+ * <style> element to override amplitudes (drift amount); same-name
+ * keyframes loaded later win, so the override path keeps working. */
+
+/* Tuning helper — when WashTunePanel sets `wash-show-bounds` on the html
+ * element, draw a debug outline around the wash root so the inset is
+ * visible. */
+:global(html.wash-show-bounds) .wash {
+  outline: 1px dashed var(--ink-soft);
+  outline-offset: -1px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Decorative effect — disabled entirely under reduced motion. */
+  [data-wash-layer] {
+    animation: none;
+    transform: none;
+    opacity: 0 !important;
+  }
+}

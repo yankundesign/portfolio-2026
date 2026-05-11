@@ -1,0 +1,98 @@
+/*
+ * SectionRail — sticky left-side section nav for case studies.
+ *
+ * The rail is a 1px ink-muted vertical spine with each section item
+ * hanging off it as a small mono-caps label. The active item gets a
+ * 1px ink rule at its left edge, replacing the muted spine for that
+ * stretch. Inactive items are ink-soft; active is ink.
+ */
+
+.rail {
+  /* Sticky positioning is set by the parent grid's column placement
+     and align-self: start. The top offset gives a comfortable read-
+     position alongside the body. */
+  position: sticky;
+  top: clamp(2.5rem, 8vh, 4.5rem);
+  align-self: start;
+  /* Constrain height so a long rail never grows past the viewport. */
+  max-height: calc(100vh - 6rem);
+  overflow-y: auto;
+  /* Hide scrollbars unless content overflows. */
+  scrollbar-width: thin;
+  scrollbar-color: var(--ink-muted) transparent;
+  /* Push the rail toward the right edge of its grid column so it sits
+     just to the left of the reading column rather than floating in
+     the middle of the gutter. */
+  margin-left: auto;
+  padding-right: clamp(1rem, 2vw, 1.5rem);
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.item {
+  margin: 0;
+  position: relative;
+}
+
+.link {
+  display: block;
+  padding: 0.55rem 0 0.55rem 0.9rem;
+  border-left: 1px solid var(--ink-muted);
+  color: var(--ink-soft);
+  text-decoration: none;
+  transition: color var(--duration-hover) var(--ease-out),
+    border-color var(--duration-hover) var(--ease-out);
+}
+
+.link:hover {
+  color: var(--ink);
+  border-left-color: var(--ink-soft);
+}
+
+.link:focus-visible {
+  outline: 1.5px solid var(--ink);
+  outline-offset: 2px;
+  border-radius: 1px;
+}
+
+.linkActive {
+  color: var(--ink);
+  border-left-color: var(--ink);
+}
+
+.linkActive:hover {
+  border-left-color: var(--ink);
+}
+
+.label {
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  font-weight: 400;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  line-height: 1.2;
+  display: inline-block;
+}
+
+/* Hidden entirely below 1024px — at narrower widths the rail can't fit
+   its longest label without crowding the reading column. The grid in
+   ChaiProject.module.css uses the same breakpoint to collapse to a
+   single-column layout. */
+
+@media (max-width: 1023px) {
+  .rail {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .link {
+    transition: none;
+  }
+}

@@ -1,0 +1,101 @@
+:root {
+  /* Color */
+  --ink: #16265e;
+  --ink-soft: #2a3a7a;
+  --ink-muted: rgba(22, 38, 94, 0.2);
+  --ink-faint: rgba(22, 38, 94, 0.08);
+  --paper: #f4f1ea;
+  --paper-soft: #ebe6d9;
+  --paper-shadow: #ddd6c2;
+  --sticky: #f1e6b8;
+
+  /* Typography */
+  --font-display: 'Fraunces', serif;
+  --font-body: 'Fraunces', serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  /* --font-hand (Caveat) removed in v0.4 — handwriting is not part of the
+   * Swiss editorial plate register. */
+
+  /* Type scale */
+  --text-display-xl: 6rem;       /* 96px — cover name */
+  --text-display-l: 3.75rem;     /* 60px — project titles */
+  --text-display-m: 2.25rem;     /* 36px — section heads */
+  --text-body-lg: 1.375rem;      /* 22px — essay lead */
+  --text-body: 1.125rem;         /* 18px — essay */
+  --text-caption: 0.6875rem;     /* 11px — captions/metadata */
+
+  /* Spacing (8px base) */
+  --space-1: 0.5rem;   /* 8px */
+  --space-2: 1rem;     /* 16px */
+  --space-3: 1.5rem;   /* 24px — gutter */
+  --space-4: 2rem;     /* 32px */
+  --space-5: 2.5rem;   /* 40px */
+  --space-6: 3rem;     /* 48px */
+  --space-8: 4rem;     /* 64px — margin desktop */
+  --space-10: 5rem;    /* 80px */
+
+  /* Grid — 12 col plate at 1280px max, 24px gutter, 60px margin.
+   * Computed column width at full container: (1280 - 120 - 11*24) / 12 ≈ 74.67px */
+  --grid-max: 1280px;
+  --grid-columns: 12;
+  --grid-gutter: 1.5rem;  /* 24px */
+  --grid-margin: 3.75rem; /* 60px */
+
+  /* Reading measure — single source of truth for the case-study reading
+   * column. Used by ChaiProject's body grid track, the editorial plate
+   * default width, project header, prose blocks, stub layouts, and any
+   * surface that needs to lock to the same measure. Change it once here. */
+  --reading-measure: 52em;
+
+  /* Column-rulings — very faint vertical lines that mark the 12-col grid on
+   * canvas pages. Visible enough to register as "ruled page," quiet enough
+   * to never compete with the plates. Replaces the old graph-paper texture
+   * (canvas v0.7). */
+  --rule-column: rgba(22, 38, 94, 0.05);
+
+  /* Motion — general */
+  --ease-out: cubic-bezier(0.0, 0.0, 0.2, 1);
+  --ease-page: cubic-bezier(0.4, 0.0, 0.2, 1);
+  --ease-unfold: cubic-bezier(0.34, 1.2, 0.64, 1);
+  --duration-hover: 160ms;
+  --duration-reveal: 240ms;
+  --duration-transition: 480ms;
+  --duration-turn: 600ms;
+  --duration-cover: 800ms;
+
+  /* Composing / ambient motion tokens removed in v0.4. The Swiss plate is
+   * still — no staggered drops, no ambient breathing, no cursor-reactive
+   * parallax. The only motion tokens that survive are the general
+   * --duration-* / --ease-* set above. */
+
+  /* Notebook transition (desk → canvas signature moment).
+   *
+   * Open: ~1100ms total — slowed from the PRD's 800ms after the v1 review
+   * called out "too fast, too rough." A real hardcover takes time to open;
+   * 800ms felt like a flicker, 1100ms feels weighted.
+   * Close: ~850ms total — also slowed from 600ms. Asymmetric: closing is
+   * dismissal, but it still needs the soft-landing beat to feel crafted.
+   *
+   * Easings were re-tuned in v1.1 — the original paper-ease curve had a
+   * micro-overshoot that read as jitter at this scale. Replaced with
+   * ease-out-expo (confident decel, no overshoot) for the morph + cover
+   * rotation, and ease-in-out-paper for the gentle lift gesture.
+   *
+   * Perspective is set on the overlay wrapper for the cover's rotateY hinge.
+   */
+  --transition-duration-open: 1100ms;
+  --transition-duration-close: 850ms;
+  --transition-ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-ease-paper: cubic-bezier(0.42, 0, 0.32, 1);
+  --transition-perspective: 1600px;
+
+  /* Editorial plate chrome (v0.4 — Swiss register) */
+  --rule-plate: rgba(22, 38, 94, 0.16);        /* bleed frame, column ruling, hairlines */
+  --rule-plate-strong: rgba(22, 38, 94, 0.32); /* register marks, stronger chrome */
+  --chrome-tracking: 0.14em;                   /* mono label tracking */
+  --chrome-tracking-tight: 0.08em;             /* mono data tracking (dates, emails) */
+  --chrome-opacity: 0.72;                      /* plate meta text opacity against ink-soft */
+  --plate-margin: 40px;                        /* chrome inset from viewport on desktop */
+  --plate-margin-tablet: 24px;
+  --plate-margin-mobile: 16px;
+}

@@ -1,0 +1,111 @@
+.plate {
+  margin: clamp(2.5rem, 5vw, 4rem) 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Width variants — how far the plate breaks out of the reading column. */
+
+.width-column {
+  max-width: var(--reading-measure);
+}
+
+.width-medium {
+  max-width: 60em;
+  margin-left: max(-2rem, calc((var(--reading-measure) - 60em) / 2));
+  margin-right: max(-2rem, calc((var(--reading-measure) - 60em) / 2));
+}
+
+.width-wide {
+  max-width: none;
+  margin-left: calc(-1 * var(--content-inset, 0px));
+  margin-right: calc(-1 * var(--content-inset, 0px));
+}
+
+/* Frame — 1px ink rule, paper-soft fill behind. */
+
+.frame {
+  position: relative;
+  border: 1px solid var(--ink);
+  background: var(--paper-soft);
+  /* Image sits flush to the ink rule — no mat. The screenshot itself
+     carries the composition; the frame is just the cut. */
+  padding: 0;
+  aspect-ratio: auto;
+  min-height: 240px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 18px -8px rgba(22, 38, 94, 0.15);
+}
+
+.frameLoaded {
+  min-height: 0;
+}
+
+.framePlaceholder {
+  min-height: 320px;
+  background:
+    repeating-linear-gradient(
+      45deg,
+      transparent 0 12px,
+      var(--ink-faint) 12px 13px
+    ),
+    var(--paper-soft);
+}
+
+.image {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+}
+
+.placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.placeholderLabel {
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.placeholderPath {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--ink);
+  background: rgba(22, 38, 94, 0.05);
+  padding: 0.4em 0.6em;
+  border: 1px solid var(--ink-muted);
+  border-radius: 2px;
+}
+
+/* Caption — mono, tracked, locked to the image's full width so it doesn't
+   wrap and reads as a single edge-aligned label beneath the plate. */
+
+.caption {
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+  line-height: 1.6;
+  width: 100%;
+}
+
+@media (max-width: 720px) {
+  .width-medium,
+  .width-wide {
+    margin-left: 0;
+    margin-right: 0;
+    max-width: 100%;
+  }
+}

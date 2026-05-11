@@ -1,0 +1,59 @@
+/*
+ * Pen — fig. 04. Non-interactive prop on the right side of the plate.
+ *
+ * The generated asset already has the pen at a diagonal. This module just
+ * sets dimensions and wraps in a figure + caption layout.
+ */
+
+.figure {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 14px;
+  margin: 0;
+}
+
+.prop {
+  display: block;
+  line-height: 0;
+}
+
+.image {
+  display: block;
+  width: 220px;
+  height: auto;
+  user-select: none;
+  -webkit-user-drag: none;
+  /* Light drop shadow — pen rests on the desk surface. */
+  filter: drop-shadow(0 3px 8px rgba(22, 38, 94, 0.10));
+}
+
+@media (min-width: 1600px) {
+  .image {
+    width: 270px;
+  }
+}
+
+@media (min-width: 2000px) {
+  .image {
+    width: 320px;
+  }
+}
+
+@media (max-width: 1279px) {
+  .image {
+    width: 190px;
+  }
+}
+
+@media (max-width: 1023px) {
+  .image {
+    width: 170px;
+  }
+}
+
+@media (max-width: 767px) {
+  .image {
+    width: 150px;
+  }
+}

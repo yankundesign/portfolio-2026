@@ -1,0 +1,115 @@
+/* ─── SpotlightDotGrid — ambient dot field with cursor spotlight ───────────
+ *
+ * Two layered radial-gradient tiles (the "dots") share the same geometry.
+ *  - .base sits at --ink-faint, always on, barely visible.
+ *  - .spotlight sits at --ink-soft with a larger dot, masked by a radial
+ *    gradient centered on --cursor-x/--cursor-y so dots punch up only inside
+ *    the cursor halo. Punchy by design — subtler reads as accidental.
+ *
+ * The spotlight's opacity itself is animated via --spotlight-opacity so we get
+ * a dignified fade when the cursor leaves the surface, instead of a yank.
+ *
+ * Column rulings retired in this pass; this dot field is now the only ambient
+ * grid signal on the canvas surface.
+ *
+ * Layer is decorative chrome — pointer-events: none, aria-hidden via JSX.
+ * ────────────────────────────────────────────────────────────────────────── */
+
+.root {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  /* Default cursor anchor is offscreen so a fresh mount never shows a stray
+   * spotlight before the first pointermove. */
+  --cursor-x: -9999px;
+  --cursor-y: -9999px;
+  --spotlight-opacity: 0;
+}
+
+/* Shared dot tile geometry — both layers tile a single dot centered in a
+ * spacing×spacing square. Spotlight uses a slightly larger dot than base so
+ * the contrast at the cursor is unmistakable, not just a subtle tint shift. */
+.base,
+.spotlight {
+  position: absolute;
+  inset: 0;
+  background-size: var(--dot-spacing) var(--dot-spacing);
+  background-position: 0 0;
+}
+
+.base {
+  /* Quiet ambient layer — barely there. Smaller dot, very low alpha. */
+  color: var(--ink-faint);
+  background-image: radial-gradient(
+    circle at center,
+    currentColor 0.9px,
+    transparent 1.4px
+  );
+}
+
+.spotlight {
+  /* Punchy halo — larger dot than base. Visible at a glance. */
+  color: var(--ink-muted);
+  background-image: radial-gradient(
+    circle at center,
+    currentColor 1.6px,
+    transparent 2.2px
+  );
+  /* Spotlight mask: a FIXED-shape radial gradient that we translate around
+   * via mask-position. This is the perf-critical move — `circle at <coord>`
+   * forces the gradient to recompute every frame, which re-rasterizes the
+   * masked layer at viewport size and stalls sibling paints (the project
+   * plate's box-shadow hover transition). With a fixed gradient + dynamic
+   * mask-position, only the mask offset changes each frame, which the
+   * compositor can move cheaply.
+   *
+   * --halo-size = 2 × (radius + falloff) is the gradient's bounding box.
+   * mask-size pins the gradient to that square; mask-repeat: no-repeat
+   * keeps the rest of the surface fully masked out (invisible).
+   * mask-position offsets the square so its center lands on the cursor. */
+  --halo-size: calc((var(--spotlight-radius) + var(--spotlight-falloff)) * 2);
+  mask-image: radial-gradient(
+    circle,
+    rgba(0, 0, 0, 1) 0,
+    rgba(0, 0, 0, 1) var(--spotlight-radius),
+    rgba(0, 0, 0, 0) calc(var(--spotlight-radius) + var(--spotlight-falloff))
+  );
+  -webkit-mask-image: radial-gradient(
+    circle,
+    rgba(0, 0, 0, 1) 0,
+    rgba(0, 0, 0, 1) var(--spotlight-radius),
+    rgba(0, 0, 0, 0) calc(var(--spotlight-radius) + var(--spotlight-falloff))
+  );
+  mask-repeat: no-repeat;
+  -webkit-mask-repeat: no-repeat;
+  mask-size: var(--halo-size) var(--halo-size);
+  -webkit-mask-size: var(--halo-size) var(--halo-size);
+  mask-position:
+    calc(var(--cursor-x) - var(--halo-size) / 2)
+    calc(var(--cursor-y) - var(--halo-size) / 2);
+  -webkit-mask-position:
+    calc(var(--cursor-x) - var(--halo-size) / 2)
+    calc(var(--cursor-y) - var(--halo-size) / 2);
+  opacity: var(--spotlight-opacity, 0);
+  transition: opacity 320ms var(--ease-out);
+  /* Compositor hints — keep this layer isolated so its repaints don't
+   * invalidate sibling paints (notably the card box-shadow transition). */
+  will-change: mask-position, opacity;
+  contain: paint;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* No spotlight; just the static base dot field. */
+  .spotlight {
+    display: none;
+  }
+}
+
+@media (hover: none) {
+  /* No hover-capable pointer (touch). The spotlight never gets a pointermove
+   * to track, so suppress the layer entirely. */
+  .spotlight {
+    display: none;
+  }
+}

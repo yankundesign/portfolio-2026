@@ -1,0 +1,78 @@
+/*
+ * DeskWayfinder — caption + curved arrow pointing at the notebook.
+ *
+ * Anchored absolutely inside .scene. As of the v0.5 density pass the
+ * arrow originates BELOW-LEFT of the notebook's column band and curves
+ * UP-RIGHT toward the cover's lower-left corner. Tunables on :root so
+ * DevTools editing finds the right anchor across viewport heights without
+ * a rebuild.
+ *
+ * Tunables:
+ *   --wayfinder-top   vertical anchor inside .scene (smaller = higher)
+ *   --wayfinder-left  horizontal anchor inside .scene (smaller = further left)
+ *   --wayfinder-width total width of caption + arrow block
+ */
+
+:root {
+  --wayfinder-top: 70%;
+  --wayfinder-left: 30%;
+  --wayfinder-width: 120px;
+}
+
+.wayfinder {
+  position: absolute;
+  top: var(--wayfinder-top);
+  left: var(--wayfinder-left);
+  width: var(--wayfinder-width);
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  pointer-events: none;
+  opacity: 0.7;
+  z-index: 2;
+}
+
+.caption {
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  font-weight: 400;
+  letter-spacing: var(--chrome-tracking);
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  white-space: nowrap;
+  /* Caption baseline-aligns with the bottom of the arrow's start point so
+   * the eye reads "open it →↗ notebook" as one gesture. */
+}
+
+.arrow {
+  flex: 0 0 auto;
+  width: 60px;
+  height: auto;
+  display: block;
+}
+
+@media (max-width: 1279px) {
+  :root {
+    --wayfinder-top: 68%;
+    --wayfinder-left: 26%;
+    --wayfinder-width: 120px;
+  }
+  .arrow {
+    width: 92px;
+  }
+}
+
+@media (max-width: 1023px) {
+  :root {
+    --wayfinder-top: 66%;
+    --wayfinder-left: 22%;
+  }
+}
+
+/* Below 768px the scene becomes a single-column flex stack — the notebook
+ * is the only visible object, so the wayfinder is no longer needed. */
+@media (max-width: 767px) {
+  .wayfinder {
+    display: none;
+  }
+}

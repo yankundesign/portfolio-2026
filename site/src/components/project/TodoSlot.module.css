@@ -1,0 +1,83 @@
+.slot {
+  border: 1px dashed var(--ink-muted);
+  background:
+    linear-gradient(
+      rgba(22, 38, 94, 0.02),
+      rgba(22, 38, 94, 0.02)
+    );
+  padding: clamp(1rem, 2vw, 1.5rem) clamp(1.25rem, 2.5vw, 1.75rem);
+  max-width: var(--reading-measure);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 1.5rem 0;
+}
+
+.label {
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ink);
+  opacity: 0.45;
+}
+
+.beat {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 1.1rem;
+  line-height: 1.3;
+  color: var(--ink);
+  margin: 0;
+  font-style: italic;
+}
+
+.hint {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--ink-soft);
+  margin: 0;
+  font-weight: 300;
+}
+
+.ref {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  color: var(--ink-soft);
+  margin: 0;
+  opacity: 0.75;
+}
+
+.ref code {
+  background: rgba(22, 38, 94, 0.04);
+  padding: 0.1em 0.4em;
+  border-radius: 2px;
+}
+
+/* Sizes — affect min-height so the pacing of the page is visible even
+   before any prose is in place. */
+
+.sm {
+  min-height: 8rem;
+}
+
+.md {
+  min-height: 11rem;
+}
+
+.lg {
+  min-height: 14rem;
+}

@@ -1,0 +1,14 @@
+/*
+ * Ink drawings on the paper roulette.
+ *
+ * The PNGs have white backgrounds. `mix-blend-mode: multiply` keeps the
+ * ink lines (dark) visible while letting the white backgrounds drop out
+ * against the roulette's paper-colored disc underneath.
+ */
+.cat {
+  display: block;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+  user-select: none;
+}

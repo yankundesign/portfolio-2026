@@ -1,0 +1,275 @@
+/*
+ * EditorialPlate — site-wide chrome (v0.4, Swiss register).
+ *
+ * Layout (vertical):
+ *
+ *   ┌─[viewport edge]─────────────────────────────────────┐
+ *   │  [plate-margin]                                      │
+ *   │   ╔═════ bleed frame ══════════════════════════════╗  │
+ *   │   ║ [metaTopLeft]               [metaTopRight]     ║  │
+ *   │   ║                                                ║  │
+ *   │   ║  1    2    3    4    5    6    7    8         ║  │
+ *   │   ║ ────────────────────────────────────────       ║  │ <- top grid rule
+ *   │   ║ │    │    │    │    │    │    │    │           ║  │
+ *   │   ║ │    │    │  CONTENT SLOT  │    │    │          ║  │
+ *   │   ║ │    │    │    │    │    │    │    │           ║  │
+ *   │   ║ ────────────────────────────────────────       ║  │ <- bottom grid rule
+ *   │   ║ [metaBottomLeft]            [metaBottomRight]  ║  │
+ *   │   ╚════════════════════════════════════════════════╝  │
+ *   │  [plate-margin]                                      │
+ *   └──────────────────────────────────────────────────────┘
+ *
+ * All chrome sits inside the bleed frame. Register marks sit at the frame
+ * corners + midpoints. Grid lines are drawn from below the column-number
+ * row to above the bottom-meta zone.
+ */
+
+.plate {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  background: var(--paper);
+  color: var(--ink);
+  overflow: hidden;
+}
+
+/* ─── Bleed frame (hairline rectangle at plate-margin) ─── */
+
+.bleedFrame {
+  position: absolute;
+  inset: var(--plate-margin);
+  border: 1px solid var(--rule-plate);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* ─── Chrome inner offset: how far meta/grid sit inside the bleed frame. */
+
+.plate {
+  --chrome-inset: 20px;         /* horizontal distance from frame edge */
+  --chrome-top: 16px;            /* meta's vertical offset from frame top */
+  --chrome-bottom: 16px;         /* meta's vertical offset from frame bottom */
+  --chrome-meta-height: 54px;    /* reserved for top/bottom meta block */
+  --chrome-numbers-gap: 10px;    /* gap between top meta and column numbers */
+  --chrome-numbers-to-rule: 18px;/* gap between column numbers and top grid rule */
+}
+
+/* ─── Plate metadata blocks ─── */
+
+.meta {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  font-weight: 400;
+  letter-spacing: var(--chrome-tracking);
+  color: var(--ink-soft);
+  opacity: var(--chrome-opacity);
+  text-transform: uppercase;
+  line-height: 1.4;
+  pointer-events: none;
+  z-index: 4;
+  max-width: 46%;
+}
+
+.metaLine {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.metaData {
+  letter-spacing: var(--chrome-tracking-tight);
+  text-transform: none;
+}
+
+.metaTopLeft {
+  top: calc(var(--plate-margin) + var(--chrome-top));
+  left: calc(var(--plate-margin) + var(--chrome-inset));
+}
+
+.metaTopRight {
+  top: calc(var(--plate-margin) + var(--chrome-top));
+  right: calc(var(--plate-margin) + var(--chrome-inset));
+  align-items: flex-end;
+  text-align: right;
+}
+
+.metaBottomLeft {
+  bottom: calc(var(--plate-margin) + var(--chrome-bottom));
+  left: calc(var(--plate-margin) + var(--chrome-inset));
+}
+
+.metaBottomRight {
+  bottom: calc(var(--plate-margin) + var(--chrome-bottom));
+  right: calc(var(--plate-margin) + var(--chrome-inset));
+  align-items: flex-end;
+  text-align: right;
+}
+
+/* ─── Column number row ─── */
+
+.columnRow {
+  position: absolute;
+  top: calc(
+    var(--plate-margin) + var(--chrome-top) + var(--chrome-meta-height) +
+      var(--chrome-numbers-gap)
+  );
+  left: calc(var(--plate-margin) + var(--chrome-inset));
+  right: calc(var(--plate-margin) + var(--chrome-inset));
+  display: grid;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.columnNumber {
+  justify-self: center;
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  font-weight: 400;
+  letter-spacing: var(--chrome-tracking);
+  color: var(--ink-soft);
+  opacity: var(--chrome-opacity);
+  position: relative;
+}
+
+/* Tick below each column number down to the top grid rule. */
+.columnNumber::after {
+  content: '';
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 50%;
+  width: 1px;
+  height: 10px;
+  background: var(--rule-plate);
+}
+
+/* ─── Grid lines overlay — the blueprint ruling ─── */
+
+.gridLines {
+  position: absolute;
+  top: calc(
+    var(--plate-margin) + var(--chrome-top) + var(--chrome-meta-height) +
+      var(--chrome-numbers-gap) + var(--chrome-numbers-to-rule)
+  );
+  bottom: calc(
+    var(--plate-margin) + var(--chrome-bottom) + var(--chrome-meta-height) +
+      var(--chrome-numbers-to-rule)
+  );
+  left: calc(var(--plate-margin) + var(--chrome-inset));
+  right: calc(var(--plate-margin) + var(--chrome-inset));
+  pointer-events: none;
+  z-index: 1;
+}
+
+.gridLineSvg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* ─── Register marks ─── */
+
+.registerMark {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  color: var(--rule-plate-strong);
+  pointer-events: none;
+  z-index: 3;
+}
+
+.regTopLeft {
+  top: calc(var(--plate-margin) - 7px);
+  left: calc(var(--plate-margin) - 7px);
+}
+
+.regTopCenter {
+  top: calc(var(--plate-margin) - 7px);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.regTopRight {
+  top: calc(var(--plate-margin) - 7px);
+  right: calc(var(--plate-margin) - 7px);
+}
+
+.regBottomLeft {
+  bottom: calc(var(--plate-margin) - 7px);
+  left: calc(var(--plate-margin) - 7px);
+}
+
+.regBottomCenter {
+  bottom: calc(var(--plate-margin) - 7px);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.regBottomRight {
+  bottom: calc(var(--plate-margin) - 7px);
+  right: calc(var(--plate-margin) - 7px);
+}
+
+/* ─── Content slot ─── */
+
+/* The content slot's padding reserves space for the chrome (meta blocks
+ * top/bottom + column-number row). The remaining inner box is laid out
+ * as a flex column so children can vertically center via auto margins or
+ * by being the only child — `.scene` sits in the middle of the page. */
+.content {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  box-sizing: border-box;
+  padding:
+    calc(
+      var(--plate-margin) + var(--chrome-top) + var(--chrome-meta-height) +
+        var(--chrome-numbers-gap) + var(--chrome-numbers-to-rule) + 24px
+    )
+    calc(var(--plate-margin) + var(--chrome-inset) + 24px)
+    calc(
+      var(--plate-margin) + var(--chrome-bottom) + var(--chrome-meta-height) +
+        var(--chrome-numbers-to-rule) + 24px
+    );
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: stretch;
+}
+
+/* ─── Responsive ─── */
+
+@media (max-width: 1279px) {
+  .plate {
+    --plate-margin: var(--plate-margin-tablet);
+    --chrome-inset: 16px;
+  }
+  .columnRow {
+    display: none;
+  }
+  .regTopCenter,
+  .regBottomCenter {
+    display: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .plate {
+    --plate-margin: var(--plate-margin-mobile);
+    --chrome-inset: 12px;
+    --chrome-meta-height: 44px;
+  }
+  .meta {
+    font-size: 10px;
+    letter-spacing: var(--chrome-tracking-tight);
+    max-width: 44%;
+  }
+  .gridLines {
+    display: none;
+  }
+}

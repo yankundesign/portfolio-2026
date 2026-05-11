@@ -1,0 +1,36 @@
+# Portfolio Scope — v1
+
+## In scope
+
+- **Desk scene homepage:** Angled perspective desk with notebook (→ works), resume paper (placeholder), about object (placeholder). All objects draggable.
+- **Canvas / pinboard:** Spatial, pannable works view inside the notebook. Hand-composed project clusters, not a grid.
+- **Full case study:** CHAI / Control Hub AI (vertical scroll, strongest metrics story — 3% → 15% adoption)
+- **Stubbed case studies** (title + metric + one paragraph + one image): Smart Search, Write-like-Webex, SAP Fieldglass
+- **Two journal pages:** "On search", "On endings" — accessible from canvas
+- **Colophon / how-this-was-made page** — accessible from canvas corner
+- **404 page** ("This page is blank.")
+- **Signature transitions:** desk → canvas portal (notebook opens into world), canvas → project (zoom into cluster)
+
+## Out of scope for v1
+
+- Essays / writing section
+- Full B-side of side projects
+- Contact form (email link + social handles only)
+- Dark mode (paper metaphor breaks it)
+- Analytics
+- Resume page content (paper object is placeholder)
+- About-me page content (object is placeholder)
+- Canvas zoom (pan only for v1)
+- Mobile-optimized canvas experience (known hard problem — plan to address in week 2)
+
+## Open questions (resolve before build)
+
+1. **Domain:** Keep yankun.info or move? Lean: keep.
+2. **Notebook title:** Lean toward no formal title — just "Yankun" + date range on cover.
+3. **Cover hero mark:** Needs a real hand-drawn mark. Placeholder SVG for prototype.
+4. **Photo:** One candid portrait somewhere? Easy to skip.
+5. **Writing schedule:** 400–800 words × 4 projects = real writing work.
+
+## Positioning thesis
+
+"I make complex, invisible systems handleable." This is the through-line — more specific than "I design enterprise AI tools."

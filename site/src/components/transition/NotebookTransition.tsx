@@ -1,0 +1,936 @@
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router';
+import {
+  TRANSITION_EVENTS,
+  broadcastState,
+  cacheDeskRect,
+  getCachedDeskRect,
+  readSourceRect,
+  type TransitionRect,
+  type TransitionState,
+} from '../../interactions/useTransitionState';
+import { useReducedMotion } from '../../interactions/useReducedMotion';
+import styles from './NotebookTransition.module.css';
+
+/**
+ * NotebookTransition — the desk → canvas signature transition overlay.
+ *
+ * Mounted once at the app root. Listens to `notebook:open` /
+ * `notebook:close` events from the trigger components (NotebookCover,
+ * CanvasCloseButton, CanvasRoute Escape handler) and orchestrates the
+ * 8-beat choreography described in `00-brief/prd-desk-canvas-transition.md`.
+ *
+ * The overlay paints all the visible work during the transition:
+ *
+ *   1. Captures the source rect (desk notebook OR canvas spread) from a
+ *      tagged DOM element via `[data-transition-source]`.
+ *   2. Snaps the layers into their start positions.
+ *   3. Runs the choreography: cover lifts, rotates, position/scale morphs,
+ *      spread fades in beneath, background paper covers the route swap.
+ *   4. At the choreography midpoint (~400ms open / ~300ms close), calls
+ *      `navigate()` so the URL changes mid-flight while the overlay's
+ *      paper background covers the route swap.
+ *   5. Settles at the destination, fades the overlay out, revealing the
+ *      destination route's content underneath.
+ *
+ * The animation engine is the **Web Animations API** (`element.animate(...)`)
+ * rather than Framer Motion's `useAnimation` controls. The PRD called for
+ * Framer Motion, but in practice `useAnimation` controls couldn't reliably
+ * resolve their `.start()` promises when animating layout properties
+ * (`left/top/width/height`) — they'd hang for tens of seconds. WAAPI's
+ * `.animate(...)` returns a real Animation object whose `.finished` Promise
+ * is grounded in the browser's compositor, not a JS scheduler. Identical
+ * timing curves; far fewer surprises.
+ *
+ * AnimatePresence is still used at the App root for route-level transitions
+ * (currently a no-op for non-motion children, set up for future use).
+ *
+ * Architecture: TWO layers, each animated separately:
+ *
+ *   spread     The open-notebook spread. Fixed at canvas-center geometry
+ *              from the first frame; only opacity animates.
+ *   cover      The rotating notebook cover. Uses the SAME asset as the
+ *              desk (`/plate/notebook.png`) so the start/end frames are
+ *              pixel-identical to what the desk paints — no asset
+ *              swap, no cross-fade handoff, no aspect-ratio mismatch.
+ *              Position/size morph from desk-rect to spread-binding-half-
+ *              rect; rotation hinges around its left edge (the spine).
+ *              `backface-visibility: hidden` makes it disappear past 90°
+ *              of rotation, revealing the spread underneath.
+ *   bg         Paper-coloured wash that covers the route swap.
+ *
+ * Why one asset for the cover (was three layers: closed + cover + spread):
+ * v1.1 used a separate `notebook-closed.png` and `notebook-cover-front.png`
+ * for the cover layer. Both had aspect 0.598; the desk asset has aspect
+ * 0.686. That mismatch meant the overlay's notebook was visibly NARROWER
+ * than the desk's, with letterbox gaps from `object-fit: contain`. The
+ * cover-front asset also got obscured because the cross-fade swap from
+ * "closed" to "cover" was too quick to see. v1.2 (this version) drops
+ * both transition assets and uses the desk asset directly. One source of
+ * truth, perfect alignment, no swap to obscure.
+ *
+ * Reduced motion: skip the 3D rotation and morph, run a 240ms paper
+ * cross-fade between the two surfaces.
+ */
+
+const ASSET_COVER = '/plate/notebook.png';
+const ASSET_SPREAD = '/canvas/open-notebook.png';
+
+const SPREAD_ASPECT = 2600 / 1812;
+const REDUCED_MOTION_DURATION = 240;
+
+/* ─── Easing curves ──────────────────────────────────────────────────────────
+ *
+ * EASE_OUT_EXPO is the workhorse. Confident deceleration, no overshoot, the
+ * curve a heavy hardcover would actually trace under its own weight. Used
+ * for the cover rotation, the position+size morph, and the soft landing.
+ *
+ * EASE_INOUT_PAPER is for the gentle lift — soft acceleration into the rise,
+ * soft deceleration into the pause. Mimics fingers slowly lifting an object.
+ *
+ * EASE_OUT is the standard cross-fade curve for opacity transitions where
+ * physical metaphor doesn't apply (background paper, asset cross-fades).
+ *
+ * No overshoot/spring curves anywhere. They feel snappy at this scale and
+ * draw attention to the animation rather than the object being animated.
+ * ────────────────────────────────────────────────────────────────────────── */
+const EASE_OUT_EXPO = 'cubic-bezier(0.16, 1, 0.3, 1)';
+const EASE_INOUT_PAPER = 'cubic-bezier(0.42, 0, 0.32, 1)';
+const EASE_OUT = 'cubic-bezier(0.4, 0, 0.2, 1)';
+const EASE_LINEAR = 'linear';
+
+/** Mirrors the canvas's --notebook-width formula at the current viewport. */
+function computeCanvasSpreadRect(): TransitionRect {
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const padding = Math.max(60, Math.min(vw * 0.08, 120));
+  const widthBudget = vw - 2 * padding;
+  const heightBudget = (vh * 0.75) * SPREAD_ASPECT;
+  const width = Math.min(widthBudget, 1400, heightBudget);
+  const height = width / SPREAD_ASPECT;
+  return {
+    left: (vw - width) / 2,
+    top: (vh - height) / 2,
+    width,
+    height,
+  };
+}
+
+/**
+ * Where the front cover lays when fully open. The spine sits at the
+ * spread's horizontal midpoint; the cover's wrapper is anchored with its
+ * LEFT edge at the binding so `transform-origin: 0% 50%` rotates around
+ * the spine. At rotation 0 the cover faces right (closed-look orientation
+ * on top of the spread); at rotation -180 the cover lays flat into the
+ * spread's left half — actual book physics.
+ */
+function computeOpenCoverRect(spread: TransitionRect): TransitionRect {
+  const halfWidth = spread.width / 2;
+  return {
+    left: spread.left + halfWidth,
+    top: spread.top,
+    width: halfWidth,
+    height: spread.height,
+  };
+}
+
+/**
+ * Default rect if the desk notebook can't be measured AND we have no
+ * cached value (cold deep-link to /works). Mirrors the responsive width
+ * media queries from `NotebookCover.module.css` so the fallback is at
+ * least the right size for the current viewport — even if the position
+ * is just a viewport-center guess.
+ */
+function fallbackDeskRect(): TransitionRect {
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  // Match the breakpoints in NotebookCover.module.css `.image` rules.
+  let width: number;
+  if (vw >= 2000) width = 480;
+  else if (vw >= 1600) width = 400;
+  else if (vw <= 767) width = 200;
+  else if (vw <= 1023) width = 240;
+  else if (vw <= 1279) width = 300;
+  else width = 340;
+  // Native asset aspect: 947 / 1380 ≈ 0.686 → height = width / 0.686.
+  const height = width / 0.686;
+  return {
+    left: (vw - width) / 2,
+    top: (vh - height) / 2,
+    width,
+    height,
+  };
+}
+
+const warnedAssets = new Set<string>();
+function warnMissingAsset(src: string): void {
+  if (warnedAssets.has(src)) return;
+  warnedAssets.add(src);
+  console.warn(
+    `[NotebookTransition] Asset missing or failed to load: ${src}. ` +
+      `Generate the real asset per 00-brief/transition-asset-prompts.md ` +
+      `to remove the placeholder fallback.`,
+  );
+}
+
+/**
+ * Snap a layer (wrapper) to a static rect + opacity + lift offset.
+ * Cancels any in-flight animations on the element. The wrapper's
+ * transform carries ONLY translate3d for the lift offset — rotation
+ * lives on the inner image element (see snapRotation).
+ */
+function snap(
+  el: HTMLElement,
+  state: { rect?: TransitionRect; opacity?: number; translateY?: number },
+): void {
+  el.getAnimations().forEach((a) => a.cancel());
+  if (state.rect) {
+    el.style.left = `${state.rect.left}px`;
+    el.style.top = `${state.rect.top}px`;
+    el.style.width = `${state.rect.width}px`;
+    el.style.height = `${state.rect.height}px`;
+  }
+  if (state.opacity !== undefined) el.style.opacity = String(state.opacity);
+  const ty = state.translateY ?? 0;
+  el.style.transform = `translate3d(0, ${ty}px, 0)`;
+}
+
+/**
+ * Snap an image's rotation. Cancels in-flight rotation animations.
+ * Used to seed the rotation start state at the beginning of each
+ * choreography. Separated from snap() because rotation lives on a
+ * different element to avoid transform conflicts.
+ */
+function snapRotation(el: HTMLElement, rotateY: number): void {
+  el.getAnimations().forEach((a) => a.cancel());
+  el.style.transform = `rotateY(${rotateY}deg)`;
+}
+
+interface AnimateOpts {
+  duration: number; // ms
+  easing?: string;
+  delay?: number; // ms
+}
+
+/**
+ * Animate to target values via WAAPI. Bakes the final state into inline
+ * styles before resolving so subsequent reads/snaps see the new values
+ * — WAAPI by default would revert to the pre-animation styles after the
+ * animation is garbage-collected, even with fill: 'forwards'.
+ *
+ * Strategy: set the target inline styles BEFORE the animation, then
+ * animate FROM the current rendered state TO that target. WAAPI captures
+ * the from-state via the implicit current-style snapshot. The from-state
+ * persists on the element as inline styles after the animation resolves,
+ * since we set the target up front (no need to bake again afterward).
+ */
+function animateTo(
+  el: HTMLElement,
+  to: Partial<{
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+    opacity: number;
+    translateY: number;
+  }>,
+  opts: AnimateOpts,
+): Promise<void> {
+  // Capture the FROM state from current inline styles. These are the
+  // truth — getComputedStyle can lag during in-flight WAAPI animations.
+  const fromTy = parseTranslateY(el.style.transform);
+  const fromOpacity = el.style.opacity || '1';
+  const fromLeft = el.style.left || '0px';
+  const fromTop = el.style.top || '0px';
+  const fromWidth = el.style.width || 'auto';
+  const fromHeight = el.style.height || 'auto';
+
+  const toTy = to.translateY !== undefined ? to.translateY : fromTy;
+  const toLeft = to.left !== undefined ? `${to.left}px` : fromLeft;
+  const toTop = to.top !== undefined ? `${to.top}px` : fromTop;
+  const toWidth = to.width !== undefined ? `${to.width}px` : fromWidth;
+  const toHeight = to.height !== undefined ? `${to.height}px` : fromHeight;
+  const toOpacity = to.opacity !== undefined ? String(to.opacity) : fromOpacity;
+  const fromTransform = `translate3d(0, ${fromTy}px, 0)`;
+  const toTransform = `translate3d(0, ${toTy}px, 0)`;
+
+  if (typeof el.animate !== 'function') {
+    // WAAPI unavailable — snap to final and resolve after duration so
+    // the orchestration's relative timing is preserved.
+    el.style.left = toLeft;
+    el.style.top = toTop;
+    el.style.width = toWidth;
+    el.style.height = toHeight;
+    el.style.opacity = toOpacity;
+    el.style.transform = toTransform;
+    return new Promise((r) => window.setTimeout(r, opts.duration + (opts.delay ?? 0)));
+  }
+
+  const anim = el.animate(
+    [
+      {
+        left: fromLeft,
+        top: fromTop,
+        width: fromWidth,
+        height: fromHeight,
+        opacity: fromOpacity,
+        transform: fromTransform,
+      },
+      {
+        left: toLeft,
+        top: toTop,
+        width: toWidth,
+        height: toHeight,
+        opacity: toOpacity,
+        transform: toTransform,
+      },
+    ],
+    {
+      duration: opts.duration,
+      easing: opts.easing ?? 'cubic-bezier(0.4, 0, 0.2, 1)',
+      delay: opts.delay ?? 0,
+      fill: 'forwards',
+    },
+  );
+
+  /**
+   * Bake target styles + release the WAAPI animation. Idempotent — safe
+   * to call from either the .finished Promise OR the safety-net
+   * setTimeout below.
+   */
+  let baked = false;
+  const bake = () => {
+    if (baked) return;
+    baked = true;
+    el.style.left = toLeft;
+    el.style.top = toTop;
+    el.style.width = toWidth;
+    el.style.height = toHeight;
+    el.style.opacity = toOpacity;
+    el.style.transform = toTransform;
+    try {
+      anim.cancel();
+    } catch {
+      // ignore — animation may already be done/canceled
+    }
+  };
+
+  /**
+   * Safety net: even with `fill: 'forwards'`, `anim.finished` doesn't
+   * always resolve on time. Hidden/throttled tabs in particular can
+   * delay it indefinitely (the browser pauses WAAPI in background tabs).
+   * Resolve via setTimeout if the Promise hasn't fired by duration +
+   * 100ms. The visible animation already plays via the compositor; the
+   * Promise is just orchestration plumbing.
+   */
+  const totalMs = opts.duration + (opts.delay ?? 0);
+  return new Promise<void>((resolve) => {
+    let finished = false;
+    const done = () => {
+      if (finished) return;
+      finished = true;
+      bake();
+      resolve();
+    };
+    anim.finished.then(done).catch(done);
+    window.setTimeout(done, totalMs + 100);
+  });
+}
+
+/** Parse `translate3d(0, 12px, 0)` segment out of a transform string. */
+function parseTranslateY(transform: string): number {
+  if (!transform) return 0;
+  const m = /translate3d\([^,]+,\s*(-?\d+(?:\.\d+)?)(?:px)?/.exec(transform);
+  return m ? parseFloat(m[1]) : 0;
+}
+
+/** Parse `rotateY(-180deg)` segment out of a transform string. */
+function parseRotateY(transform: string): number {
+  if (!transform) return 0;
+  const m = /rotateY\((-?\d+(?:\.\d+)?)deg\)/.exec(transform);
+  return m ? parseFloat(m[1]) : 0;
+}
+
+/**
+ * Animate the rotateY of the cover face stack. The wrapper handles the
+ * position morph via translate + left/top/width/height, while the face
+ * stack rotates the front and back surfaces together around the spine.
+ *
+ * Same safety-net pattern as animateTo: resolves on .finished OR on a
+ * setTimeout, whichever first, with idempotent style baking.
+ */
+function animateRotation(
+  wrapper: HTMLElement,
+  toRotateY: number,
+  opts: AnimateOpts,
+): Promise<void> {
+  // The face stack is the first child of the wrapper. It contains the
+  // front image plus a paper-colored back face, both hinged as one rigid
+  // object around the left edge (transform-origin set in CSS).
+  const img = wrapper.querySelector<HTMLElement>('[data-transition-cover-face]');
+  if (!img) return Promise.resolve();
+
+  const fromRy = parseRotateY(img.style.transform);
+  const fromTransform = `rotateY(${fromRy}deg)`;
+  const toTransform = `rotateY(${toRotateY}deg)`;
+
+  if (typeof img.animate !== 'function') {
+    img.style.transform = toTransform;
+    return new Promise((r) => window.setTimeout(r, opts.duration + (opts.delay ?? 0)));
+  }
+
+  const anim = img.animate(
+    [{ transform: fromTransform }, { transform: toTransform }],
+    {
+      duration: opts.duration,
+      easing: opts.easing ?? 'cubic-bezier(0.4, 0, 0.2, 1)',
+      delay: opts.delay ?? 0,
+      fill: 'forwards',
+    },
+  );
+
+  let baked = false;
+  const bake = () => {
+    if (baked) return;
+    baked = true;
+    img.style.transform = toTransform;
+    try {
+      anim.cancel();
+    } catch {
+      // ignore
+    }
+  };
+
+  const totalMs = opts.duration + (opts.delay ?? 0);
+  return new Promise<void>((resolve) => {
+    let finished = false;
+    const done = () => {
+      if (finished) return;
+      finished = true;
+      bake();
+      resolve();
+    };
+    anim.finished.then(done).catch(done);
+    window.setTimeout(done, totalMs + 100);
+  });
+}
+
+export default function NotebookTransition() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const reducedMotion = useReducedMotion();
+
+  const [state, setState] = useState<TransitionState>(() =>
+    typeof window !== 'undefined' && window.location.pathname === '/works'
+      ? 'open'
+      : 'idle',
+  );
+
+  // DOM refs for direct WAAPI animation. Layers are always mounted so the
+  // refs are always valid once the component has mounted.
+  const bgRef = useRef<HTMLDivElement>(null);
+  const spreadRef = useRef<HTMLDivElement>(null);
+  const coverRef = useRef<HTMLDivElement>(null);
+  const spineRef = useRef<HTMLDivElement>(null);
+  const isRunningRef = useRef(false);
+
+  const transitionTo = useCallback((next: TransitionState) => {
+    setState(next);
+    broadcastState(next);
+  }, []);
+
+  const navigateRef = useRef(navigate);
+  useEffect(() => {
+    navigateRef.current = navigate;
+  }, [navigate]);
+
+  // Sync state with URL on direct deep-link navigation.
+  useEffect(() => {
+    let nextState: TransitionState | null = null;
+    if (state === 'idle' && location.pathname === '/works') {
+      nextState = 'open';
+    } else if (state === 'open' && location.pathname === '/') {
+      nextState = 'idle';
+    }
+
+    if (!nextState) return;
+    const id = window.setTimeout(() => transitionTo(nextState), 0);
+    return () => window.clearTimeout(id);
+  }, [location.pathname, state, transitionTo]);
+
+  /**
+   * OPEN choreography. ~1240ms total.
+   *
+   * Single-asset model (v1.2): the cover layer uses the SAME image as the
+   * desk (`/plate/notebook.png`). At opacity 1, position-matched to the
+   * desk's notebook, it's pixel-identical to what's already painted there
+   * — so the user can't distinguish the desk's static notebook from the
+   * overlay's animated cover. No swap, no cross-fade handoff, no
+   * letterboxing from aspect-ratio mismatches.
+   *
+   *   0–80     Beat 0 — cover snaps to desk-rect at opacity 1 (invisible
+   *                     swap because it matches the desk's notebook
+   *                     pixel-for-pixel)
+   *   0–220    Beat 1 — cover lifts -16px (gentle ease-in-out;
+   *                     felt as a deliberate "pick up" gesture)
+   *   220–280  Beat 2 — settle pause at lifted position (60ms hold)
+   *   280–1000 Beat 3 — cover rotates 0 → -180° AND morphs from desk-rect
+   *                     to spread-binding-half-rect (720ms ease-out-expo;
+   *                     rotation and position share easing so the cover
+   *                     reads as one rigid body)
+   *   500–900  Beat 4 — spread fades in beneath rotating cover
+   *   200–400  Beat 5 — bg paper covers the desk
+   *   ~520     Beat 6 — navigate('/works')
+   *   1000–1240 Beat 7 — overlay fades out, canvas content reveals
+   */
+  const runOpen = useCallback(async () => {
+    const bg = bgRef.current;
+    const spread = spreadRef.current;
+    const cover = coverRef.current;
+    const spine = spineRef.current;
+    if (!bg || !spread || !cover || isRunningRef.current) return;
+    isRunningRef.current = true;
+
+    try {
+    const deskRect = readSourceRect('notebook') ?? fallbackDeskRect();
+    const spreadRect = computeCanvasSpreadRect();
+    const openCoverRect = computeOpenCoverRect(spreadRect);
+
+    // Cache the desk rect so close — which fires from /works where the
+    // desk isn't in the DOM — can land the cover at the matching size
+    // instead of the small fallback (340px).
+    cacheDeskRect(deskRect);
+
+    transitionTo('opening');
+
+    // Beat 0 — cover snaps to desk-rect at opacity 1. Because the cover
+    // asset IS the desk's asset, this snap is invisible: the overlay's
+    // notebook lands exactly on top of the desk's notebook with the same
+    // pixels. The desk's notebook is still rendered underneath; if the
+    // overlay flickers for one frame, the desk's notebook covers for it.
+    snap(cover, { rect: deskRect, opacity: 1, translateY: 0 });
+    const coverFace = cover.querySelector<HTMLElement>('[data-transition-cover-face]');
+    if (coverFace) snapRotation(coverFace, 0);
+    snap(spread, { rect: spreadRect, opacity: 0 });
+    if (spine) {
+      snap(spine, {
+        rect: {
+          left: spreadRect.left + spreadRect.width / 2 - 2,
+          top: spreadRect.top + spreadRect.height * 0.04,
+          width: 4,
+          height: spreadRect.height * 0.92,
+        },
+        opacity: 0,
+      });
+    }
+    snap(bg, { opacity: 0 });
+
+    // Force a layout flush so the snap takes effect before the next
+    // animate() call reads computed styles.
+    void bg.offsetHeight;
+
+    // Beat 5 (background) — the desk disappears as a linear wash, not as
+    // a late route mask. The route swap waits until the wash is opaque,
+    // so the user sees desk -> paper -> canvas instead of a sudden cut.
+    const bgCoverPromise = animateTo(bg, { opacity: 1 }, {
+      duration: 580,
+      easing: EASE_LINEAR,
+      delay: 80,
+    });
+
+    // Beat 1 (lift) — cover gently rises -16px over 220ms with a soft
+    // ease-in-out. The gesture has weight; the eye registers it as a
+    // wind-up rather than a pop.
+    await animateTo(cover, { translateY: -16 }, {
+      duration: 220,
+      easing: EASE_INOUT_PAPER,
+    });
+
+    // Beat 2 — brief settle at lifted position (60ms). The "now I'll
+    // open it" beat — short enough to not feel sluggish, long enough to
+    // mark the transition from picking-up to opening.
+    await new Promise<void>((r) => window.setTimeout(r, 60));
+
+    // Beat 3 — position+size morph and rotation, animated SEPARATELY so
+    // each can use the right easing for its visual job:
+    //
+    //   Position morph: ease-out-expo (confident decel — the cover travels
+    //     to the binding and arrives without overshoot).
+    //
+    //   Rotation: ease-in-out for a slow visible start (so the user
+    //     actually sees the cover face tilt open through 0°→90°) before
+    //     it accelerates through the back half (90°→180°, hidden by
+    //     backface-visibility). With the previous shared ease-out-expo,
+    //     the rotation flew through the visible range in ~120ms and the
+    //     viewer never registered the open gesture — fixed by splitting.
+    //
+    //   Rotation runs slightly LONGER than the position morph (820ms vs
+    //   720ms) so the cover continues to settle flat after it has
+    //   arrived at the binding. Mimics a real book that finishes
+    //   settling open after the spine has stopped moving.
+    const morphPromise = animateTo(
+      cover,
+      {
+        left: openCoverRect.left,
+        top: openCoverRect.top,
+        width: openCoverRect.width,
+        height: openCoverRect.height,
+        translateY: 0,
+      },
+      { duration: 720, easing: EASE_OUT_EXPO },
+    );
+    const rotatePromise = animateRotation(cover, -180, {
+      duration: 820,
+      easing: EASE_INOUT_PAPER,
+    });
+    const spreadPromise = animateTo(
+      spread,
+      { opacity: 1 },
+      { duration: 460, easing: EASE_OUT, delay: 280 },
+    );
+    const spinePromise = spine
+      ? animateTo(spine, { opacity: 1 }, {
+          duration: 360,
+          easing: EASE_OUT,
+          delay: 260,
+        })
+      : Promise.resolve();
+
+    // Beat 6 — navigate only after the wash has covered the desk. This
+    // preserves the linear disappearance while keeping the route swap
+    // invisible.
+    window.setTimeout(() => {
+      navigateRef.current('/works');
+    }, 690);
+
+    await Promise.all([
+      bgCoverPromise,
+      morphPromise,
+      rotatePromise,
+      spreadPromise,
+      spinePromise,
+    ]);
+
+    // Beat 7 — overlay fades out, revealing the canvas content. The
+    // canvas's spread sits in the same pixels as the overlay's spread,
+    // so the hand-off is invisible. Project rows + side margins reveal
+    // as the bg clears.
+    await Promise.all([
+      animateTo(bg, { opacity: 0 }, { duration: 240, easing: EASE_OUT }),
+      animateTo(spread, { opacity: 0 }, { duration: 240, easing: EASE_OUT }),
+      ...(spine
+        ? [animateTo(spine, { opacity: 0 }, { duration: 240, easing: EASE_OUT })]
+        : []),
+      animateTo(cover, { opacity: 0 }, { duration: 180, easing: EASE_OUT }),
+    ]);
+
+    transitionTo('open');
+    } finally {
+      isRunningRef.current = false;
+    }
+  }, [transitionTo]);
+
+  /**
+   * CLOSE choreography. ~1140ms total.
+   *
+   * v1.3 polish: applies the same treatment that v1.2 gave the open —
+   * slower rotation so the visible 90°→0° portion is actually readable
+   * (~360ms instead of ~290ms), translateY-based landing for symmetry
+   * with the open's lift, and a settle-pause beat after the landing so
+   * the cover registers as resting on the desk before fading away.
+   *
+   * Single-asset model (v1.2): the cover that's been laid flat on the
+   * spread folds back, morphs to the desk position (lifted), settles
+   * onto the surface, then fades into the desk's already-rendered
+   * notebook. Same asset throughout — no swap, no second handoff.
+   *
+   * Mirror of open's wind-up→main→reveal arc:
+   *
+   *   Open  : LIFT → pause → MORPH+ROTATE+SPREAD-IN  → reveal
+   *   Close :         MORPH+ROTATE+SPREAD-OUT → LAND → settle → reveal
+   *
+   *   0–620    Beat 1 — cover position morphs from spread-binding back
+   *                     to desk-rect (arriving lifted via translateY: -16)
+   *   0–720    Beat 2 — cover folds -180° → 0° (ease-in-out so the
+   *                     visible -90°→0° back-half gets ~360ms; long
+   *                     enough that the eye reads the closing motion)
+   *   60–400   Beat 3 — spread fades out beneath the folding cover
+   *   100–340  Beat 4 — bg ramps up to cover the route swap
+   *   ~300     Beat 5 — navigate('/')
+   *   720–920  Beat 6 — soft landing: cover descends from translateY -16
+   *                     to 0 (200ms ease-out-expo; mimics a hardcover
+   *                     coming to rest under its own weight)
+   *   920–1000 Beat 7 — settle pause (80ms hold); the cover sits on the
+   *                     desk for a beat, mirrors open's apex pause
+   *   1000–1240 Beat 8 — bg + cover cross-fade out together, revealing
+   *                      the desk's notebook underneath. Single asset =
+   *                      invisible handoff. 240ms matches open's reveal
+   *                      duration so the closing feels symmetric in
+   *                      texture even though it's faster overall.
+   */
+  const runClose = useCallback(async () => {
+    const bg = bgRef.current;
+    const spread = spreadRef.current;
+    const cover = coverRef.current;
+    const spine = spineRef.current;
+    if (!bg || !spread || !cover || isRunningRef.current) return;
+    isRunningRef.current = true;
+
+    try {
+    const spreadRect = readSourceRect('spread') ?? computeCanvasSpreadRect();
+    // Resolution priority for the desk rect:
+    //   1. Live measurement (only works if user navigated to /works WITHOUT
+    //      using the open transition — rare; route would be in a half-state)
+    //   2. Cached value from the most recent open transition (the common
+    //      path — open caches, close consumes)
+    //   3. Hardcoded fallback (340px) for cold-deep-link cases where the
+    //      user lands on /works without ever having seen the desk
+    const deskRect =
+      readSourceRect('notebook') ?? getCachedDeskRect() ?? fallbackDeskRect();
+    const openCoverRect = computeOpenCoverRect(spreadRect);
+
+    transitionTo('closing');
+
+    // Snap initial state — cover fully open at -180°, spread visible.
+    snap(cover, { rect: openCoverRect, opacity: 1, translateY: 0 });
+    const coverFace = cover.querySelector<HTMLElement>('[data-transition-cover-face]');
+    if (coverFace) snapRotation(coverFace, -180);
+    snap(spread, { rect: spreadRect, opacity: 1 });
+    if (spine) {
+      snap(spine, {
+        rect: {
+          left: spreadRect.left + spreadRect.width / 2 - 2,
+          top: spreadRect.top + spreadRect.height * 0.04,
+          width: 4,
+          height: spreadRect.height * 0.92,
+        },
+        opacity: 1,
+      });
+    }
+    snap(bg, { opacity: 0 });
+
+    void bg.offsetHeight;
+
+    // Beat 4 (background) — briefly covers the route swap, then starts
+    // revealing the desk while the cover is still folding. This makes the
+    // desk return as a visible process instead of appearing at the end.
+    const bgCoverPromise = animateTo(bg, { opacity: 1 }, {
+      duration: 220,
+      easing: EASE_LINEAR,
+      delay: 40,
+    });
+    const bgRevealPromise = bgCoverPromise.then(() =>
+      animateTo(bg, { opacity: 0 }, {
+        duration: 720,
+        easing: EASE_LINEAR,
+        delay: 60,
+      }),
+    );
+
+    // Beat 1 (position morph) — cover travels from spread-binding back
+    // to the desk slot, ARRIVING at the lifted position (translateY: -16).
+    // The soft-landing beat below will settle it the last 16px down to
+    // the desk surface. Using translateY here (instead of a top offset)
+    // keeps the morph + landing as transform-only animations — GPU
+    // composited, no layout thrash, and symmetric with open's lift
+    // which also uses translateY.
+    const morphPromise = animateTo(
+      cover,
+      {
+        left: deskRect.left,
+        top: deskRect.top,
+        width: deskRect.width,
+        height: deskRect.height,
+        translateY: -16,
+      },
+      { duration: 620, easing: EASE_OUT_EXPO },
+    );
+
+    // Beat 2 (rotation) — cover folds back -180° → 0°. Slowed from v1.2's
+    // 580ms to 720ms so the visible back-half (-90° → 0°) gets ~360ms
+    // instead of ~290ms. The user actually sees the cover swing closed
+    // rather than blink past horizontal.
+    const rotatePromise = animateRotation(cover, 0, {
+      duration: 720,
+      easing: EASE_INOUT_PAPER,
+    });
+
+    // Beat 3 (spread fade-out) — slowed from 280ms to 340ms for a more
+    // graceful disappearance. Delay 60ms so the fold has visibly begun
+    // before the spread starts to dissolve.
+    const spreadPromise = animateTo(
+      spread,
+      { opacity: 0 },
+      { duration: 340, easing: EASE_OUT, delay: 60 },
+    );
+    const spinePromise = spine
+      ? animateTo(spine, { opacity: 0 }, {
+          duration: 300,
+          easing: EASE_OUT,
+          delay: 120,
+        })
+      : Promise.resolve();
+
+    // Beat 5 — route swap behind opaque bg. The desk begins fading back
+    // in shortly afterward while the notebook is still closing.
+    window.setTimeout(() => {
+      navigateRef.current('/');
+    }, 290);
+
+    await Promise.all([morphPromise, rotatePromise, spreadPromise, spinePromise]);
+
+    // Beat 6 — soft landing. Cover descends from translateY -16 to 0
+    // over 200ms with ease-out-expo. Slowed from v1.2's 140ms so the
+    // settle reads as a deliberate landing, not a blink. Mirrors the
+    // open's lift gesture (translateY 0 → -16 over 220ms) so the close
+    // feels like the lift in reverse.
+    await animateTo(cover, { translateY: 0 }, {
+      duration: 200,
+      easing: EASE_OUT_EXPO,
+    });
+
+    // Beat 7 — settle pause. The cover sits on the desk for 80ms before
+    // the overlay fades away. Mirrors open's 60ms apex-pause and gives
+    // the user a moment to register "the notebook is back where it
+    // started" before the route reveals.
+    await new Promise<void>((r) => window.setTimeout(r, 80));
+
+    // Beat 8 — the desk is already visible behind the cover by now. Fade
+    // only the overlay cover into the desk's matching notebook image; keep
+    // awaiting the earlier desk reveal so the overlay doesn't go idle
+    // before the linear background handoff has completed.
+    await Promise.all([
+      bgRevealPromise,
+      animateTo(cover, { opacity: 0 }, { duration: 240, easing: EASE_OUT }),
+    ]);
+
+    transitionTo('idle');
+    } finally {
+      isRunningRef.current = false;
+    }
+  }, [transitionTo]);
+
+  /** Reduced-motion paths — both directions become a 240ms paper cross-fade. */
+  const runOpenReduced = useCallback(async () => {
+    const bg = bgRef.current;
+    if (!bg || isRunningRef.current) return;
+    isRunningRef.current = true;
+    try {
+      transitionTo('opening');
+      await fadeBetweenSurfaces(bg, () => navigateRef.current('/works'));
+      transitionTo('open');
+    } finally {
+      isRunningRef.current = false;
+    }
+  }, [transitionTo]);
+
+  const runCloseReduced = useCallback(async () => {
+    const bg = bgRef.current;
+    if (!bg || isRunningRef.current) return;
+    isRunningRef.current = true;
+    try {
+      transitionTo('closing');
+      await fadeBetweenSurfaces(bg, () => navigateRef.current('/'));
+      transitionTo('idle');
+    } finally {
+      isRunningRef.current = false;
+    }
+  }, [transitionTo]);
+
+  // Bind to the event bus.
+  useEffect(() => {
+    const onOpen = () => {
+      if (reducedMotion) {
+        void runOpenReduced();
+      } else {
+        void runOpen();
+      }
+    };
+    const onClose = () => {
+      if (reducedMotion) {
+        void runCloseReduced();
+      } else {
+        void runClose();
+      }
+    };
+    window.addEventListener(TRANSITION_EVENTS.open, onOpen);
+    window.addEventListener(TRANSITION_EVENTS.close, onClose);
+    return () => {
+      window.removeEventListener(TRANSITION_EVENTS.open, onOpen);
+      window.removeEventListener(TRANSITION_EVENTS.close, onClose);
+    };
+  }, [reducedMotion, runOpen, runOpenReduced, runClose, runCloseReduced]);
+
+  const isActive = state !== 'idle' && state !== 'open';
+
+  return (
+    <div
+      className={`${styles.root} ${isActive ? styles.rootActive : ''} ${reducedMotion ? styles.reducedMotion : ''}`}
+      aria-hidden="true"
+    >
+      {/* Preload — kept mounted so assets are decoded before transition.
+       * The cover asset is the same as the desk's, already cached by the
+       * desk render — no separate preload needed for it. We only preload
+       * the spread, which the desk doesn't render. */}
+      <img
+        className={styles.preload}
+        src={ASSET_SPREAD}
+        alt=""
+        onError={() => warnMissingAsset(ASSET_SPREAD)}
+      />
+
+      {/* Background paper — covers the route swap. */}
+      <div ref={bgRef} className={styles.background} style={{ opacity: 0 }} />
+
+      {/* Spread layer — fixed at canvas-center geometry; only opacity moves. */}
+      <div ref={spreadRef} className={styles.spreadLayer} style={{ opacity: 0 }}>
+        <img
+          className={styles.spreadImg}
+          src={ASSET_SPREAD}
+          alt=""
+          onError={() => warnMissingAsset(ASSET_SPREAD)}
+        />
+      </div>
+
+      {/* Spine/contact shadow — a thin ink wash at the hinge. It gives the
+       * rotation a fixed physical pivot while staying inside the two-color
+       * paper system. */}
+      <div ref={spineRef} className={styles.spineShadow} style={{ opacity: 0 }} />
+
+      {/* Cover layer — the rotating notebook. Uses the same asset as the
+       * desk so its start/end frames are pixel-identical to what the desk
+       * paints. Position+size+rotation animate from desk-rect to spread-
+       * binding-half-rect (or vice versa). */}
+      <div ref={coverRef} className={styles.coverLayer} style={{ opacity: 0 }}>
+        <div className={styles.coverFace} data-transition-cover-face>
+          <img
+            className={styles.coverImg}
+            src={ASSET_COVER}
+            alt=""
+            onError={() => warnMissingAsset(ASSET_COVER)}
+          />
+          <div className={styles.coverBack} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** Reduced-motion helper — fade bg up, navigate, fade bg back down. */
+async function fadeBetweenSurfaces(
+  bg: HTMLElement,
+  onMidpoint: () => void,
+): Promise<void> {
+  snap(bg, { opacity: 0 });
+  void bg.offsetHeight;
+  await animateTo(bg, { opacity: 1 }, {
+    duration: REDUCED_MOTION_DURATION / 2,
+    easing: EASE_OUT,
+  });
+  onMidpoint();
+  await new Promise((r) => setTimeout(r, 16));
+  await animateTo(bg, { opacity: 0 }, {
+    duration: REDUCED_MOTION_DURATION / 2,
+    easing: EASE_OUT,
+  });
+}

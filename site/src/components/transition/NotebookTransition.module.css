@@ -1,0 +1,239 @@
+/* ─── NotebookTransition — desk → canvas signature transition ────────────────
+ *
+ * Full-screen overlay. Mounted at the app root, fixed-position so it covers
+ * the route content during the open/close choreography.
+ *
+ * Two layers (v1.2 simplification), each animated separately:
+ *
+ *   .spreadLayer   The open-notebook spread. Fixed at canvas-centered
+ *                   geometry from the first frame; only opacity animates.
+ *                   When closed, opacity 0 — the spread is dormant in
+ *                   the destination position.
+ *   .coverLayer    The rotating notebook. Position and size morph from
+ *                   desk-rect to spread-binding-center-rect. Rotation hinges
+ *                   around its left edge (the spine). Uses the SAME asset
+ *                   as the desk (`/plate/notebook.png`) so the start/end
+ *                   frames are pixel-identical to the desk's static image
+ *                   — the overlay can fade in/out invisibly.
+ *   .background    Paper-coloured wash. Covers the route swap by going
+ *                   opaque mid-transition, then fading out to reveal the
+ *                   destination route's content.
+ *
+ * Z-order (last-in-DOM wins): cover > spread > bg. The cover paints on
+ * top of the spread so the spread reveals as the cover rotates away.
+ *
+ * NOTE: v1.1 had a third .closedLayer for the matched-pixel handoff at
+ * each end of the timeline. v1.2 retired it: the cover IS the asset
+ * matched to the desk, so a separate "closed" layer was redundant and
+ * actually CAUSED the size mismatch (the closed asset had a different
+ * aspect ratio than the desk asset, so it appeared narrower).
+ * ────────────────────────────────────────────────────────────────────────── */
+
+.root {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  /* Perspective lives on the wrapper so the cover's rotateY hinge feels
+   * dimensional. Without this, the rotation is a flat skew. The token is
+   * tunable — 1600px is the PRD default; larger = more subtle, smaller =
+   * more pronounced. */
+  perspective: var(--transition-perspective);
+  perspective-origin: 50% 50%;
+  /* Idle: invisible and click-through. The component flips this to auto
+   * during transitions so the user can't click through to elements that
+   * are being animated. */
+  pointer-events: none;
+}
+
+.rootActive {
+  pointer-events: auto;
+}
+
+/* ─── Background ──────────────────────────────────────────────────────────── */
+
+.background {
+  position: absolute;
+  inset: 0;
+  background: var(--paper);
+  /* No subtle gradient or chrome here. Plain paper. The spread + cover
+   * layers paint on top — they're the visible drama. */
+}
+
+/* ─── Spread layer ────────────────────────────────────────────────────────── */
+
+.spreadLayer {
+  position: absolute;
+  /* Inline left/top/width/height set by the component (computed canvas-spread
+   * geometry). Only opacity is animated by Framer Motion. */
+  pointer-events: none;
+  transform-origin: 50% 50%;
+}
+
+.spreadImg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-drag: none;
+  /* Drop shadow matches NotebookSpread.module.css so the overlay's spread
+   * reads identically to the canvas's spread when they're stacked. */
+  filter: drop-shadow(0 12px 28px rgba(22, 38, 94, 0.16));
+}
+
+/* ─── Cover layer ─────────────────────────────────────────────────────────── *
+ *
+ * Two-element split (v1.2.1) so position morph and rotation can animate
+ * INDEPENDENTLY without their `transform` strings clobbering each other:
+ *
+ *   .coverLayer (wrapper) — handles position + size + lift translateY.
+ *                            Animated via inline left/top/width/height + a
+ *                            transform of just `translate3d`. No rotation
+ *                            here.
+ *   .coverFace (child)    — handles rotateY around the spine. It carries
+ *                            the front image plus a paper-colored back
+ *                            face, so the cover reads as two-sided when
+ *                            it passes 90deg.
+ *
+ * Why this matters: the rotation needs ease-in-out (so the visible 0°→90°
+ * portion gets enough time for the eye to register it) while the position
+ * morph wants ease-out-expo (confident decel into the binding). These are
+ * different curves, so they have to be different animations — and WAAPI
+ * doesn't compose two `transform` animations cleanly. Splitting onto
+ * parent + child sidesteps the conflict entirely.
+ * ────────────────────────────────────────────────────────────────────────── */
+
+.coverLayer {
+  position: absolute;
+  /* Inline left/top/width/height set by the component. Transform is
+   * just `translate3d(0, ty, 0)` for the lift offset. No rotation. */
+  transform-style: preserve-3d;
+  pointer-events: none;
+}
+
+.coverFace {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  /* Spine pivot for the rotation. The img fills the wrapper so this is
+   * also the wrapper's left edge — same pivot point either way. */
+  transform-origin: 0% 50%;
+}
+
+.rootActive .coverLayer {
+  will-change: transform, left, top, width, height;
+}
+
+.rootActive .coverFace {
+  will-change: transform;
+}
+
+.coverImg,
+.coverBack {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.coverImg {
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-drag: none;
+  filter: drop-shadow(0 8px 18px rgba(22, 38, 94, 0.14));
+  image-rendering: -webkit-optimize-contrast;
+}
+
+.coverBack {
+  /* The inside of the cover is intentionally abstract: paper, ink rules,
+   * and a spine gutter. It is visible only after the cover passes 90deg,
+   * replacing the previous "cover disappears" beat with a more physical
+   * two-sided object without introducing another bitmap asset. */
+  box-sizing: border-box;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(22, 38, 94, 0.18) 0,
+      rgba(22, 38, 94, 0.09) 5%,
+      transparent 18%
+    ),
+    linear-gradient(
+      0deg,
+      rgba(22, 38, 94, 0.05) 0 1px,
+      transparent 1px 18px
+    ),
+    var(--paper);
+  border: 1px solid rgba(22, 38, 94, 0.18);
+  box-shadow:
+    inset 10px 0 18px rgba(22, 38, 94, 0.08),
+    inset -1px 0 0 rgba(22, 38, 94, 0.08);
+  filter: drop-shadow(0 8px 18px rgba(22, 38, 94, 0.12));
+  transform: rotateY(180deg);
+}
+
+.coverBack::before {
+  content: '';
+  position: absolute;
+  left: 9%;
+  top: 10%;
+  width: 32%;
+  height: 16%;
+  border: 1px solid rgba(22, 38, 94, 0.18);
+}
+
+.coverBack::after {
+  content: '';
+  position: absolute;
+  left: 9%;
+  top: 30%;
+  width: 42%;
+  height: 1px;
+  background: rgba(22, 38, 94, 0.16);
+  box-shadow:
+    0 16px 0 rgba(22, 38, 94, 0.1),
+    0 32px 0 rgba(22, 38, 94, 0.08);
+}
+
+.spineShadow {
+  position: absolute;
+  pointer-events: none;
+  border-radius: 999px;
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(22, 38, 94, 0.2) 44%,
+      rgba(22, 38, 94, 0.26) 50%,
+      rgba(22, 38, 94, 0.12) 58%,
+      transparent
+    );
+  filter: blur(1.5px);
+  transform-origin: 50% 50%;
+}
+
+/* ─── Reduced motion ──────────────────────────────────────────────────────── */
+
+.reducedMotion .coverLayer,
+.reducedMotion .spreadLayer,
+.reducedMotion .spineShadow {
+  /* Hide the morphing layers entirely under reduced motion — only the
+   * background paper cross-fades. Cleaner than animating to a static
+   * frame. */
+  display: none;
+}
+
+/* ─── Asset preload ───────────────────────────────────────────────────────── */
+
+.preload {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+  left: -9999px;
+  top: -9999px;
+}

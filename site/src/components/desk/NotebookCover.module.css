@@ -1,0 +1,197 @@
+/*
+ * Notebook — fig. 01. Hero object, center of the plate.
+ *
+ * Width locked so the cover reads at a consistent weight across viewports.
+ * Hover: caption underline draws; the image itself does not move.
+ *
+ * Channel-1 tuning vars (set on documentElement by WashTunePanel; the
+ * fallbacks below are the hardcoded production values):
+ *   --wash-inset-{top|right|bottom|left}
+ *   --wash-{mist|primary|core}-peak
+ *   --wash-{mist|primary|core}-fade-{in|out}-{ms|delay-ms}
+ */
+
+.figure {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin: 0;
+}
+
+.button {
+  display: block;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  transition: transform var(--duration-hover) var(--ease-out);
+  outline: none;
+  border-radius: 6px;
+  /* Anchor for the absolutely-positioned watercolor wash. */
+  position: relative;
+}
+
+.button:hover {
+  transform: translateY(-2px);
+}
+
+.button:focus-visible {
+  outline: 1.5px solid var(--ink);
+  outline-offset: 4px;
+}
+
+/* ─── Watercolor wash — atmospheric effect on dwell ─── */
+
+.wash {
+  position: absolute;
+  /* Asymmetric inset — the wash bleeds further past the bottom edge
+   * than the left so the silhouette feels weighted toward the lower
+   * right. Per-side fallbacks are the production-tuned values; the
+   * tuning panel overrides them via --wash-inset-*. */
+  inset:
+    var(--wash-inset-top, -14%)
+    var(--wash-inset-right, -14%)
+    var(--wash-inset-bottom, -19%)
+    var(--wash-inset-left, -6%);
+  /* Explicit lower stacking. The image below claims z-index: 1 so it
+   * always paints on top — without this, the absolutely-positioned wash
+   * paints above the static <img> by default (positioned > non-positioned
+   * in the stacking order, regardless of source order). */
+  z-index: 0;
+}
+
+/* ─── Per-layer cascade ───────────────────────────────────────────────────
+ *
+ * Three layers (mist, primary, core) stagger their fade-in and fade-out so
+ * the wash reads as ink applied in stages, not as one shape appearing.
+ *
+ * Hover-in (outside-in — mist first, core last):
+ *   t=0     mist begins        — atmospheric haze appears
+ *   t=80    primary begins     — body of the wash fills in
+ *   t=160   core begins        — dense pool deepens last
+ *
+ * Hover-out (inside-out — core first, mist last):
+ *   t=0     core fades         — concentrated pigment lifts
+ *   t=80    primary fades      — body dissipates
+ *   t=150   mist fades         — atmosphere lingers longest
+ *
+ * The inverse order on hover-out matches how a real ink wash dries: the
+ * dense areas stay densest longest while the dilute outer mist has already
+ * spread thin. */
+
+/* Base (not hovered) — defines fade-out timing per layer. */
+.button [data-wash-layer='core'] {
+  transition: opacity var(--wash-core-fade-out-ms, 735ms) var(--ease-out)
+                       var(--wash-core-fade-out-delay-ms, 0ms);
+}
+
+.button [data-wash-layer='primary'] {
+  transition: opacity var(--wash-primary-fade-out-ms, 945ms) var(--ease-out)
+                       var(--wash-primary-fade-out-delay-ms, 84ms);
+}
+
+.button [data-wash-layer='mist'] {
+  transition: opacity var(--wash-mist-fade-out-ms, 1155ms) var(--ease-out)
+                       var(--wash-mist-fade-out-delay-ms, 158ms);
+}
+
+/* Hover — overrides with fade-in timing. Tuning helper: when
+ * `wash-force-hover` is set on the html element by WashTunePanel, the same
+ * styles fire so the wash stays visible while the user is dragging
+ * sliders. */
+:global(html.wash-force-hover) .button [data-wash-layer='mist'],
+.button:hover [data-wash-layer='mist'],
+.button:focus-visible [data-wash-layer='mist'] {
+  opacity: var(--wash-mist-peak, 0.77);
+  transition: opacity var(--wash-mist-fade-in-ms, 630ms) var(--ease-out)
+                       var(--wash-mist-fade-in-delay-ms, 0ms);
+}
+
+:global(html.wash-force-hover) .button [data-wash-layer='primary'],
+.button:hover [data-wash-layer='primary'],
+.button:focus-visible [data-wash-layer='primary'] {
+  opacity: var(--wash-primary-peak, 1);
+  transition: opacity var(--wash-primary-fade-in-ms, 578ms) var(--ease-out)
+                       var(--wash-primary-fade-in-delay-ms, 84ms);
+}
+
+:global(html.wash-force-hover) .button [data-wash-layer='core'],
+.button:hover [data-wash-layer='core'],
+.button:focus-visible [data-wash-layer='core'] {
+  opacity: var(--wash-core-peak, 0.83);
+  transition: opacity var(--wash-core-fade-in-ms, 525ms) var(--ease-out)
+                       var(--wash-core-fade-in-delay-ms, 168ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .button:hover [data-wash-layer],
+  .button:focus-visible [data-wash-layer] {
+    /* Decorative — disabled under reduced motion. */
+    opacity: 0;
+    transition: none;
+  }
+}
+
+/* Wire the FigCaption underline to the figure's hover/focus. */
+.figure:hover [data-figcaption-underline],
+.figure:focus-within [data-figcaption-underline] {
+  transform: scaleX(1);
+}
+
+.image {
+  display: block;
+  width: 340px;
+  height: auto;
+  user-select: none;
+  -webkit-user-drag: none;
+  /* Position + z-index so the image always paints above the absolutely-
+   * positioned watercolor wash, which would otherwise win the stacking
+   * order despite being earlier in source order. */
+  position: relative;
+  z-index: 1;
+  /* Soft drop shadow — gives the notebook physical presence on the desk
+   * surface. Uses ink at low opacity so it disappears against the warm
+   * paper background without reading as harsh. */
+  filter: drop-shadow(0 8px 18px rgba(22, 38, 94, 0.14));
+}
+
+@media (min-width: 1600px) {
+  .image {
+    width: 400px;
+  }
+}
+
+@media (min-width: 2000px) {
+  .image {
+    width: 480px;
+  }
+}
+
+@media (max-width: 1279px) {
+  .image {
+    width: 300px;
+  }
+}
+
+@media (max-width: 1023px) {
+  .image {
+    width: 240px;
+  }
+}
+
+@media (max-width: 767px) {
+  .image {
+    width: 200px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .button {
+    transition: none;
+  }
+  .button:hover {
+    transform: none;
+  }
+}

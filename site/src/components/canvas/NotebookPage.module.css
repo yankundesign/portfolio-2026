@@ -1,0 +1,117 @@
+/*
+ * NotebookPage — single page inside the open notebook.
+ *
+ * Top: optional editorial header (mono caps label + italic description).
+ * Body: vertical stack of project rows.
+ *
+ * Page padding is intentional whitespace inside the page boundary set by
+ * NotebookSpread — gives the project rows breathing room from the cover
+ * edges so they don't feel cramped against the binding.
+ */
+
+.page {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: clamp(8px, 2.4%, 28px);
+  gap: clamp(12px, 3%, 32px);
+  box-sizing: border-box;
+  /* `overflow: visible` (no clip) — required for the hover image-bloom
+   * in ProjectRow.module.css. The mockup scales 1.5× from its bottom-
+   * right corner on row hover and needs to bloom up-and-left past the
+   * page boundary to be fully visible. With overflow:hidden here, the
+   * bloom got clipped against the page's top/left edges (see decisions
+   * log 2026-05-04 — "Lift-and-Loft hover").
+   *
+   * The original "defensive clip" that lived here is now unnecessary:
+   * .rows is sized to fit four projects + their drawer clearance via
+   * padding-bottom, and the bloom is the only intentional overflow.
+   * Anything else extending past the page would be a layout bug to
+   * surface, not silently swallow. */
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  /* Header enters FIRST — like writing the section label before placing
+   * the cards. Offset 0 means it appears the moment the canvas-enter-
+   * delay fires (which is calibrated to overlay-clear + 100ms breathing
+   * room). The label snaps in fast; the description follows with a
+   * slight delay (animated separately below). */
+  animation: headerSettle 480ms cubic-bezier(0.25, 1, 0.5, 1) both;
+  animation-delay: var(--canvas-enter-delay, 0ms);
+}
+
+.label {
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  font-weight: 500;
+  letter-spacing: var(--chrome-tracking);
+  color: var(--ink-soft);
+  text-transform: uppercase;
+}
+
+.description {
+  margin: 0;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(14px, 1.1vw, 18px);
+  line-height: 1.45;
+  color: var(--ink);
+  /* Description fades in slightly after the header label — gives the
+   * impression that the label was written first, then the description.
+   * Italic display type benefits from a slower reveal — the strokes
+   * have more time to settle visually. */
+  animation: descriptionSettle 600ms cubic-bezier(0.25, 1, 0.5, 1) both;
+  animation-delay: calc(var(--canvas-enter-delay, 0ms) + 180ms);
+}
+
+@keyframes headerSettle {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes descriptionSettle {
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .header,
+  .description {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.rows {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  /* No flex gap here — rowWrapper carries margin-bottom to handle both
+   * inter-row spacing AND drawer clearance for its own back-label. */
+  gap: 0;
+  /* Push rows toward the bottom half of the page so the header has room
+   * to breathe. The mockup shows rows in the lower 60% of each page. */
+  justify-content: flex-end;
+  /* Bottom padding gives the LAST row's drawer room to slide into without
+   * extending past the page's overflow clip. */
+  padding-bottom: clamp(40px, 6%, 70px);
+}

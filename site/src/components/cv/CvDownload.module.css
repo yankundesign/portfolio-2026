@@ -1,0 +1,90 @@
+/*
+ * CvDownload — typographic download link.
+ *
+ * `pinned`: sits in the top-right gutter, sticks while scrolling.
+ * `inline`: flows inline where placed (e.g., footer echo).
+ */
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 1rem;
+  background: var(--paper);
+  color: var(--ink);
+  border: 1px solid var(--ink);
+  border-radius: 0;
+  text-decoration: none;
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  line-height: 1;
+  transition:
+    background var(--duration-hover) var(--ease-out),
+    color var(--duration-hover) var(--ease-out),
+    transform var(--duration-hover) var(--ease-out);
+  cursor: pointer;
+}
+
+.link:hover,
+.link:focus-visible {
+  background: var(--ink);
+  color: var(--paper);
+  transform: translateY(-1px);
+  outline: none;
+}
+
+.link:focus-visible {
+  box-shadow: 0 0 0 2px var(--paper), 0 0 0 3.5px var(--ink);
+}
+
+.hint {
+  color: var(--ink-soft);
+  transition: color var(--duration-hover) var(--ease-out);
+}
+
+.link:hover .hint,
+.link:focus-visible .hint {
+  color: var(--paper);
+}
+
+.label {
+  /* label mass carries the button */
+}
+
+.arrow {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  transition: transform var(--duration-hover) var(--ease-out);
+}
+
+.link:hover .arrow,
+.link:focus-visible .arrow {
+  transform: translateY(2px);
+}
+
+/* Pinned — top-right of the content column, sticky while the user scrolls. */
+.pinned {
+  position: sticky;
+  top: 1.25rem;
+  align-self: end;
+  z-index: 10;
+}
+
+.inline {
+  display: inline-flex;
+}
+
+@media (max-width: 640px) {
+  .pinned {
+    position: fixed;
+    top: auto;
+    bottom: 1rem;
+    right: 1rem;
+    padding: 0.75rem 1rem;
+    box-shadow: 0 2px 8px rgba(22, 38, 94, 0.08);
+  }
+}

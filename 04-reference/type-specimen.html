@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Typography Specimens — Yankun Portfolio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- Direction A: Editorial Serif + Mono -->
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,700;1,9..144,400&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<!-- Direction B: Grotesque + Italic Serif -->
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<!-- Direction C: Wood Type condensed + clean body -->
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,700;0,6..96,900;1,6..96,400&family=DM+Sans:wght@300;400;500;700&family=Oswald:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #16265e;
+    --ink-soft: #2a3a7a;
+    --paper: #f4f1ea;
+    --paper-soft: #ebe6d9;
+    --rule: #16265e;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--paper);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    padding: 80px 0 120px;
+  }
+
+  /* Subtle paper grain */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.086  0 0 0 0 0.149  0 0 0 0 0.369  0 0 0 0.04 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    mix-blend-mode: multiply;
+    opacity: 0.6;
+  }
+
+  .page {
+    position: relative;
+    z-index: 2;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 60px;
+  }
+
+  /* Page header */
+  .header {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink);
+    display: flex;
+    justify-content: space-between;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--ink);
+    margin-bottom: 80px;
+  }
+  .header-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 400;
+    font-size: 13px;
+    letter-spacing: 0;
+    text-transform: none;
+    font-style: italic;
+  }
+
+  .intro {
+    max-width: 640px;
+    margin-bottom: 100px;
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: 18px;
+    line-height: 1.55;
+    color: var(--ink-soft);
+  }
+  .intro strong {
+    font-weight: 500;
+    color: var(--ink);
+  }
+
+  /* Specimen section */
+  .specimen {
+    margin-bottom: 140px;
+    position: relative;
+  }
+
+  .specimen-label {
+    display: flex;
+    align-items: baseline;
+    gap: 24px;
+    margin-bottom: 32px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--ink);
+  }
+
+  .specimen-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    font-weight: 400;
+  }
+  .specimen-name {
+    font-family: 'Fraunces', serif;
+    font-size: 20px;
+    font-style: italic;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    flex: 1;
+  }
+  .specimen-fonts {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+
+  /* Each specimen renders an album cover mock + liner notes row + marginalia */
+  .mock-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 60px;
+    align-items: start;
+  }
+
+  /* ==== Mock: album cover side ==== */
+  .mock-cover {
+    aspect-ratio: 1 / 1;
+    background: var(--paper);
+    border: 1px solid var(--ink);
+    padding: 36px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .mock-cover .catalog {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .mock-cover .title-block {
+    margin-top: auto;
+  }
+
+  .mock-cover .tagline {
+    font-size: 13px;
+    letter-spacing: 0.02em;
+    margin-top: 18px;
+    max-width: 80%;
+  }
+
+  /* Hand-drawn mark (SVG) on cover */
+  .mark {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -54%);
+    width: 180px;
+    opacity: 0.9;
+  }
+
+  /* ==== Mock: liner notes side ==== */
+  .mock-notes {
+    padding-top: 12px;
+  }
+
+  .notes-heading {
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--ink);
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .track {
+    display: grid;
+    grid-template-columns: 24px 1fr auto;
+    gap: 16px;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(22, 38, 94, 0.2);
+    align-items: baseline;
+  }
+  .track:last-child { border-bottom: none; }
+
+  .track-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+  }
+  .track-name {
+    font-size: 18px;
+    line-height: 1.2;
+  }
+  .track-feat {
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-top: 4px;
+  }
+  .track-time {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+  }
+
+  .essay {
+    margin-top: 40px;
+    padding-top: 24px;
+    border-top: 1px solid var(--ink);
+    position: relative;
+  }
+  .essay-kicker {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    color: var(--ink-soft);
+  }
+  .essay-body {
+    font-size: 15px;
+    line-height: 1.6;
+    max-width: 42ch;
+  }
+  .essay-body em {
+    font-style: italic;
+  }
+
+  /* Marginalia — hand-drawn arrow pointing at track list */
+  .marginalia {
+    position: absolute;
+    right: -24px;
+    top: 120px;
+    width: 120px;
+    color: var(--ink);
+    pointer-events: none;
+  }
+  .marginalia-text {
+    font-family: 'Caveat', 'Kalam', cursive;
+    font-size: 15px;
+    line-height: 1.1;
+    transform: rotate(-4deg);
+    display: block;
+    margin-top: 4px;
+  }
+
+  /* ======================================================
+     DIRECTION A — Editorial Serif + Mono (Fraunces + JetBrains)
+     ====================================================== */
+  .dir-a .mock-cover .brand-type {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: 88px;
+    line-height: 0.9;
+    letter-spacing: -0.03em;
+    font-variation-settings: "opsz" 144, "SOFT" 50;
+  }
+  .dir-a .mock-cover .tagline {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 17px;
+    letter-spacing: 0;
+    line-height: 1.35;
+  }
+  .dir-a .track-name { font-family: 'Fraunces', serif; font-weight: 400; letter-spacing: -0.01em;}
+  .dir-a .track-feat { font-family: 'Fraunces', serif; font-style: italic; font-weight: 300;}
+  .dir-a .essay-body { font-family: 'Fraunces', serif; font-weight: 300;}
+  .dir-a .essay-body strong { font-weight: 500; }
+
+  /* ======================================================
+     DIRECTION B — Grotesque + Italic Serif (Inter Tight + Instrument Serif)
+     ====================================================== */
+  .dir-b .mock-cover .brand-type {
+    font-family: 'Inter Tight', sans-serif;
+    font-weight: 700;
+    font-size: 84px;
+    line-height: 0.88;
+    letter-spacing: -0.045em;
+  }
+  .dir-b .mock-cover .tagline {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-size: 22px;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+  }
+  .dir-b .track-name { font-family: 'Inter Tight', sans-serif; font-weight: 500; letter-spacing: -0.02em;}
+  .dir-b .track-feat { font-family: 'Instrument Serif', serif; font-style: italic;}
+  .dir-b .essay-body { font-family: 'Inter Tight', sans-serif; font-weight: 400;}
+  .dir-b .essay-body em { font-family: 'Instrument Serif', serif; font-size: 1.05em;}
+
+  /* ======================================================
+     DIRECTION C — Condensed Display + Clean Body (Oswald/Bodoni + DM Sans)
+     ====================================================== */
+  .dir-c .mock-cover .brand-type {
+    font-family: 'Bodoni Moda', serif;
+    font-weight: 900;
+    font-size: 104px;
+    line-height: 0.85;
+    letter-spacing: -0.03em;
+    font-variation-settings: "opsz" 96;
+  }
+  .dir-c .mock-cover .tagline {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 13px;
+    line-height: 1.4;
+  }
+  .dir-c .track-name { font-family: 'Bodoni Moda', serif; font-weight: 700; letter-spacing: -0.01em;}
+  .dir-c .track-feat { font-family: 'DM Sans', sans-serif; font-size: 11px; letter-spacing: 0.02em;}
+  .dir-c .essay-body { font-family: 'DM Sans', sans-serif; font-weight: 400;}
+  .dir-c .essay-body em { font-family: 'Bodoni Moda', serif; font-style: italic;}
+
+  /* Caveat for handwritten margin notes */
+  @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;500&display=swap');
+
+  /* Verdict strip */
+  .verdict {
+    margin-top: 32px;
+    padding: 20px 24px;
+    background: var(--paper-soft);
+    border-left: 2px solid var(--ink);
+  }
+  .verdict-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    color: var(--ink-soft);
+  }
+  .verdict-text {
+    font-family: 'Fraunces', serif;
+    font-weight: 400;
+    font-style: italic;
+    font-size: 16px;
+    line-height: 1.5;
+    max-width: 70ch;
+  }
+
+  /* Footer note */
+  .footnote {
+    max-width: 640px;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--ink-soft);
+    padding-top: 32px;
+    border-top: 1px solid var(--ink);
+  }
+
+  @media (max-width: 900px) {
+    body { padding: 40px 0; }
+    .page { padding: 0 28px; }
+    .mock-grid { grid-template-columns: 1fr; gap: 32px;}
+    .marginalia { display: none; }
+    .dir-a .mock-cover .brand-type,
+    .dir-b .mock-cover .brand-type { font-size: 64px; }
+    .dir-c .mock-cover .brand-type { font-size: 76px; }
+  }
+</style>
+</head>
+<body>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500&display=swap" rel="stylesheet">
+
+<div class="page">
+
+  <header class="header">
+    <span>YK / Portfolio Specimen · 001</span>
+    <span class="header-title">Three typographic voices, one visual system.</span>
+    <span>April 2026</span>
+  </header>
+
+  <p class="intro">
+    Same content, same ink blue, same warm paper, same hand-drawn marks. Only the typography changes.
+    Read all three, then notice which voice sounds like <strong>you</strong> when it speaks about your work.
+  </p>
+
+  <!-- ============================================================
+       DIRECTION A
+       ============================================================ -->
+  <section class="specimen dir-a">
+    <div class="specimen-label">
+      <span class="specimen-num">A / 01</span>
+      <span class="specimen-name">Editorial Serif + Mono · "The Literary"</span>
+      <span class="specimen-fonts">Fraunces · JetBrains Mono · Caveat</span>
+    </div>
+
+    <div class="mock-grid">
+      <div class="mock-cover">
+        <div class="catalog">
+          <span>YK · 001</span>
+          <span>Side A</span>
+        </div>
+
+        <svg class="mark" viewBox="0 0 180 140" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#16265e" stroke-width="1.4" stroke-linecap="round">
+          <path d="M20 110 C 40 60, 80 30, 110 50 S 160 100, 160 110" />
+          <path d="M28 112 C 48 72, 78 48, 108 60" opacity="0.5" />
+          <circle cx="145" cy="46" r="3.5" fill="#16265e" stroke="none"/>
+          <path d="M30 118 L 160 118" opacity="0.3"/>
+        </svg>
+
+        <div class="title-block">
+          <div class="brand-type">Yankun.</div>
+          <div class="tagline">Compositions for complex systems — notes from five years on the enterprise floor.</div>
+        </div>
+      </div>
+
+      <div class="mock-notes">
+        <div class="notes-heading">
+          <span>Track Listing</span>
+          <span>Runtime 42:08</span>
+        </div>
+
+        <div class="track">
+          <span class="track-num">01</span>
+          <div>
+            <div class="track-name">Control Hub AI, from 3% to 15%</div>
+            <div class="track-feat">feat. Nirav Shah, Kathryn Lee</div>
+          </div>
+          <span class="track-time">12:04</span>
+        </div>
+        <div class="track">
+          <span class="track-num">02</span>
+          <div>
+            <div class="track-name">Smart Search, rewritten</div>
+            <div class="track-feat">feat. Jasna, Rachael Marr</div>
+          </div>
+          <span class="track-time">06:32</span>
+        </div>
+        <div class="track">
+          <span class="track-num">03</span>
+          <div>
+            <div class="track-name">Write-like-Webex</div>
+            <div class="track-feat">a side project in Cursor</div>
+          </div>
+          <span class="track-time">04:15</span>
+        </div>
+        <div class="track">
+          <span class="track-num">04</span>
+          <div>
+            <div class="track-name">SAP Fieldglass, homepage</div>
+            <div class="track-feat">earlier work, still proud</div>
+          </div>
+          <span class="track-time">09:40</span>
+        </div>
+
+        <div class="essay">
+          <svg class="marginalia" viewBox="0 0 120 80" fill="none" stroke="#16265e" stroke-width="1.2" stroke-linecap="round">
+            <path d="M100 50 Q 60 40, 20 50" />
+            <path d="M22 46 L 16 50 L 22 54" />
+          </svg>
+          <span class="marginalia" style="top:60px; right:-10px; width:auto;">
+            <span class="marginalia-text">the one to<br/>open with</span>
+          </span>
+          <div class="essay-kicker">From the liner notes</div>
+          <p class="essay-body">
+            <strong>I make invisible systems handleable.</strong> In enterprise software,
+            the interface isn't the product — the <em>decision</em> is.
+            My work is in the seam between, where five years of admin-console
+            complexity meets a first-time user at 9 p.m. on a Tuesday.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="verdict">
+      <div class="verdict-label">Voice</div>
+      <div class="verdict-text">
+        Warm, literary, restrained. Reads like something you'd find in an independent magazine.
+        Best if you want people to slow down and actually read.
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       DIRECTION B
+       ============================================================ -->
+  <section class="specimen dir-b">
+    <div class="specimen-label">
+      <span class="specimen-num">A / 02</span>
+      <span class="specimen-name">Grotesque + Italic Serif · "The Blue Note"</span>
+      <span class="specimen-fonts">Inter Tight · Instrument Serif · Caveat</span>
+    </div>
+
+    <div class="mock-grid">
+      <div class="mock-cover">
+        <div class="catalog">
+          <span>YK · 001</span>
+          <span>Side A</span>
+        </div>
+
+        <svg class="mark" viewBox="0 0 180 140" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#16265e" stroke-width="1.4" stroke-linecap="round">
+          <path d="M20 110 C 40 60, 80 30, 110 50 S 160 100, 160 110" />
+          <path d="M28 112 C 48 72, 78 48, 108 60" opacity="0.5" />
+          <circle cx="145" cy="46" r="3.5" fill="#16265e" stroke="none"/>
+          <path d="M30 118 L 160 118" opacity="0.3"/>
+        </svg>
+
+        <div class="title-block">
+          <div class="brand-type">YANKUN</div>
+          <div class="tagline">Compositions for complex systems — notes from five years on the enterprise floor.</div>
+        </div>
+      </div>
+
+      <div class="mock-notes">
+        <div class="notes-heading">
+          <span>Track Listing</span>
+          <span>Runtime 42:08</span>
+        </div>
+
+        <div class="track">
+          <span class="track-num">01</span>
+          <div>
+            <div class="track-name">Control Hub AI, from 3% to 15%</div>
+            <div class="track-feat">feat. Nirav Shah, Kathryn Lee</div>
+          </div>
+          <span class="track-time">12:04</span>
+        </div>
+        <div class="track">
+          <span class="track-num">02</span>
+          <div>
+            <div class="track-name">Smart Search, rewritten</div>
+            <div class="track-feat">feat. Jasna, Rachael Marr</div>
+          </div>
+          <span class="track-time">06:32</span>
+        </div>
+        <div class="track">
+          <span class="track-num">03</span>
+          <div>
+            <div class="track-name">Write-like-Webex</div>
+            <div class="track-feat">a side project in Cursor</div>
+          </div>
+          <span class="track-time">04:15</span>
+        </div>
+        <div class="track">
+          <span class="track-num">04</span>
+          <div>
+            <div class="track-name">SAP Fieldglass, homepage</div>
+            <div class="track-feat">earlier work, still proud</div>
+          </div>
+          <span class="track-time">09:40</span>
+        </div>
+
+        <div class="essay">
+          <svg class="marginalia" viewBox="0 0 120 80" fill="none" stroke="#16265e" stroke-width="1.2" stroke-linecap="round">
+            <path d="M100 50 Q 60 40, 20 50" />
+            <path d="M22 46 L 16 50 L 22 54" />
+          </svg>
+          <span class="marginalia" style="top:60px; right:-10px; width:auto;">
+            <span class="marginalia-text">the one to<br/>open with</span>
+          </span>
+          <div class="essay-kicker">From the liner notes</div>
+          <p class="essay-body">
+            I make invisible systems handleable. In enterprise software,
+            the interface isn't the product — the <em>decision</em> is.
+            My work is in the seam between, where five years of admin-console
+            complexity meets a first-time user at 9 p.m. on a Tuesday.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="verdict">
+      <div class="verdict-label">Voice</div>
+      <div class="verdict-text">
+        Confident, graphic, contemporary. The italic serif provides the warmth the sans-serif doesn't.
+        Closest to the Blue Note / Reid Miles reference. Best if you want to read immediately "senior designer."
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       DIRECTION C
+       ============================================================ -->
+  <section class="specimen dir-c">
+    <div class="specimen-label">
+      <span class="specimen-num">A / 03</span>
+      <span class="specimen-name">Display Serif + Clean Sans · "The Broadside"</span>
+      <span class="specimen-fonts">Bodoni Moda · Oswald · DM Sans · Caveat</span>
+    </div>
+
+    <div class="mock-grid">
+      <div class="mock-cover">
+        <div class="catalog">
+          <span>YK · 001</span>
+          <span>Side A</span>
+        </div>
+
+        <svg class="mark" viewBox="0 0 180 140" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#16265e" stroke-width="1.4" stroke-linecap="round">
+          <path d="M20 110 C 40 60, 80 30, 110 50 S 160 100, 160 110" />
+          <path d="M28 112 C 48 72, 78 48, 108 60" opacity="0.5" />
+          <circle cx="145" cy="46" r="3.5" fill="#16265e" stroke="none"/>
+          <path d="M30 118 L 160 118" opacity="0.3"/>
+        </svg>
+
+        <div class="title-block">
+          <div class="brand-type">Yankun</div>
+          <div class="tagline">Compositions for complex systems · Five years, enterprise floor</div>
+        </div>
+      </div>
+
+      <div class="mock-notes">
+        <div class="notes-heading">
+          <span>Track Listing</span>
+          <span>Runtime 42:08</span>
+        </div>
+
+        <div class="track">
+          <span class="track-num">01</span>
+          <div>
+            <div class="track-name">Control Hub AI, from 3% to 15%</div>
+            <div class="track-feat">feat. Nirav Shah, Kathryn Lee</div>
+          </div>
+          <span class="track-time">12:04</span>
+        </div>
+        <div class="track">
+          <span class="track-num">02</span>
+          <div>
+            <div class="track-name">Smart Search, rewritten</div>
+            <div class="track-feat">feat. Jasna, Rachael Marr</div>
+          </div>
+          <span class="track-time">06:32</span>
+        </div>
+        <div class="track">
+          <span class="track-num">03</span>
+          <div>
+            <div class="track-name">Write-like-Webex</div>
+            <div class="track-feat">a side project in Cursor</div>
+          </div>
+          <span class="track-time">04:15</span>
+        </div>
+        <div class="track">
+          <span class="track-num">04</span>
+          <div>
+            <div class="track-name">SAP Fieldglass, homepage</div>
+            <div class="track-feat">earlier work, still proud</div>
+          </div>
+          <span class="track-time">09:40</span>
+        </div>
+
+        <div class="essay">
+          <svg class="marginalia" viewBox="0 0 120 80" fill="none" stroke="#16265e" stroke-width="1.2" stroke-linecap="round">
+            <path d="M100 50 Q 60 40, 20 50" />
+            <path d="M22 46 L 16 50 L 22 54" />
+          </svg>
+          <span class="marginalia" style="top:60px; right:-10px; width:auto;">
+            <span class="marginalia-text">the one to<br/>open with</span>
+          </span>
+          <div class="essay-kicker">From the liner notes</div>
+          <p class="essay-body">
+            I make invisible systems handleable. In enterprise software,
+            the interface isn't the product — the <em>decision</em> is.
+            My work is in the seam between, where five years of admin-console
+            complexity meets a first-time user at 9 p.m. on a Tuesday.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="verdict">
+      <div class="verdict-label">Voice</div>
+      <div class="verdict-text">
+        Bold, declarative, editorial. The display serif makes a louder statement; the sans keeps reading easy.
+        Best if you want the portfolio to feel like a printed object from the first glance.
+      </div>
+    </div>
+  </section>
+
+  <p class="footnote">
+    A note on execution — the final portfolio will use real hand-drawn marginalia (not the placeholder
+    Caveat font shown here) and hero ink drawings. The paper grain is intentionally subtle; you should
+    only notice it if you lean in.
+  </p>
+
+</div>
+</body>
+</html>

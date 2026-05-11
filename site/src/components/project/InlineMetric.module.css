@@ -1,0 +1,43 @@
+.metric {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  flex: 1 1 180px;
+  min-width: 0;
+  padding-top: 1rem;
+  border-top: 1px solid var(--ink-muted);
+}
+
+.figure {
+  display: flex;
+  align-items: baseline;
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: clamp(2.5rem, 5.5vw, 3.75rem);
+  line-height: 0.85;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  font-variation-settings: 'opsz' 96;
+}
+
+.value {
+  font-variant-numeric: tabular-nums;
+}
+
+.suffix {
+  font-style: italic;
+  font-size: 0.6em;
+  color: var(--ink-soft);
+  padding-left: 0.08em;
+  font-weight: 300;
+}
+
+.label {
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+  line-height: 1.55;
+  margin: 0;
+  max-width: 32ch;
+}

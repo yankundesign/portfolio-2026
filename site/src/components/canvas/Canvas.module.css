@@ -1,0 +1,178 @@
+/* ─── Canvas v0.7 — 12-col editorial plate ─────────────────────────────────
+ *
+ * The surface is plain paper with very faint vertical column rulings that
+ * mark the 12-col grid. Replaces the v0.6 graph-paper texture. The grid
+ * itself is implemented with CSS Grid; cards declare `grid-column` and
+ * `grid-row-start` to occupy column spans + row tracks. Different aspect
+ * ratios on cards give the editorial composition; rotation is gone.
+ * ────────────────────────────────────────────────────────────────────────── */
+
+.surface {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  background-color: var(--paper);
+  /* Column rulings retired (post-spotlight): the cursor-aware dot grid is
+   * now the only ambient grid signal on the canvas. The rulingsVisible /
+   * rulingsHidden classes still exist so the entrance choreography in
+   * CanvasRoute keeps its current sequencing API, but they're visual no-ops
+   * here. */
+}
+
+.rulingsHidden,
+.rulingsVisible {
+  /* No-op — kept so the prop API in Canvas.tsx remains stable. */
+}
+
+/* ─── Grid — 12 column editorial plate ─── */
+
+.grid {
+  position: relative;
+  z-index: 1;
+  max-width: var(--grid-max);
+  margin: 0 auto;
+  padding: 96px var(--grid-margin) 120px;
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  column-gap: var(--grid-gutter);
+  /* Named grid rows let us split each "work row" into a caption track
+   * (above the cards) and the cards' own track. Row gaps are distinct. */
+  grid-template-rows:
+    [intro] auto
+    [intro-end caption-1] auto
+    [caption-1-end row-1] auto
+    [row-1-end caption-2] 64px
+    [caption-2-end row-2] auto;
+  align-items: start;
+}
+
+/* ─── Editorial intro paragraph ─── */
+
+.intro {
+  grid-column: 1 / span 8;
+  grid-row: intro;
+  margin: 0 0 56px;
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-style: italic;
+  font-size: 22px;
+  line-height: 1.45;
+  color: var(--ink);
+  max-width: 32em;
+  transition:
+    opacity var(--duration-reveal) var(--ease-out),
+    transform var(--duration-reveal) var(--ease-out);
+}
+
+.introPrefix {
+  font-family: var(--font-mono);
+  font-style: normal;
+  font-size: var(--text-caption);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-right: 4px;
+  vertical-align: 0.18em;
+}
+
+.introHidden {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.introVisible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ─── Section caption (paired works grouping) ─── */
+
+.sectionCaption {
+  display: block;
+  margin: 0 0 16px;
+  padding-top: 4px;
+  border-top: 1px solid var(--ink-muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  letter-spacing: var(--chrome-tracking);
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  transition: opacity var(--duration-reveal) var(--ease-out);
+}
+
+.captionHidden {
+  opacity: 0;
+}
+
+.captionVisible {
+  opacity: 1;
+}
+
+/* ─── Furniture (header, footer) ─── */
+
+.furniture {
+  transition:
+    opacity var(--duration-reveal) var(--ease-out);
+}
+
+.furnitureHidden {
+  opacity: 0;
+}
+
+.furnitureVisible {
+  opacity: 1;
+}
+
+/* ─── Running header ─── */
+
+.runningHeader {
+  position: absolute;
+  top: var(--space-3);
+  left: var(--space-3);
+  right: var(--space-3);
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* ─── Running footer ─── */
+
+.runningFooter {
+  position: absolute;
+  bottom: var(--space-3);
+  left: var(--space-3);
+  right: var(--space-3);
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  z-index: 2;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .intro,
+  .sectionCaption,
+  .furniture {
+    transition: none;
+  }
+
+  .introHidden {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .captionHidden,
+  .furnitureHidden {
+    opacity: 1;
+  }
+}

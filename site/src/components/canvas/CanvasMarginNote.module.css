@@ -1,0 +1,123 @@
+/*
+ * CanvasMarginNote — right-margin THOUGHTS sticky on the canvas.
+ *
+ * Anchored absolutely inside the canvas content area. Tunables on :root.
+ *
+ * Tunables:
+ *   --canvas-note-top    vertical anchor (% of canvas content area)
+ *   --canvas-note-right  horizontal anchor (% from right edge of canvas content)
+ *   --canvas-note-width  width in px
+ */
+
+:root {
+  --canvas-note-top: 50%;
+  --canvas-note-right: 2%;
+  --canvas-note-width: 200px;
+}
+
+.note {
+  position: absolute;
+  top: var(--canvas-note-top);
+  right: var(--canvas-note-right);
+  transform: translateY(-50%);
+  width: var(--canvas-note-width);
+  padding: 18px 16px 22px;
+  background: var(--paper-soft);
+  border: 1px solid var(--ink-muted);
+  /* Subtle drop shadow — note sits on the canvas plate. */
+  filter: drop-shadow(0 4px 10px rgba(22, 38, 94, 0.08));
+  z-index: 5;
+  /* Slight CCW tilt so the note doesn't feel machine-placed.
+   * Static rotation is OK on physical material props (Decisions Log
+   * 2026-04-29: v0.4 deadpan rule clarified). */
+  transform: translateY(-50%) rotate(-1.5deg);
+  /* Entrance: opacity-only fade so the static tilt-transform isn't
+   * disturbed. Arrives LAST in the canvas reveal sequence — after the
+   * close button — like the marginalia being placed last on a finished
+   * spread. Offset = close button offset (1820ms) + 240ms gap. */
+  animation: marginNoteSettle 480ms cubic-bezier(0.4, 0, 0.2, 1) both;
+  animation-delay: calc(var(--canvas-enter-delay, 0ms) + 2060ms);
+}
+
+@keyframes marginNoteSettle {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .note {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+/* Washi tape strip across the top edge — material attachment. */
+.washi {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  width: 64px;
+  height: 18px;
+  transform: translateX(-50%);
+  background: rgba(244, 235, 200, 0.85); /* warm cream tone, semi-transparent */
+  border-left: 1px dashed rgba(22, 38, 94, 0.06);
+  border-right: 1px dashed rgba(22, 38, 94, 0.06);
+  /* Tape edge irregularity: subtle clip-path simulating torn ends. */
+  clip-path: polygon(
+    0 12%, 8% 0, 22% 18%, 38% 4%, 56% 14%, 72% 2%, 88% 16%, 100% 6%,
+    100% 88%, 92% 100%, 76% 84%, 60% 96%, 44% 86%, 28% 98%, 12% 84%, 0 92%
+  );
+  pointer-events: none;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: var(--chrome-tracking);
+  color: var(--ink-soft);
+  text-transform: uppercase;
+}
+
+.text {
+  margin: 0;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 300;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--ink);
+}
+
+/* Postal cancel mark in lower-right corner. Slightly off-axis. */
+.stamp {
+  position: absolute;
+  bottom: 6px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  display: block;
+  pointer-events: none;
+  transform: rotate(-8deg);
+}
+
+/* ─── Responsive ─── */
+
+@media (max-width: 1023px) {
+  :root {
+    --canvas-note-top: auto;
+    --canvas-note-right: 4%;
+    --canvas-note-width: 180px;
+  }
+  .note {
+    transform: rotate(-1.5deg);
+    bottom: 5%;
+    top: auto;
+  }
+}

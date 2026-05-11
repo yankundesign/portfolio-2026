@@ -1,0 +1,73 @@
+/* ─── Global @keyframes ───────────────────────────────────────────────────
+ *
+ * Kept OUTSIDE any *.module.css file because Vite's CSS Modules will scope
+ * @keyframes names to local hashes (e.g. _ink-drift-mist_1hp4n_1) but does
+ * NOT rewrite animation-name references that live inside `var()` fallbacks.
+ * The mismatch would silently kill the animation — the animation property
+ * resolves to a name that has no matching keyframe rule, so the element
+ * sits frozen on the `from` frame.
+ *
+ * The WatercolorWash component sets `--wash-anim-{layer}` (or falls back
+ * to a literal animation shorthand) referencing these names; the
+ * WashTunePanel writes the same names from JS. Both paths use the
+ * unscoped global name → matches → animation runs.
+ * ────────────────────────────────────────────────────────────────────────── */
+
+/* Mist — atmospheric outer halo. Bold amplitude (1.5× of original
+ * baseline) for visible drift in a brief hover window. */
+@keyframes ink-drift-mist {
+  0% {
+    transform: scale(1) rotate(0deg) translate(0, 0);
+  }
+  25% {
+    transform: scale(1.15) rotate(-7.5deg) translate(6%, -3%);
+  }
+  50% {
+    transform: scale(1.09) rotate(6deg) translate(-4.5%, 4.5%);
+  }
+  75% {
+    transform: scale(1.18) rotate(-3deg) translate(3%, 1.5%);
+  }
+  100% {
+    transform: scale(1) rotate(0deg) translate(0, 0);
+  }
+}
+
+/* Primary — body of the wash. Medium amplitude. */
+@keyframes ink-drift-primary {
+  0% {
+    transform: scale(1) rotate(0deg) translate(0, 0);
+  }
+  25% {
+    transform: scale(1.06) rotate(3deg) translate(-2%, 2%);
+  }
+  50% {
+    transform: scale(1.08) rotate(-4deg) translate(3%, -1%);
+  }
+  75% {
+    transform: scale(1.04) rotate(2deg) translate(-1%, 2%);
+  }
+  100% {
+    transform: scale(1) rotate(0deg) translate(0, 0);
+  }
+}
+
+/* Core — concentrated dense pool. Subtle amplitude — the focal point holds
+ * relatively still while the mist breathes around it. */
+@keyframes ink-drift-core {
+  0% {
+    transform: scale(1) rotate(0deg) translate(0, 0);
+  }
+  25% {
+    transform: scale(1.04) rotate(-1deg) translate(0.5%, -0.5%);
+  }
+  50% {
+    transform: scale(0.96) rotate(1.5deg) translate(-1%, 0.5%);
+  }
+  75% {
+    transform: scale(1.03) rotate(0.5deg) translate(0.5%, 0.5%);
+  }
+  100% {
+    transform: scale(1) rotate(0deg) translate(0, 0);
+  }
+}

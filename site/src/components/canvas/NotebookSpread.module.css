@@ -1,0 +1,135 @@
+/*
+ * NotebookSpread — open-notebook PNG + content overlay.
+ *
+ * The PNG fills the spread; .overlay matches inset:0 so percentage positions
+ * inside the overlay map to positions within the PNG. Two page slots are
+ * absolutely positioned over the actual cream page areas of the asset.
+ *
+ * Tunables (per-edge insets of the page area, as % of spread):
+ *   --notebook-page-top       distance from top of spread to top of pages
+ *   --notebook-page-bottom    distance from bottom of spread to bottom of pages
+ *   --notebook-left-page-l    distance from left of spread to left of left page
+ *   --notebook-left-page-r    distance from left of spread to right of left page
+ *   --notebook-right-page-l   distance from left of spread to left of right page
+ *   --notebook-right-page-r   distance from left of spread to right of right page
+ *
+ * (`-r` values for left/right page are the LEFT positions of their right
+ * edges, i.e. the page's right boundary measured from the left of the
+ * spread. This keeps the math simple — both edges use `left:` positioning.)
+ */
+
+:root {
+  /* Vertical bounds — top + bottom of both pages. */
+  --notebook-page-top: 7%;
+  --notebook-page-bottom: 7%;
+
+  /* Left page horizontal bounds (l = left edge, r = right edge — both
+   * measured from the spread's left edge as percentages). */
+  --notebook-left-page-l: 6%;
+  --notebook-left-page-r: 48%;
+
+  /* Right page horizontal bounds. */
+  --notebook-right-page-l: 52%;
+  --notebook-right-page-r: 94%;
+}
+
+.spread {
+  position: relative;
+  /* Width is set on the parent .canvas as --notebook-width so the close
+   * button can anchor itself relative to this exact value. Falls back to
+   * the same formula if the variable isn't defined (e.g. component used
+   * in isolation). */
+  width: var(
+    --notebook-width,
+    min(100%, 1400px, calc((100vh - 25vh) * 2600 / 1812))
+  );
+  margin: 0 auto;
+  /* Match the PNG's intrinsic aspect ratio so the overlay positions
+   * consistently. If the asset changes, update this ratio. */
+  aspect-ratio: 2600 / 1812;
+}
+
+.notebook {
+  display: block;
+  width: 100%;
+  height: 100%;
+  user-select: none;
+  -webkit-user-drag: none;
+  /* Drop shadow tucks the spread onto the desk plate. */
+  filter: drop-shadow(0 12px 28px rgba(22, 38, 94, 0.16));
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  /* The overlay itself doesn't catch pointer events — pages do, individually. */
+  pointer-events: none;
+}
+
+.page {
+  position: absolute;
+  top: var(--notebook-page-top);
+  bottom: var(--notebook-page-bottom);
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.pageLeft {
+  left: var(--notebook-left-page-l);
+  /* Width = right edge minus left edge. */
+  width: calc(var(--notebook-left-page-r) - var(--notebook-left-page-l));
+}
+
+.pageRight {
+  left: var(--notebook-right-page-l);
+  width: calc(var(--notebook-right-page-r) - var(--notebook-right-page-l));
+}
+
+/* ─── Hover dim — focus the eye on the bloomed plate ──────────────────
+ *
+ * When any project row inside the spread is hovered (or keyboard-focused),
+ * the OTHER three rows fade to 40% opacity. This pairs with the image-
+ * bloom on the hovered row (ProjectRow.module.css → .mockupImage scale)
+ * so the eye lands on the enlarged plate without competition.
+ *
+ * Crosses CSS Module boundaries via the [data-row] attribute set in
+ * ProjectRow.tsx — keeps the rule scoped to the spread without needing
+ * to share class names between modules.
+ *
+ * Why `filter: opacity()` instead of plain `opacity:`:
+ *   The rowWrapper carries an entrance animation (`rowPlace`) with
+ *   `animation-fill-mode: both`, whose final keyframe sets `opacity: 1`.
+ *   Animation-held values override regular CSS declarations with higher
+ *   priority — so `opacity: 0.4` here would be silently swallowed by
+ *   the persistent keyframe value. `filter: opacity()` is a separate
+ *   property the keyframe doesn't touch, so it composes cleanly. Same
+ *   visual result, no `!important` needed.
+ *
+ * Transition lives on every [data-row] so both the dim-down (hover-on)
+ * and the snap-back (hover-off) ease smoothly.
+ * ────────────────────────────────────────────────────────────────────── */
+.spread [data-row] {
+  filter: opacity(1);
+  transition: filter 240ms ease-out;
+}
+.spread:has([data-row]:hover) [data-row]:not(:hover),
+.spread:has([data-row]:focus-within) [data-row]:not(:focus-within) {
+  filter: opacity(0.4);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Dim is fine for reduced-motion (opacity, not movement) — keep it
+   * but make it a snap rather than a fade. */
+  .spread [data-row] {
+    transition: filter 60ms linear;
+  }
+}
+
+/* ─── Responsive ─── */
+
+@media (max-width: 1023px) {
+  .spread {
+    max-width: 100%;
+  }
+}
