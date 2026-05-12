@@ -4,6 +4,61 @@ Track design and build decisions as they're made.
 
 ---
 
+## 2026-05-10 · Hosting — Cloudflare Pages, Wrangler CLI deploy, yankun.design DNS at Cloudflare
+
+Picked a host and got the site live. Three sub-decisions worth pinning down before they fade.
+
+**Cloudflare Pages over Vercel.** Both can serve a static Vite SPA at Lighthouse 95. The deciding factors: unmetered free-tier bandwidth (Vercel caps at 100 GB/mo, and the Hobby plan technically forbids monetized projects — a portfolio is fine today, but the asymmetry favors Cloudflare long-term); free Web Analytics built into the same dashboard (Vercel's analytics is paywalled past 2.5k events/mo); and consolidating DNS + Pages + Analytics into one vendor once the domain moves over. Vercel's preview-comment workflow and zero-config Vite detection are nicer, but for a static site that's a marginal edge. Migration cost between either is ~10 minutes — no real lock-in either way.
+
+**Wrangler CLI for deploys, not the dashboard's git connect.** The dashboard "Connect GitHub" flow is broken on this Cloudflare account — the GitHub App installs successfully (verified on the GitHub side), but Cloudflare's OAuth callback fails to pair the installation back to the in-progress project-creation session. Tried three times, including a full uninstall + reinstall per Cloudflare's own error message ("attempt to fully uninstall and reinstall"). Same result each time. This is a known intermittent bug — not a configuration issue on our end. Pivoted to `npx wrangler pages deploy site/dist --project-name=yankun-portfolio --branch=main`, which uses a separate OAuth flow that works. The project was created via CLI on the first run; future deploys are the same one-liner. Trade-off: no auto-deploy on `git push` to main. Acceptable — the deploy command is reproducible, and we can re-attempt the dashboard git connect after the OAuth bug is reported to have cleared (likely days, not weeks).
+
+**Domain is yankun.design, DNS moving to Cloudflare.** Old scope doc said yankun.info; that's stale. Yankun bought yankun.design at Spaceship registrar with no email or other records on it — fresh registration, zero migration risk. Moving DNS to Cloudflare rather than keeping it at Spaceship: Pages works smoothest when the domain sits in a Cloudflare zone (apex CNAME flattening, auto SSL, integrated Web Analytics view), and Spaceship's CNAME-at-apex support is awkward. Trade-off: one-time nameserver swap at Spaceship (5 minutes), wait for propagation (typically <1 hour). Worth it.
+
+**Site-level config added to the build:**
+
+- `site/public/_redirects` — `/*  /index.html  200`. SPA fallback for React Router — any path that doesn't match a static asset gets the app shell. Verified: direct hit on `/works/chai` loads the case study, not a Cloudflare 404.
+- `site/public/_headers` — `Cache-Control: public, max-age=31536000, immutable` for `/assets/*` and `/fonts/*`; `max-age=0, must-revalidate` for `*.html`. Standard hashed-asset caching with no-cache HTML so deploys are visible immediately.
+- `site/.nvmrc` — `20`. Pins Cloudflare's build container to Node 20; the React 19 / Vite 8 / TypeScript 6 stack needs ≥20.
+
+**Live URLs:**
+
+- `https://yankun-portfolio.pages.dev` — Cloudflare-hosted production
+- `https://bf445755.yankun-portfolio.pages.dev` — first deploy's immutable hash URL (kept by Cloudflare for rollback)
+
+**Verified post-deploy:**
+
+- Homepage renders the full desk scene (Field Notebook, yogurt roulette, CV card, About polaroid, pen, plate metadata, register marks)
+- Fraunces / JetBrains Mono / Caveat all load
+- Direct deep route `/works/chai` loads → `_redirects` shipping correctly
+- Bad route `/this-page-does-not-exist` shows the custom 404 ("This page is blank. Not every idea makes it in.")
+- Lighthouse not yet run — to be checked once custom domain attaches
+
+**Analytics plan (deferred until token issued).** Cloudflare Web Analytics over Google Analytics or Plausible. Reasoning: free, no cookie banner required (privacy-first design — no cross-site tracking), lightweight script tag (~3 KB), lives in the same Cloudflare dashboard, and matches the site's anti-bloat sensibility. To wire up after the custom domain is live: Cloudflare → Analytics & Logs → Web Analytics → Add site → enter `yankun.design`. Cloudflare issues a single-line `<script>` tag with a site token. Add the tag at the bottom of `site/index.html` body, gated behind `import.meta.env.PROD` so it doesn't fire in dev. No analytics library, no React wrapper — one inline tag.
+
+**Open items:**
+
+- Move DNS at Spaceship → Cloudflare (in progress; Yankun is updating nameservers)
+- Attach `yankun.design` and `www.yankun.design` to the Pages project once the zone activates
+- Run Lighthouse on the custom domain (target 95+ across categories per scope doc)
+- Enable Web Analytics; add the script tag to `index.html`
+- Reattempt the dashboard git-connect flow next week; if it works, switch from manual `wrangler` to auto-deploy on push. If not, document the wrangler workflow in a `DEPLOY.md` for future runs.
+
+**Files touched:**
+
+- `site/public/_redirects` (new)
+- `site/public/_headers` (new)
+- `site/.nvmrc` (new)
+- `00-brief/decisions-log.md` (this entry)
+
+**Verification:**
+
+- Local `npm run build` succeeds; `_redirects` and `_headers` copy into `dist/` root correctly
+- Live URL passes the three checks above (homepage, deep route, 404)
+
+**Source:** Conversation 2026-05-10. Hosting comparison considered Cloudflare Pages, Vercel, Netlify, GitHub Pages. Vercel was the runner-up.
+
+---
+
 ## 2026-05-04 · Canvas — Lift-and-Loft hover (image bloom + dim-others, layered on existing hover)
 
 The mockups on the canvas read as blue rectangles at column-width — readability problem flagged in the user's hover sketch. Considered five options (Lift-and-Loft, Specimen Drawer, Lift-Off Page, Loupe, Trace Overlay), prototyped 1/2/4 in `03-prototype-explore/prototype-card-hover.html`, and shipped a refined version of #1.

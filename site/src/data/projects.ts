@@ -117,7 +117,7 @@ export const projects: Project[] = [
     gridRow: 2,
     alignVertical: 'start',
     aspect: '1-1',
-    mockup: '/canvas/mockups/build-with-ai.svg',
+    mockup: '/canvas/mockups/build-with-ai.png',
   },
   {
     slug: 'sap-fieldglass',
