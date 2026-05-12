@@ -50,7 +50,7 @@ import styles from './NotebookTransition.module.css';
  *   spread     The open-notebook spread. Fixed at canvas-center geometry
  *              from the first frame; only opacity animates.
  *   cover      The rotating notebook cover. Uses the SAME asset as the
- *              desk (`/plate/notebook.png`) so the start/end frames are
+ *              desk (`/plate/notebook.webp`) so the start/end frames are
  *              pixel-identical to what the desk paints — no asset
  *              swap, no cross-fade handoff, no aspect-ratio mismatch.
  *              Position/size morph from desk-rect to spread-binding-half-
@@ -73,8 +73,8 @@ import styles from './NotebookTransition.module.css';
  * cross-fade between the two surfaces.
  */
 
-const ASSET_COVER = '/plate/notebook.png';
-const ASSET_SPREAD = '/canvas/open-notebook.png';
+const ASSET_COVER = '/plate/notebook.webp';
+const ASSET_SPREAD = '/canvas/open-notebook.webp';
 
 const SPREAD_ASPECT = 2600 / 1812;
 const REDUCED_MOTION_DURATION = 240;
@@ -462,7 +462,7 @@ export default function NotebookTransition() {
    * OPEN choreography. ~1240ms total.
    *
    * Single-asset model (v1.2): the cover layer uses the SAME image as the
-   * desk (`/plate/notebook.png`). At opacity 1, position-matched to the
+   * desk (`/plate/notebook.webp`). At opacity 1, position-matched to the
    * desk's notebook, it's pixel-identical to what's already painted there
    * — so the user can't distinguish the desk's static notebook from the
    * overlay's animated cover. No swap, no cross-fade handoff, no

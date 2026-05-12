@@ -22,17 +22,17 @@ export default function Ephemera() {
     <div className={styles.ephemera} aria-hidden="true">
       <img
         className={styles.sketch}
-        src="/desk/architectural-sketch.png"
+        src="/desk/architectural-sketch.webp"
         alt=""
       />
       <img
         className={styles.blueprint}
-        src="/desk/blueprint-fragment.png"
+        src="/desk/blueprint-fragment.webp"
         alt=""
       />
       <img
         className={styles.postage}
-        src="/desk/postage-stamp.png"
+        src="/desk/postage-stamp.webp"
         alt=""
       />
     </div>

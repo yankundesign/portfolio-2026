@@ -12,7 +12,7 @@
  *   .coverLayer    The rotating notebook. Position and size morph from
  *                   desk-rect to spread-binding-center-rect. Rotation hinges
  *                   around its left edge (the spine). Uses the SAME asset
- *                   as the desk (`/plate/notebook.png`) so the start/end
+ *                   as the desk (`/plate/notebook.webp`) so the start/end
  *                   frames are pixel-identical to the desk's static image
  *                   — the overlay can fade in/out invisibly.
  *   .background    Paper-coloured wash. Covers the route swap by going

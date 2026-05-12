@@ -2,7 +2,7 @@
  * Cat roulette data.
  *
  * Six moods of Yogurt (Yankun's British Shorthair). Each id corresponds to a
- * hand-drawn PNG at /public/cats/{id}.png.
+ * hand-drawn WebP at /public/cats/{id}.webp.
  *
  * Labels are first-person, cat-voice, short. They read as captions on a
  * field-notebook page, not marketing copy.

@@ -9,7 +9,7 @@ export interface AboutObjectProps {
 /**
  * About card — fig. 03. Polaroid specimen, lower-right region.
  *
- * Renders the real generated polaroid asset; the polaroid PNG already
+ * Renders the real generated polaroid asset; the polaroid WebP already
  * carries its own caption strip, so no overlay text is added here.
  */
 export default function AboutObject({ onClick, className }: AboutObjectProps) {
@@ -22,7 +22,7 @@ export default function AboutObject({ onClick, className }: AboutObjectProps) {
         aria-label="About — placeholder"
       >
         <img
-          src="/plate/about.png"
+          src="/plate/about.webp"
           alt=""
           className={styles.image}
           draggable={false}

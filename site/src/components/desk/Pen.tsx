@@ -16,7 +16,7 @@ export default function Pen({ className }: PenProps) {
     <figure className={`${styles.figure} ${className ?? ''}`}>
       <div className={styles.prop} aria-hidden="true">
         <img
-          src="/plate/pen.png"
+          src="/plate/pen.webp"
           alt=""
           className={styles.image}
           draggable={false}

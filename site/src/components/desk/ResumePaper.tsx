@@ -28,7 +28,7 @@ export default function ResumePaper({ onClick, className }: ResumePaperProps) {
         aria-label="View CV"
       >
         <img
-          src="/plate/cv.png"
+          src="/plate/cv.webp"
           alt=""
           className={styles.image}
           draggable={false}

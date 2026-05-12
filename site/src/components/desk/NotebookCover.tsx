@@ -36,7 +36,7 @@ export default function NotebookCover({ className }: NotebookCoverProps) {
       >
         <WatercolorWash className={styles.wash} />
         <img
-          src="/plate/notebook.png"
+          src="/plate/notebook.webp"
           alt=""
           className={styles.image}
           draggable={false}
