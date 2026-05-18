@@ -13,35 +13,6 @@
   position: relative;
 }
 
-.topNav {
-  position: absolute;
-  top: clamp(1.5rem, 3vw, 2.25rem);
-  left: clamp(1.5rem, 4vw, 3.75rem);
-  z-index: 20;
-}
-
-.back {
-  font-family: var(--font-mono);
-  font-size: var(--text-caption);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.25rem 0;
-  transition: color var(--duration-hover) var(--ease-out);
-  border-bottom: 1px solid transparent;
-}
-
-.back:hover,
-.back:focus-visible {
-  color: var(--ink);
-  border-bottom-color: var(--ink);
-  outline: none;
-}
-
 .main {
   padding: clamp(4rem, 8vw, 6rem) clamp(1.5rem, 4vw, 3.75rem) clamp(4rem, 8vw, 6rem);
   display: flex;
@@ -156,10 +127,6 @@
     margin-top: 1.5rem;
   }
 
-  .topNav {
-    top: 1rem;
-    left: 1rem;
-  }
 }
 
 @media (prefers-reduced-motion: no-preference) {

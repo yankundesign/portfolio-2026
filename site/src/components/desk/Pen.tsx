@@ -1,4 +1,3 @@
-import FigCaption from '../shared/FigCaption';
 import styles from './Pen.module.css';
 
 export interface PenProps {
@@ -8,8 +7,9 @@ export interface PenProps {
 /**
  * Pen — fig. 04. Non-interactive prop, lower-right of the plate.
  *
- * Renders the real generated pen asset. No onClick, but still gets a
- * figcaption to match the plate convention (every object is numbered).
+ * Renders the real generated pen asset. Caption suppressed: the pen is
+ * decorative and crowds the corner; figure 4 is intentionally absent
+ * from the plate's numbered set.
  */
 export default function Pen({ className }: PenProps) {
   return (
@@ -22,7 +22,6 @@ export default function Pen({ className }: PenProps) {
           draggable={false}
         />
       </div>
-      <FigCaption number={4} label="pen" align="right" />
     </figure>
   );
 }

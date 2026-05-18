@@ -48,7 +48,8 @@ import styles from './ChaiProject.module.css';
  *                         · 6.1 Contextual analysis (sparkle → Q&A) — 2 plates
  *                         · 6.2 Data analysis (direct queries)      — 1 plate
  *                         · 6.3 Custom report generation             — 2 plates
- *   8. Devices          prose, two plates stacked
+ *   8. Workspaces & Devices
+ *                       prose, two plates stacked
  *   9. Outcome          3% → 18% display + context paragraph
  *  10. Next             transition into the Control Hub Agentic case study
  *  11. Credits          role-only, no names
@@ -230,14 +231,14 @@ export default function ChaiProject() {
             </div>
           </section>
 
-          {/* ---- Beat 7 · Devices ---------------------------------- */}
-          <section id="proof-3" aria-label="Devices" className={styles.proof}>
-            <SectionHeader label="Devices" summary={proofs.devices.summary} />
+          {/* ---- Beat 7 · Workspaces & Devices ---------------------- */}
+          <section id="proof-3" aria-label="Workspaces & Devices" className={styles.proof}>
+            <SectionHeader label="Workspaces & Devices" summary={proofs.devices.summary} />
             {devicesProse ? (
               <ProseBlock paragraphs={devicesProse} />
             ) : (
               <TodoSlot
-                beat="Beat 7 · Devices Troubleshooting"
+                beat="Beat 7 · Workspaces & Devices"
                 hint="The craft-depth moment. Multi-signal embeddings, root-cause clustering. Add one or two lines on what didn't work first."
                 outlineRef="01-content/chai.md · Beat 7"
                 size="md"

@@ -50,9 +50,51 @@ npm run build        # Production build to dist/
 npm run preview      # Preview production build
 ```
 
-Deploy target: Vercel or Cloudflare Pages, root directory `site/`, build output `dist/`.
-
 TypeScript strict mode for all code. Self-hosted fonts (woff2) with `font-display: swap`.
+
+## Deploy
+
+Live at **https://yankun.design** (also `https://yankun-portfolio.pages.dev`). Hosted on Cloudflare Pages, project `yankun-portfolio`. DNS is at Cloudflare.
+
+**Deploys are manual.** Cloudflare's dashboard "Connect to Git" flow has a known OAuth pairing bug on this account — the GitHub App installs cleanly, but Cloudflare's callback fails to pair, so there is no auto-deploy on `git push`. Every deploy goes through Wrangler from local.
+
+### Workflow
+
+After making changes, from the repo root:
+
+```bash
+cd site
+npm run build
+npx wrangler pages deploy dist --project-name=yankun-portfolio --branch=main --commit-dirty=true
+cd ..
+git add .
+git commit -m "<your message>"
+git push
+```
+
+Build + Wrangler ships the live site. `git push` updates the GitHub repo. They are independent — running one does not trigger the other. Order is not strict, but deploying before pushing is the cleaner habit: a failed build gets fixed before a commit lands.
+
+### Wrangler auth
+
+First-time use opens a browser OAuth flow to Cloudflare; stays logged in ~30 days. If `wrangler` reports `Failed to fetch auth token`, run the command again — it retries via OAuth automatically.
+
+### Future fix
+
+Retry the dashboard git-connect flow occasionally — the OAuth bug tends to clear after several days. Pages → yankun-portfolio → Settings → Builds & deployments → "Connect to Git." If it succeeds, auto-deploy on push starts working and the Wrangler step becomes optional. If it errors, a GitHub Actions workflow with a Cloudflare API token is the backup. Decisions captured in `00-brief/decisions-log.md` under the 2026-05-10 entry.
+
+## Image assets
+
+Images in `site/public/` use two formats depending on usage:
+
+**WebP at q=85** for desk-scene chrome, plates, cats, transitions, and the canvas notebook spread — 90% smaller than equivalent PNGs at indistinguishable quality. These load on every page, so weight matters.
+
+**PNG** for `canvas/mockups/*` (project tiles on the canvas) and `images/chai/*` (CHAI case study detail screenshots) — kept lossless so text and fine UI remain crisp at zoom.
+
+Original PNGs for WebP-converted images are still kept in `site/public/` alongside the WebPs for revertability. Code references the WebP. Reverting a single image is a one-line `.webp` → `.png` swap in the source — the original PNG is already there to serve.
+
+When adding a new image:
+- Mockup tile, case study screenshot, anything where pixel fidelity at zoom matters → PNG
+- Anything else (textures, plates, illustrations, hero objects) → WebP at q=85
 
 ## Architecture (site/src/)
 

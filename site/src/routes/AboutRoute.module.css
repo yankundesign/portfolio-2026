@@ -1,0 +1,240 @@
+.page {
+  min-height: 100vh;
+  background: var(--paper);
+  color: var(--ink);
+  position: relative;
+}
+
+.main {
+  padding: clamp(4rem, 8vw, 6rem) clamp(1.5rem, 4vw, 3.75rem) clamp(4rem, 8vw, 6rem);
+  display: flex;
+  justify-content: center;
+}
+
+.contentCol {
+  width: 100%;
+  max-width: var(--grid-max);
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.header {
+  margin: clamp(1.5rem, 4vw, 3rem) 0 clamp(2.5rem, 6vw, 4rem);
+  padding-bottom: clamp(1.25rem, 3vw, 2rem);
+  border-bottom: 1px solid var(--ink-muted);
+}
+
+.sectionNumber {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  letter-spacing: 0.12em;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: clamp(3rem, 8vw, 6rem);
+  line-height: 0.95;
+  letter-spacing: 0;
+  margin: clamp(0.75rem, 2vw, 1.25rem) 0 0;
+  color: var(--ink);
+  font-variation-settings: 'opsz' 72;
+}
+
+.heroSection {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.42fr) minmax(0, 0.58fr);
+  gap: clamp(2.5rem, 7vw, 6rem);
+  align-items: center;
+  padding-bottom: clamp(3rem, 8vw, 5rem);
+}
+
+.heroSlot {
+  justify-self: center;
+}
+
+.copySlot {
+  justify-self: start;
+  max-width: 40rem;
+  padding-left: clamp(1rem, 3vw, 2rem);
+  border-left: 1px solid var(--ink-muted);
+}
+
+.codaSection {
+  padding: clamp(2rem, 5vw, 3.5rem) 0 clamp(2rem, 5vw, 3.5rem);
+  border-top: 1px solid var(--ink-muted);
+}
+
+.codaHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1.5rem;
+  margin-bottom: clamp(1.5rem, 4vw, 2.25rem);
+}
+
+.hint {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  letter-spacing: var(--chrome-tracking-tight);
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.codaLayer {
+  position: relative;
+  min-height: clamp(230px, 24vw, 320px);
+}
+
+.codaLayer > * {
+  position: absolute;
+}
+
+.coda1 {
+  left: clamp(0rem, 8vw, 7rem);
+  top: clamp(1.5rem, 4vw, 3rem);
+}
+
+.coda2 {
+  left: 40%;
+  top: 0;
+}
+
+.coda3 {
+  right: clamp(0rem, 9vw, 8rem);
+  top: clamp(1rem, 3vw, 2.5rem);
+}
+
+.codaLayer > *:hover {
+  z-index: 6;
+}
+
+.footer {
+  padding-top: clamp(1.5rem, 4vw, 2.5rem);
+  border-top: 1px solid var(--ink-muted);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  letter-spacing: 0.12em;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+}
+
+.email {
+  color: var(--ink-soft);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition:
+    color var(--duration-hover) var(--ease-out),
+    border-color var(--duration-hover) var(--ease-out);
+}
+
+.email:hover,
+.email:focus-visible {
+  color: var(--ink);
+  border-bottom-color: var(--ink);
+  outline: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .contentCol > * {
+    animation: content-in 480ms var(--ease-out) both;
+  }
+
+  @keyframes content-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+@media (max-width: 900px) {
+  .heroSection {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    align-items: start;
+  }
+
+  .heroSlot {
+    justify-self: start;
+  }
+
+  .copySlot {
+    padding-left: clamp(1rem, 3vw, 1.5rem);
+  }
+
+  .codaLayer {
+    min-height: 410px;
+  }
+
+  .coda1 {
+    left: 0;
+    top: 1.25rem;
+  }
+
+  .coda2 {
+    left: auto;
+    right: 0;
+    top: 0.1rem;
+  }
+
+  .coda3 {
+    left: 26%;
+    right: auto;
+    top: 10.75rem;
+  }
+}
+
+@media (max-width: 720px) {
+  .header {
+    margin-top: 2.5rem;
+  }
+
+  .codaHeader {
+    display: block;
+  }
+
+  .hint {
+    margin-top: 0.75rem;
+  }
+}
+
+@media (max-width: 520px) {
+  .codaLayer {
+    min-height: 500px;
+  }
+
+  .coda1 {
+    left: 0;
+  }
+
+  .coda2 {
+    right: 0;
+    top: 8.5rem;
+  }
+
+  .coda3 {
+    left: 0;
+    top: 17.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .email {
+    transition: none;
+  }
+}

@@ -98,10 +98,10 @@
   right: -10px;
   /* Drawer height is about half the card — enough to hold subtitle + impact
    * without becoming a competing card. */
-  height: 46%;
+  height: 54%;
   /* Clean museum-label stock: off-white, slightly warm, with only a
    * whisper of paper tooth. No ruled lines; legibility wins here. */
-  background-color: #f8f5ee;
+  background-color: #f0f0f0;
   background-image: url('/textures/project-card-paper.svg');
   background-size: 360px 360px;
   background-blend-mode: multiply;

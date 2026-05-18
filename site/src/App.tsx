@@ -6,6 +6,7 @@ import ProjectRoute from './routes/ProjectRoute'
 import JournalRoute from './routes/JournalRoute'
 import ColophonRoute from './routes/ColophonRoute'
 import CvRoute from './routes/CvRoute'
+import AboutRoute from './routes/AboutRoute'
 import NotFoundRoute from './routes/NotFoundRoute'
 import InkFilters from './components/shared/InkFilters'
 import NotebookTransition from './components/transition/NotebookTransition'
@@ -31,6 +32,7 @@ function AnimatedRoutes() {
         <Route path="/works" element={<CanvasRoute />} />
         <Route path="/works/:slug" element={<ProjectRoute />} />
         <Route path="/cv" element={<CvRoute />} />
+        <Route path="/about" element={<AboutRoute />} />
         <Route path="/journal/:slug" element={<JournalRoute />} />
         <Route path="/colophon" element={<ColophonRoute />} />
         <Route path="*" element={<NotFoundRoute />} />

@@ -1,5 +1,4 @@
 import { useEffect } from 'react';
-import { Link } from 'react-router';
 import CvCover from '../components/cv/CvCover';
 import CvRole from '../components/cv/CvRole';
 import CvMetric from '../components/cv/CvMetric';
@@ -7,6 +6,7 @@ import CvSkills from '../components/cv/CvSkills';
 import CvEducation from '../components/cv/CvEducation';
 import CvDownload from '../components/cv/CvDownload';
 import Grain from '../components/shared/Grain';
+import BackToDeskLink from '../components/shared/BackToDeskLink';
 import { roles, metrics, intro } from '../data/cv';
 import styles from './CvRoute.module.css';
 
@@ -45,12 +45,7 @@ export default function CvRoute() {
   return (
     <div className={styles.page}>
       <Grain />
-
-      <nav className={styles.topNav} aria-label="Primary">
-        <Link to="/" className={styles.back}>
-          <span aria-hidden="true">←</span> back to desk
-        </Link>
-      </nav>
+      <BackToDeskLink />
 
       <main className={styles.main}>
         <div className={styles.contentCol}>

@@ -91,7 +91,7 @@
 }
 
 .proof {
-  /* Smart Search · Report Analysis · Devices sit a little further apart
+  /* Smart Search · Report Analysis · Workspaces & Devices sit a little further apart
      than regular beats — they're the load-bearing sections. */
   margin-top: clamp(4rem, 8vw, 7rem);
 }
@@ -107,14 +107,14 @@
 
 /* Evolution row — three plates stacked (1.0 → 2.0 → 3.0).
    Single column, full width of the reading column. The reader scrolls
-   through the three releases in order; side-by-side comparison is not
+   through the releases in order; side-by-side comparison is not
    the move. */
 
 .evolutionRow {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
-  margin: clamp(2rem, 4vw, 3rem) 0;
+  margin: 0 0 clamp(2rem, 4vw, 3rem);
 }
 
 /* Report Analysis sub-beats (6.1, 6.2, 6.3).

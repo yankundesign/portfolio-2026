@@ -68,9 +68,9 @@ export interface ProjectGroup {
 export const projects: Project[] = [
   {
     slug: 'chai',
-    title: 'Control Hub AI',
+    title: 'Control Hub AI Assistant',
     role: 'ai assistant for it admins',
-    subtitle: 'An AI assistant for IT admins navigating a labyrinthine console',
+    subtitle: 'An AI assistant for IT admins',
     year: '2024–2025',
     collaborators: [],
     impact: 'adoption from 3% to 18%',
@@ -86,12 +86,12 @@ export const projects: Project[] = [
   {
     slug: 'control-hub-agentic',
     title: 'Control Hub Agentic',
-    // Placeholder — Yankun to confirm role line, real impact, and metric.
     role: 'agentic experience for control hub',
-    subtitle: 'Placeholder subtitle — content pending',
-    year: '2025',
+    subtitle:
+      'Designing how AI plans, acts, and stays accountable inside an enterprise admin console',
+    year: '2026',
     collaborators: [],
-    impact: 'metric pending',
+    impact: 'direction-setting prototype for leadership review',
     figNumber: 2,
     size: 'main',
     colStart: 8,
@@ -106,7 +106,7 @@ export const projects: Project[] = [
     title: 'Build with AI',
     role: 'ai tools and team systems',
     subtitle:
-      'A working shelf of AI builds: a Figma plug-in, this portfolio, team agent skills, and side projects.',
+      'A working shelf of AI builds.',
     year: '2025–2026',
     collaborators: [],
     impact: 'experiments turned into reusable tools',

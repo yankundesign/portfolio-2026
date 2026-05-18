@@ -19,7 +19,7 @@ export default function AboutObject({ onClick, className }: AboutObjectProps) {
         type="button"
         className={styles.button}
         onClick={onClick}
-        aria-label="About — placeholder"
+        aria-label="About"
       >
         <img
           src="/plate/about.webp"
