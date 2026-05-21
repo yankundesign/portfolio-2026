@@ -71,12 +71,35 @@
    studies read top to bottom on tablet and below. */
 
 @media (max-width: 1023px) {
+  .article {
+    --reading-measure: calc(100vw - clamp(3rem, 10vw, 7.5rem));
+  }
+
   .grid {
     grid-template-columns: 1fr;
+  }
+  .body {
+    grid-column: 1;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
   }
   .rail,
   .gutter {
     display: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .article,
+  .grid,
+  .body,
+  .beat,
+  .proof,
+  .colophon {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
   }
 }
 

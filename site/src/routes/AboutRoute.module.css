@@ -77,18 +77,9 @@
   margin-bottom: clamp(1.5rem, 4vw, 2.25rem);
 }
 
-.hint {
-  margin: 0;
-  font-family: var(--font-mono);
-  font-size: var(--text-caption);
-  letter-spacing: var(--chrome-tracking-tight);
-  text-transform: uppercase;
-  color: var(--ink-soft);
-}
-
 .codaLayer {
   position: relative;
-  min-height: clamp(230px, 24vw, 320px);
+  min-height: clamp(290px, 30vw, 400px);
 }
 
 .codaLayer > * {
@@ -178,7 +169,7 @@
   }
 
   .codaLayer {
-    min-height: 410px;
+    min-height: 500px;
   }
 
   .coda1 {
@@ -195,7 +186,7 @@
   .coda3 {
     left: 26%;
     right: auto;
-    top: 10.75rem;
+    top: 13.5rem;
   }
 }
 
@@ -207,15 +198,11 @@
   .codaHeader {
     display: block;
   }
-
-  .hint {
-    margin-top: 0.75rem;
-  }
 }
 
 @media (max-width: 520px) {
   .codaLayer {
-    min-height: 500px;
+    min-height: 620px;
   }
 
   .coda1 {
@@ -224,12 +211,12 @@
 
   .coda2 {
     right: 0;
-    top: 8.5rem;
+    top: 10.5rem;
   }
 
   .coda3 {
     left: 0;
-    top: 17.5rem;
+    top: 21.5rem;
   }
 }
 

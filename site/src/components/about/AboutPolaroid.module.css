@@ -7,10 +7,13 @@
 }
 
 .polaroidButton {
-  --tilt-x: 0deg;
-  --tilt-y: 0deg;
-  --lift-y: 0px;
-  --lift-scale: 1;
+  --object-tilt-x: 0deg;
+  --object-tilt-y: 0deg;
+  --object-lift-y: 0px;
+  --object-scale: 1;
+  --object-shadow-x: 0px;
+  --object-shadow-y: 14px;
+  --object-shadow-scale: 1.03;
   --rest-rotation: 0deg;
   display: block;
   padding: 0;
@@ -18,24 +21,18 @@
   background: transparent;
   color: inherit;
   cursor: pointer;
-  perspective: 1200px;
-  transform:
-    translateY(var(--lift-y))
-    scale(var(--lift-scale))
-    rotate(var(--rest-rotation))
-    rotateX(var(--tilt-x))
-    rotateY(var(--tilt-y));
+  perspective: 900px;
+  position: relative;
+  transform: rotate(var(--rest-rotation));
   transform-style: preserve-3d;
-  transition:
-    transform 180ms var(--ease-out),
-    filter 180ms var(--ease-out);
+  transition: transform 170ms var(--ease-out);
   outline: none;
 }
 
 .polaroidButton:hover,
 .polaroidButton:focus-visible {
-  --lift-y: -6px;
-  --lift-scale: 1.02;
+  --object-lift-y: -10px;
+  --object-scale: 1.025;
 }
 
 .polaroidButton:focus-visible {
@@ -48,13 +45,60 @@
 }
 
 .codaButton {
-  width: clamp(132px, min(15vw, 22vh), 210px);
+  width: clamp(168px, min(19vw, 28vh), 264px);
   cursor: default;
 }
 
 .codaButton:hover {
-  --lift-scale: 1.03;
-  filter: drop-shadow(0 14px 20px rgba(22, 38, 94, 0.14));
+  --object-scale: 1.025;
+}
+
+.polaroidShadow {
+  position: absolute;
+  left: 7%;
+  right: 7%;
+  bottom: 3%;
+  height: 22%;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: 999px;
+  background:
+    radial-gradient(
+      ellipse at center,
+      rgba(22, 38, 94, 0.28) 0%,
+      rgba(22, 38, 94, 0.15) 44%,
+      rgba(22, 38, 94, 0) 73%
+    );
+  filter: blur(10px);
+  opacity: 0.68;
+  transform:
+    translate3d(
+      var(--object-shadow-x),
+      var(--object-shadow-y),
+      -32px
+    )
+    scale(var(--object-shadow-scale));
+  transform-origin: center;
+  transition:
+    transform 170ms var(--ease-out),
+    opacity 170ms var(--ease-out);
+  will-change: transform;
+}
+
+.polaroidObject {
+  display: block;
+  width: 100%;
+  position: relative;
+  z-index: 1;
+  transform:
+    translate3d(0, var(--object-lift-y), 24px)
+    scale(var(--object-scale))
+    rotateX(var(--object-tilt-x))
+    rotateY(var(--object-tilt-y));
+  transform-origin: 48% 56%;
+  transform-style: preserve-3d;
+  transition: transform 170ms var(--ease-out);
+  will-change: transform;
 }
 
 .flipStack {
@@ -84,7 +128,6 @@
   border: 1px solid rgba(22, 38, 94, 0.32);
   box-shadow:
     inset 0 1px 0 rgba(244, 241, 234, 0.85),
-    0 16px 28px rgba(22, 38, 94, 0.16),
     0 2px 0 rgba(22, 38, 94, 0.1);
   backface-visibility: hidden;
   overflow: visible;
@@ -125,6 +168,15 @@
   overflow: hidden;
 }
 
+.imageWindowPhoto {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
 .imageWindow::after {
   content: '';
   position: absolute;
@@ -133,6 +185,7 @@
   background-size: 260px 260px;
   mix-blend-mode: screen;
   opacity: 0.16;
+  pointer-events: none;
 }
 
 .printCaption {
@@ -151,34 +204,6 @@
 .coda .printCaption {
   font-size: 0.625rem;
   padding-top: 9%;
-}
-
-.tape {
-  position: absolute;
-  top: -7%;
-  width: 43%;
-  height: 13%;
-  background:
-    linear-gradient(90deg, transparent 0 8%, rgba(22, 38, 94, 0.08) 8% 9%, transparent 9%),
-    linear-gradient(180deg, rgba(244, 241, 234, 0.9), rgba(221, 214, 194, 0.74));
-  border: 1px solid rgba(22, 38, 94, 0.12);
-  box-shadow: 0 2px 4px rgba(22, 38, 94, 0.1);
-  transform: rotate(-1deg);
-  z-index: 2;
-}
-
-.tapeLeft {
-  left: 27%;
-}
-
-.tapeCenter {
-  left: 50%;
-  transform: translateX(-50%) rotate(1deg);
-}
-
-.tapeRight {
-  right: 18%;
-  transform: rotate(2deg);
 }
 
 .backStamp {
@@ -216,7 +241,7 @@
   }
 
   .codaButton {
-    width: clamp(140px, 30vw, 188px);
+    width: clamp(176px, 38vw, 236px);
   }
 }
 
@@ -226,7 +251,7 @@
   }
 
   .codaButton {
-    width: 112px;
+    width: 144px;
   }
 
   .printCaption {
@@ -245,20 +270,27 @@
   }
 
   .codaButton {
-    width: clamp(126px, 42vw, 166px);
+    width: clamp(158px, 50vw, 208px);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .polaroidButton,
+  .polaroidObject,
+  .polaroidShadow {
+    transition: none;
+  }
+
   .polaroidButton:hover,
   .polaroidButton:focus-visible {
-    --tilt-x: 0deg;
-    --tilt-y: 0deg;
-    --lift-y: 0px;
-    --lift-scale: 1;
-    transition: none;
-    filter: none;
+    --object-tilt-x: 0deg;
+    --object-tilt-y: 0deg;
+    --object-lift-y: 0px;
+    --object-scale: 1;
+  }
+
+  .polaroidShadow {
+    transform: translate3d(0, 14px, -32px) scale(1.03);
   }
 
   .flipStack {

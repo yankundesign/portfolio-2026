@@ -57,9 +57,6 @@ export default function AboutRoute() {
           <section className={styles.codaSection} aria-label="Photo notes">
             <div className={styles.codaHeader}>
               <span className={styles.sectionNumber}>Photo notes</span>
-              <p className={styles.hint}>
-                Turn the large polaroid for notes.
-              </p>
             </div>
 
             <div className={styles.codaLayer} aria-hidden="true">

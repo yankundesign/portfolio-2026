@@ -260,7 +260,7 @@ export default function CatRoulette({ className }: CatRouletteProps) {
             />
           </svg>
           <span className={styles.badgeRivet} />
-          <span className={styles.badgeSpin}>— SPIN IT —</span>
+          <span className={styles.badgeSpin}>SPIN IT</span>
         </div>
 
         {/* Layer 4: pointer triangle at 12 o'clock. */}

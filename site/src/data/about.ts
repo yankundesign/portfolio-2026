@@ -1,7 +1,6 @@
 export const aboutParagraphs = [
   'I work on systems where the surface is small and the underneath is enormous — admin tools, AI assistants, the kind of software with a thousand settings and no front door. Most of what I do is making that underneath legible. CHAI is the work I’d point at first.',
   'I came to product design from architecture. I kept the part about thinking in floor plans. I let go of the part where you wait eight years to see anything stand up.',
-  'I’m in San Francisco, looking for a small team where design and build aren’t different jobs.',
 ];
 
 export const heroAnnotation = {
@@ -15,29 +14,33 @@ export interface AboutCodaItem {
   caption: string;
   fig: number;
   rotation: string;
-  tape: 'left' | 'center' | 'right';
+  image: string;
+  alt: string;
 }
 
 export const aboutCoda: AboutCodaItem[] = [
   {
-    id: 'studio',
-    caption: 'STUDIO 2 · 2010',
+    id: 'yogurt',
+    caption: 'MY CAT - YOGURT',
     fig: 7,
     rotation: '-6deg',
-    tape: 'left',
+    image: '/images/about/yogurt.png',
+    alt: 'A jar of homemade yogurt on the kitchen counter.',
   },
   {
-    id: 'sf',
-    caption: 'SF · APR 2026',
+    id: 'outdoor',
+    caption: 'OUTSIDE · SOMETIMES',
     fig: 8,
     rotation: '3deg',
-    tape: 'center',
+    image: '/images/about/outdoor.png',
+    alt: 'Outside, somewhere in the Bay Area.',
   },
   {
-    id: 'review',
-    caption: 'FIRST REVIEW',
+    id: 'hobby',
+    caption: 'OFF-HOURS',
     fig: 9,
     rotation: '-1deg',
-    tape: 'right',
+    image: '/images/about/hobby.png',
+    alt: 'An off-hours hobby moment.',
   },
 ];

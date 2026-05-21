@@ -2,6 +2,8 @@ import { useEffect } from 'react';
 import { Link, useParams } from 'react-router';
 import ChaiProject from '../components/project/ChaiProject';
 import ControlHubAgenticProject from '../components/project/ControlHubAgenticProject';
+import SapFieldglassProject from '../components/project/SapFieldglassProject';
+import BuildWithAiProject from '../components/project/BuildWithAiProject';
 import Grain from '../components/shared/Grain';
 import { projects } from '../data/projects';
 import styles from './ProjectRoute.module.css';
@@ -9,8 +11,8 @@ import styles from './ProjectRoute.module.css';
 /**
  * /works/:slug — project detail route.
  *
- * CHAI and Control Hub Agentic have bespoke layouts. Other projects
- * (build-with-ai, sap-fieldglass) render a stub with the canvas-card info.
+ * CHAI, Control Hub Agentic, Build with AI, and SAP Fieldglass have bespoke
+ * layouts. Other projects render a stub with the canvas-card info.
  *
  * /works/smart-search was retired in canvas v0.7 — the slug now resolves to
  * the 404 stub. Smart Search remains a proof beat *inside* the CHAI case
@@ -56,6 +58,10 @@ export default function ProjectRoute() {
           <ChaiProject />
         ) : slug === 'control-hub-agentic' ? (
           <ControlHubAgenticProject />
+        ) : slug === 'build-with-ai' ? (
+          <BuildWithAiProject />
+        ) : slug === 'sap-fieldglass' ? (
+          <SapFieldglassProject />
         ) : project ? (
           <ProjectStub project={project} />
         ) : (

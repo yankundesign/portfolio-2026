@@ -5,8 +5,8 @@ import type { Figure } from './chaiContent';
  *
  * Source: 01-content/control-hub-agentic-outline.md.
  *
- * The outline is structural, not final prose. Prose slots intentionally remain
- * null so the page renders explicit TodoSlots instead of AI-written essay copy.
+ * Draft prose is based on Yankun's 2026-05-18 notes and should be treated as
+ * editable case-study copy until the final screen assets land.
  */
 
 export type ProseSlot = readonly string[] | null;
@@ -15,7 +15,7 @@ export const header = {
   figNumber: 'fig. 02',
   title: 'Control Hub Agentic',
   subtitle:
-    'Designing how AI plans, acts, and stays accountable inside an enterprise admin console.',
+    'Designing agnetic AI experience inside an enterprise admin console.',
   yearRange: '2026',
   context: 'Cisco Webex · Control Hub',
   role: 'Product Designer, design lead',
@@ -26,15 +26,42 @@ export const header = {
 } as const;
 
 export const prose = {
-  opening: null,
-  context: null,
-  framework: null,
-  compare: null,
-  onboard: null,
-  deleteLine: null,
-  craft: null,
-  outcome: null,
-  reflection: null,
+  opening: [
+    'The clearest feedback on the agentic prototype was not resistance to AI. It was a need for Control Hub to still feel like Control Hub.',
+    'Admins could see the value of an assistant that planned work, checked dependencies, and handled repetitive tasks. But they did not want a new AI surface that took the console away from them. They wanted a recognizable home base, with the agent working inside it.',
+    'One line stayed with me: "I could see it making Control Hub even easier to use for users that aren\'t in it every day."',
+  ],
+  context: [
+    'After CHAI, the product and design team wanted a north star for agentic AI inside Control Hub. The goal was not a generic assistant demo. It was a vision grounded in real admin work: where AI should live, how it should plan, when it should ask for approval, and how every action should remain visible afterward.',
+  ],
+  framework: [
+    'I organized the experience around four surfaces: Chat, Insights, Workflow, and Activity.',
+    'Chat stayed the main interface because admins often start with intent, not a form. Insights made the system proactive by surfacing important changes and risks in context. Workflow handled repeatable tasks through a sequence of skills, checks, and approval moments. Activity made the agent accountable by recording what it did, what the admin approved, and what changed.',
+  ],
+  compare: [
+    'One proof was location comparison. An admin could ask Control Hub to compare Austin and San Jose, then align settings while preserving a local exception, like Austin\'s emergency callback number.',
+    'The benefit is consistency without flattening context. The AI does the comparison work; the admin keeps judgment over what should change.',
+  ],
+  onboard: [
+    'Device onboarding showed why chat alone was not enough. The agent could gather missing inputs, check device and workspace requirements, recommend settings, run a test batch, and only then proceed after approval.',
+    'The admin no longer had to babysit every field, but they could still review the plan, understand the assumptions, and stop the run if something looked wrong.',
+  ],
+  deleteLine: [
+    'The highest-trust proof was deleting a virtual line. The agent did not jump straight to deletion; it went to the virtual line details page, checked dependencies, and showed what would be affected.',
+    'Then it offered choices: remove dependencies and delete, reassign dependencies first, or cancel. The agent worked with context across Control Hub, but the human still made the important decision.',
+  ],
+  craft: [
+    'I built a fully interactive prototype with Cursor, Codex, and Claude Code so people could react to the experience as software, not as a slide. The prototype tested how chat handed off to workflow, how plans persisted, how execution states behaved, and how Activity recorded the work afterward.',
+    'The speed mattered because the feedback became more specific. We could watch where trust broke, tighten the model, and share the AI-assisted prototyping process with the team.',
+  ],
+  outcome: [
+    'The prototype helped get stakeholder buy-in to demo the direction at Cisco Live US 2026 and gave the team a concrete path for the next phase of AI in Control Hub.',
+    'The conversation moved from "how autonomous should AI be?" to "what contract is the admin approving?" That shift turned agentic AI into buildable patterns: proactive insights, editable plans, human approval, visible execution, and audit.',
+  ],
+  reflection: [
+    'I came out of this work less interested in autonomy as a concept and more interested in accountability as an interface. Enterprise AI becomes trustworthy when its assumptions are visible, its plans are editable, its actions are bounded, and its history is easy to inspect.',
+    'The more consequential the action, the quieter the UI needs to become. No theater. Just enough intelligence to reduce the admin\'s burden, and enough structure to keep them in control.',
+  ],
 } as const satisfies Record<string, ProseSlot>;
 
 export const thesis = {
@@ -176,15 +203,15 @@ export const figures = {
     width: 'column',
   },
   activity: {
-    src: '/images/control-hub-agentic/activity-audit.png',
-    caption: 'Activity — audit trail after the agentic action',
+    src: '/images/control-hub-agentic/delete-virtual-line-docked.png',
+    caption: 'Delete Virtual Line — docked dependency review before action',
     alt: 'Control Hub Activity entry showing agent actions, admin approval, and resulting system changes.',
     width: 'column',
   },
   widgetAnatomy: {
-    src: '/images/control-hub-agentic/widget-anatomy.png',
-    caption: 'Widget anatomy — Input / Plan / Execution / Report',
-    alt: 'Widget anatomy strip showing the Input, Plan, Execution, and Report states.',
+    src: '/images/control-hub-agentic/prototype-craft.png',
+    caption: 'Building the prototype — Cursor, Codex, and Claude Code',
+    alt: 'Building the prototype — Cursor, Codex, and Claude Code.',
     width: 'column',
   },
   outcome: {

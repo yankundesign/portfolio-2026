@@ -41,3 +41,9 @@
   );
   --canvas-close-gap: 100px;
 }
+
+.canvas[data-entry-motion='instant'] *,
+.canvas[data-entry-motion='instant'] *::before,
+.canvas[data-entry-motion='instant'] *::after {
+  animation: none !important;
+}

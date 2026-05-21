@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react';
 import FigCaption from '../shared/FigCaption';
 import type { AboutCodaItem } from '../../data/about';
-import { usePolaroidTilt } from '../../interactions/usePolaroidTilt';
+import { useObjectTilt } from '../../interactions/useObjectTilt';
 import styles from './AboutPolaroid.module.css';
 
 export interface AboutPolaroidCodaProps {
@@ -10,13 +10,11 @@ export interface AboutPolaroidCodaProps {
 }
 
 export default function AboutPolaroidCoda({ item, className }: AboutPolaroidCodaProps) {
-  const { ref, tiltHandlers } = usePolaroidTilt<HTMLDivElement>(4);
-  const tapeClass =
-    item.tape === 'center'
-      ? styles.tapeCenter
-      : item.tape === 'right'
-        ? styles.tapeRight
-        : styles.tapeLeft;
+  const { ref, tiltHandlers } = useObjectTilt<HTMLDivElement>({
+    maxDegrees: 9,
+    liftY: -8,
+    scale: 1.025,
+  });
 
   return (
     <figure
@@ -25,10 +23,14 @@ export default function AboutPolaroidCoda({ item, className }: AboutPolaroidCoda
       aria-hidden="true"
     >
       <div ref={ref} className={`${styles.polaroidButton} ${styles.codaButton}`} {...tiltHandlers}>
-        <div className={`${styles.polaroid} ${styles.coda}`}>
-          <span className={`${styles.tape} ${tapeClass}`} aria-hidden="true" />
-          <span className={styles.imageWindow} aria-hidden="true" />
-          <span className={styles.printCaption}>{item.caption}</span>
+        <span className={styles.polaroidShadow} aria-hidden="true" />
+        <div className={styles.polaroidObject}>
+          <div className={`${styles.polaroid} ${styles.coda}`}>
+            <span className={styles.imageWindow}>
+              <img src={item.image} alt="" className={styles.imageWindowPhoto} loading="lazy" decoding="async" />
+            </span>
+            <span className={styles.printCaption}>{item.caption}</span>
+          </div>
         </div>
       </div>
       <FigCaption number={item.fig} label="" align="left" />

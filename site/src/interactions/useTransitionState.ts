@@ -33,6 +33,24 @@ interface StateEventDetail {
   state: TransitionState;
 }
 
+function inferTransitionStateFromLocation(): TransitionState {
+  if (typeof window === 'undefined') return 'idle';
+  return window.location.pathname === '/works' ? 'open' : 'idle';
+}
+
+let currentTransitionState: TransitionState = inferTransitionStateFromLocation();
+
+function getInitialTransitionState(): TransitionState {
+  if (
+    currentTransitionState === 'opening' ||
+    currentTransitionState === 'closing'
+  ) {
+    return currentTransitionState;
+  }
+
+  return inferTransitionStateFromLocation();
+}
+
 /**
  * Source rectangle for the desk notebook (or canvas spread). Captured at
  * the moment the transition starts so the overlay knows where to morph
@@ -51,10 +69,11 @@ export function useTransitionState(): {
   closeNotebook: () => void;
 } {
   const [state, setState] = useState<TransitionState>(() => {
-    if (typeof window === 'undefined') return 'idle';
     // Direct deep-link to /works skips the open animation; we treat the
-    // notebook as already open. Browser back from there triggers close.
-    return window.location.pathname === '/works' ? 'open' : 'idle';
+    // notebook as already open. If a route mounts while the root overlay is
+    // mid-flight, use the current in-memory state so it can coordinate its
+    // own entrance choreography with the notebook transition.
+    return getInitialTransitionState();
   });
 
   // Mirror state to a ref so the callbacks below can read it without
@@ -104,6 +123,7 @@ export const TRANSITION_EVENTS = {
 
 /** Broadcast a state change. Called by the overlay only. */
 export function broadcastState(state: TransitionState): void {
+  currentTransitionState = state;
   if (typeof window === 'undefined') return;
   window.dispatchEvent(
     new CustomEvent<StateEventDetail>(STATE_EVENT, { detail: { state } }),

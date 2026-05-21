@@ -2,7 +2,8 @@
  * Notebook — fig. 01. Hero object, center of the plate.
  *
  * Width locked so the cover reads at a consistent weight across viewports.
- * Hover: caption underline draws; the image itself does not move.
+ * Hover: caption underline draws; the notebook body lifts and tilts while
+ * a stable outer frame preserves the desk-to-canvas transition measurement.
  *
  * Channel-1 tuning vars (set on documentElement by WashTunePanel; the
  * fallbacks below are the hardcoded production values):
@@ -20,26 +21,139 @@
 }
 
 .button {
+  --object-tilt-x: 0deg;
+  --object-tilt-y: 0deg;
+  --object-lift-y: 0px;
+  --object-scale: 1;
+  --object-shadow-x: 0px;
+  --object-shadow-y: 14px;
+  --object-shadow-scale: 1.03;
   display: block;
   padding: 0;
   margin: 0;
   border: 0;
   background: transparent;
   cursor: pointer;
-  transition: transform var(--duration-hover) var(--ease-out);
   outline: none;
   border-radius: 6px;
-  /* Anchor for the absolutely-positioned watercolor wash. */
   position: relative;
+  perspective: 900px;
 }
 
-.button:hover {
-  transform: translateY(-2px);
+.button:hover,
+.button:focus-visible {
+  --object-lift-y: -10px;
+  --object-scale: 1.025;
 }
 
 .button:focus-visible {
   outline: 1.5px solid var(--ink);
   outline-offset: 4px;
+}
+
+.sourceFrame {
+  display: block;
+  width: 340px;
+  position: relative;
+  transform-style: preserve-3d;
+}
+
+.castShadow {
+  position: absolute;
+  left: 7%;
+  right: 6%;
+  bottom: 3%;
+  height: 19%;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: 999px;
+  background:
+    radial-gradient(
+      ellipse at center,
+      rgba(22, 38, 94, 0.3) 0%,
+      rgba(22, 38, 94, 0.17) 42%,
+      rgba(22, 38, 94, 0) 72%
+    );
+  filter: blur(11px);
+  opacity: 0.7;
+  transform:
+    translate3d(
+      var(--object-shadow-x),
+      var(--object-shadow-y),
+      -36px
+    )
+    scale(var(--object-shadow-scale));
+  transform-origin: center;
+  transition:
+    transform 170ms var(--ease-out),
+    opacity 170ms var(--ease-out);
+  will-change: transform;
+}
+
+.notebookBody {
+  display: block;
+  width: 100%;
+  position: relative;
+  z-index: 2;
+  isolation: isolate;
+  transform:
+    translate3d(0, var(--object-lift-y), 28px)
+    scale(var(--object-scale))
+    rotateX(var(--object-tilt-x))
+    rotateY(var(--object-tilt-y));
+  transform-origin: 43% 58%;
+  transform-style: preserve-3d;
+  transition: transform 170ms var(--ease-out);
+  will-change: transform;
+}
+
+.notebookBody::before,
+.notebookBody::after {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.78;
+  border: 1px solid rgba(22, 38, 94, 0.2);
+  background: var(--paper-soft);
+  mix-blend-mode: multiply;
+  backface-visibility: hidden;
+}
+
+.notebookBody::before {
+  top: 8.5%;
+  right: 5.2%;
+  bottom: 9%;
+  width: 13px;
+  clip-path: polygon(0 2%, 100% 8%, 100% 96%, 0 100%);
+  box-shadow: -1px 0 0 rgba(244, 241, 234, 0.54);
+  background:
+    repeating-linear-gradient(
+      0deg,
+      rgba(22, 38, 94, 0.13) 0 1px,
+      rgba(244, 241, 234, 0) 1px 5px
+    ),
+    var(--paper-soft);
+  transform: translateZ(-18px) rotateY(72deg);
+  transform-origin: left center;
+}
+
+.notebookBody::after {
+  left: 8%;
+  right: 9%;
+  bottom: 3.2%;
+  height: 12px;
+  clip-path: polygon(4% 0, 98% 0, 100% 100%, 0 100%);
+  box-shadow: 0 1px 0 rgba(22, 38, 94, 0.08);
+  background:
+    repeating-linear-gradient(
+      90deg,
+      rgba(22, 38, 94, 0.13) 0 1px,
+      rgba(244, 241, 234, 0) 1px 5px
+    ),
+    var(--paper-soft);
+  transform: translateZ(-16px) rotateX(-68deg);
+  transform-origin: top center;
 }
 
 /* ─── Watercolor wash — atmospheric effect on dwell ─── */
@@ -55,11 +169,7 @@
     var(--wash-inset-right, -14%)
     var(--wash-inset-bottom, -19%)
     var(--wash-inset-left, -6%);
-  /* Explicit lower stacking. The image below claims z-index: 1 so it
-   * always paints on top — without this, the absolutely-positioned wash
-   * paints above the static <img> by default (positioned > non-positioned
-   * in the stacking order, regardless of source order). */
-  z-index: 0;
+  z-index: 1;
 }
 
 /* ─── Per-layer cascade ───────────────────────────────────────────────────
@@ -142,56 +252,63 @@
 
 .image {
   display: block;
-  width: 340px;
+  width: 100%;
   height: auto;
   user-select: none;
   -webkit-user-drag: none;
-  /* Position + z-index so the image always paints above the absolutely-
-   * positioned watercolor wash, which would otherwise win the stacking
-   * order despite being earlier in source order. */
   position: relative;
   z-index: 1;
-  /* Soft drop shadow — gives the notebook physical presence on the desk
-   * surface. Uses ink at low opacity so it disappears against the warm
-   * paper background without reading as harsh. */
-  filter: drop-shadow(0 8px 18px rgba(22, 38, 94, 0.14));
+  transform: translateZ(1px);
+  backface-visibility: hidden;
+  filter: drop-shadow(0 1px 0 rgba(244, 241, 234, 0.32));
 }
 
 @media (min-width: 1600px) {
-  .image {
+  .sourceFrame {
     width: 400px;
   }
 }
 
 @media (min-width: 2000px) {
-  .image {
+  .sourceFrame {
     width: 480px;
   }
 }
 
 @media (max-width: 1279px) {
-  .image {
+  .sourceFrame {
     width: 300px;
   }
 }
 
 @media (max-width: 1023px) {
-  .image {
+  .sourceFrame {
     width: 240px;
   }
 }
 
 @media (max-width: 767px) {
-  .image {
+  .sourceFrame {
     width: 200px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .button {
+  .button,
+  .castShadow,
+  .notebookBody {
     transition: none;
   }
-  .button:hover {
-    transform: none;
+
+  .button:hover,
+  .button:focus-visible {
+    --object-lift-y: 0px;
+    --object-scale: 1;
+    --object-tilt-x: 0deg;
+    --object-tilt-y: 0deg;
+  }
+
+  .castShadow {
+    transform: translate3d(0, 14px, -36px) scale(1.03);
   }
 }

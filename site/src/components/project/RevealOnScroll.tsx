@@ -12,7 +12,7 @@ export interface RevealOnScrollProps {
   /** Fraction of element that must be visible to trigger. */
   threshold?: number;
   /** Wrapper element tag. */
-  as?: 'div' | 'figure' | 'section' | 'aside' | 'blockquote' | 'p' | 'header';
+  as?: 'div' | 'figure' | 'section' | 'aside' | 'blockquote' | 'p' | 'header' | 'li';
   className?: string;
 }
 
@@ -37,11 +37,7 @@ export default function RevealOnScroll({
 
   useEffect(() => {
     if (!inView) return;
-    if (delay <= 0) {
-      setDelayedIn(true);
-      return;
-    }
-    timeoutRef.current = window.setTimeout(() => setDelayedIn(true), delay);
+    timeoutRef.current = window.setTimeout(() => setDelayedIn(true), Math.max(delay, 0));
     return () => {
       if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
     };

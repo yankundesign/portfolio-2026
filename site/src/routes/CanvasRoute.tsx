@@ -13,22 +13,13 @@ import styles from './CanvasRoute.module.css';
 
 /**
  * Base delay (ms) for the page-content entrance animations when the
- * canvas mounts via the open transition. Must be ≥ the time from canvas
- * mount until the open-transition overlay fully clears, otherwise the
- * earliest content animations begin BEHIND the still-fading overlay
- * and the user can't see them.
+ * canvas mounts via the desk -> canvas open transition. Must be >= the
+ * time from canvas mount until the open-transition overlay fully clears,
+ * otherwise the earliest content animations begin behind the still-fading
+ * overlay and the user can't see them.
  *
- * Open transition timing (from NotebookTransition.tsx runOpen):
- *   click             t = 0
- *   navigate('/works')t = 520   ← canvas mounts here
- *   overlay clears    t = 1340  (1100 + 240 final fade)
- *
- * Gap from canvas mount to overlay clear: 1340 - 520 = 820ms.
- * Add 100ms breathing room so the user sees a brief "blank notebook"
- * moment before the first card lands → 920ms.
- *
- * On direct deep-links (no transition) this base is 0 — the rows enter
- * immediately on mount, no overlay to wait for.
+ * Project-detail returns skip these entrance animations entirely, so they
+ * do not inherit this wait.
  */
 const CONTENT_ENTER_DELAY_AFTER_TRANSITION = 920;
 
@@ -59,19 +50,17 @@ export default function CanvasRoute() {
   const navigate = useNavigate();
   const { state, closeNotebook } = useTransitionState();
 
-  // Capture the transition state ONCE on mount (via useMemo with empty
-  // semantics — useState would also work). If we mounted while the
-  // overlay was opening (the common path), gate content animations
-  // until the overlay clears. If state is already 'open' (deep link or
-  // browser back/forward), no overlay to wait for — content enters
-  // immediately. The captured value is stable for the route's lifetime
-  // so the CSS variable doesn't churn mid-animation.
-  const contentEnterDelay = useMemo(() => {
-    return state === 'opening'
-      ? `${CONTENT_ENTER_DELAY_AFTER_TRANSITION}ms`
-      : '0ms';
+  // Capture the transition state once on mount. The staged canvas entrance
+  // only belongs to the desk -> canvas opening; direct /works visits and
+  // returns from project detail should show the full canvas immediately.
+  const canvasEntryMotion = useMemo(() => {
+    return state === 'opening' ? 'staged' : 'instant';
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  const contentEnterDelay =
+    canvasEntryMotion === 'staged'
+      ? `${CONTENT_ENTER_DELAY_AFTER_TRANSITION}ms`
+      : '0ms';
 
   const handleProjectClick = useCallback(
     (slug: string) => {
@@ -104,6 +93,7 @@ export default function CanvasRoute() {
     <>
       <div
         className={styles.canvas}
+        data-entry-motion={canvasEntryMotion}
         style={{ ['--canvas-enter-delay' as string]: contentEnterDelay }}
       >
         {/* Ambient dot field with cursor spotlight — the only background

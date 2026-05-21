@@ -1,12 +1,16 @@
 import { useState } from 'react';
 import FigCaption from '../shared/FigCaption';
 import { heroAnnotation } from '../../data/about';
-import { usePolaroidTilt } from '../../interactions/usePolaroidTilt';
+import { useObjectTilt } from '../../interactions/useObjectTilt';
 import styles from './AboutPolaroid.module.css';
 
 export default function AboutPolaroidHero() {
   const [flipped, setFlipped] = useState(false);
-  const { ref, tiltHandlers } = usePolaroidTilt<HTMLButtonElement>(4);
+  const { ref, tiltHandlers } = useObjectTilt<HTMLButtonElement>({
+    maxDegrees: 10,
+    liftY: -10,
+    scale: 1.025,
+  });
 
   return (
     <figure className={`${styles.figure} ${styles.heroFigure}`}>
@@ -21,24 +25,33 @@ export default function AboutPolaroidHero() {
         onClick={() => setFlipped((value) => !value)}
         {...tiltHandlers}
       >
-        <span className={styles.flipStack}>
-          <span className={`${styles.polaroid} ${styles.front}`} aria-hidden={flipped}>
-            <span className={`${styles.tape} ${styles.tapeLeft}`} aria-hidden="true" />
-            <span className={styles.imageWindow} aria-hidden="true" />
-            <span className={styles.printCaption}>SELF-PORTRAIT · 2026</span>
-          </span>
+        <span className={styles.polaroidShadow} aria-hidden="true" />
+        <span className={styles.polaroidObject}>
+          <span className={styles.flipStack}>
+            <span className={`${styles.polaroid} ${styles.front}`} aria-hidden={flipped}>
+              <span className={styles.imageWindow}>
+                <img
+                  src="/images/about/me.png"
+                  alt="Yankun, photographed for the About page."
+                  className={styles.imageWindowPhoto}
+                  loading="lazy"
+                  decoding="async"
+                />
+              </span>
+              <span className={styles.printCaption}>NICE TO MEET YOU</span>
+            </span>
 
-          <span className={`${styles.polaroid} ${styles.back}`} aria-hidden={!flipped}>
-            <span className={`${styles.tape} ${styles.tapeLeft}`} aria-hidden="true" />
-            <span className={styles.backStamp}>
-              <span>
-                <b>LOC.</b> {heroAnnotation.location}
-              </span>
-              <span>
-                <b>DATE</b> {heroAnnotation.date}
-              </span>
-              <span>
-                <b>NOTE</b> {heroAnnotation.note}
+            <span className={`${styles.polaroid} ${styles.back}`} aria-hidden={!flipped}>
+              <span className={styles.backStamp}>
+                <span>
+                  <b>LOC.</b> {heroAnnotation.location}
+                </span>
+                <span>
+                  <b>DATE</b> {heroAnnotation.date}
+                </span>
+                <span>
+                  <b>NOTE</b> {heroAnnotation.note}
+                </span>
               </span>
             </span>
           </span>

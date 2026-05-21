@@ -165,33 +165,25 @@
 }
 
 .badgeRivet {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  z-index: 2;
-  display: block;
-  width: 4px;
-  height: 4px;
-  margin: 0;
-  border-radius: 50%;
-  background: var(--ink);
-  box-shadow: 0 0 0 1px var(--ink-soft);
-  transform: translate(-50%, -50%);
+  display: none;
 }
 
 .badgeSpin {
   position: absolute;
-  top: calc(50% + 13px);
+  top: 50%;
   left: 50%;
   z-index: 2;
   font-family: var(--font-mono);
   font-size: 8px;
   font-weight: 700;
   letter-spacing: 0.08em;
-  color: var(--ink);
+  color: var(--paper);
+  background: var(--ink);
   text-transform: uppercase;
   line-height: 1;
   white-space: nowrap;
+  padding: 3px 6px;
+  border-radius: 2px;
   transform: translate(-50%, -50%);
 }
 

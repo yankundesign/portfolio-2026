@@ -83,3 +83,20 @@
 .sep {
   color: var(--ink-muted);
 }
+
+@media (max-width: 720px) {
+  .header {
+    max-width: 100%;
+  }
+
+  .title,
+  .subtitle,
+  .metaStrip {
+    max-width: 100%;
+    overflow-wrap: break-word;
+  }
+
+  .hero {
+    max-width: 100%;
+  }
+}
