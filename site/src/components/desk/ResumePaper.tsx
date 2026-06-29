@@ -7,7 +7,7 @@ export interface ResumePaperProps {
 }
 
 /**
- * CV card — fig. 02. Upper-right on the desk plate.
+ * Resume card — fig. 02. Upper-right on the desk plate.
  *
  * Renders the real generated CV asset. Clicking opens /cv. The asset
  * carries the typeset content; this component is just the frame + caption.
@@ -56,7 +56,7 @@ export default function ResumePaper({ onClick, className }: ResumePaperProps) {
           />
         </svg>
       </button>
-      <FigCaption number={2} label="cv" align="left" />
+      <FigCaption number={2} label="resume" align="left" />
     </figure>
   );
 }

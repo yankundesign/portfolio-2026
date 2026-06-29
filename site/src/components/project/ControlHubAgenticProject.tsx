@@ -50,7 +50,8 @@ export default function ControlHubAgenticProject() {
             <div className={styles.evolutionRow}>
               <EditorialPlate figure={figures.frameworkChat} />
               <EditorialPlate figure={figures.frameworkInsights} />
-              <EditorialPlate figure={figures.frameworkWorkflow} />
+              <EditorialPlate figure={figures.frameworkAgents} />
+              <EditorialPlate figure={figures.frameworkSkills} />
               <EditorialPlate figure={figures.frameworkActivity} />
             </div>
           </section>

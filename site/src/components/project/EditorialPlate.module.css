@@ -44,6 +44,14 @@
   min-height: 0;
 }
 
+/* Stacked plate — two or more images sharing one frame + caption. Images
+   stack with a 24px paper gap between them, so the plate reads as a single
+   registered specimen holding a short sequence. */
+.frameStacked {
+  flex-direction: column;
+  gap: 24px;
+}
+
 .framePlaceholder {
   min-height: 320px;
   background:

@@ -1,49 +1,210 @@
-/* ─── Canvas route v0.8.1 (open-notebook spread) ───────────────────────────
+/* ─── Canvas route v0.9 (notebook backdrop + floating editorial plates) ─────
  *
- * Layout: EditorialPlate chrome wraps the canvas; inside, a flex-positioned
- * NotebookSpread is centered, with the close button and margin note absolutely
- * positioned at left/right. The .canvas container is the positioning context
- * for both side-margin elements.
+ * The open notebook is a fixed, full-height background STAGE. Project plates
+ * float over it on a scrollable 12-column grid. Because html/body are
+ * overflow:hidden (see global.css), `.canvas` is the scroll container; the
+ * fixed stage layers (backdrop, dot grid, close affordance) attach to the
+ * viewport and stay put as the content scrolls. No transformed ancestor, so
+ * position:fixed is safe.
  * ────────────────────────────────────────────────────────────────────────── */
 
 .canvas {
   position: relative;
   width: 100%;
-  /* Standalone chromeless root — fills the viewport so the notebook
-   * spread vertically centers within a full-page container, with the
-   * SpotlightDotGrid as the only background pattern. EditorialPlate
-   * chrome (column numbers, labels, bleed frame, register marks, grid
-   * rulings) is intentionally absent on this route. */
-  min-height: 100vh;
+  height: 100svh;
   background: var(--paper);
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: clamp(20px, 4vw, 60px) clamp(60px, 8vw, 120px);
-  box-sizing: border-box;
-
-  /* Single source of truth for the notebook spread's rendered width.
-   * Consumed by NotebookSpread (sets the spread's actual width) and by
-   * CanvasCloseButton (anchors itself relative to the spread's left edge,
-   * not to the canvas — keeps the button outside the notebook regardless
-   * of viewport aspect ratio).
-   *
-   * Note: the formula uses `100vw - 2 * canvas-padding` instead of `100%`.
-   * This matters because the variable is consumed both inside `width:`
-   * (where `100%` means the containing block) AND inside `transform:`
-   * (where `100%` means the element's own size). Using viewport units
-   * makes the value context-independent — same pixels everywhere. */
-  --notebook-width: min(
-    calc(100vw - 2 * clamp(60px, 8vw, 120px)),
-    1400px,
-    calc((100vh - 25vh) * 2600 / 1812)
-  );
-  --canvas-close-gap: 100px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  /* Reserve the scrollbar on BOTH edges so the content box stays centered in
+   * the viewport. The notebook backdrop is fixed/centered to the viewport, so
+   * symmetric gutters keep the content's center (and the spine channel) lined
+   * up with the notebook spine instead of drifting left by the scrollbar. */
+  scrollbar-gutter: stable both-edges;
 }
 
+/* Direct /works visits and project-detail returns skip the staged entrance —
+ * everything is shown immediately. */
 .canvas[data-entry-motion='instant'] *,
 .canvas[data-entry-motion='instant'] *::before,
 .canvas[data-entry-motion='instant'] *::after {
   animation: none !important;
+}
+
+/* ─── Notebook backdrop — the held stage ─────────────────────────────────── */
+
+.backdrop {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  height: 100svh;
+  /* Full-height, cropped at the sides. Matches computeCanvasSpreadRect() in
+   * NotebookTransition so the open/close cover lands on this exact geometry. */
+  width: calc(100svh * 2600 / 1812);
+  transform: translateX(-50%);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.backdropImage {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  user-select: none;
+  -webkit-user-drag: none;
+  filter: drop-shadow(0 12px 28px rgba(22, 38, 94, 0.16));
+}
+
+/* Light paper scrim — the vellum cards do most of the contrast work via
+ * their own backdrop blur, so this stays faint to keep the notebook and the
+ * spine channel between the pages crisp. */
+.backdrop::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(244, 241, 234, 0.18);
+}
+
+/* ─── Content ────────────────────────────────────────────────────────────── */
+
+.content {
+  position: relative;
+  z-index: 2;
+  /* Canvas-specific: wider than the global --grid-max (1280) so the two-page
+   * spread breathes on larger screens. Fluid below this cap. */
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: clamp(96px, 14vh, 168px) clamp(24px, 5vw, 60px)
+    clamp(80px, 12vh, 140px);
+  box-sizing: border-box;
+}
+
+.intro {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  /* Sits directly above the CHAI plate: same width and inner-edge alignment
+   * (flex-end) as the featured plate, so the label lines up with the card's
+   * left edge instead of outdenting to the page margin. The page's flex gap
+   * spaces it from the plate. The right page has no intro, so Agentic rides
+   * higher than CHAI. */
+  align-self: flex-end;
+  width: 100%;
+  max-width: 31rem;
+  margin: 0;
+  animation: introIn 600ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: var(--canvas-enter-delay, 0ms);
+}
+
+@keyframes introIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.introLabel {
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  font-weight: 500;
+  letter-spacing: var(--chrome-tracking);
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.introDescription {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1rem, 1.2vw, 1.2rem);
+  font-style: italic;
+  font-weight: 300;
+  line-height: 1.45;
+  color: var(--ink);
+}
+
+/* ─── Spread — two pages straddling the notebook spine ───────────────────── *
+ *
+ * The notebook backdrop is centered, so the spine sits at the content's
+ * horizontal center. Two independent plate stacks frame it, with a wide
+ * column-gap as the spine channel so the binding shows between them. Each
+ * page stacks independently (no shared grid rows), so a tall plate on one
+ * side never opens a gap on the other. Both pages start at the spread top;
+ * the intro sits inside the left page, so the right page (Agentic) rides
+ * higher than CHAI — an editorial stagger without a flat 2×2.
+ * ────────────────────────────────────────────────────────────────────────── */
+
+.spread {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: clamp(24px, 3vw, 72px);
+  align-items: start;
+}
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(28px, 5vh, 45px);
+  min-width: 0;
+}
+
+/* Plates are capped (see ProjectPlate), so each page column has slack. Pull
+ * the plates toward the spine so the two pages read as a paired spread with
+ * the notebook page as the outer margin. The intro (not a [data-size] item)
+ * stays left-aligned at the top of the left page. */
+.page[data-page='left'] > [data-size] {
+  align-self: flex-end;
+}
+
+.page[data-page='right'] > [data-size] {
+  align-self: flex-start;
+}
+
+/* ─── Tablet / mobile: single column, faint backdrop ─────────────────────── */
+
+@media (max-width: 1100px) {
+  .spread {
+    grid-template-columns: 1fr;
+    gap: clamp(28px, 6vw, 52px);
+  }
+
+  .page {
+    gap: clamp(28px, 6vw, 52px);
+  }
+
+  /* Single column — plates fill the width, no spine-hug or size cap. */
+  .page > [data-size] {
+    align-self: stretch;
+    max-width: none;
+  }
+
+  /* Intro spans the column and reads left-aligned at the top. */
+  .intro {
+    align-self: stretch;
+    max-width: 40rem;
+  }
+
+  /* Notebook recedes so the single-column plates stay readable. */
+  .backdrop::after {
+    background: rgba(244, 241, 234, 0.5);
+  }
+}
+
+@media (max-width: 640px) {
+  .backdropImage {
+    opacity: 0.6;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .intro {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
 }

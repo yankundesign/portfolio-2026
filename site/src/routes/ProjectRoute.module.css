@@ -21,7 +21,7 @@
    both widen to 90em together — see ChaiProject.module.css. */
 
 .topNav {
-  max-width: 78em;
+  max-width: 80em;
   margin: 0 auto;
   padding: 1.75rem 0;
   display: flex;
@@ -32,9 +32,17 @@
   pointer-events: none;
 }
 
+/* Match the article's widened tiers so the back link stays aligned with
+   the rail's left edge. */
+@media (min-width: 1440px) {
+  .topNav {
+    max-width: 88em;
+  }
+}
+
 @media (min-width: 1920px) {
   .topNav {
-    max-width: 90em;
+    max-width: 98em;
   }
 }
 

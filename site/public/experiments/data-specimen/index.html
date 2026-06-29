@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Data Specimen</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <nav class="desk-nav" aria-label="Primary">
+      <a class="desk-link" href="/" aria-label="Back to the desk">
+        <span class="desk-link__icon" aria-hidden="true">←</span>
+        <span>Back to desk</span>
+      </a>
+    </nav>
+
+    <main class="app-shell">
+      <section class="specimen-stage" aria-label="Alive data specimen">
+        <div class="plate-mark plate-mark--top-left" aria-hidden="true"></div>
+        <div class="plate-mark plate-mark--top-right" aria-hidden="true"></div>
+        <div class="plate-mark plate-mark--bottom-left" aria-hidden="true"></div>
+        <div class="plate-mark plate-mark--bottom-right" aria-hidden="true"></div>
+
+        <div class="specimen-canvas-wrap">
+          <canvas id="specimen-canvas" width="960" height="640"></canvas>
+        </div>
+
+        <footer class="specimen-caption">
+          <div>
+            <h1>Data Specimen</h1>
+          </div>
+          <p id="specimen-note">Fish mask · swimming sparkle current · pointer-sensitive field</p>
+        </footer>
+      </section>
+
+      <aside class="control-panel" aria-label="Specimen controls">
+        <div class="control-group">
+          <p class="control-label">Shape</p>
+          <div class="shape-control" role="radiogroup" aria-label="Shape selector">
+            <button class="shape-button is-active" type="button" data-shape="fish" role="radio" aria-checked="true">
+              <span class="shape-button__name">Fish</span>
+              <span class="shape-button__meta">Swim</span>
+            </button>
+            <button class="shape-button" type="button" data-shape="jellyfish" role="radio" aria-checked="false">
+              <span class="shape-button__name">Jellyfish</span>
+              <span class="shape-button__meta">Pulse</span>
+            </button>
+            <button class="shape-button" type="button" data-shape="butterfly" role="radio" aria-checked="false">
+              <span class="shape-button__name">Butterfly</span>
+              <span class="shape-button__meta">Flutter</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <p class="control-label">Render</p>
+          <button id="render-switch" class="render-switch" type="button" role="switch" aria-checked="false">
+            <span class="render-switch__label render-switch__label--particle">Particle</span>
+            <span class="render-switch__track" aria-hidden="true">
+              <span class="render-switch__thumb"></span>
+            </span>
+            <span class="render-switch__label render-switch__label--sparkle">Sparkle</span>
+          </button>
+        </div>
+
+        <div class="control-group">
+          <label class="control-label" for="density-range">Density</label>
+          <input id="density-range" type="range" min="520" max="2200" value="1180" step="20" />
+        </div>
+
+        <div class="control-group">
+          <label class="control-label" for="motion-range">Current</label>
+          <input id="motion-range" type="range" min="0" max="100" value="64" step="1" />
+        </div>
+
+        <div class="control-group">
+          <label class="control-label" for="threshold-range">Mask Cut</label>
+          <input id="threshold-range" type="range" min="18" max="238" value="176" step="1" />
+        </div>
+
+        <div class="control-actions">
+          <button id="reset-button" class="button button--ghost" type="button">Reset</button>
+          <label class="button button--dark" for="mask-upload">Create your own</label>
+          <input id="mask-upload" class="visually-hidden" type="file" accept="image/*" />
+        </div>
+
+        <p class="lab-note">Upload a transparent PNG or high-contrast image. Use Mask Cut to tune the shape.</p>
+      </aside>
+    </main>
+
+    <script src="src/main.js"></script>
+  </body>
+</html>

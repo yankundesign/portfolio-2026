@@ -86,6 +86,36 @@
   text-transform: none;
 }
 
+/* ─── Brand wordmark variant (top-left identity slot) ─── */
+
+/* Used on the homepage to promote the first meta line from "chrome metadata"
+ * into a masthead. Lives in the same plate-chrome slot as the editorial
+ * metadata, but speaks in the display voice so the site reads with a name
+ * at a glance. */
+.metaBrand {
+  gap: 6px;
+  max-width: 52%;
+  opacity: 1;
+}
+
+.brandTitle {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.625rem;          /* 26px — wordmark voice */
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  text-transform: none;
+  white-space: nowrap;
+}
+
+/* Subtitle inherits the mono caption treatment from .metaLine but reads
+ * a touch quieter under the wordmark. */
+.brandSubtitle {
+  opacity: var(--chrome-opacity);
+}
+
 .metaTopLeft {
   top: calc(var(--plate-margin) + var(--chrome-top));
   left: calc(var(--plate-margin) + var(--chrome-inset));
@@ -242,12 +272,73 @@
   align-items: stretch;
 }
 
+/* ─── Homepage plate proof reveal ─── */
+
+.plate[data-proof-phase] .bleedFrame,
+.plate[data-proof-phase] .gridLines,
+.plate[data-proof-phase] .columnRow,
+.plate[data-proof-phase] .registerMark,
+.plate[data-proof-phase] .meta,
+.plate[data-proof-phase] .content {
+  transition:
+    opacity 520ms var(--ease-out),
+    transform 760ms var(--transition-ease-out-expo);
+}
+
+.plate[data-proof-phase='paper'] .bleedFrame,
+.plate[data-proof-phase='paper'] .gridLines,
+.plate[data-proof-phase='paper'] .columnRow,
+.plate[data-proof-phase='paper'] .registerMark,
+.plate[data-proof-phase='paper'] .meta,
+.plate[data-proof-phase='paper'] .content {
+  opacity: 0;
+}
+
+.plate[data-proof-phase='paper'] .bleedFrame {
+  transform: scaleX(0.975) scaleY(0.94);
+}
+
+.plate[data-proof-phase='paper'] .gridLines {
+  transform: scaleY(0.9);
+}
+
+.plate[data-proof-phase='paper'] .columnRow,
+.plate[data-proof-phase='paper'] .meta {
+  transform: translateY(-4px);
+}
+
+.plate[data-proof-phase='rulings'] .content {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.plate[data-proof-phase='rulings'] .metaTopLeft,
+.plate[data-proof-phase='rulings'] .metaTopRight,
+.plate[data-proof-phase='rulings'] .metaBottomLeft {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .plate[data-proof-phase] .bleedFrame,
+  .plate[data-proof-phase] .gridLines,
+  .plate[data-proof-phase] .columnRow,
+  .plate[data-proof-phase] .registerMark,
+  .plate[data-proof-phase] .meta,
+  .plate[data-proof-phase] .content {
+    transition: none;
+  }
+}
+
 /* ─── Responsive ─── */
 
 @media (max-width: 1279px) {
   .plate {
     --plate-margin: var(--plate-margin-tablet);
     --chrome-inset: 16px;
+  }
+  .brandTitle {
+    font-size: 1.375rem;  /* 22px */
   }
   .columnRow {
     display: none;
@@ -263,13 +354,26 @@
     --plate-margin: var(--plate-margin-mobile);
     --chrome-inset: 12px;
     --chrome-meta-height: 44px;
+    overflow-x: hidden;
+    overflow-y: auto;
   }
   .meta {
     font-size: 10px;
     letter-spacing: var(--chrome-tracking-tight);
     max-width: 44%;
   }
+  .metaBrand {
+    max-width: 60%;
+  }
+  .brandTitle {
+    font-size: 1.125rem;  /* 18px */
+    letter-spacing: -0.005em;
+  }
   .gridLines {
     display: none;
+  }
+  .content {
+    min-height: auto;
+    justify-content: flex-start;
   }
 }

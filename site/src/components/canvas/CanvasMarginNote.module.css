@@ -11,8 +11,8 @@
 
 :root {
   --canvas-note-top: 50%;
-  --canvas-note-right: 2%;
-  --canvas-note-width: 200px;
+  --canvas-note-right: clamp(18px, 2vw, 28px);
+  --canvas-note-width: clamp(150px, 12vw, 190px);
 }
 
 .note {
@@ -109,15 +109,14 @@
 
 /* ─── Responsive ─── */
 
-@media (max-width: 1023px) {
-  :root {
-    --canvas-note-top: auto;
-    --canvas-note-right: 4%;
-    --canvas-note-width: 180px;
-  }
+@media (max-width: 1179px) {
   .note {
-    transform: rotate(-1.5deg);
-    bottom: 5%;
-    top: auto;
+    display: none;
+  }
+}
+
+@media (min-width: 1180px) and (max-width: 1800px) and (max-height: 1160px) {
+  .note {
+    display: none;
   }
 }

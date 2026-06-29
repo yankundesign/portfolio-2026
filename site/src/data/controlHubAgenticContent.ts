@@ -149,8 +149,8 @@ export const proofs = {
 
 export const figures = {
   aiHome: {
-    src: '/images/control-hub-agentic/ai-home.png',
-    caption: 'AI Home / Assistant tab — additive to Control Hub, not a replacement for it',
+    src: '/images/control-hub-agentic/ai-first-overview.png',
+    caption: 'AI-first overview',
     alt: 'Control Hub Agentic AI Home or Assistant tab, showing the agentic surface within Control Hub.',
     width: 'column',
   },
@@ -166,10 +166,20 @@ export const figures = {
     alt: 'Control Hub Agentic insights surface showing contextual findings before an action is planned.',
     width: 'column',
   },
-  frameworkWorkflow: {
-    src: '/images/control-hub-agentic/framework-workflow.png',
-    caption: 'Workflow — structured execution for multi-step jobs',
-    alt: 'Control Hub Agentic workflow surface showing a structured plan for a multi-step admin job.',
+  frameworkAgents: {
+    src: '/images/control-hub-agentic/framework-agents-1.png',
+    srcs: [
+      '/images/control-hub-agentic/framework-agents-1.png',
+      '/images/control-hub-agentic/framework-agents-2.png',
+    ],
+    caption: 'Agents — structured execution for multi-step jobs',
+    alt: 'Control Hub Agentic agents surface showing structured execution for a multi-step admin job.',
+    width: 'column',
+  },
+  frameworkSkills: {
+    src: '/images/control-hub-agentic/framework-skills.png',
+    caption: 'Skills — manage what your agents can do',
+    alt: 'Control Hub Agentic skills surface for managing the capabilities available to agents.',
     width: 'column',
   },
   frameworkActivity: {

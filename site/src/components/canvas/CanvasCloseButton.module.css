@@ -1,72 +1,59 @@
 /*
- * CanvasCloseButton — left-margin close affordance.
+ * CanvasCloseButton — fixed top-left close affordance (canvas v0.9).
  *
- * Anchored to the notebook spread's actual left edge, NOT to a percentage
- * of the canvas. This is what keeps the button outside the notebook on
- * every viewport: it always sits `--canvas-close-gap` px to the left of
- * the spread, because both the spread and the button consume the same
- * `--notebook-width` value defined on the parent .canvas.
+ * The only navigation back from the canvas to the desk. v0.8.1 anchored this
+ * to the centered notebook spread's left edge; v0.9 makes the notebook a
+ * full-bleed backdrop with no reliable side margin, so the affordance becomes
+ * a stable fixed top-left control. Mono caps "close" + small arrow.
  *
- * Math: spread is centered, so its left edge sits at
- *   canvas_center - notebook_width / 2
- * The button's transform translates from `left: 50%` (canvas center) by
- *   -notebook_width / 2 - gap
- * landing exactly `gap` px outside the spread's left edge.
- *
- * Tunables:
- *   --canvas-close-top    vertical anchor (% of canvas content area)
- *   --canvas-close-gap    distance from notebook spread's left edge (px)
+ * Tunables via :root so position can be adjusted in DevTools without rebuilds.
  */
 
 :root {
-  --canvas-close-top: 50%;
+  --canvas-close-top: clamp(20px, 4vh, 36px);
+  --canvas-close-left: clamp(20px, 4vw, 60px);
+  --canvas-close-width: 7rem;
 }
 
 .button {
-  position: absolute;
+  position: fixed;
   top: var(--canvas-close-top);
-  /* Anchor to canvas horizontal center, then walk left by half the
-   * notebook width plus the gap. Tracks the spread regardless of how the
-   * height-driven sizing changes the spread's actual width. */
-  left: 50%;
-  transform: translate(
-    calc(-1 * var(--notebook-width) / 2 - var(--canvas-close-gap)),
-    -50%
-  );
+  left: var(--canvas-close-left);
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 10px;
-  background: transparent;
+  justify-content: center;
+  gap: 10px;
+  width: auto;
+  min-width: var(--canvas-close-width);
+  min-height: 44px;
+  padding: 10px 14px;
+  /* Faint paper backing so the label stays legible over the notebook. */
+  background: color-mix(in srgb, var(--paper) 86%, transparent);
   border: 0;
   margin: 0;
   cursor: pointer;
   outline: none;
   font-family: var(--font-mono);
-  font-size: var(--text-caption);
+  font-size: 0.75rem;
   font-weight: 400;
   letter-spacing: var(--chrome-tracking);
   color: var(--ink-soft);
   text-transform: lowercase;
   z-index: 10;
   transition: color var(--duration-hover) var(--ease-out);
-  /* Entrance: fades in after all four project cards have been placed.
-   * Chrome affordances arrive LAST, like the marginalia in a letterpress
-   * specimen card. Opacity-only (no transform) because the button's
-   * transform is already used for spread-edge anchoring.
-   *
-   * Delay computed against the new (v1.6) row sequence:
-   *   row 0 starts at canvas-enter-delay + 320ms (lead-in)
-   *   row 3 starts at canvas-enter-delay + 320 + (3 × 240) = +1040ms
-   *   row 3 finishes at +1040 + 700 = +1740ms
-   *   close button: +1820ms (80ms breathing after last row finishes) */
+  /* Entrance: fades in after the plates have been placed. Chrome arrives
+   * last, like marginalia on a letterpress specimen card. */
   animation: closeButtonSettle 360ms cubic-bezier(0.4, 0, 0.2, 1) both;
-  animation-delay: calc(var(--canvas-enter-delay, 0ms) + 1820ms);
+  animation-delay: calc(var(--canvas-enter-delay, 0ms) + 900ms);
 }
 
 @keyframes closeButtonSettle {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -91,25 +78,14 @@
 
 .arrow {
   flex: 0 0 auto;
-  width: 24px;
-  height: 12px;
+  width: 28px;
+  height: 14px;
   display: block;
   transition: transform var(--duration-hover) var(--ease-out);
 }
 
 .button:hover .arrow {
   transform: translateX(2px);
-}
-
-@media (max-width: 1023px) {
-  /* On narrow viewports the notebook fills the canvas, so there's no
-   * "outside" to put the button in — relocate it to the top-left corner
-   * and override the desktop transform. */
-  .button {
-    top: 5%;
-    left: 4%;
-    transform: none;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {

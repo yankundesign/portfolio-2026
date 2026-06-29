@@ -1,0 +1,280 @@
+/*
+ * ProjectPlate — canvas v0.9 editorial plate (sulfuric-acid-paper card).
+ *
+ * The CARD ITSELF is the sheet of vellum: a translucent paper-toned surface
+ * whose backdrop-filter blurs the notebook softly through its paper areas.
+ * The mockup sits on the sheet CRISP and uncovered — the work is never
+ * obscured. Strictly --paper + --ink; never tinted.
+ *
+ * The blur is constant (no animation), so the only things that move on
+ * hover/focus are transform + box-shadow + the card's paper opacity — cheap,
+ * off the scroll path. Column placement lives in CanvasRoute.module.css.
+ */
+
+.plate {
+  list-style: none;
+  margin: 0;
+  position: relative;
+  /* Fill the page column up to a capped size, so on wide laptop/desktop
+     columns the plates stay a comfortable scale (mounted on the notebook
+     page) instead of ballooning to fill the half. On narrow columns the
+     cap is inert and the plate fills the column.
+
+     The 56svh ceiling keeps the card within the notebook's CREAM page on
+     short viewports: the notebook width is height-driven (100svh × 2600/1812),
+     so when the window is short the pages are narrow. Without this, the rem
+     cap would let a card spill onto the cover/binding (~viewports under
+     ~880px tall). It's inert on taller screens where the rem cap governs. */
+  width: 100%;
+  max-width: min(var(--plate-max, 30rem), 56svh);
+  animation: platePlace 720ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(
+    var(--canvas-enter-delay, 0ms) + 320ms + var(--plate-index, 0) * 120ms
+  );
+}
+
+.plate[data-size='featured'] {
+  --plate-max: 31rem;
+}
+
+.plate[data-size='main'] {
+  --plate-max: 29rem;
+}
+
+.plate[data-size='standard'] {
+  --plate-max: 25rem;
+}
+
+@keyframes platePlace {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ─── The vellum card ───────────────────────────────────────────────────── */
+
+.button {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: clamp(10px, 0.8vw, 14px);
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  outline: none;
+
+  /* Sulfuric-acid paper: translucent so the notebook blurs through. */
+  background-color: color-mix(in srgb, var(--paper) 56%, transparent);
+  -webkit-backdrop-filter: blur(9px) saturate(1.04) brightness(1.02);
+  backdrop-filter: blur(9px) saturate(1.04) brightness(1.02);
+  border: 1px solid rgba(22, 38, 94, 0.2);
+  box-shadow:
+    /* top sheen — light catching the waxy sheet edge */
+    inset 0 1px 0 rgba(255, 250, 235, 0.55),
+    inset 0 0 0 1px rgba(255, 250, 235, 0.12),
+    0 2px 6px rgba(22, 38, 94, 0.05),
+    0 12px 30px rgba(22, 38, 94, 0.09);
+  transition:
+    transform 360ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 360ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 360ms cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 360ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.button:hover,
+.button:focus-visible {
+  transform: translateY(-6px);
+  border-color: rgba(22, 38, 94, 0.32);
+  /* Comes forward: a touch more opaque, like the sheet pressed flatter. */
+  background-color: color-mix(in srgb, var(--paper) 68%, transparent);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 250, 235, 0.6),
+    inset 0 0 0 1px rgba(255, 250, 235, 0.16),
+    0 6px 14px rgba(22, 38, 94, 0.1),
+    0 24px 46px rgba(22, 38, 94, 0.15);
+}
+
+.button:focus-visible {
+  outline: 1.5px solid var(--ink);
+  outline-offset: 2px;
+}
+
+/* Without backdrop-filter, lean opaque so the card isn't see-through. */
+@supports not (
+  (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))
+) {
+  .button {
+    background-color: color-mix(in srgb, var(--paper) 84%, var(--paper-soft));
+  }
+  .button:hover,
+  .button:focus-visible {
+    background-color: color-mix(in srgb, var(--paper) 90%, var(--paper-soft));
+  }
+}
+
+/* ─── Mockup — crisp, uncovered, framed as an editorial plate ───────────── */
+
+.sleeve {
+  position: relative;
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  aspect-ratio: 16 / 10;
+  background: var(--paper);
+  border: 1px solid var(--ink-muted);
+  transition: border-color 360ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.button:hover .sleeve,
+.button:focus-visible .sleeve {
+  border-color: rgba(22, 38, 94, 0.34);
+}
+
+.mockup,
+.mockupPlaceholder {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+}
+
+.mockupPlaceholder {
+  background:
+    repeating-linear-gradient(
+      135deg,
+      rgba(22, 38, 94, 0.06) 0 10px,
+      rgba(22, 38, 94, 0.1) 10px 20px
+    ),
+    var(--ink);
+}
+
+/* ─── Meta ──────────────────────────────────────────────────────────────── */
+
+.meta {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(4px, 0.45vw, 7px);
+  /* No horizontal padding: the text aligns flush with the mockup's left and
+     right edges. The card's own padding provides the breathing room from the
+     card edge for both the sleeve and the meta uniformly. */
+  padding: clamp(11px, 1.1vw, 15px) 0 0;
+}
+
+.topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.status {
+  flex: 0 0 auto;
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  font-weight: 500;
+  letter-spacing: var(--chrome-tracking);
+  text-transform: uppercase;
+  color: var(--ink);
+  padding: 3px 8px;
+  border: 1px solid var(--ink-muted);
+  border-radius: 2px;
+  white-space: nowrap;
+}
+
+.fig {
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  font-weight: 400;
+  letter-spacing: var(--chrome-tracking-tight);
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 1.2rem;
+  line-height: 1.08;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.context {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+
+/* Outcome-first: the headline metric is the loudest non-title line. */
+.proof {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 3px 10px;
+  margin-top: 0;
+  padding-top: clamp(6px, 0.6vw, 9px);
+  border-top: 1px solid rgba(22, 38, 94, 0.18);
+}
+
+.proofMetric {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.1;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+
+.proofRest {
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  letter-spacing: var(--chrome-tracking-tight);
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+/* ─── Size variants (map to the tier ladder via data-size) ──────────────── */
+
+.plate[data-size='featured'] .sleeve {
+  aspect-ratio: 1 / 1;
+}
+
+/* Title, context, and outcome are uniform across all sizes (per request) —
+   only the sleeve aspect ratio varies by tier. */
+.plate[data-size='main'] .sleeve {
+  aspect-ratio: 4 / 3;
+}
+
+/* ─── Reduced motion: no lift, no entrance slide. ───────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .plate {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .button,
+  .button:hover,
+  .button:focus-visible {
+    transform: none;
+    transition:
+      box-shadow 200ms linear,
+      border-color 200ms linear,
+      background-color 200ms linear;
+  }
+}

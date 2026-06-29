@@ -54,7 +54,8 @@ function getInitialTransitionState(): TransitionState {
 /**
  * Source rectangle for the desk notebook (or canvas spread). Captured at
  * the moment the transition starts so the overlay knows where to morph
- * from / to. Read from elements tagged with `data-transition-source`.
+ * from / to. Prefer the optional visual source, then fall back to the
+ * stable layout source.
  */
 export interface TransitionRect {
   left: number;
@@ -145,9 +146,11 @@ export function broadcastState(state: TransitionState): void {
  */
 export function readSourceRect(name: 'notebook' | 'spread'): TransitionRect | null {
   if (typeof document === 'undefined') return null;
-  const el = document.querySelector<HTMLElement>(
-    `[data-transition-source="${name}"]`,
-  );
+  const el =
+    document.querySelector<HTMLElement>(
+      `[data-transition-visual-source="${name}"]`,
+    ) ??
+    document.querySelector<HTMLElement>(`[data-transition-source="${name}"]`);
   if (!el) return null;
   const rect = el.getBoundingClientRect();
   return {

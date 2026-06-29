@@ -19,7 +19,11 @@ import styles from './Ephemera.module.css';
  */
 export default function Ephemera() {
   return (
-    <div className={styles.ephemera} aria-hidden="true">
+    <div
+      className={styles.ephemera}
+      data-desk-support="ephemera"
+      aria-hidden="true"
+    >
       <img
         className={styles.sketch}
         src="/desk/architectural-sketch.webp"

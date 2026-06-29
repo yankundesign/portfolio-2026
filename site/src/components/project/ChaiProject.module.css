@@ -18,23 +18,29 @@
  */
 
 .article {
-  max-width: 78em;
+  /* v0.9.1: widened uniformly to use more of the page and cut the side
+     whitespace. The article is sized close to (rail + reading column +
+     small gutter) so the whole block centers with modest, symmetric
+     margins instead of a big empty right gutter. Reading measure scales
+     up with the viewport; prose + plates grow together because both key
+     off --reading-measure. */
+  max-width: 80em;
+  --reading-measure: 60em;
   margin: 0 auto;
   padding: 0 1px; /* avoid horizontal collapse of plate shadows */
 }
 
-/* On very wide displays (≥1920px) widen the article to 90em AND bump
-   the reading column from 52em to 64em. Both prose and plates use
-   --reading-measure, so they grow together. The rail and gutter still
-   get meaningful slack because 90em - 64em = 26em split between them.
-   Prose at 64em (1024px) is wider than the editorial ideal (32–38em)
-   but reads cleanly because Fraunces' tracking and the short-sentence
-   voice keep line lengths from feeling lost. */
+@media (min-width: 1440px) {
+  .article {
+    max-width: 88em;
+    --reading-measure: 66em;
+  }
+}
 
 @media (min-width: 1920px) {
   .article {
-    max-width: 90em;
-    --reading-measure: 64em;
+    max-width: 98em;
+    --reading-measure: 76em;
   }
 }
 
@@ -42,14 +48,15 @@
 
 .grid {
   display: grid;
-  /* Rail column has a minimum width (11rem) so the labels never crowd
-     the reading column. If the viewport can't accommodate min rail +
-     reading column, the reading column shrinks first via min(...). */
+  /* Rail is bounded (not greedy) so it stays a slim label column; the
+     reading column takes the measure; the trailing gutter only mops up
+     the small remainder. This keeps content wide and the empty right
+     gutter minimal — the article max-width is sized to match. */
   grid-template-columns:
-    minmax(11rem, 1fr)
+    minmax(10rem, 12rem)
     min(var(--reading-measure), 100%)
     minmax(0, 1fr);
-  column-gap: clamp(1rem, 3vw, 2rem);
+  column-gap: clamp(1.25rem, 2.5vw, 2.5rem);
   align-items: start;
 }
 

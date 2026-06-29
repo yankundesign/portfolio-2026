@@ -161,6 +161,13 @@ export const proofs = {
 
 export interface Figure {
   src: string;
+  /**
+   * Optional additional images stacked vertically inside one plate frame,
+   * sharing a single caption. When set, these images render in order
+   * (use `src` as the first when you want it included); a 1px ink rule
+   * divides each stacked image.
+   */
+  srcs?: string[];
   caption: string;
   alt: string;
   /** Optional internal route that makes the plate image and caption navigable. */
@@ -204,7 +211,7 @@ export const figures = {
   },
   evolution20: {
     src: '/images/chai/chai-2-0.png',
-    caption: 'CHAI 2.0',
+    caption: 'CHAI 3.0',
     alt: 'CHAI 2.0 sidebar — refined to surface reasoning alongside the answer.',
     width: 'column',
   },

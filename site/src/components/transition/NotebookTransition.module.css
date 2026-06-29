@@ -98,9 +98,8 @@
  * Why this matters: the rotation needs ease-in-out (so the visible 0°→90°
  * portion gets enough time for the eye to register it) while the position
  * morph wants ease-out-expo (confident decel into the binding). These are
- * different curves, so they have to be different animations — and WAAPI
- * doesn't compose two `transform` animations cleanly. Splitting onto
- * parent + child sidesteps the conflict entirely.
+ * different curves, so they stay on separate GSAP tweens. Splitting onto
+ * parent + child keeps the transform channels independent.
  * ────────────────────────────────────────────────────────────────────────── */
 
 .coverLayer {

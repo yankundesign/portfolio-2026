@@ -35,6 +35,8 @@
 .slot {
   display: flex;
   min-width: 0;
+  position: relative;
+  z-index: 2;
 }
 
 /* Roulette — cols 1–2, bottom-aligned. */
@@ -79,6 +81,28 @@
   justify-content: center;
   padding-top: 24px;
   padding-left: 8px;
+}
+
+/* Plate proof reveal: GSAP lifts the objects in as the final proof layer. */
+.scene[data-proof-phase='paper'],
+.scene[data-proof-phase='rulings'] {
+  pointer-events: none;
+}
+
+.scene[data-proof-phase='objects'] .slot,
+.scene[data-proof-phase='objects'] > :not(.slot) {
+  opacity: 0;
+  filter: blur(2px);
+  transform: translateY(10px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scene[data-proof-phase='objects'] .slot,
+  .scene[data-proof-phase='objects'] > :not(.slot) {
+    opacity: 1;
+    filter: none;
+    transform: none;
+  }
 }
 
 /* ─── Responsive ─── */

@@ -4,6 +4,47 @@ Track design and build decisions as they're made.
 
 ---
 
+## 2026-06-14 · Canvas v0.9 — notebook becomes backdrop, plates float and scroll (reverses two v0.8.1 calls)
+
+Planned the next canvas redesign after a competitive review of five designer portfolios (Jackie Hu, Emmi Wu, Sanvi Saya, Zhiyuan Chen, Yoorok Jeong). The shipped v0.8.1 canvas has four problems: forced 2×2 symmetry, single-viewport no-scroll spread, buried metrics, and no status signals. The fix is architectural — split the notebook (background) from the cards (content) — plus a content-treatment pass. Full spec in `00-brief/prd-canvas-v0.9-backdrop-plates.md`. **Planned, not built.**
+
+**The decisions:**
+
+1. **Notebook → backdrop (reverses v0.8.1 "printed inside the notebook").** The open-notebook image becomes a fixed, full-height, cropped background stage. Cards no longer live in two page slots; they float on the paper over it. `NotebookSpread` (image + page slots) retires from `/works`; the image becomes `NotebookBackdrop`, the `NotebookPage`/`ProjectRow` children become a new `ProjectPlate`. Risk accepted: the notebook stops being a *container* and could read as wallpaper — mitigated by requiring one or two plates to deliberately acknowledge it (cross the fold, shadow into the crease).
+
+2. **CHAI regains hero status (reverses v0.8.1's equal-weighting call).** v0.8.1 accepted four equal plates "for compositional simplicity." With the page slots gone, hierarchy is free again — CHAI is the clear primary plate (cols 1–8, hero treatment).
+
+3. **`/works` scrolls again.** Fixed backdrop + scrollable 12-col content. **No parallax** (the backdrop doesn't move — a held stage, not a parallax layer); no scroll-speed offset. Honors the guideline's motion ban.
+
+4. **Frosted sleeve, monochrome — the "sulfuric-acid paper" vibe, reconciled with the two-color lock.** Plates read as translucent glassine sleeves: the mockup is softened behind a paper-toned frost at rest, then clarifies and lifts on hover/focus. We take the *material and behavior* of vellum/glassine, **not** the blue/pink gradient print of the Kano reference samples — strictly `--paper` + `--ink`. Yankun chose this over (a) *tinted frost*, which would have broken the palette and drifted toward generic AI-gradient slop the guideline explicitly rejects, and (b) *chrome-only glassine*, which was weaker and didn't give the plates an identity. This is a sanctioned read of the guideline, not a deviation: glassine is a paper material, on-thesis for "a printed object rendered in browser."
+
+5. **Outcome-first + status chips.** The metric becomes the loudest non-title line (ink-blue at heavier weight — the guideline's one sanctioned emphasis). Each plate gets a typographic mono-caps status pill with a 1px ink rule (`SHIPPED`, `FULL CASE STUDY`, etc.) — no icons, per the "UI chrome is typographic" rule.
+
+**Engineering calls baked into the plan:**
+
+- **Transition is the only thing that can break.** The close reads `[data-transition-source="spread"]`; that attribute must move onto `NotebookBackdrop`, and `computeCanvasSpreadRect()` must be rewritten to the new full-height geometry (`height = 100svh`, `width = height × 2600/1812`, centered, crop allowed) so the open endpoint agrees with it. Page-ratio constants stay (they scale with the rect). Test open AND close at all breakpoints; watch for a "balloon" zoom-out-from-nothing on close with a larger-than-viewport rect.
+- **Extend the data schema, don't duplicate it.** `projects.ts` already has `size`, `canvasTier`, `canvasOutcome`, `canvasContext`. Rename `canvasTier`→`canvasStatus`, promote `canvasOutcome`→`canvasProofs[]`, add `canvasTags[]`, reuse `size` (no new `canvasImageSize`). Avoids two overlapping schemas.
+- **One content path.** Fold the existing separate `.fallback` single-column list into `ProjectPlate`'s responsive behavior — don't maintain two.
+- **Accessibility guardrails:** frost clears on keyboard focus (not hover-only); `prefers-reduced-motion` cross-fades instead of lifting; title/chip/outcome live on paper *outside* the frost so nothing is hidden behind a hover that can't happen on touch.
+- **Perf watch:** `backdrop-filter` blur is the Lighthouse-95 risk; four plates is fine, keep blur off scroll-driven properties.
+
+**Stale docs flagged (not rewritten):** `canvas-redesign-prompt.md` (v0.6-era PosterCard) and `prd-notebook-canvas.md` (v0.5) describe retired architectures. The new PRD notes it supersedes the canvas surface. CLAUDE.md still points at `prd-notebook-canvas.md` as the canvas PRD — update that reference when v0.9 builds.
+
+**Files this entry affects:**
+- `00-brief/prd-canvas-v0.9-backdrop-plates.md` (new — the spec)
+- `00-brief/decisions-log.md` (this entry)
+
+**Files this will affect when built:**
+- `site/src/routes/CanvasRoute.tsx` + `.module.css`
+- `site/src/components/canvas/NotebookSpread.tsx` → `NotebookBackdrop.tsx`; `NotebookPage.tsx` retired from route
+- `site/src/components/canvas/ProjectPlate.tsx` + `.module.css` (new; replaces `ProjectRow` on canvas)
+- `site/src/components/transition/NotebookTransition.tsx` (`computeCanvasSpreadRect`, `data-transition-source`)
+- `site/src/data/projects.ts` (schema consolidation)
+
+**Source:** Conversation 2026-06-14. Competitive review of jackiehu.design, emmiwu.com, sanvithi.com, zhiyuanchen.com, yoorok.com; sulfuric-acid-paper (glassine) reference samples from Yankun.
+
+---
+
 ## 2026-05-10 · Hosting — Cloudflare Pages, Wrangler CLI deploy, yankun.design DNS at Cloudflare
 
 Picked a host and got the site live. Three sub-decisions worth pinning down before they fade.

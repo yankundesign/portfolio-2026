@@ -10,6 +10,7 @@ import {
   type TransitionState,
 } from '../../interactions/useTransitionState';
 import { useReducedMotion } from '../../interactions/useReducedMotion';
+import { gsap } from '../../interactions/gsap';
 import styles from './NotebookTransition.module.css';
 
 /**
@@ -33,14 +34,9 @@ import styles from './NotebookTransition.module.css';
  *   5. Settles at the destination, fades the overlay out, revealing the
  *      destination route's content underneath.
  *
- * The animation engine is the **Web Animations API** (`element.animate(...)`)
- * rather than Framer Motion's `useAnimation` controls. The PRD called for
- * Framer Motion, but in practice `useAnimation` controls couldn't reliably
- * resolve their `.start()` promises when animating layout properties
- * (`left/top/width/height`) — they'd hang for tens of seconds. WAAPI's
- * `.animate(...)` returns a real Animation object whose `.finished` Promise
- * is grounded in the browser's compositor, not a JS scheduler. Identical
- * timing curves; far fewer surprises.
+ * The animation engine is GSAP. Earlier versions used hand-written WAAPI
+ * promise helpers; the current version keeps the same measured layer model
+ * but lets GSAP own tween lifecycle, easing, interruption, and cleanup.
  *
  * AnimatePresence is still used at the App root for route-level transitions
  * (currently a no-op for non-motion children, set up for future use).
@@ -76,7 +72,11 @@ import styles from './NotebookTransition.module.css';
 const ASSET_COVER = '/plate/notebook.webp';
 const ASSET_SPREAD = '/canvas/open-notebook.webp';
 
+const COVER_ASPECT = 947 / 1380;
 const SPREAD_ASPECT = 2600 / 1812;
+const SPREAD_PAGE_TOP_RATIO = 0.07;
+const SPREAD_PAGE_BOTTOM_RATIO = 0.07;
+const SPREAD_LEFT_PAGE_WIDTH_RATIO = 0.42;
 const REDUCED_MOTION_DURATION = 240;
 
 /* ─── Easing curves ──────────────────────────────────────────────────────────
@@ -99,18 +99,26 @@ const EASE_INOUT_PAPER = 'cubic-bezier(0.42, 0, 0.32, 1)';
 const EASE_OUT = 'cubic-bezier(0.4, 0, 0.2, 1)';
 const EASE_LINEAR = 'linear';
 
-/** Mirrors the canvas's --notebook-width formula at the current viewport. */
+/**
+ * Canvas v0.9 geometry. The canvas notebook is a fixed, full-height backdrop
+ * (`CanvasRoute.module.css .backdrop`), cropped at the sides when wider than
+ * the viewport. This MUST mirror that CSS exactly so the open transition's
+ * cover endpoint and the close transition's measured rect agree:
+ *
+ *   height = 100svh, width = height * SPREAD_ASPECT, horizontally centered.
+ *
+ * Close prefers the live measurement of `[data-transition-source="spread"]`
+ * (the backdrop element); this computed value is the fallback and the open
+ * endpoint, so the two stay in lockstep.
+ */
 function computeCanvasSpreadRect(): TransitionRect {
   const vw = window.innerWidth;
   const vh = window.innerHeight;
-  const padding = Math.max(60, Math.min(vw * 0.08, 120));
-  const widthBudget = vw - 2 * padding;
-  const heightBudget = (vh * 0.75) * SPREAD_ASPECT;
-  const width = Math.min(widthBudget, 1400, heightBudget);
-  const height = width / SPREAD_ASPECT;
+  const height = vh;
+  const width = height * SPREAD_ASPECT;
   return {
     left: (vw - width) / 2,
-    top: (vh - height) / 2,
+    top: 0,
     width,
     height,
   };
@@ -126,11 +134,16 @@ function computeCanvasSpreadRect(): TransitionRect {
  */
 function computeOpenCoverRect(spread: TransitionRect): TransitionRect {
   const halfWidth = spread.width / 2;
+  const pageTop = spread.top + spread.height * SPREAD_PAGE_TOP_RATIO;
+  const pageHeight =
+    spread.height * (1 - SPREAD_PAGE_TOP_RATIO - SPREAD_PAGE_BOTTOM_RATIO);
+  const leftPageWidth = spread.width * SPREAD_LEFT_PAGE_WIDTH_RATIO;
+  const coverWidth = Math.min(leftPageWidth, pageHeight * COVER_ASPECT);
   return {
     left: spread.left + halfWidth,
-    top: spread.top,
-    width: halfWidth,
-    height: spread.height,
+    top: pageTop,
+    width: coverWidth,
+    height: pageHeight,
   };
 }
 
@@ -153,7 +166,7 @@ function fallbackDeskRect(): TransitionRect {
   else if (vw <= 1279) width = 300;
   else width = 340;
   // Native asset aspect: 947 / 1380 ≈ 0.686 → height = width / 0.686.
-  const height = width / 0.686;
+  const height = width / COVER_ASPECT;
   return {
     left: (vw - width) / 2,
     top: (vh - height) / 2,
@@ -183,16 +196,22 @@ function snap(
   el: HTMLElement,
   state: { rect?: TransitionRect; opacity?: number; translateY?: number },
 ): void {
-  el.getAnimations().forEach((a) => a.cancel());
+  gsap.killTweensOf(el);
+
+  const vars: gsap.TweenVars = {
+    x: 0,
+    y: state.translateY ?? 0,
+  };
+
   if (state.rect) {
-    el.style.left = `${state.rect.left}px`;
-    el.style.top = `${state.rect.top}px`;
-    el.style.width = `${state.rect.width}px`;
-    el.style.height = `${state.rect.height}px`;
+    vars.left = state.rect.left;
+    vars.top = state.rect.top;
+    vars.width = state.rect.width;
+    vars.height = state.rect.height;
   }
-  if (state.opacity !== undefined) el.style.opacity = String(state.opacity);
-  const ty = state.translateY ?? 0;
-  el.style.transform = `translate3d(0, ${ty}px, 0)`;
+  if (state.opacity !== undefined) vars.opacity = state.opacity;
+
+  gsap.set(el, vars);
 }
 
 /**
@@ -202,8 +221,11 @@ function snap(
  * different element to avoid transform conflicts.
  */
 function snapRotation(el: HTMLElement, rotateY: number): void {
-  el.getAnimations().forEach((a) => a.cancel());
-  el.style.transform = `rotateY(${rotateY}deg)`;
+  gsap.killTweensOf(el);
+  gsap.set(el, {
+    rotationY: rotateY,
+    transformOrigin: '0% 50%',
+  });
 }
 
 interface AnimateOpts {
@@ -212,18 +234,32 @@ interface AnimateOpts {
   delay?: number; // ms
 }
 
-/**
- * Animate to target values via WAAPI. Bakes the final state into inline
- * styles before resolving so subsequent reads/snaps see the new values
- * — WAAPI by default would revert to the pre-animation styles after the
- * animation is garbage-collected, even with fill: 'forwards'.
- *
- * Strategy: set the target inline styles BEFORE the animation, then
- * animate FROM the current rendered state TO that target. WAAPI captures
- * the from-state via the implicit current-style snapshot. The from-state
- * persists on the element as inline styles after the animation resolves,
- * since we set the target up front (no need to bake again afterward).
- */
+function gsapEase(easing?: string): string {
+  if (easing === EASE_LINEAR) return 'none';
+  if (easing === EASE_OUT_EXPO) return 'expo.out';
+  if (easing === EASE_INOUT_PAPER) return 'power2.inOut';
+  return 'power2.out';
+}
+
+function tweenTo(target: HTMLElement, vars: gsap.TweenVars): Promise<void> {
+  return new Promise((resolve) => {
+    let resolved = false;
+    const done = () => {
+      if (resolved) return;
+      resolved = true;
+      resolve();
+    };
+
+    gsap.to(target, {
+      ...vars,
+      overwrite: 'auto',
+      onComplete: done,
+      onInterrupt: done,
+    });
+  });
+}
+
+/** Animate to target values via GSAP. */
 function animateTo(
   el: HTMLElement,
   to: Partial<{
@@ -236,119 +272,20 @@ function animateTo(
   }>,
   opts: AnimateOpts,
 ): Promise<void> {
-  // Capture the FROM state from current inline styles. These are the
-  // truth — getComputedStyle can lag during in-flight WAAPI animations.
-  const fromTy = parseTranslateY(el.style.transform);
-  const fromOpacity = el.style.opacity || '1';
-  const fromLeft = el.style.left || '0px';
-  const fromTop = el.style.top || '0px';
-  const fromWidth = el.style.width || 'auto';
-  const fromHeight = el.style.height || 'auto';
-
-  const toTy = to.translateY !== undefined ? to.translateY : fromTy;
-  const toLeft = to.left !== undefined ? `${to.left}px` : fromLeft;
-  const toTop = to.top !== undefined ? `${to.top}px` : fromTop;
-  const toWidth = to.width !== undefined ? `${to.width}px` : fromWidth;
-  const toHeight = to.height !== undefined ? `${to.height}px` : fromHeight;
-  const toOpacity = to.opacity !== undefined ? String(to.opacity) : fromOpacity;
-  const fromTransform = `translate3d(0, ${fromTy}px, 0)`;
-  const toTransform = `translate3d(0, ${toTy}px, 0)`;
-
-  if (typeof el.animate !== 'function') {
-    // WAAPI unavailable — snap to final and resolve after duration so
-    // the orchestration's relative timing is preserved.
-    el.style.left = toLeft;
-    el.style.top = toTop;
-    el.style.width = toWidth;
-    el.style.height = toHeight;
-    el.style.opacity = toOpacity;
-    el.style.transform = toTransform;
-    return new Promise((r) => window.setTimeout(r, opts.duration + (opts.delay ?? 0)));
-  }
-
-  const anim = el.animate(
-    [
-      {
-        left: fromLeft,
-        top: fromTop,
-        width: fromWidth,
-        height: fromHeight,
-        opacity: fromOpacity,
-        transform: fromTransform,
-      },
-      {
-        left: toLeft,
-        top: toTop,
-        width: toWidth,
-        height: toHeight,
-        opacity: toOpacity,
-        transform: toTransform,
-      },
-    ],
-    {
-      duration: opts.duration,
-      easing: opts.easing ?? 'cubic-bezier(0.4, 0, 0.2, 1)',
-      delay: opts.delay ?? 0,
-      fill: 'forwards',
-    },
-  );
-
-  /**
-   * Bake target styles + release the WAAPI animation. Idempotent — safe
-   * to call from either the .finished Promise OR the safety-net
-   * setTimeout below.
-   */
-  let baked = false;
-  const bake = () => {
-    if (baked) return;
-    baked = true;
-    el.style.left = toLeft;
-    el.style.top = toTop;
-    el.style.width = toWidth;
-    el.style.height = toHeight;
-    el.style.opacity = toOpacity;
-    el.style.transform = toTransform;
-    try {
-      anim.cancel();
-    } catch {
-      // ignore — animation may already be done/canceled
-    }
+  const vars: gsap.TweenVars = {
+    duration: opts.duration / 1000,
+    delay: (opts.delay ?? 0) / 1000,
+    ease: gsapEase(opts.easing),
   };
 
-  /**
-   * Safety net: even with `fill: 'forwards'`, `anim.finished` doesn't
-   * always resolve on time. Hidden/throttled tabs in particular can
-   * delay it indefinitely (the browser pauses WAAPI in background tabs).
-   * Resolve via setTimeout if the Promise hasn't fired by duration +
-   * 100ms. The visible animation already plays via the compositor; the
-   * Promise is just orchestration plumbing.
-   */
-  const totalMs = opts.duration + (opts.delay ?? 0);
-  return new Promise<void>((resolve) => {
-    let finished = false;
-    const done = () => {
-      if (finished) return;
-      finished = true;
-      bake();
-      resolve();
-    };
-    anim.finished.then(done).catch(done);
-    window.setTimeout(done, totalMs + 100);
-  });
-}
+  if (to.left !== undefined) vars.left = to.left;
+  if (to.top !== undefined) vars.top = to.top;
+  if (to.width !== undefined) vars.width = to.width;
+  if (to.height !== undefined) vars.height = to.height;
+  if (to.opacity !== undefined) vars.opacity = to.opacity;
+  if (to.translateY !== undefined) vars.y = to.translateY;
 
-/** Parse `translate3d(0, 12px, 0)` segment out of a transform string. */
-function parseTranslateY(transform: string): number {
-  if (!transform) return 0;
-  const m = /translate3d\([^,]+,\s*(-?\d+(?:\.\d+)?)(?:px)?/.exec(transform);
-  return m ? parseFloat(m[1]) : 0;
-}
-
-/** Parse `rotateY(-180deg)` segment out of a transform string. */
-function parseRotateY(transform: string): number {
-  if (!transform) return 0;
-  const m = /rotateY\((-?\d+(?:\.\d+)?)deg\)/.exec(transform);
-  return m ? parseFloat(m[1]) : 0;
+  return tweenTo(el, vars);
 }
 
 /**
@@ -356,8 +293,7 @@ function parseRotateY(transform: string): number {
  * position morph via translate + left/top/width/height, while the face
  * stack rotates the front and back surfaces together around the spine.
  *
- * Same safety-net pattern as animateTo: resolves on .finished OR on a
- * setTimeout, whichever first, with idempotent style baking.
+ * Resolves when the GSAP tween completes or is interrupted.
  */
 function animateRotation(
   wrapper: HTMLElement,
@@ -370,48 +306,12 @@ function animateRotation(
   const img = wrapper.querySelector<HTMLElement>('[data-transition-cover-face]');
   if (!img) return Promise.resolve();
 
-  const fromRy = parseRotateY(img.style.transform);
-  const fromTransform = `rotateY(${fromRy}deg)`;
-  const toTransform = `rotateY(${toRotateY}deg)`;
-
-  if (typeof img.animate !== 'function') {
-    img.style.transform = toTransform;
-    return new Promise((r) => window.setTimeout(r, opts.duration + (opts.delay ?? 0)));
-  }
-
-  const anim = img.animate(
-    [{ transform: fromTransform }, { transform: toTransform }],
-    {
-      duration: opts.duration,
-      easing: opts.easing ?? 'cubic-bezier(0.4, 0, 0.2, 1)',
-      delay: opts.delay ?? 0,
-      fill: 'forwards',
-    },
-  );
-
-  let baked = false;
-  const bake = () => {
-    if (baked) return;
-    baked = true;
-    img.style.transform = toTransform;
-    try {
-      anim.cancel();
-    } catch {
-      // ignore
-    }
-  };
-
-  const totalMs = opts.duration + (opts.delay ?? 0);
-  return new Promise<void>((resolve) => {
-    let finished = false;
-    const done = () => {
-      if (finished) return;
-      finished = true;
-      bake();
-      resolve();
-    };
-    anim.finished.then(done).catch(done);
-    window.setTimeout(done, totalMs + 100);
+  return tweenTo(img, {
+    rotationY: toRotateY,
+    transformOrigin: '0% 50%',
+    duration: opts.duration / 1000,
+    delay: (opts.delay ?? 0) / 1000,
+    ease: gsapEase(opts.easing),
   });
 }
 
@@ -426,7 +326,7 @@ export default function NotebookTransition() {
       : 'idle',
   );
 
-  // DOM refs for direct WAAPI animation. Layers are always mounted so the
+  // DOM refs for direct GSAP animation. Layers are always mounted so the
   // refs are always valid once the component has mounted.
   const bgRef = useRef<HTMLDivElement>(null);
   const spreadRef = useRef<HTMLDivElement>(null);
@@ -492,139 +392,161 @@ export default function NotebookTransition() {
     isRunningRef.current = true;
 
     try {
-    const deskRect = readSourceRect('notebook') ?? fallbackDeskRect();
-    const spreadRect = computeCanvasSpreadRect();
-    const openCoverRect = computeOpenCoverRect(spreadRect);
+      const deskRect = readSourceRect('notebook') ?? fallbackDeskRect();
+      const spreadRect = computeCanvasSpreadRect();
+      const openCoverRect = computeOpenCoverRect(spreadRect);
 
-    // Cache the desk rect so close — which fires from /works where the
-    // desk isn't in the DOM — can land the cover at the matching size
-    // instead of the small fallback (340px).
-    cacheDeskRect(deskRect);
+      // Cache the desk rect so close — which fires from /works where the
+      // desk isn't in the DOM — can land the cover at the matching size
+      // instead of the small fallback (340px).
+      cacheDeskRect(deskRect);
 
-    transitionTo('opening');
+      transitionTo('opening');
 
-    // Beat 0 — cover snaps to desk-rect at opacity 1. Because the cover
-    // asset IS the desk's asset, this snap is invisible: the overlay's
-    // notebook lands exactly on top of the desk's notebook with the same
-    // pixels. The desk's notebook is still rendered underneath; if the
-    // overlay flickers for one frame, the desk's notebook covers for it.
-    snap(cover, { rect: deskRect, opacity: 1, translateY: 0 });
-    const coverFace = cover.querySelector<HTMLElement>('[data-transition-cover-face]');
-    if (coverFace) snapRotation(coverFace, 0);
-    snap(spread, { rect: spreadRect, opacity: 0 });
-    if (spine) {
-      snap(spine, {
-        rect: {
-          left: spreadRect.left + spreadRect.width / 2 - 2,
-          top: spreadRect.top + spreadRect.height * 0.04,
-          width: 4,
-          height: spreadRect.height * 0.92,
-        },
-        opacity: 0,
+      // Beat 0 — cover snaps to desk-rect at opacity 1. Because the cover
+      // asset IS the desk's asset, this snap is invisible: the overlay's
+      // notebook lands exactly on top of the desk's notebook with the same
+      // pixels.
+      snap(cover, { rect: deskRect, opacity: 1, translateY: 0 });
+      const coverFace = cover.querySelector<HTMLElement>(
+        '[data-transition-cover-face]',
+      );
+      if (coverFace) snapRotation(coverFace, 0);
+      snap(spread, { rect: spreadRect, opacity: 0 });
+      if (spine) {
+        snap(spine, {
+          rect: {
+            left: spreadRect.left + spreadRect.width / 2 - 2,
+            top: spreadRect.top + spreadRect.height * 0.04,
+            width: 4,
+            height: spreadRect.height * 0.92,
+          },
+          opacity: 0,
+        });
+      }
+      snap(bg, { opacity: 0 });
+
+      // Force a layout flush so the snapped geometry is committed before
+      // GSAP interpolates toward the open spread.
+      void bg.offsetHeight;
+
+      await new Promise<void>((resolve) => {
+        const revealTargets = spine ? [bg, spread, spine] : [bg, spread];
+        const timeline = gsap.timeline({
+          defaults: { overwrite: 'auto' },
+          onComplete: resolve,
+        });
+
+        // A labeled score makes the page turn easier to tune as one
+        // physical gesture: pick up, hinge, reveal, then settle.
+        timeline
+          .addLabel('pickUp', 0)
+          .to(
+            bg,
+            {
+              opacity: 1,
+              duration: 0.58,
+              ease: 'none',
+            },
+            'pickUp+=0.08',
+          )
+          .to(
+            cover,
+            {
+              y: -16,
+              duration: 0.22,
+              ease: 'power2.inOut',
+            },
+            'pickUp',
+          );
+
+        if (coverFace) {
+          timeline.to(
+            coverFace,
+            {
+              rotationY: -5,
+              transformOrigin: '0% 50%',
+              duration: 0.16,
+              ease: 'power2.inOut',
+            },
+            'pickUp+=0.06',
+          );
+        }
+
+        timeline.addLabel('hinge', 'pickUp+=0.28').to(
+          cover,
+          {
+            left: openCoverRect.left,
+            top: openCoverRect.top,
+            width: openCoverRect.width,
+            height: openCoverRect.height,
+            y: 0,
+            duration: 0.76,
+            ease: 'expo.out',
+          },
+          'hinge',
+        );
+
+        if (coverFace) {
+          timeline.to(
+            coverFace,
+            {
+              rotationY: -180,
+              transformOrigin: '0% 50%',
+              duration: 0.92,
+              ease: 'power2.inOut',
+            },
+            'hinge',
+          );
+        }
+
+        timeline
+          .to(
+            spread,
+            {
+              opacity: 1,
+              duration: 0.5,
+              ease: 'power2.out',
+            },
+            'hinge+=0.2',
+          )
+          .call(() => navigateRef.current('/works'), undefined, 'hinge+=0.43');
+
+        if (spine) {
+          timeline.to(
+            spine,
+            {
+              opacity: 1,
+              duration: 0.38,
+              ease: 'power2.out',
+            },
+            'hinge+=0.22',
+          );
+        }
+
+        timeline
+          .addLabel('settle', 'hinge+=0.94')
+          .to(
+            cover,
+            {
+              opacity: 0,
+              duration: 0.18,
+              ease: 'power2.out',
+            },
+            'settle',
+          )
+          .to(
+            revealTargets,
+            {
+              opacity: 0,
+              duration: 0.28,
+              ease: 'power2.out',
+            },
+            'settle+=0.04',
+          );
       });
-    }
-    snap(bg, { opacity: 0 });
 
-    // Force a layout flush so the snap takes effect before the next
-    // animate() call reads computed styles.
-    void bg.offsetHeight;
-
-    // Beat 5 (background) — the desk disappears as a linear wash, not as
-    // a late route mask. The route swap waits until the wash is opaque,
-    // so the user sees desk -> paper -> canvas instead of a sudden cut.
-    const bgCoverPromise = animateTo(bg, { opacity: 1 }, {
-      duration: 580,
-      easing: EASE_LINEAR,
-      delay: 80,
-    });
-
-    // Beat 1 (lift) — cover gently rises -16px over 220ms with a soft
-    // ease-in-out. The gesture has weight; the eye registers it as a
-    // wind-up rather than a pop.
-    await animateTo(cover, { translateY: -16 }, {
-      duration: 220,
-      easing: EASE_INOUT_PAPER,
-    });
-
-    // Beat 2 — brief settle at lifted position (60ms). The "now I'll
-    // open it" beat — short enough to not feel sluggish, long enough to
-    // mark the transition from picking-up to opening.
-    await new Promise<void>((r) => window.setTimeout(r, 60));
-
-    // Beat 3 — position+size morph and rotation, animated SEPARATELY so
-    // each can use the right easing for its visual job:
-    //
-    //   Position morph: ease-out-expo (confident decel — the cover travels
-    //     to the binding and arrives without overshoot).
-    //
-    //   Rotation: ease-in-out for a slow visible start (so the user
-    //     actually sees the cover face tilt open through 0°→90°) before
-    //     it accelerates through the back half (90°→180°, hidden by
-    //     backface-visibility). With the previous shared ease-out-expo,
-    //     the rotation flew through the visible range in ~120ms and the
-    //     viewer never registered the open gesture — fixed by splitting.
-    //
-    //   Rotation runs slightly LONGER than the position morph (820ms vs
-    //   720ms) so the cover continues to settle flat after it has
-    //   arrived at the binding. Mimics a real book that finishes
-    //   settling open after the spine has stopped moving.
-    const morphPromise = animateTo(
-      cover,
-      {
-        left: openCoverRect.left,
-        top: openCoverRect.top,
-        width: openCoverRect.width,
-        height: openCoverRect.height,
-        translateY: 0,
-      },
-      { duration: 720, easing: EASE_OUT_EXPO },
-    );
-    const rotatePromise = animateRotation(cover, -180, {
-      duration: 820,
-      easing: EASE_INOUT_PAPER,
-    });
-    const spreadPromise = animateTo(
-      spread,
-      { opacity: 1 },
-      { duration: 460, easing: EASE_OUT, delay: 280 },
-    );
-    const spinePromise = spine
-      ? animateTo(spine, { opacity: 1 }, {
-          duration: 360,
-          easing: EASE_OUT,
-          delay: 260,
-        })
-      : Promise.resolve();
-
-    // Beat 6 — navigate only after the wash has covered the desk. This
-    // preserves the linear disappearance while keeping the route swap
-    // invisible.
-    window.setTimeout(() => {
-      navigateRef.current('/works');
-    }, 690);
-
-    await Promise.all([
-      bgCoverPromise,
-      morphPromise,
-      rotatePromise,
-      spreadPromise,
-      spinePromise,
-    ]);
-
-    // Beat 7 — overlay fades out, revealing the canvas content. The
-    // canvas's spread sits in the same pixels as the overlay's spread,
-    // so the hand-off is invisible. Project rows + side margins reveal
-    // as the bg clears.
-    await Promise.all([
-      animateTo(bg, { opacity: 0 }, { duration: 240, easing: EASE_OUT }),
-      animateTo(spread, { opacity: 0 }, { duration: 240, easing: EASE_OUT }),
-      ...(spine
-        ? [animateTo(spine, { opacity: 0 }, { duration: 240, easing: EASE_OUT })]
-        : []),
-      animateTo(cover, { opacity: 0 }, { duration: 180, easing: EASE_OUT }),
-    ]);
-
-    transitionTo('open');
+      transitionTo('open');
     } finally {
       isRunningRef.current = false;
     }

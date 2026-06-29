@@ -24,8 +24,9 @@
   outline: none;
 }
 
-.button:hover {
-  transform: translateY(-2px);
+.button:hover,
+.button:focus-visible {
+  transform: translateY(-5px) rotate(0.8deg) scale(1.018);
 }
 
 .button:focus-visible {
@@ -78,7 +79,8 @@
 
 @media (prefers-reduced-motion: reduce) {
   .button,
-  .button:hover {
+  .button:hover,
+  .button:focus-visible {
     transition: none;
     transform: none;
   }

@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Indigo FM — Late-Night Lo-fi</title>
+<link rel="icon" href="dj.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Doto:wght@400;600&family=Space+Grotesk:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  /* ========== reset + base ========== */
+  html, body {
+    margin: 0; padding: 0; height: 100%; width: 100%;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+    overflow: hidden; background: #0c0813; color: #111;
+  }
+  * { box-sizing: border-box; }
+
+  /* ========== animated fluid gradient stage ==========
+     Three blurred discs that drift/scale on offset cycles + a vignette + film grain.
+     Indigo + warm-amber palette for the late-night-lofi vibe. */
+  .stage {
+    position: fixed; inset: 0;
+    display: grid; place-items: center; overflow: hidden;
+    background: radial-gradient(ellipse at 50% 50%, #14102a 0%, #0a0719 70%, #06040f 100%);
+  }
+  .fluid {
+    position: absolute; border-radius: 50%;
+    filter: blur(140px) saturate(1.15);
+    opacity: 0.72; mix-blend-mode: screen;
+    pointer-events: none; will-change: transform;
+  }
+  .fluid.indigo {
+    width: 70vmin; height: 70vmin;
+    left: 50%; top: 50%; margin-left: -35vmin; margin-top: -35vmin;
+    background: radial-gradient(circle at 40% 40%,
+      oklch(0.58 0.20 280) 0%, oklch(0.42 0.21 285) 40%, oklch(0.26 0.14 290 / 0) 72%);
+    animation: flow-a 26s cubic-bezier(.45,.05,.55,.95) infinite;
+  }
+  .fluid.amber {
+    width: 64vmin; height: 64vmin;
+    left: 50%; top: 50%; margin-left: -32vmin; margin-top: -32vmin;
+    background: radial-gradient(circle at 50% 50%,
+      oklch(0.74 0.16 55) 0%, oklch(0.60 0.20 40) 42%, oklch(0.36 0.14 30 / 0) 72%);
+    animation: flow-b 34s cubic-bezier(.45,.05,.55,.95) infinite;
+    opacity: 0.55;
+  }
+  .fluid.rose {
+    width: 44vmin; height: 44vmin;
+    left: 50%; top: 50%; margin-left: -22vmin; margin-top: -22vmin;
+    filter: blur(110px) saturate(1.15); opacity: 0.5;
+    background: radial-gradient(circle at 50% 50%,
+      oklch(0.70 0.16 350) 0%, oklch(0.52 0.18 340) 45%, oklch(0.30 0.12 330 / 0) 72%);
+    animation: flow-c 42s cubic-bezier(.45,.05,.55,.95) infinite;
+  }
+  @keyframes flow-a {
+    0%   { transform: translate(-22vmin, -14vmin) scale(1.00) rotate(  0deg); }
+    25%  { transform: translate(  8vmin, -22vmin) scale(1.10) rotate( 60deg); }
+    50%  { transform: translate( 24vmin,  -2vmin) scale(0.95) rotate(140deg); }
+    75%  { transform: translate(-10vmin,  14vmin) scale(1.08) rotate(220deg); }
+    100% { transform: translate(-22vmin, -14vmin) scale(1.00) rotate(360deg); }
+  }
+  @keyframes flow-b {
+    0%   { transform: translate( 20vmin,  16vmin) scale(1.05) rotate(   0deg); }
+    25%  { transform: translate(-12vmin,  22vmin) scale(0.94) rotate( -60deg); }
+    50%  { transform: translate(-26vmin,   2vmin) scale(1.15) rotate(-140deg); }
+    75%  { transform: translate( 12vmin, -12vmin) scale(1.06) rotate(-220deg); }
+    100% { transform: translate( 20vmin,  16vmin) scale(1.05) rotate(-360deg); }
+  }
+  @keyframes flow-c {
+    0%   { transform: translate(  2vmin,  -4vmin) scale(1.00); }
+    25%  { transform: translate(-18vmin,   6vmin) scale(1.18); }
+    50%  { transform: translate(  6vmin,  18vmin) scale(0.86); }
+    75%  { transform: translate( 22vmin,  -8vmin) scale(1.10); }
+    100% { transform: translate(  2vmin,  -4vmin) scale(1.00); }
+  }
+  @media (prefers-reduced-motion: reduce) { .fluid { animation-duration: 240s !important; } }
+
+  .vignette {
+    position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse at 50% 55%, transparent 0%, rgba(0,0,0,0.18) 80%, rgba(0,0,0,0.4) 100%);
+  }
+  .grain {
+    position: absolute; inset: 0; pointer-events: none; opacity: 0.06; mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.6 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  }
+
+  /* ========== top nav ========== */
+  .topnav {
+    position: fixed; top: 24px; left: 0; right: 0;
+    display: flex; justify-content: center; align-items: center; gap: 44px;
+    z-index: 50; pointer-events: none;
+  }
+  .topnav-link {
+    pointer-events: auto;
+    font-family: 'Space Grotesk', 'Inter', sans-serif;
+    font-size: 14px; font-weight: 300; letter-spacing: 0.3em;
+    color: rgba(255, 255, 255, 0.85); text-decoration: none;
+    padding: 6px 4px; transition: color 0.18s ease;
+  }
+  .topnav-link:hover { color: #fff; }
+
+  /* ========== card ========== */
+  .card {
+    position: relative; width: 440px;
+    max-width: calc(100vw - 48px); height: min(780px, calc(100vh - 48px));
+    border-radius: 28px; overflow: hidden;
+    box-shadow: 0 40px 80px -20px rgba(0,0,0,0.55), 0 10px 24px -8px rgba(0,0,0,0.32),
+                0 0 0 1px rgba(255,255,255,0.06);
+    display: flex; flex-direction: column; background: #fff;
+  }
+
+  /* header */
+  .header {
+    position: relative; flex: 0 0 auto; height: 232px;
+    background: linear-gradient(180deg, #0d0a1c 0%, #161426 100%);
+    color: #fff; padding: 22px 24px 0;
+    border-radius: 28px 28px 0 0; overflow: hidden;
+  }
+  .header::before {
+    content: ''; position: absolute; inset: 0 0 auto 0; height: 130px;
+    background-image: radial-gradient(circle, rgba(255,255,255,0.09) 1px, transparent 1px);
+    background-size: 16px 16px; pointer-events: none;
+    mask-image: linear-gradient(180deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.55) 55%, transparent 100%);
+    -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.55) 55%, transparent 100%);
+  }
+  .header-top { display: flex; justify-content: space-between; align-items: flex-start; position: relative; z-index: 2; }
+  .header-name {
+    font-family: 'Doto', 'Space Mono', monospace;
+    font-size: 32px; font-weight: 400; letter-spacing: -0.02em; line-height: 1.1; color: #fff;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .header-avatar {
+    width: 28px; height: 28px; border-radius: 50%; overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.18); flex-shrink: 0;
+  }
+  .header-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .header-status {
+    font-size: 13px; color: #ffb38a; margin-top: 4px; padding-left: 38px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .dot-live {
+    width: 6px; height: 6px; border-radius: 999px; background: #ffb38a;
+    box-shadow: 0 0 6px rgba(255,179,138,0.6);
+    animation: pulse 1.2s ease-in-out infinite; opacity: 0.9;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.4; transform: scale(0.8); }
+    50% { opacity: 1; transform: scale(1.1); }
+  }
+  .header-time {
+    font-size: 15px; font-weight: 500;
+    font-variant-numeric: tabular-nums; color: rgba(255,255,255,0.95);
+  }
+  .wave-wrap {
+    position: absolute; left: 0; right: 0; bottom: -2px; height: 170px; z-index: 1;
+    pointer-events: none;
+    mask-image: linear-gradient(180deg, transparent 0%, #000 30%, #000 100%);
+    -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 30%, #000 100%);
+  }
+  .wave-wrap canvas { width: 100%; height: 100%; display: block; }
+
+  /* body */
+  .body {
+    flex: 1 1 auto; display: flex; flex-direction: column;
+    background: #fff; border-radius: 28px 28px 0 0; margin-top: -18px;
+    position: relative; z-index: 3; overflow: hidden;
+  }
+  .meta { padding: 24px 28px 18px; display: flex; flex-direction: column; gap: 6px; }
+  .meta-name { font-size: 30px; font-weight: 600; line-height: 1.08; letter-spacing: -0.02em; color: #111; }
+  .meta-sub {
+    font-size: 12px; color: #8a8a90;
+    display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+  }
+  .meta-source {
+    font-size: 11px; font-weight: 500; color: #a8a8af;
+    display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0;
+    text-decoration: none; transition: color 0.15s ease;
+  }
+  .meta-source:hover { color: #4a4a52; }
+
+  /* mini player (the song bed) */
+  .mini-player { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+  .mp-btn {
+    flex: 0 0 auto; width: 22px; height: 22px; border-radius: 999px;
+    background: #111; border: none; color: #fff;
+    display: grid; place-items: center; cursor: pointer; padding: 0;
+    transition: transform 0.12s ease;
+  }
+  .mp-btn:hover { transform: scale(1.06); }
+  .mp-btn:active { transform: scale(0.94); }
+  .mp-line {
+    flex: 1 1 auto; height: 2px; background: #e5e5e4;
+    border-radius: 999px; position: relative; overflow: hidden; cursor: pointer;
+  }
+  .mp-fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0%; background: #111; border-radius: 999px; }
+  .mp-time {
+    flex: 0 0 auto; font-size: 10.5px; color: #8a8a90;
+    font-variant-numeric: tabular-nums; letter-spacing: 0.01em;
+  }
+
+  /* transcript */
+  .transcript-wrap {
+    flex: 1 1 auto; margin: 0 16px;
+    background:
+      radial-gradient(circle, rgba(0,0,0,0.08) 0.5px, transparent 0.5px) 0 0/12px 12px,
+      #f3f1ec;
+    border-radius: 18px; overflow: hidden; position: relative; min-height: 0;
+  }
+  .transcript-scroll {
+    height: 100%; overflow-y: auto; padding: 20px 20px 40px; scroll-behavior: smooth;
+  }
+  .transcript-scroll::-webkit-scrollbar { width: 0; }
+  .transcript-fade {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 40px;
+    background: linear-gradient(180deg, rgba(243,241,236,0) 0%, rgba(243,241,236,1) 100%);
+    pointer-events: none;
+  }
+  .turn { margin-bottom: 18px; transition: opacity 0.3s ease; }
+  .turn.pending { opacity: 0.35; }
+  .turn-head {
+    font-size: 11.5px; color: #8a8a90; letter-spacing: 0.01em; margin-bottom: 4px;
+  }
+  .turn-head .who { color: #6a6a70; }
+  .turn.active .turn-head { color: #111; }
+  .turn.active .turn-head .who { color: #111; }
+  .turn-body {
+    font-size: 16px; line-height: 1.42; color: #111;
+    letter-spacing: -0.005em; text-wrap: pretty;
+  }
+  .word { transition: color 0.15s ease, background 0.15s ease, box-shadow 0.2s ease; }
+  .word.said { color: #111; }
+  .word.current {
+    color: #4a2010;
+    background: rgba(255,179,138,0.32);
+    box-shadow: 0 0 0 1px rgba(255,179,138,0.4), 0 0 10px rgba(255,179,138,0.28);
+    border-radius: 4px; padding: 0 2px; margin: 0 -2px;
+  }
+  .word.future { color: #b5b5ba; }
+
+  /* main player */
+  .player {
+    flex: 0 0 auto; display: flex; align-items: center; gap: 14px;
+    padding: 14px 18px 18px; background: #fff;
+  }
+  .player-time {
+    font-size: 13px; font-weight: 500; color: #111;
+    font-variant-numeric: tabular-nums; min-width: 34px;
+  }
+  .player-bars {
+    flex: 1 1 auto; height: 28px;
+    display: flex; align-items: center; gap: 2px;
+    cursor: pointer; position: relative; touch-action: none;
+  }
+  .player-bar {
+    flex: 1 1 auto; background: #cfcfd1; border-radius: 999px;
+    transition: background 0.12s ease; pointer-events: none;
+  }
+  .player-bar.played { background: #111; }
+  .play-btn {
+    flex: 0 0 auto; width: 36px; height: 36px; border-radius: 999px;
+    background: #111; border: none; color: #fff;
+    display: grid; place-items: center; cursor: pointer;
+    transition: transform 0.12s ease, background 0.12s ease; padding: 0;
+  }
+  .play-btn:hover { transform: scale(1.04); }
+  .play-btn:active { transform: scale(0.96); }
+</style>
+</head>
+<body>
+
+<nav class="topnav" aria-label="Top navigation">
+  <a href="/" class="topnav-link">HOME</a>
+  <a id="topnavMusic" href="#" target="_blank" rel="noopener" class="topnav-link">MUSIC</a>
+</nav>
+
+<div class="stage">
+  <div class="fluid indigo"></div>
+  <div class="fluid amber"></div>
+  <div class="fluid rose"></div>
+  <div class="vignette"></div>
+  <div class="grain"></div>
+
+  <div class="card">
+    <div class="header">
+      <div class="header-top">
+        <div>
+          <div class="header-name">
+            <div class="header-avatar"><img src="dj.svg" alt="Indigo"></div>
+            Indigo
+          </div>
+          <div class="header-status">
+            <span class="dot-live" id="dotLive"></span>
+            <span id="headerStatus">Tuning in…</span>
+          </div>
+        </div>
+        <div class="header-time" id="headerTime">0:00</div>
+      </div>
+      <div class="wave-wrap"><canvas id="waveCanvas"></canvas></div>
+    </div>
+
+    <div class="body">
+      <div class="meta">
+        <div class="meta-name" id="metaName">Indigo&rsquo;s<br>Pilot Episode</div>
+        <div class="meta-sub" id="metaSub">Aruarian Dance — Nujabes</div>
+        <div class="mini-player">
+          <button class="mp-btn" id="mpBtn" aria-label="Play song">
+            <svg id="mpIconPlay" width="9" height="9" viewBox="0 0 14 14" fill="none">
+              <path d="M3.5 2.2 L11.5 7 L3.5 11.8 Z" fill="currentColor"/>
+            </svg>
+            <svg id="mpIconPause" width="9" height="9" viewBox="0 0 14 14" fill="none" style="display:none">
+              <rect x="3" y="2" width="2.5" height="10" rx="0.8" fill="currentColor"/>
+              <rect x="8.5" y="2" width="2.5" height="10" rx="0.8" fill="currentColor"/>
+            </svg>
+          </button>
+          <div class="mp-line" id="mpLine"><div class="mp-fill" id="mpFill"></div></div>
+          <div class="mp-time" id="mpTime">0:00 / 0:30</div>
+        </div>
+      </div>
+
+      <div class="transcript-wrap">
+        <div class="transcript-scroll" id="transcriptScroll"></div>
+        <div class="transcript-fade"></div>
+      </div>
+
+      <div class="player">
+        <div class="player-time" id="playerTime">0:00</div>
+        <div class="player-bars" id="scrubber"></div>
+        <button class="play-btn" id="playBtn" aria-label="Play">
+          <svg id="iconPause" width="14" height="14" viewBox="0 0 14 14" fill="none" style="display:none">
+            <rect x="3" y="2" width="2.5" height="10" rx="0.8" fill="currentColor"/>
+            <rect x="8.5" y="2" width="2.5" height="10" rx="0.8" fill="currentColor"/>
+          </svg>
+          <svg id="iconPlay" width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M3.5 2.2 L11.5 7 L3.5 11.8 Z" fill="currentColor"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  // ============================================================
+  // Config — swap song / DJ identity here. (Audio is generated
+  // by scripts/generate_dj.py; song bed is a 30s iTunes preview.)
+  // ============================================================
+  const INTRO_AUDIO = './intro.mp3';
+  const INTRO_TIMINGS = './intro.json';   // produced by generate_dj.py
+  const SPEAKER = 'Indigo';
+  const SONG = {
+    title: "Indigo&rsquo;s<br>Pilot Episode",
+    subtitle: 'Aruarian Dance — Nujabes',
+    previewUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview126/v4/1a/f6/fd/1af6fd13-193b-ddea-4a1d-01941d642cd5/mzaf_908671668205794278.plus.aac.p.m4a',
+    appleMusicUrl: 'https://music.apple.com/us/album/aruarian-dance/1721842998?i=1721843001',
+  };
+  const SONG_BED_VOLUME = 0.22;
+
+  const mmss = s => {
+    s = Math.max(0, Math.floor(s));
+    return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+  };
+
+  // ============================================================
+  // Build transcript turns from intro.json word timings.
+  // We collapse adjacent words that follow each other tightly into
+  // sentence-shaped "turns" so the layout reads as paragraphs.
+  // ============================================================
+  let TURNS = [];
+  let TOTAL = 20.0;
+
+  // Group words into turns. edge-tts strips punctuation from WordBoundary
+  // events, so we infer sentence breaks from inter-word gaps. Empirically,
+  // sentence pauses land near 0.40s; mid-sentence commas around 0.20–0.33s.
+  // 0.35s threshold cleanly catches sentence breaks without over-segmenting.
+  const TURN_GAP_S = 0.35;
+
+  async function loadTimings() {
+    const res = await fetch(INTRO_TIMINGS, { cache: 'no-store' });
+    if (!res.ok) throw new Error('failed to load timings');
+    const data = await res.json();
+    TOTAL = data.duration || TOTAL;
+
+    const groups = [];
+    let cur = [];
+    let lastEnd = 0;
+    for (const w of data.words) {
+      const gap = w.start - lastEnd;
+      if (cur.length > 0 && gap > TURN_GAP_S) {
+        groups.push(cur);
+        cur = [];
+      }
+      cur.push(w);
+      lastEnd = w.end;
+    }
+    if (cur.length) groups.push(cur);
+
+    TURNS = groups.map((words, i) => {
+      const start = words[0].start;
+      const next = groups[i + 1];
+      const end = next ? next[0].start - 0.05 : (TOTAL - 0.1);
+      const text = words.map(w => w.word).join(' ').replace(/\s+([.,!?])/g, '$1');
+      return { who: SPEAKER, start, end, text, words };
+    });
+  }
+
+  // ============================================================
+  // Audio: intro is the time-truth source; song bed shadows it.
+  // ============================================================
+  const audio = new Audio();
+  audio.preload = 'auto';
+  audio.src = INTRO_AUDIO;
+  audio.addEventListener('loadedmetadata', () => {
+    if (audio.duration && isFinite(audio.duration)) TOTAL = audio.duration;
+  });
+
+  const songAudio = new Audio();
+  songAudio.preload = 'auto';
+  songAudio.crossOrigin = 'anonymous';
+  songAudio.volume = SONG_BED_VOLUME;
+  songAudio.loop = true;
+  songAudio.src = SONG.previewUrl;
+
+  // When the intro finishes, fade the bed out and reset both tracks.
+  audio.addEventListener('ended', () => {
+    const fadeMs = 800;
+    const t0 = performance.now();
+    const v0 = songAudio.volume;
+    const fade = (now) => {
+      const t = Math.min(1, (now - t0) / fadeMs);
+      songAudio.volume = v0 * (1 - t);
+      if (t < 1) requestAnimationFrame(fade);
+      else {
+        songAudio.pause();
+        songAudio.currentTime = 0;
+        songAudio.volume = SONG_BED_VOLUME;
+        audio.currentTime = 0;
+      }
+    };
+    requestAnimationFrame(fade);
+  });
+
+  // ============================================================
+  // DOM refs
+  // ============================================================
+  const headerStatus = document.getElementById('headerStatus');
+  const headerTime   = document.getElementById('headerTime');
+  const dotLive      = document.getElementById('dotLive');
+  const playerTime   = document.getElementById('playerTime');
+  const scrubber     = document.getElementById('scrubber');
+  const playBtn      = document.getElementById('playBtn');
+  const iconPause    = document.getElementById('iconPause');
+  const iconPlay     = document.getElementById('iconPlay');
+  const transcriptScroll = document.getElementById('transcriptScroll');
+
+  // Wire static song meta + nav
+  document.getElementById('topnavMusic').href = SONG.appleMusicUrl;
+  document.getElementById('metaName').innerHTML = SONG.title;
+  const metaSub = document.getElementById('metaSub');
+  metaSub.textContent = '';
+  const subLabel = document.createElement('span');
+  subLabel.textContent = SONG.subtitle;
+  metaSub.appendChild(subLabel);
+  const metaSource = document.createElement('a');
+  metaSource.className = 'meta-source';
+  metaSource.href = SONG.appleMusicUrl;
+  metaSource.target = '_blank';
+  metaSource.rel = 'noopener';
+  metaSource.setAttribute('aria-label', 'Listen to full song on Apple Music');
+  metaSource.innerHTML = `
+    <svg width="11" height="11" viewBox="0 0 14 14" fill="currentColor" aria-hidden="true">
+      <path d="M11.2 1.8v6.9c0 1.4-1 2.4-2.3 2.4-1.2 0-2.1-.8-2.1-1.9 0-1.1 1-1.9 2.1-1.9.4 0 .8.1 1.1.3V3.9L5.9 5.2v5.1c0 1.4-1 2.4-2.3 2.4-1.2 0-2.1-.8-2.1-1.9 0-1.1 1-1.9 2.1-1.9.4 0 .8.1 1.1.3V2.6l6.5-.8z"/>
+    </svg>
+    Listen on Apple Music
+    <svg width="9" height="9" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M3 2h5v5"/><path d="M8 2L2.5 7.5"/>
+    </svg>`;
+  metaSub.appendChild(metaSource);
+
+  // ============================================================
+  // Scrubber bars (procedural fake waveform on the controls)
+  // ============================================================
+  const SCRUB_COUNT = 56;
+  const scrubBarEls = [];
+  for (let i = 0; i < SCRUB_COUNT; i++) {
+    const n1 = Math.sin(i * 0.6) * 0.5 + 0.5;
+    const n2 = Math.sin(i * 0.23 + 1.3) * 0.5 + 0.5;
+    const env = 0.5 + 0.5 * Math.sin((i / SCRUB_COUNT) * Math.PI);
+    const h = 6 + (n1 * 0.6 + n2 * 0.4) * env * 18;
+    const bar = document.createElement('div');
+    bar.className = 'player-bar';
+    bar.style.height = h + 'px';
+    scrubber.appendChild(bar);
+    scrubBarEls.push(bar);
+  }
+  function seekFromEvent(e) {
+    const rect = scrubber.getBoundingClientRect();
+    const cx = e.clientX ?? (e.touches && e.touches[0]?.clientX);
+    if (cx == null) return;
+    const p = Math.max(0, Math.min(1, (cx - rect.left) / rect.width));
+    const t = p * (audio.duration || TOTAL);
+    audio.currentTime = t;
+    const songDur = isFinite(songAudio.duration) && songAudio.duration > 0 ? songAudio.duration : 30;
+    songAudio.currentTime = t % songDur;
+  }
+  scrubber.addEventListener('pointerdown', e => { scrubber.setPointerCapture(e.pointerId); seekFromEvent(e); });
+  scrubber.addEventListener('pointermove', e => { if (e.buttons) seekFromEvent(e); });
+
+  // ============================================================
+  // Play / pause / status
+  // ============================================================
+  function syncPlayButton() {
+    const playing = !audio.paused;
+    iconPause.style.display = playing ? '' : 'none';
+    iconPlay.style.display  = playing ? 'none' : '';
+    playBtn.setAttribute('aria-label', playing ? 'Pause' : 'Play');
+    dotLive.style.opacity = playing ? '1' : '0.3';
+  }
+  audio.addEventListener('play',  syncPlayButton);
+  audio.addEventListener('pause', syncPlayButton);
+
+  // Web Audio analyser — lazy on first user gesture (autoplay policy).
+  let analyser = null, freqData = null, audioCtx = null;
+  function ensureAnalyser() {
+    if (analyser) return;
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    try {
+      audioCtx = new AC();
+      const src = audioCtx.createMediaElementSource(songAudio);
+      analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 256;
+      analyser.smoothingTimeConstant = 0.82;
+      src.connect(analyser);
+      analyser.connect(audioCtx.destination);
+      freqData = new Uint8Array(analyser.frequencyBinCount);
+    } catch (e) { analyser = null; }
+  }
+  playBtn.addEventListener('click', () => {
+    ensureAnalyser();
+    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+    if (audio.paused) {
+      audio.play().catch(() => {});
+      songAudio.play().catch(() => {});
+    } else {
+      audio.pause(); songAudio.pause();
+    }
+  });
+  audio.addEventListener('pause', () => { if (!songAudio.paused) songAudio.pause(); });
+  audio.addEventListener('play',  () => { if (songAudio.paused) songAudio.play().catch(() => {}); });
+  syncPlayButton();
+
+  // Local clock in the header — tabular nums for that radio look.
+  function updateClock() {
+    const d = new Date();
+    headerTime.textContent = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  }
+  updateClock();
+  setInterval(updateClock, 30 * 1000);
+
+  // ============================================================
+  // Render transcript + run UI tick
+  // ============================================================
+  let turnEls = [];
+
+  function renderTranscript() {
+    transcriptScroll.innerHTML = '';
+    turnEls = TURNS.map(t => {
+      const turn = document.createElement('div');
+      turn.className = 'turn';
+      const head = document.createElement('div');
+      head.className = 'turn-head';
+      head.innerHTML = `<span class="who">${t.who}</span> • ${mmss(t.start)}`;
+      const body = document.createElement('div');
+      body.className = 'turn-body';
+      const wordEls = t.words.map((w, i) => {
+        const span = document.createElement('span');
+        span.className = 'word';
+        span.textContent = (i === 0 ? '' : ' ') + w.word;
+        body.appendChild(span);
+        return { span, w };
+      });
+      turn.appendChild(head);
+      turn.appendChild(body);
+      transcriptScroll.appendChild(turn);
+      return { turn, wordEls, meta: t };
+    });
+    const spacer = document.createElement('div');
+    spacer.style.height = '20px';
+    transcriptScroll.appendChild(spacer);
+  }
+
+  let lastScrollBucket = -1;
+  function maybeScrollToActive(time) {
+    const bucket = Math.floor(time / 2);
+    if (bucket === lastScrollBucket) return;
+    lastScrollBucket = bucket;
+    const active = turnEls.find(({ meta }) => time >= meta.start && time < meta.end);
+    if (!active) return;
+    const elRect = transcriptScroll.getBoundingClientRect();
+    const aRect  = active.turn.getBoundingClientRect();
+    const desired = aRect.top - elRect.top + transcriptScroll.scrollTop - 24;
+    transcriptScroll.scrollTo({ top: desired, behavior: 'smooth' });
+  }
+
+  function updateUI() {
+    const time = audio.currentTime;
+    const total = audio.duration || TOTAL;
+    const playing = !audio.paused;
+
+    playerTime.textContent = mmss(time);
+
+    const played = Math.round((time / total) * SCRUB_COUNT);
+    for (let i = 0; i < SCRUB_COUNT; i++) {
+      scrubBarEls[i].classList.toggle('played', i < played);
+    }
+
+    for (const { turn, wordEls, meta } of turnEls) {
+      const isActive  = time >= meta.start && time < meta.end;
+      const isPast    = time >= meta.end;
+      const isPending = time < meta.start;
+      turn.classList.toggle('pending', isPending);
+      turn.classList.toggle('active',  isActive);
+
+      for (const { span, w } of wordEls) {
+        let cls = 'word ';
+        if (time >= w.end) cls += 'said';
+        else if (time >= w.start) cls += 'current';
+        else cls += (isPast ? 'said' : 'future');
+        if (span.className !== cls) span.className = cls;
+      }
+    }
+
+    headerStatus.textContent = playing ? 'On air' : 'Paused';
+    maybeScrollToActive(time);
+  }
+
+  function tick() { updateUI(); requestAnimationFrame(tick); }
+
+  // ============================================================
+  // Live waveform — analyser on the song bed; procedural shimmer
+  // when paused so the header never feels dead.
+  // ============================================================
+  const canvas = document.getElementById('waveCanvas');
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  let cw = 0, ch = 0;
+  function resizeCanvas() {
+    const rect = canvas.getBoundingClientRect();
+    cw = rect.width; ch = rect.height;
+    canvas.width  = cw * dpr; canvas.height = ch * dpr;
+    ctx.setTransform(1,0,0,1,0,0); ctx.scale(dpr, dpr);
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  let phase = 0;
+  function rand(i) { const x = Math.sin(i * 12.9898) * 43758.5453; return x - Math.floor(x); }
+  function drawWave() {
+    ctx.clearRect(0, 0, cw, ch);
+    const barGap = 2, barWidth = 2;
+    const step = barGap + barWidth;
+    const count = Math.floor(cw / step);
+    phase += !audio.paused ? 0.06 : 0.004;
+
+    const live = analyser && !audio.paused;
+    if (live) analyser.getByteFrequencyData(freqData);
+    const binsUsed = live ? Math.floor(freqData.length * 0.42) : 0;
+
+    for (let i = 0; i < count; i++) {
+      const x = i * step + (cw - count * step) / 2;
+      const center = i / count;
+      const env = 0.55 + 0.45 * Math.sin(center * Math.PI);
+      const n1 = Math.sin(i * 0.18 + phase * 2.2) * 0.5 + 0.5;
+      const n2 = Math.sin(i * 0.42 + phase * 1.1 + rand(i) * 6) * 0.5 + 0.5;
+      const n3 = Math.sin(i * 0.08 + phase * 0.8) * 0.5 + 0.5;
+      const noise = rand(i + Math.floor(phase * 3)) * 0.3;
+      const proc = (n1 * 0.55 + n2 * 0.35 + n3 * 0.10);
+
+      let amp;
+      if (live) {
+        const bin = 1 + Math.floor((i / count) * binsUsed);
+        const level = freqData[bin] / 255;
+        amp = level * 0.7 + proc * 0.3;
+      } else {
+        amp = proc;
+      }
+      let h = amp * env * ch * 1.25;
+      h += noise * (live ? 6 : 12);
+      h = Math.max(4, Math.min(ch - 4, h));
+      const y = ch - h;
+      const alpha = 0.55 + 0.4 * (1 - (i / count - 0.5) ** 2 * 2);
+      ctx.fillStyle = `rgba(255,255,255,${Math.min(0.9, alpha)})`;
+      ctx.fillRect(x, y, barWidth, h);
+    }
+    requestAnimationFrame(drawWave);
+  }
+
+  // ============================================================
+  // Mini player (mirrors songAudio)
+  // ============================================================
+  const mpBtn       = document.getElementById('mpBtn');
+  const mpIconPlay  = document.getElementById('mpIconPlay');
+  const mpIconPause = document.getElementById('mpIconPause');
+  const mpFill      = document.getElementById('mpFill');
+  const mpTimeEl    = document.getElementById('mpTime');
+  const mpLine      = document.getElementById('mpLine');
+
+  function mpRender() {
+    const dur = isFinite(songAudio.duration) && songAudio.duration > 0 ? songAudio.duration : 30;
+    const t = Math.max(0, Math.min(dur, songAudio.currentTime));
+    mpFill.style.width = ((t / dur) * 100) + '%';
+    mpTimeEl.textContent = `${mmss(t)} / ${mmss(dur)}`;
+  }
+  function syncMpIcon() {
+    const playing = !songAudio.paused;
+    mpIconPlay.style.display  = playing ? 'none' : '';
+    mpIconPause.style.display = playing ? '' : 'none';
+    mpBtn.setAttribute('aria-label', playing ? 'Pause song' : 'Play song');
+  }
+  songAudio.addEventListener('timeupdate', mpRender);
+  songAudio.addEventListener('loadedmetadata', mpRender);
+  songAudio.addEventListener('play', syncMpIcon);
+  songAudio.addEventListener('pause', syncMpIcon);
+  mpBtn.addEventListener('click', () => playBtn.click());
+  mpLine.addEventListener('pointerdown', e => {
+    const rect = mpLine.getBoundingClientRect();
+    const dur = isFinite(songAudio.duration) && songAudio.duration > 0 ? songAudio.duration : 30;
+    const t = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width)) * dur;
+    songAudio.currentTime = t;
+    audio.currentTime = Math.min(t, audio.duration || TOTAL);
+    mpRender();
+  });
+  mpRender(); syncMpIcon();
+
+  // ============================================================
+  // Boot — load timings, render. Playback is user-initiated only:
+  // the play button is the single entry point (no autoplay, no
+  // first-click anywhere). headerStatus shows "Tuning in…" until
+  // the user presses play.
+  // ============================================================
+  loadTimings()
+    .catch(err => {
+      console.error(err);
+      TURNS = [];
+    })
+    .finally(() => {
+      renderTranscript();
+      requestAnimationFrame(tick);
+      requestAnimationFrame(drawWave);
+    });
+})();
+</script>
+</body>
+</html>

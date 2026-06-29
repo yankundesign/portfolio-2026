@@ -4,12 +4,6 @@
  * Width locked so the cover reads at a consistent weight across viewports.
  * Hover: caption underline draws; the notebook body lifts and tilts while
  * a stable outer frame preserves the desk-to-canvas transition measurement.
- *
- * Channel-1 tuning vars (set on documentElement by WashTunePanel; the
- * fallbacks below are the hardcoded production values):
- *   --wash-inset-{top|right|bottom|left}
- *   --wash-{mist|primary|core}-peak
- *   --wash-{mist|primary|core}-fade-{in|out}-{ms|delay-ms}
  */
 
 .figure {
@@ -44,6 +38,8 @@
 .button:focus-visible {
   --object-lift-y: -10px;
   --object-scale: 1.025;
+  --object-shadow-y: 22px;
+  --object-shadow-scale: 1.08;
 }
 
 .button:focus-visible {
@@ -154,94 +150,6 @@
     var(--paper-soft);
   transform: translateZ(-16px) rotateX(-68deg);
   transform-origin: top center;
-}
-
-/* ─── Watercolor wash — atmospheric effect on dwell ─── */
-
-.wash {
-  position: absolute;
-  /* Asymmetric inset — the wash bleeds further past the bottom edge
-   * than the left so the silhouette feels weighted toward the lower
-   * right. Per-side fallbacks are the production-tuned values; the
-   * tuning panel overrides them via --wash-inset-*. */
-  inset:
-    var(--wash-inset-top, -14%)
-    var(--wash-inset-right, -14%)
-    var(--wash-inset-bottom, -19%)
-    var(--wash-inset-left, -6%);
-  z-index: 1;
-}
-
-/* ─── Per-layer cascade ───────────────────────────────────────────────────
- *
- * Three layers (mist, primary, core) stagger their fade-in and fade-out so
- * the wash reads as ink applied in stages, not as one shape appearing.
- *
- * Hover-in (outside-in — mist first, core last):
- *   t=0     mist begins        — atmospheric haze appears
- *   t=80    primary begins     — body of the wash fills in
- *   t=160   core begins        — dense pool deepens last
- *
- * Hover-out (inside-out — core first, mist last):
- *   t=0     core fades         — concentrated pigment lifts
- *   t=80    primary fades      — body dissipates
- *   t=150   mist fades         — atmosphere lingers longest
- *
- * The inverse order on hover-out matches how a real ink wash dries: the
- * dense areas stay densest longest while the dilute outer mist has already
- * spread thin. */
-
-/* Base (not hovered) — defines fade-out timing per layer. */
-.button [data-wash-layer='core'] {
-  transition: opacity var(--wash-core-fade-out-ms, 735ms) var(--ease-out)
-                       var(--wash-core-fade-out-delay-ms, 0ms);
-}
-
-.button [data-wash-layer='primary'] {
-  transition: opacity var(--wash-primary-fade-out-ms, 945ms) var(--ease-out)
-                       var(--wash-primary-fade-out-delay-ms, 84ms);
-}
-
-.button [data-wash-layer='mist'] {
-  transition: opacity var(--wash-mist-fade-out-ms, 1155ms) var(--ease-out)
-                       var(--wash-mist-fade-out-delay-ms, 158ms);
-}
-
-/* Hover — overrides with fade-in timing. Tuning helper: when
- * `wash-force-hover` is set on the html element by WashTunePanel, the same
- * styles fire so the wash stays visible while the user is dragging
- * sliders. */
-:global(html.wash-force-hover) .button [data-wash-layer='mist'],
-.button:hover [data-wash-layer='mist'],
-.button:focus-visible [data-wash-layer='mist'] {
-  opacity: var(--wash-mist-peak, 0.77);
-  transition: opacity var(--wash-mist-fade-in-ms, 630ms) var(--ease-out)
-                       var(--wash-mist-fade-in-delay-ms, 0ms);
-}
-
-:global(html.wash-force-hover) .button [data-wash-layer='primary'],
-.button:hover [data-wash-layer='primary'],
-.button:focus-visible [data-wash-layer='primary'] {
-  opacity: var(--wash-primary-peak, 1);
-  transition: opacity var(--wash-primary-fade-in-ms, 578ms) var(--ease-out)
-                       var(--wash-primary-fade-in-delay-ms, 84ms);
-}
-
-:global(html.wash-force-hover) .button [data-wash-layer='core'],
-.button:hover [data-wash-layer='core'],
-.button:focus-visible [data-wash-layer='core'] {
-  opacity: var(--wash-core-peak, 0.83);
-  transition: opacity var(--wash-core-fade-in-ms, 525ms) var(--ease-out)
-                       var(--wash-core-fade-in-delay-ms, 168ms);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .button:hover [data-wash-layer],
-  .button:focus-visible [data-wash-layer] {
-    /* Decorative — disabled under reduced motion. */
-    opacity: 0;
-    transition: none;
-  }
 }
 
 /* Wire the FigCaption underline to the figure's hover/focus. */

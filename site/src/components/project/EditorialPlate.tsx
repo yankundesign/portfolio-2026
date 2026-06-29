@@ -21,7 +21,14 @@ export interface EditorialPlateProps {
  * the caption and the expected file path — the page structure holds.
  */
 export default function EditorialPlate({ figure, className }: EditorialPlateProps) {
-  const [loadState, setLoadState] = useState<'loading' | 'loaded' | 'error'>('loading');
+  const srcs = figure.srcs && figure.srcs.length > 0 ? figure.srcs : [figure.src];
+  const [loadedCount, setLoadedCount] = useState(0);
+  const [hasError, setHasError] = useState(false);
+  const loadState: 'loading' | 'loaded' | 'error' = hasError
+    ? 'error'
+    : loadedCount >= srcs.length
+      ? 'loaded'
+      : 'loading';
   const widthClass = styles[`width-${figure.width ?? 'column'}`];
   const frame = (
     <div
@@ -29,24 +36,31 @@ export default function EditorialPlate({ figure, className }: EditorialPlateProp
         styles.frame,
         loadState === 'error' ? styles.framePlaceholder : '',
         loadState === 'loaded' ? styles.frameLoaded : '',
+        srcs.length > 1 ? styles.frameStacked : '',
       ]
         .join(' ')
         .trim()}
     >
-      {loadState !== 'error' && (
-        <img
-          src={figure.src}
-          alt={figure.alt}
-          className={styles.image}
-          loading="lazy"
-          onLoad={() => setLoadState('loaded')}
-          onError={() => setLoadState('error')}
-        />
-      )}
+      {loadState !== 'error' &&
+        srcs.map((src, i) => (
+          <img
+            key={src}
+            src={src}
+            alt={
+              srcs.length > 1
+                ? `${figure.alt} (${i + 1} of ${srcs.length})`
+                : figure.alt
+            }
+            className={styles.image}
+            loading="lazy"
+            onLoad={() => setLoadedCount((c) => c + 1)}
+            onError={() => setHasError(true)}
+          />
+        ))}
       {loadState === 'error' && (
         <div className={styles.placeholder} role="img" aria-label={figure.alt}>
           <span className={styles.placeholderLabel}>Image pending</span>
-          <code className={styles.placeholderPath}>{figure.src}</code>
+          <code className={styles.placeholderPath}>{srcs.join(', ')}</code>
         </div>
       )}
     </div>

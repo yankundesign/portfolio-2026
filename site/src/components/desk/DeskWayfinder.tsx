@@ -14,7 +14,7 @@ import styles from './DeskWayfinder.module.css';
  */
 export default function DeskWayfinder() {
   return (
-    <div className={styles.wayfinder}>
+    <div className={styles.wayfinder} data-desk-support="wayfinder">
       <span className={styles.caption}>open it</span>
       <svg
         className={styles.arrow}

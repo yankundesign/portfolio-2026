@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router'
 import { AnimatePresence } from 'framer-motion'
 import DeskRoute from './routes/DeskRoute'
@@ -7,6 +8,7 @@ import JournalRoute from './routes/JournalRoute'
 import ColophonRoute from './routes/ColophonRoute'
 import CvRoute from './routes/CvRoute'
 import AboutRoute from './routes/AboutRoute'
+import RadioRoute from './routes/RadioRoute'
 import NotFoundRoute from './routes/NotFoundRoute'
 import InkFilters from './components/shared/InkFilters'
 import NotebookTransition from './components/transition/NotebookTransition'
@@ -33,12 +35,23 @@ function AnimatedRoutes() {
         <Route path="/works/:slug" element={<ProjectRoute />} />
         <Route path="/cv" element={<CvRoute />} />
         <Route path="/about" element={<AboutRoute />} />
+        <Route path="/radio" element={<RadioRoute />} />
+        <Route path="/experiments/data-specimen" element={<DataSpecimenRedirect />} />
+        <Route path="/experiments/data-specimen/" element={<DataSpecimenRedirect />} />
         <Route path="/journal/:slug" element={<JournalRoute />} />
         <Route path="/colophon" element={<ColophonRoute />} />
         <Route path="*" element={<NotFoundRoute />} />
       </Routes>
     </AnimatePresence>
   )
+}
+
+function DataSpecimenRedirect() {
+  useEffect(() => {
+    window.location.replace('/experiments/data-specimen/index.html')
+  }, [])
+
+  return null
 }
 
 export default function App() {

@@ -16,7 +16,10 @@
  * ────────────────────────────────────────────────────────────────────────── */
 
 .root {
-  position: absolute;
+  /* Fixed (v0.9): the canvas scrolls, but the dot field is part of the held
+   * stage and must not scroll with the content. Fixed also pins the rect to
+   * the viewport (0,0) so cursor mapping stays correct while scrolling. */
+  position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 0;

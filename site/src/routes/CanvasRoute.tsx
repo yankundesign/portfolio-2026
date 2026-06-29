@@ -1,10 +1,7 @@
 import { useCallback, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router';
-import NotebookSpread from '../components/canvas/NotebookSpread';
-import NotebookPage from '../components/canvas/NotebookPage';
-import ProjectRow from '../components/canvas/ProjectRow';
+import ProjectPlate from '../components/canvas/ProjectPlate';
 import CanvasCloseButton from '../components/canvas/CanvasCloseButton';
-import CanvasMarginNote from '../components/canvas/CanvasMarginNote';
 import { SpotlightDotGrid } from '../components/canvas/SpotlightDotGrid';
 import Grain from '../components/shared/Grain';
 import { useTransitionState } from '../interactions/useTransitionState';
@@ -13,38 +10,32 @@ import styles from './CanvasRoute.module.css';
 
 /**
  * Base delay (ms) for the page-content entrance animations when the
- * canvas mounts via the desk -> canvas open transition. Must be >= the
- * time from canvas mount until the open-transition overlay fully clears,
- * otherwise the earliest content animations begin behind the still-fading
- * overlay and the user can't see them.
+ * canvas mounts via the desk -> canvas open transition. Starts while the
+ * overlay is still clearing so the handoff never exposes an empty stage
+ * before the intro and plates begin to resolve.
  *
  * Project-detail returns skip these entrance animations entirely, so they
  * do not inherit this wait.
  */
-const CONTENT_ENTER_DELAY_AFTER_TRANSITION = 920;
+const CONTENT_ENTER_DELAY_AFTER_TRANSITION = 560;
 
 /**
- * CanvasRoute — chromeless notebook spread.
+ * CanvasRoute — canvas v0.9 (notebook backdrop + floating editorial plates).
  *
- * Single-section notebook surface. Four projects laid out 2 + 2 across the
- * spread (CHAI top-left, Agentic top-right, Build with AI bottom-left, SAP
- * bottom-right).
- * Side margins carry the close affordance (left) and a THOUGHTS pull-quote
- * sticky (right). The notebook is the focus — no editorial-plate chrome on
- * this route, only the SpotlightDotGrid background.
+ * The open notebook is a fixed, full-height background STAGE (cropped at the
+ * sides). Project plates are independent editorial plates laid over it on a
+ * scrollable 12-column grid — no longer constrained to two notebook page
+ * slots. CHAI is the clear hero. See `00-brief/prd-canvas-v0.9-backdrop-plates.md`.
+ *
+ * The notebook backdrop carries `data-transition-source="spread"` so the
+ * desk -> canvas close transition can measure it (see NotebookTransition).
  */
 
-const PAGE_HEADER_LEFT = {
+const INTRO = {
   label: 'NOTE / 001 — WORKS',
   description:
-    'A short collection of works in AI, enterprise, and content systems.',
+    'A short collection of works in AI, enterprise, and AI-native design.',
 };
-
-const PAGE_HEADER_RIGHT = {
-  label: 'SELECTED WORKS',
-};
-
-const THOUGHTS_TEXT = 'The work is in the spread, not the cover.';
 
 export default function CanvasRoute() {
   const navigate = useNavigate();
@@ -85,9 +76,20 @@ export default function CanvasRoute() {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [handleClose]);
 
-  // Spread arrangement: top row first (left page top, right page top), then
-  // bottom row (left page bottom, right page bottom). Z-pattern reading.
-  const [leftTop, rightTop, leftBottom, rightBottom] = projects;
+  // Plates are grouped onto two pages straddling the notebook spine. The
+  // original index is preserved (entrance stagger + fig numbers) even though
+  // the visual grouping isn't sequential. Left page leads with the CHAI hero.
+  const pages = useMemo(() => {
+    const indexed = projects.map((project, index) => ({ project, index }));
+    return {
+      left: indexed.filter(({ project }) =>
+        ['chai', 'build-with-ai'].includes(project.slug),
+      ),
+      right: indexed.filter(({ project }) =>
+        ['control-hub-agentic', 'sap-fieldglass'].includes(project.slug),
+      ),
+    };
+  }, []);
 
   return (
     <>
@@ -96,45 +98,57 @@ export default function CanvasRoute() {
         data-entry-motion={canvasEntryMotion}
         style={{ ['--canvas-enter-delay' as string]: contentEnterDelay }}
       >
-        {/* Ambient dot field with cursor spotlight — the only background
-         * pattern. Mounted first so it sits behind the notebook + side
-         * margin elements. */}
+        {/* Ambient dot field with cursor spotlight. Mounted as a direct child
+         * of the scroll surface so its pointermove listener (which binds to
+         * its parent) receives events across the whole page. */}
         <SpotlightDotGrid />
+
+        {/* Notebook backdrop — fixed, full-height, cropped at the sides. The
+         * held stage the plates float over. `data-transition-source` exposes
+         * it to NotebookTransition, which measures it on close. */}
+        <div
+          className={styles.backdrop}
+          data-transition-source="spread"
+          aria-hidden="true"
+        >
+          <img
+            className={styles.backdropImage}
+            src="/canvas/open-notebook.webp"
+            alt=""
+            draggable={false}
+          />
+        </div>
 
         <CanvasCloseButton onClick={handleClose} />
 
-        <NotebookSpread
-          leftPage={
-            <NotebookPage header={PAGE_HEADER_LEFT}>
-              <ProjectRow
-                project={leftTop}
-                index={0}
-                onClick={handleProjectClick}
-              />
-              <ProjectRow
-                project={leftBottom}
-                index={2}
-                onClick={handleProjectClick}
-              />
-            </NotebookPage>
-          }
-          rightPage={
-            <NotebookPage header={PAGE_HEADER_RIGHT}>
-              <ProjectRow
-                project={rightTop}
-                index={1}
-                onClick={handleProjectClick}
-              />
-              <ProjectRow
-                project={rightBottom}
-                index={3}
-                onClick={handleProjectClick}
-              />
-            </NotebookPage>
-          }
-        />
-
-        <CanvasMarginNote text={THOUGHTS_TEXT} />
+        <main className={styles.content}>
+          <div className={styles.spread}>
+            <div className={styles.page} data-page="left">
+              <header className={styles.intro}>
+                <span className={styles.introLabel}>{INTRO.label}</span>
+                <p className={styles.introDescription}>{INTRO.description}</p>
+              </header>
+              {pages.left.map(({ project, index }) => (
+                <ProjectPlate
+                  key={project.slug}
+                  project={project}
+                  index={index}
+                  onClick={handleProjectClick}
+                />
+              ))}
+            </div>
+            <div className={styles.page} data-page="right">
+              {pages.right.map(({ project, index }) => (
+                <ProjectPlate
+                  key={project.slug}
+                  project={project}
+                  index={index}
+                  onClick={handleProjectClick}
+                />
+              ))}
+            </div>
+          </div>
+        </main>
       </div>
 
       <Grain />

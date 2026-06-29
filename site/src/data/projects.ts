@@ -43,11 +43,26 @@ export interface Project {
 
   // ─── v0.8.1 (open notebook canvas) additions ───
   /**
-   * Optional mockup image path for the canvas project row. Renders a
+   * Optional mockup image path for the canvas project plate. Renders a
    * paper-shadow placeholder if missing. Place files under
    * `site/public/canvas/mockups/`.
    */
   mockup?: string;
+  /**
+   * Canvas v0.9 status chip (e.g. "Full case study", "Earlier work").
+   * Was `canvasTier` pre-v0.9. Rendered as a mono-caps pill on the plate.
+   */
+  canvasStatus: string;
+  /** Short taxonomy chips shown beneath the plate title. */
+  canvasTags: string[];
+  /**
+   * Outcome / proof lines shown at rest. The FIRST entry is the headline
+   * metric and gets the loud ink-blue treatment; later entries are quieter
+   * supporting proofs. Was the single `canvasOutcome` string pre-v0.9.
+   */
+  canvasProofs: string[];
+  /** Context sentence used on the plate, responsive list, and a11y labels. */
+  canvasContext: string;
 }
 
 /**
@@ -82,13 +97,18 @@ export const projects: Project[] = [
     alignVertical: 'start',
     aspect: '16-10',
     mockup: '/canvas/mockups/chai.png',
+    canvasStatus: 'Full case study',
+    canvasTags: ['Cisco Webex', 'Enterprise AI', 'Shipped'],
+    canvasProofs: ['3% → 18% adoption', '86% drop in no-result searches'],
+    canvasContext:
+      'Turned a low-adoption assistant into a task-aware admin workflow.',
   },
   {
     slug: 'control-hub-agentic',
     title: 'Control Hub Agentic',
     role: 'agentic experience for control hub',
     subtitle:
-      'Designing agnetic AI experience inside Webex Control Hub',
+      'Designing agentic AI experience inside Webex Control Hub',
     year: '2026',
     collaborators: [],
     impact: 'Set direction of agentic AI in Control Hub',
@@ -100,6 +120,11 @@ export const projects: Project[] = [
     alignVertical: 'start',
     aspect: '4-5',
     mockup: '/canvas/mockups/control-hub-agentic.png',
+    canvasStatus: 'In progress',
+    canvasTags: ['Cisco Webex', 'Agentic AI', 'Direction'],
+    canvasProofs: ['Set the agentic direction'],
+    canvasContext:
+      'Explores how agents plan, explain, and execute admin work inside Control Hub.',
   },
   {
     slug: 'build-with-ai',
@@ -118,6 +143,11 @@ export const projects: Project[] = [
     alignVertical: 'start',
     aspect: '1-1',
     mockup: '/canvas/mockups/build-with-ai.png',
+    canvasStatus: 'Ongoing',
+    canvasTags: ['Internal tools', 'Prompt systems', 'Team workflows'],
+    canvasProofs: ['Experiments → reusable tools'],
+    canvasContext:
+      'A working shelf of AI tools, prompt systems, and team workflows.',
   },
   {
     slug: 'sap-fieldglass',
@@ -135,6 +165,11 @@ export const projects: Project[] = [
     alignVertical: 'end',
     aspect: '16-10',
     mockup: '/canvas/mockups/sap-fieldglass.png',
+    canvasStatus: 'Earlier work',
+    canvasTags: ['Enterprise', 'Dashboard', 'Shipped'],
+    canvasProofs: ['1,000+ customers'],
+    canvasContext:
+      'Simplified dense workforce-management surfaces for enterprise customers.',
   },
 ];
 

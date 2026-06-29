@@ -1,4 +1,6 @@
-import type { ReactNode } from 'react';
+import { useRef, type ReactNode } from 'react';
+import { gsap, useGSAP } from '../../interactions/gsap';
+import { useReducedMotion } from '../../interactions/useReducedMotion';
 import styles from './EditorialPlate.module.css';
 
 /**
@@ -17,12 +19,26 @@ export interface GridSystem {
   margin: number;
 }
 
+export interface BrandIdentity {
+  /** Display title — rendered in Fraunces as a wordmark. */
+  title: string;
+  /** Optional mono subtitle below the wordmark (e.g., "Portfolio"). */
+  subtitle?: string;
+}
+
 export interface EditorialPlateProps {
   plateNumber: number | string;
   plateTitle: string;
   system?: string;
   /** When set, replaces the default plate-number / title / system lines. */
   metaLines?: string[];
+  /**
+   * When set, replaces the top-left meta block with a brand wordmark
+   * (Fraunces display title + optional mono subtitle). Use for identity
+   * surfaces (the homepage masthead). Takes precedence over `metaLines`
+   * for the top-left slot.
+   */
+  brand?: BrandIdentity;
 
   format?: string;
   date?: string;
@@ -41,6 +57,8 @@ export interface EditorialPlateProps {
   showBleedFrame?: boolean;
   showGridLines?: boolean;
 
+  revealPhase?: 'paper' | 'rulings' | 'objects' | 'ready';
+
   children?: ReactNode;
 }
 
@@ -57,6 +75,7 @@ export default function EditorialPlate({
   plateTitle,
   system,
   metaLines,
+  brand,
   format,
   date,
   columns = 8,
@@ -68,8 +87,11 @@ export default function EditorialPlate({
   siteBuildLine,
   showBleedFrame = true,
   showGridLines = true,
+  revealPhase,
   children,
 }: EditorialPlateProps) {
+  const plateRef = useRef<HTMLDivElement>(null);
+  const reducedMotion = useReducedMotion();
   const plateNumberStr =
     typeof plateNumber === 'number'
       ? String(plateNumber).padStart(2, '0')
@@ -77,25 +99,101 @@ export default function EditorialPlate({
 
   const resolvedDate = date ?? formatToday();
 
+  useGSAP(
+    () => {
+      if (!revealPhase || reducedMotion) return;
+
+      const plate = plateRef.current;
+      if (!plate) return;
+
+      if (revealPhase === 'rulings') {
+        const rules = gsap.utils.toArray<HTMLElement>(
+          '[data-plate-rule]',
+          plate,
+        );
+
+        gsap.fromTo(
+          rules,
+          {
+            opacity: 0,
+            filter: 'blur(1px)',
+          },
+          {
+            opacity: 1,
+            filter: 'blur(0px)',
+            duration: 0.64,
+            stagger: 0.035,
+            ease: 'expo.out',
+            clearProps: 'opacity,filter',
+          },
+        );
+      }
+
+      if (revealPhase === 'objects') {
+        const textBlocks = gsap.utils.toArray<HTMLElement>(
+          '[data-plate-text]',
+          plate,
+        );
+
+        gsap.fromTo(
+          textBlocks,
+          {
+            opacity: 0,
+            y: -5,
+          },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.46,
+            stagger: 0.04,
+            ease: 'power3.out',
+            clearProps: 'opacity,transform',
+          },
+        );
+      }
+    },
+    {
+      scope: plateRef,
+      dependencies: [revealPhase, reducedMotion],
+      revertOnUpdate: true,
+    },
+  );
+
   return (
-    <div className={styles.plate}>
+    <div ref={plateRef} className={styles.plate} data-proof-phase={revealPhase}>
       {showBleedFrame && (
-        <div className={styles.bleedFrame} aria-hidden="true" />
+        <div
+          className={styles.bleedFrame}
+          data-plate-rule
+          aria-hidden="true"
+        />
       )}
 
       {/* Blueprint grid ruling — top rule, bottom rule, vertical column rules. */}
       {showGridLines && columns > 0 && (
-        <div className={styles.gridLines} aria-hidden="true">
+        <div className={styles.gridLines} data-plate-rule aria-hidden="true">
           <GridRuling columns={columns} />
         </div>
       )}
 
       {/* Top-left plate meta */}
       <div
-        className={`${styles.meta} ${styles.metaTopLeft}`}
+        className={`${styles.meta} ${styles.metaTopLeft}${
+          brand ? ` ${styles.metaBrand}` : ''
+        }`}
+        data-plate-text
         aria-hidden="true"
       >
-        {metaLines ? (
+        {brand ? (
+          <>
+            <span className={styles.brandTitle}>{brand.title}</span>
+            {brand.subtitle && (
+              <span className={`${styles.metaLine} ${styles.brandSubtitle}`}>
+                {brand.subtitle}
+              </span>
+            )}
+          </>
+        ) : metaLines ? (
           metaLines.map((line, i) => (
             <span key={i} className={styles.metaLine}>{line}</span>
           ))
@@ -113,6 +211,7 @@ export default function EditorialPlate({
       {/* Top-right plate meta */}
       <div
         className={`${styles.meta} ${styles.metaTopRight}`}
+        data-plate-text
         aria-hidden="true"
       >
         {format && (
@@ -130,6 +229,7 @@ export default function EditorialPlate({
         <div
           className={styles.columnRow}
           style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}
+          data-plate-text
           aria-hidden="true"
         >
           {Array.from({ length: columns }, (_, i) => (
@@ -169,6 +269,7 @@ export default function EditorialPlate({
       {grid && (
         <div
           className={`${styles.meta} ${styles.metaBottomLeft}`}
+          data-plate-text
           aria-hidden="true"
         >
           <span className={styles.metaLine}>GRID SYSTEM</span>
@@ -182,6 +283,7 @@ export default function EditorialPlate({
       {(annotation || currentlyLine || siteBuildLine) && (
         <div
           className={`${styles.meta} ${styles.metaBottomRight}`}
+          data-plate-text
           aria-hidden="true"
         >
           {siteBuildLine && (
@@ -295,6 +397,7 @@ function RegisterMark({ className }: { className?: string }) {
   return (
     <svg
       className={className}
+      data-plate-rule
       width="14"
       height="14"
       viewBox="0 0 14 14"
