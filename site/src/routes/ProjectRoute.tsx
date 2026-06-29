@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useLayoutEffect } from 'react';
 import { Link, useParams } from 'react-router';
 import ChaiProject from '../components/project/ChaiProject';
 import ControlHubAgenticProject from '../components/project/ControlHubAgenticProject';
@@ -34,12 +34,26 @@ export default function ProjectRoute() {
     };
     document.documentElement.style.overflow = 'auto';
     document.body.style.overflow = 'auto';
-    window.scrollTo(0, 0);
 
     return () => {
       document.documentElement.style.overflow = prev.htmlOverflow;
       document.body.style.overflow = prev.bodyOverflow;
     };
+  }, []);
+
+  // Project-to-project links keep the browser's current scroll position unless
+  // this route explicitly resets it after the new slug renders.
+  useLayoutEffect(() => {
+    const resetScroll = () => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    };
+
+    resetScroll();
+    const frame = window.requestAnimationFrame(resetScroll);
+
+    return () => window.cancelAnimationFrame(frame);
   }, [slug]);
 
   return (
