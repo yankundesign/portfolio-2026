@@ -11,6 +11,7 @@ import {
 } from '../../interactions/useTransitionState';
 import { useReducedMotion } from '../../interactions/useReducedMotion';
 import { gsap } from '../../interactions/gsap';
+import { projects } from '../../data/projects';
 import styles from './NotebookTransition.module.css';
 
 /**
@@ -175,6 +176,26 @@ function fallbackDeskRect(): TransitionRect {
   };
 }
 
+/**
+ * Pre-decode the canvas mockup tiles so their (large PNG) decode work does
+ * NOT land on the main thread at the route swap — which fires mid-rotation,
+ * when a decode stall is a visible hitch in the GSAP tween. Called from an
+ * idle callback on mount and again (idempotent) when the open starts.
+ */
+let canvasMockupsPreloaded = false;
+function preloadCanvasMockups(): void {
+  if (canvasMockupsPreloaded || typeof window === 'undefined') return;
+  canvasMockupsPreloaded = true;
+  for (const project of projects) {
+    if (!project.mockup) continue;
+    const img = new Image();
+    img.src = project.mockup;
+    img.decode?.().catch(() => {
+      // Decode failures fall through to normal <img> loading in the route.
+    });
+  }
+}
+
 const warnedAssets = new Set<string>();
 function warnMissingAsset(src: string): void {
   if (warnedAssets.has(src)) return;
@@ -187,20 +208,36 @@ function warnMissingAsset(src: string): void {
 }
 
 /**
- * Snap a layer (wrapper) to a static rect + opacity + lift offset.
- * Cancels any in-flight animations on the element. The wrapper's
- * transform carries ONLY translate3d for the lift offset — rotation
- * lives on the inner image element (see snapRotation).
+ * Snap a layer (wrapper) to a static rect + opacity + transform.
+ * Cancels any in-flight animations on the element.
+ *
+ * FLIP model (v1.4): the rect is set ONCE per choreography — it is the
+ * layer's anchor box and never animates. All motion happens on the
+ * transform channel (x / y / scaleX / scaleY), which stays on the
+ * compositor: no per-frame layout, no per-frame repaint, and the cover's
+ * drop-shadow rasterizes once at the anchor size instead of re-filtering
+ * every frame. Rotation lives on the inner face element (see
+ * snapRotation) so the channels never clobber each other.
  */
 function snap(
   el: HTMLElement,
-  state: { rect?: TransitionRect; opacity?: number; translateY?: number },
+  state: {
+    rect?: TransitionRect;
+    opacity?: number;
+    x?: number;
+    y?: number;
+    scaleX?: number;
+    scaleY?: number;
+  },
 ): void {
   gsap.killTweensOf(el);
 
   const vars: gsap.TweenVars = {
-    x: 0,
-    y: state.translateY ?? 0,
+    x: state.x ?? 0,
+    y: state.y ?? 0,
+    scaleX: state.scaleX ?? 1,
+    scaleY: state.scaleY ?? 1,
+    transformOrigin: '0 0',
   };
 
   if (state.rect) {
@@ -212,6 +249,22 @@ function snap(
   if (state.opacity !== undefined) vars.opacity = state.opacity;
 
   gsap.set(el, vars);
+}
+
+/**
+ * FLIP transform that makes an element anchored at `base` appear at
+ * `target`. transform-origin must be '0 0' (snap() sets it).
+ */
+function flipTo(
+  base: TransitionRect,
+  target: TransitionRect,
+): { x: number; y: number; scaleX: number; scaleY: number } {
+  return {
+    x: target.left - base.left,
+    y: target.top - base.top,
+    scaleX: target.width / base.width,
+    scaleY: target.height / base.height,
+  };
 }
 
 /**
@@ -259,16 +312,15 @@ function tweenTo(target: HTMLElement, vars: gsap.TweenVars): Promise<void> {
   });
 }
 
-/** Animate to target values via GSAP. */
+/** Animate to target transform/opacity values via GSAP. Compositor-only. */
 function animateTo(
   el: HTMLElement,
   to: Partial<{
-    left: number;
-    top: number;
-    width: number;
-    height: number;
     opacity: number;
-    translateY: number;
+    x: number;
+    y: number;
+    scaleX: number;
+    scaleY: number;
   }>,
   opts: AnimateOpts,
 ): Promise<void> {
@@ -278,12 +330,11 @@ function animateTo(
     ease: gsapEase(opts.easing),
   };
 
-  if (to.left !== undefined) vars.left = to.left;
-  if (to.top !== undefined) vars.top = to.top;
-  if (to.width !== undefined) vars.width = to.width;
-  if (to.height !== undefined) vars.height = to.height;
   if (to.opacity !== undefined) vars.opacity = to.opacity;
-  if (to.translateY !== undefined) vars.y = to.translateY;
+  if (to.x !== undefined) vars.x = to.x;
+  if (to.y !== undefined) vars.y = to.y;
+  if (to.scaleX !== undefined) vars.scaleX = to.scaleX;
+  if (to.scaleY !== undefined) vars.scaleY = to.scaleY;
 
   return tweenTo(el, vars);
 }
@@ -344,6 +395,23 @@ export default function NotebookTransition() {
     navigateRef.current = navigate;
   }, [navigate]);
 
+  // Warm the canvas mockup decode during desk idle time.
+  useEffect(() => {
+    const idleWindow = window as unknown as {
+      requestIdleCallback?: (callback: () => void) => number;
+      cancelIdleCallback?: (id: number) => void;
+      setTimeout: Window['setTimeout'];
+      clearTimeout: Window['clearTimeout'];
+    };
+
+    if (typeof idleWindow.requestIdleCallback === 'function') {
+      const id = idleWindow.requestIdleCallback(() => preloadCanvasMockups());
+      return () => idleWindow.cancelIdleCallback?.(id);
+    }
+    const id = idleWindow.setTimeout(preloadCanvasMockups, 600);
+    return () => idleWindow.clearTimeout(id);
+  }, []);
+
   // Sync state with URL on direct deep-link navigation.
   useEffect(() => {
     let nextState: TransitionState | null = null;
@@ -392,6 +460,10 @@ export default function NotebookTransition() {
     isRunningRef.current = true;
 
     try {
+      // Belt-and-braces: if the idle preload hasn't run yet, start the
+      // decode now — it gets a ~700ms head start on the route swap.
+      preloadCanvasMockups();
+
       const deskRect = readSourceRect('notebook') ?? fallbackDeskRect();
       const spreadRect = computeCanvasSpreadRect();
       const openCoverRect = computeOpenCoverRect(spreadRect);
@@ -406,8 +478,12 @@ export default function NotebookTransition() {
       // Beat 0 — cover snaps to desk-rect at opacity 1. Because the cover
       // asset IS the desk's asset, this snap is invisible: the overlay's
       // notebook lands exactly on top of the desk's notebook with the same
-      // pixels.
-      snap(cover, { rect: deskRect, opacity: 1, translateY: 0 });
+      // pixels. The desk rect is the cover's FLIP anchor box for the whole
+      // open — the start frame is at transform identity, so the handoff
+      // from the desk's static notebook is pixel-exact; the hinge morph
+      // then travels on x/y/scale only.
+      snap(cover, { rect: deskRect, opacity: 1 });
+      const openFlip = flipTo(deskRect, openCoverRect);
       const coverFace = cover.querySelector<HTMLElement>(
         '[data-transition-cover-face]',
       );
@@ -476,11 +552,10 @@ export default function NotebookTransition() {
         timeline.addLabel('hinge', 'pickUp+=0.28').to(
           cover,
           {
-            left: openCoverRect.left,
-            top: openCoverRect.top,
-            width: openCoverRect.width,
-            height: openCoverRect.height,
-            y: 0,
+            x: openFlip.x,
+            y: openFlip.y,
+            scaleX: openFlip.scaleX,
+            scaleY: openFlip.scaleY,
             duration: 0.76,
             ease: 'expo.out',
           },
@@ -614,7 +689,11 @@ export default function NotebookTransition() {
     transitionTo('closing');
 
     // Snap initial state — cover fully open at -180°, spread visible.
-    snap(cover, { rect: openCoverRect, opacity: 1, translateY: 0 });
+    // FLIP anchor is the DESK rect (the end frame, where pixel-exactness
+    // with the desk's static notebook matters); the start position at the
+    // spread binding is expressed as a transform on top of it.
+    const closeFlip = flipTo(deskRect, openCoverRect);
+    snap(cover, { rect: deskRect, opacity: 1, ...closeFlip });
     const coverFace = cover.querySelector<HTMLElement>('[data-transition-cover-face]');
     if (coverFace) snapRotation(coverFace, -180);
     snap(spread, { rect: spreadRect, opacity: 1 });
@@ -641,30 +720,25 @@ export default function NotebookTransition() {
       easing: EASE_LINEAR,
       delay: 40,
     });
+    // Reveal eases out (was linear): a full-viewport wash fading at
+    // constant rate reads mechanical — the least paper-like motion in
+    // the sequence. Ease-out lets the desk arrive quickly, then breathe.
     const bgRevealPromise = bgCoverPromise.then(() =>
       animateTo(bg, { opacity: 0 }, {
         duration: 720,
-        easing: EASE_LINEAR,
+        easing: EASE_OUT,
         delay: 60,
       }),
     );
 
     // Beat 1 (position morph) — cover travels from spread-binding back
-    // to the desk slot, ARRIVING at the lifted position (translateY: -16).
-    // The soft-landing beat below will settle it the last 16px down to
-    // the desk surface. Using translateY here (instead of a top offset)
-    // keeps the morph + landing as transform-only animations — GPU
-    // composited, no layout thrash, and symmetric with open's lift
-    // which also uses translateY.
+    // to the desk slot, ARRIVING at the lifted position (y: -16).
+    // The soft-landing beat below settles it the last 16px down to the
+    // desk surface. The whole morph is transform-only (x/y/scale toward
+    // the anchor's identity) — GPU composited, no layout thrash.
     const morphPromise = animateTo(
       cover,
-      {
-        left: deskRect.left,
-        top: deskRect.top,
-        width: deskRect.width,
-        height: deskRect.height,
-        translateY: -16,
-      },
+      { x: 0, y: -16, scaleX: 1, scaleY: 1 },
       { duration: 620, easing: EASE_OUT_EXPO },
     );
 
@@ -701,12 +775,12 @@ export default function NotebookTransition() {
 
     await Promise.all([morphPromise, rotatePromise, spreadPromise, spinePromise]);
 
-    // Beat 6 — soft landing. Cover descends from translateY -16 to 0
-    // over 200ms with ease-out-expo. Slowed from v1.2's 140ms so the
-    // settle reads as a deliberate landing, not a blink. Mirrors the
-    // open's lift gesture (translateY 0 → -16 over 220ms) so the close
-    // feels like the lift in reverse.
-    await animateTo(cover, { translateY: 0 }, {
+    // Beat 6 — soft landing. Cover descends from y -16 to 0 over 200ms
+    // with ease-out-expo. Slowed from v1.2's 140ms so the settle reads
+    // as a deliberate landing, not a blink. Mirrors the open's lift
+    // gesture (y 0 → -16 over 220ms) so the close feels like the lift
+    // in reverse.
+    await animateTo(cover, { y: 0 }, {
       duration: 200,
       easing: EASE_OUT_EXPO,
     });

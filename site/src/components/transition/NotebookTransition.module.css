@@ -78,7 +78,7 @@
   -webkit-user-drag: none;
   /* Drop shadow matches NotebookSpread.module.css so the overlay's spread
    * reads identically to the canvas's spread when they're stacked. */
-  filter: drop-shadow(0 12px 28px rgba(22, 38, 94, 0.16));
+  filter: drop-shadow(0 12px 28px color-mix(in srgb, var(--ink) 16%, transparent));
 }
 
 /* ─── Cover layer ─────────────────────────────────────────────────────────── *
@@ -121,7 +121,9 @@
 }
 
 .rootActive .coverLayer {
-  will-change: transform, left, top, width, height;
+  /* v1.4 FLIP model: the rect (left/top/width/height) is a static anchor
+   * set once per choreography — only the transform animates. */
+  will-change: transform;
 }
 
 .rootActive .coverFace {
@@ -143,7 +145,7 @@
   object-fit: contain;
   user-select: none;
   -webkit-user-drag: none;
-  filter: drop-shadow(0 8px 18px rgba(22, 38, 94, 0.14));
+  filter: drop-shadow(0 8px 18px color-mix(in srgb, var(--ink) 14%, transparent));
   image-rendering: -webkit-optimize-contrast;
 }
 
@@ -156,21 +158,21 @@
   background:
     linear-gradient(
       90deg,
-      rgba(22, 38, 94, 0.18) 0,
-      rgba(22, 38, 94, 0.09) 5%,
+      color-mix(in srgb, var(--ink) 18%, transparent) 0,
+      color-mix(in srgb, var(--ink) 9%, transparent) 5%,
       transparent 18%
     ),
     linear-gradient(
       0deg,
-      rgba(22, 38, 94, 0.05) 0 1px,
+      color-mix(in srgb, var(--ink) 5%, transparent) 0 1px,
       transparent 1px 18px
     ),
     var(--paper);
-  border: 1px solid rgba(22, 38, 94, 0.18);
+  border: 1px solid color-mix(in srgb, var(--ink) 18%, transparent);
   box-shadow:
-    inset 10px 0 18px rgba(22, 38, 94, 0.08),
-    inset -1px 0 0 rgba(22, 38, 94, 0.08);
-  filter: drop-shadow(0 8px 18px rgba(22, 38, 94, 0.12));
+    inset 10px 0 18px color-mix(in srgb, var(--ink) 8%, transparent),
+    inset -1px 0 0 color-mix(in srgb, var(--ink) 8%, transparent);
+  filter: drop-shadow(0 8px 18px color-mix(in srgb, var(--ink) 12%, transparent));
   transform: rotateY(180deg);
 }
 
@@ -181,7 +183,7 @@
   top: 10%;
   width: 32%;
   height: 16%;
-  border: 1px solid rgba(22, 38, 94, 0.18);
+  border: 1px solid color-mix(in srgb, var(--ink) 18%, transparent);
 }
 
 .coverBack::after {
@@ -191,10 +193,10 @@
   top: 30%;
   width: 42%;
   height: 1px;
-  background: rgba(22, 38, 94, 0.16);
+  background: color-mix(in srgb, var(--ink) 16%, transparent);
   box-shadow:
-    0 16px 0 rgba(22, 38, 94, 0.1),
-    0 32px 0 rgba(22, 38, 94, 0.08);
+    0 16px 0 color-mix(in srgb, var(--ink) 10%, transparent),
+    0 32px 0 color-mix(in srgb, var(--ink) 8%, transparent);
 }
 
 .spineShadow {
@@ -205,9 +207,9 @@
     linear-gradient(
       90deg,
       transparent,
-      rgba(22, 38, 94, 0.2) 44%,
-      rgba(22, 38, 94, 0.26) 50%,
-      rgba(22, 38, 94, 0.12) 58%,
+      color-mix(in srgb, var(--ink) 20%, transparent) 44%,
+      color-mix(in srgb, var(--ink) 26%, transparent) 50%,
+      color-mix(in srgb, var(--ink) 12%, transparent) 58%,
       transparent
     );
   filter: blur(1.5px);

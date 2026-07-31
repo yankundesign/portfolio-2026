@@ -154,7 +154,7 @@ export const projects: Project[] = [
     title: 'SAP Fieldglass',
     role: 'enterprise dashboard, earlier work',
     subtitle: 'Making a complex system handleable — earlier work',
-    year: '2020 - 2024',
+    year: '2020–2024',
     collaborators: [],
     impact: 'adopted by 1,000+ customers',
     figNumber: 4,

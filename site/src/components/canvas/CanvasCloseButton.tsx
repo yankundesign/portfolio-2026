@@ -21,7 +21,8 @@ export default function CanvasCloseButton({ onClick }: CanvasCloseButtonProps) {
       onClick={onClick}
       aria-label="Close notebook, return to desk"
     >
-      <span className={styles.label}>close</span>
+      {/* Arrow leads and points LEFT — closing returns to the desk, so the
+       * affordance reads as "back", not "forward". */}
       <svg
         className={styles.arrow}
         viewBox="0 0 24 12"
@@ -29,13 +30,14 @@ export default function CanvasCloseButton({ onClick }: CanvasCloseButtonProps) {
         aria-hidden="true"
       >
         <path
-          d="M 1 6 L 22 6 M 17 1 L 22 6 L 17 11"
+          d="M 23 6 L 2 6 M 7 1 L 2 6 L 7 11"
           stroke="currentColor"
-          strokeWidth="1"
+          strokeWidth="1.2"
           strokeLinecap="round"
           strokeLinejoin="round"
         />
       </svg>
+      <span className={styles.label}>close</span>
     </button>
   );
 }

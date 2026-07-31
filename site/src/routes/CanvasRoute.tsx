@@ -20,22 +20,20 @@ import styles from './CanvasRoute.module.css';
 const CONTENT_ENTER_DELAY_AFTER_TRANSITION = 560;
 
 /**
- * CanvasRoute — canvas v0.9 (notebook backdrop + floating editorial plates).
+ * CanvasRoute — canvas v1.0 (viewport-fitted spread).
  *
- * The open notebook is a fixed, full-height background STAGE (cropped at the
- * sides). Project plates are independent editorial plates laid over it on a
- * scrollable 12-column grid — no longer constrained to two notebook page
- * slots. CHAI is the clear hero. See `00-brief/prd-canvas-v0.9-backdrop-plates.md`.
+ * A real notebook spread is a fixed page: you turn it, you don't scroll it.
+ * The four plates now sit on ONE shared grid spanning both notebook pages —
+ * two equal plates per page, tops and bottoms registered across the spine,
+ * the whole spread fitted to a single desktop viewport. Hierarchy comes
+ * from reading order (fig. 01 top-left), status, and metric — never card
+ * size. Intro occupies the top-left register; the site imprint (colophon
+ * link) sits bottom-right like a printed book's imprint. Below 1100px the
+ * spread degrades to the single-column scroll.
  *
  * The notebook backdrop carries `data-transition-source="spread"` so the
  * desk -> canvas close transition can measure it (see NotebookTransition).
  */
-
-const INTRO = {
-  label: 'NOTE / 001 — WORKS',
-  description:
-    'A short collection of works in AI, enterprise, and AI-native design.',
-};
 
 export default function CanvasRoute() {
   const navigate = useNavigate();
@@ -76,20 +74,13 @@ export default function CanvasRoute() {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [handleClose]);
 
-  // Plates are grouped onto two pages straddling the notebook spine. The
-  // original index is preserved (entrance stagger + fig numbers) even though
-  // the visual grouping isn't sequential. Left page leads with the CHAI hero.
-  const pages = useMemo(() => {
-    const indexed = projects.map((project, index) => ({ project, index }));
-    return {
-      left: indexed.filter(({ project }) =>
-        ['chai', 'build-with-ai'].includes(project.slug),
-      ),
-      right: indexed.filter(({ project }) =>
-        ['control-hub-agentic', 'sap-fieldglass'].includes(project.slug),
-      ),
-    };
-  }, []);
+  // Source order in data/projects.ts IS the spread composition: items
+  // auto-flow left→right, top→bottom across the shared grid (chai top-left,
+  // agentic top-right, build-with-ai bottom-left, fieldglass bottom-right).
+  const plates = useMemo(
+    () => projects.map((project, index) => ({ project, index })),
+    [],
+  );
 
   return (
     <>
@@ -123,32 +114,23 @@ export default function CanvasRoute() {
 
         <main className={styles.content}>
           <div className={styles.spread}>
-            <div className={styles.page} data-page="left">
-              <header className={styles.intro}>
-                <span className={styles.introLabel}>{INTRO.label}</span>
-                <p className={styles.introDescription}>{INTRO.description}</p>
-              </header>
-              {pages.left.map(({ project, index }) => (
-                <ProjectPlate
-                  key={project.slug}
-                  project={project}
-                  index={index}
-                  onClick={handleProjectClick}
-                />
-              ))}
-            </div>
-            <div className={styles.page} data-page="right">
-              {pages.right.map(({ project, index }) => (
-                <ProjectPlate
-                  key={project.slug}
-                  project={project}
-                  index={index}
-                  onClick={handleProjectClick}
-                />
-              ))}
-            </div>
+            {plates.map(({ project, index }) => (
+              <ProjectPlate
+                key={project.slug}
+                project={project}
+                index={index}
+                onClick={handleProjectClick}
+              />
+            ))}
           </div>
         </main>
+
+        {/* Running footer — the spread's only page furniture. Fixed to the
+         * viewport bottom, like a printed folio line. */}
+        <div className={styles.runningFooter} aria-hidden="true">
+          <span>note / 001 — works</span>
+          <span>field notes · vol. v</span>
+        </div>
       </div>
 
       <Grain />

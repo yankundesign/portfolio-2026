@@ -21,14 +21,13 @@
   left: var(--canvas-close-left);
   display: inline-flex;
   align-items: center;
-  justify-content: center;
   gap: 10px;
   width: auto;
-  min-width: var(--canvas-close-width);
   min-height: 44px;
-  padding: 10px 14px;
-  /* Faint paper backing so the label stays legible over the notebook. */
-  background: color-mix(in srgb, var(--paper) 86%, transparent);
+  padding: 10px 4px;
+  /* Quiet text chrome — same register as the running footer. No paper
+   * block; the top-left corner sits on plain page, not the notebook. */
+  background: none;
   border: 0;
   margin: 0;
   cursor: pointer;
@@ -74,18 +73,26 @@
 
 .label {
   white-space: nowrap;
+  /* Hairline underline rises on hover — link register, not button chrome. */
+  border-bottom: 1px solid transparent;
+  transition: border-color var(--duration-hover) var(--ease-out);
+}
+
+.button:hover .label,
+.button:focus-visible .label {
+  border-bottom-color: var(--ink-muted);
 }
 
 .arrow {
   flex: 0 0 auto;
-  width: 28px;
-  height: 14px;
+  width: 22px;
+  height: 11px;
   display: block;
   transition: transform var(--duration-hover) var(--ease-out);
 }
 
 .button:hover .arrow {
-  transform: translateX(2px);
+  transform: translateX(-3px);
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -16,6 +16,8 @@ import { usePlateProofReveal } from '../interactions/usePlateProofReveal';
 import { useReducedMotion } from '../interactions/useReducedMotion';
 import styles from './DeskRoute.module.css';
 
+const SHOW_DESK_JELLYFISH = false;
+
 /**
  * DeskRoute — v0.4 Swiss editorial plate register.
  *
@@ -156,7 +158,7 @@ export default function DeskRoute() {
           aria-hidden={proofReveal.sceneHidden ? true : undefined}
           inert={proofReveal.sceneHidden ? true : undefined}
         >
-          <DeskJellyfishLayer />
+          {SHOW_DESK_JELLYFISH ? <DeskJellyfishLayer /> : null}
 
           {/* Ephemera mounted before navigation objects so both ambient layers
            * paint behind the desk interaction targets. */}

@@ -8,21 +8,18 @@ export interface ProjectPlateProps {
 }
 
 /**
- * ProjectPlate — canvas v0.9 editorial plate.
+ * ProjectPlate — canvas v1.0 bare editorial plate.
  *
- * A loose plate laid over the notebook backdrop. The CARD ITSELF is the
- * sheet of sulfuric-acid paper: a translucent vellum whose `backdrop-filter`
- * blurs the notebook softly THROUGH the card's paper areas. The mockup sits
- * on that sheet crisp and uncovered — the work is never obscured (guideline:
- * screenshots are honest, full-color editorial plates).
+ * The vellum container is retired (decisions-log 2026-07-31). The plate is
+ * now the guideline's editorial-plate pattern verbatim: the mockup in a
+ * 1px ink rule, with a museum-label caption set directly on the notebook
+ * paper beneath it. All four plates are the same size and the same 16:10
+ * sleeve — hierarchy comes from reading order, the fig line's status, and
+ * the metric, never from card size.
  *
- * Strictly two-color: the vellum is paper-toned, never tinted. This is the
- * material of sulfuric-acid paper, not the colored print of the reference
- * samples (decisions-log 2026-06-14).
- *
- * Size variants map to the existing tier ladder via `project.size`
- * (featured | main | standard); column placement lives in CSS by source
- * order (CHAI, Agentic, Build with AI, SAP).
+ * Caption at rest is three lines: fig line (status folded in) · title ·
+ * headline metric. `canvasContext` moved into the aria-label and the case
+ * study — the spread stays scannable in a single viewport.
  */
 export default function ProjectPlate({
   project,
@@ -39,7 +36,7 @@ export default function ProjectPlate({
   return (
     <article
       className={styles.plate}
-      data-size={project.size}
+      data-plate
       style={{ ['--plate-index' as string]: index }}
     >
       <button
@@ -63,23 +60,15 @@ export default function ProjectPlate({
         </span>
 
         <span className={styles.meta}>
-          <span className={styles.topline}>
-            <span className={styles.status}>{project.canvasStatus}</span>
-            <span className={styles.fig}>
-              fig. {number} · {project.year}
-            </span>
+          <span className={styles.fig}>
+            fig. {number} · {project.year} · {project.canvasStatus}
           </span>
 
           <h3 className={styles.title}>{project.title}</h3>
 
-          <span className={styles.context}>{project.canvasContext}</span>
-
           {headlineProof && (
-            <span className={styles.proof}>
-              <strong className={styles.proofMetric}>{headlineProof}</strong>
-            </span>
+            <span className={styles.proof}>{headlineProof}</span>
           )}
-
         </span>
       </button>
     </article>

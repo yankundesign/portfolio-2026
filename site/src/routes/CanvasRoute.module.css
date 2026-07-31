@@ -1,11 +1,11 @@
-/* ─── Canvas route v0.9 (notebook backdrop + floating editorial plates) ─────
+/* ─── Canvas route v1.0 (viewport-fitted spread) ─────────────────────────────
  *
- * The open notebook is a fixed, full-height background STAGE. Project plates
- * float over it on a scrollable 12-column grid. Because html/body are
- * overflow:hidden (see global.css), `.canvas` is the scroll container; the
- * fixed stage layers (backdrop, dot grid, close affordance) attach to the
- * viewport and stay put as the content scrolls. No transformed ancestor, so
- * position:fixed is safe.
+ * The open notebook is a fixed, full-height background STAGE. The four
+ * plates sit on ONE shared grid spanning both pages: two columns framing
+ * the spine channel, two registered plate rows, intro in the top-left
+ * register, imprint bottom-right. The whole spread fits a single desktop
+ * viewport — no scrolling a paper page. `.canvas` keeps overflow-y:auto
+ * purely as a fallback for short viewports and the <1100px single column.
  * ────────────────────────────────────────────────────────────────────────── */
 
 .canvas {
@@ -18,9 +18,7 @@
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
   /* Reserve the scrollbar on BOTH edges so the content box stays centered in
-   * the viewport. The notebook backdrop is fixed/centered to the viewport, so
-   * symmetric gutters keep the content's center (and the spine channel) lined
-   * up with the notebook spine instead of drifting left by the scrollbar. */
+   * the viewport and the spine channel lines up with the notebook spine. */
   scrollbar-gutter: stable both-edges;
 }
 
@@ -54,157 +52,143 @@
   object-fit: cover;
   user-select: none;
   -webkit-user-drag: none;
-  filter: drop-shadow(0 12px 28px rgba(22, 38, 94, 0.16));
+  filter: drop-shadow(0 12px 28px color-mix(in srgb, var(--ink) 16%, transparent));
 }
 
-/* Light paper scrim — the vellum cards do most of the contrast work via
- * their own backdrop blur, so this stays faint to keep the notebook and the
- * spine channel between the pages crisp. */
+/* Light paper scrim — plates are bare (no vellum), so this stays faint to
+ * keep the notebook page texture and the spine channel crisp. */
 .backdrop::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(244, 241, 234, 0.18);
+  background: color-mix(in srgb, var(--paper) 18%, transparent);
 }
 
-/* ─── Content ────────────────────────────────────────────────────────────── */
+/* ─── Content — one viewport, spread centered ────────────────────────────── */
 
 .content {
   position: relative;
   z-index: 2;
-  /* Canvas-specific: wider than the global --grid-max (1280) so the two-page
-   * spread breathes on larger screens. Fluid below this cap. */
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: clamp(96px, 14vh, 168px) clamp(24px, 5vw, 60px)
-    clamp(80px, 12vh, 140px);
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  padding: clamp(40px, 6svh, 72px) clamp(24px, 5vw, 60px);
   box-sizing: border-box;
 }
 
-.intro {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  /* Sits directly above the CHAI plate: same width and inner-edge alignment
-   * (flex-end) as the featured plate, so the label lines up with the card's
-   * left edge instead of outdenting to the page margin. The page's flex gap
-   * spaces it from the plate. The right page has no intro, so Agentic rides
-   * higher than CHAI. */
-  align-self: flex-end;
-  width: 100%;
-  max-width: 31rem;
-  margin: 0;
-  animation: introIn 600ms cubic-bezier(0.16, 1, 0.3, 1) both;
-  animation-delay: var(--canvas-enter-delay, 0ms);
-}
-
-@keyframes introIn {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-.introLabel {
-  font-family: var(--font-mono);
-  font-size: var(--text-caption);
-  font-weight: 500;
-  letter-spacing: var(--chrome-tracking);
-  text-transform: uppercase;
-  color: var(--ink-soft);
-}
-
-.introDescription {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: clamp(1rem, 1.2vw, 1.2rem);
-  font-style: italic;
-  font-weight: 300;
-  line-height: 1.45;
-  color: var(--ink);
-}
-
-/* ─── Spread — two pages straddling the notebook spine ───────────────────── *
+/* ─── Spread — one shared grid across both notebook pages ────────────────── *
  *
- * The notebook backdrop is centered, so the spine sits at the content's
- * horizontal center. Two independent plate stacks frame it, with a wide
- * column-gap as the spine channel so the binding shows between them. Each
- * page stacks independently (no shared grid rows), so a tall plate on one
- * side never opens a gap on the other. Both pages start at the spread top;
- * the intro sits inside the left page, so the right page (Agentic) rides
- * higher than CHAI — an editorial stagger without a flat 2×2.
+ * Two columns frame the spine channel; both plate rows are registered, so
+ * every plate top and bottom aligns across the spine. Widths are svh-tied
+ * because the notebook backdrop is height-driven — the grid tracks the
+ * cream pages at any window size.
  * ────────────────────────────────────────────────────────────────────────── */
 
 .spread {
   display: grid;
+  width: 100%;
+  /* svh-only: scales with the height-driven notebook. A px cap here would
+   * re-shrink the plates on large displays. 118svh stays inside the cream
+   * pages (notebook is ~143.5svh wide). */
+  max-width: 118svh;
   grid-template-columns: 1fr 1fr;
-  column-gap: clamp(24px, 3vw, 72px);
+  grid-template-rows: auto auto;
+  column-gap: clamp(40px, 8svh, 96px);
+  row-gap: clamp(14px, 2.4svh, 28px);
   align-items: start;
 }
 
-.page {
+/* Column assignment by source order: odd plates left page, even right page.
+ * Plates hug the spine so the notebook page edge is the outer margin. */
+.spread > article:nth-of-type(odd) {
+  grid-column: 1;
+  justify-self: end;
+}
+
+.spread > article:nth-of-type(even) {
+  grid-column: 2;
+  justify-self: start;
+}
+
+.spread > article:nth-of-type(1),
+.spread > article:nth-of-type(2) {
+  grid-row: 1;
+}
+
+.spread > article:nth-of-type(3),
+.spread > article:nth-of-type(4) {
+  grid-row: 2;
+}
+
+/* ─── Running footer — folio line, the spread's only page furniture ──────── */
+
+.runningFooter {
+  position: fixed;
+  bottom: clamp(16px, 2.6svh, 28px);
+  left: clamp(24px, 5vw, 60px);
+  right: clamp(24px, 5vw, 60px);
   display: flex;
-  flex-direction: column;
-  gap: clamp(28px, 5vh, 45px);
-  min-width: 0;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  letter-spacing: var(--chrome-tracking);
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  z-index: 3;
+  pointer-events: none;
+  animation: footerSettle 360ms cubic-bezier(0.4, 0, 0.2, 1) both;
+  animation-delay: calc(var(--canvas-enter-delay, 0ms) + 900ms);
 }
 
-/* Plates are capped (see ProjectPlate), so each page column has slack. Pull
- * the plates toward the spine so the two pages read as a paired spread with
- * the notebook page as the outer margin. The intro (not a [data-size] item)
- * stays left-aligned at the top of the left page. */
-.page[data-page='left'] > [data-size] {
-  align-self: flex-end;
+@keyframes footerSettle {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
-.page[data-page='right'] > [data-size] {
-  align-self: flex-start;
+@media (prefers-reduced-motion: reduce) {
+  .runningFooter {
+    animation: none;
+    opacity: 1;
+  }
 }
 
-/* ─── Tablet / mobile: single column, faint backdrop ─────────────────────── */
+/* ─── Tablet / mobile: single column scroll, faint backdrop ──────────────── */
 
 @media (max-width: 1100px) {
+  .content {
+    min-height: 100svh;
+    place-items: start center;
+  }
+
   .spread {
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
     gap: clamp(28px, 6vw, 52px);
+    max-width: 40rem;
   }
 
-  .page {
-    gap: clamp(28px, 6vw, 52px);
-  }
-
-  /* Single column — plates fill the width, no spine-hug or size cap. */
-  .page > [data-size] {
+  .spread > article:nth-of-type(n) {
     align-self: stretch;
     max-width: none;
   }
 
-  /* Intro spans the column and reads left-aligned at the top. */
-  .intro {
-    align-self: stretch;
-    max-width: 40rem;
-  }
-
   /* Notebook recedes so the single-column plates stay readable. */
   .backdrop::after {
-    background: rgba(244, 241, 234, 0.5);
+    background: color-mix(in srgb, var(--paper) 50%, transparent);
+  }
+
+  /* A fixed folio line would overlap the scrolling column. */
+  .runningFooter {
+    display: none;
   }
 }
 
 @media (max-width: 640px) {
   .backdropImage {
     opacity: 0.6;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .intro {
-    animation: none;
-    opacity: 1;
-    transform: none;
   }
 }

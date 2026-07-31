@@ -4,6 +4,34 @@ Track design and build decisions as they're made.
 
 ---
 
+## 2026-07-31 · Transition v1.4 — FLIP morph, mockup pre-decode, close-reveal easing
+
+Smoothness pass on the desk ↔ canvas transition. Choreography (beats, durations, easings of the open) untouched — the problems were rendering-level. Cover morph converted from animated `left/top/width/height` to a FLIP transform (`x/y/scale` against a static anchor rect: desk rect both directions, so the pixel-critical handoff frame — open's start, close's end — sits at transform identity). Eliminates per-frame layout/paint and per-frame drop-shadow re-rasterization during the hinge. Canvas mockup PNGs now pre-decode via idle callback on desk mount (plus at open start) so their decode doesn't stall the main thread at the mid-flight route swap. Close's desk reveal eased out (was linear). Plate entrance base delay 320→180ms to close the empty-notebook beat after the overlay clears. Transition CSS rgba literals → `color-mix(var(--ink))`. Known accepted trade-off: on viewports where the open-cover rect's aspect is clipped by the left page width, the FLIP scale is slightly non-uniform mid-flight — imperceptible against the rotation.
+
+---
+
+## 2026-07-31 · Canvas v1.0 — viewport-fitted spread returns; vellum retired (reverses two v0.9 calls)
+
+Visual review of the shipped v0.9 canvas found: nothing aligned across the spine (two independent flex stacks), three variation axes at once (card widths 25–31rem, sleeve aspects 1:1/4:3/16:10, vertical stagger) reading as drift rather than composition, quadruple framing around every mockup, and a dead zone bottom-right of the scroll. Yankun's direction: keep the notebook metaphor and backdrop, equalize the cards, minimize scrolling.
+
+**The decisions:**
+
+1. **Viewport-fitted spread returns (reverses v0.9 "/works scrolls again").** A real notebook spread is a fixed page — you turn it, you don't scroll it. Four plates on ONE shared grid spanning both pages: two registered rows, every plate top/bottom aligned across the spine, whole spread in a single desktop viewport. Plate widths are svh-capped (`min(26rem, 40svh)`) so the grid tracks the height-driven backdrop at any window size. Below 1100px it degrades to the single-column scroll — no-scroll is a desktop promise.
+
+2. **Equal plates return (reverses v0.9 "CHAI regains hero status").** One size, one 16:10 sleeve for all four. Hierarchy moves entirely to reading order (fig. 01 top-left), the fig line's status ("full case study" is CHAI-only), and the metric line. Museum-wall logic: equal frames, unequal labels. Escape valve if this reads flat: hover-enlarge on CHAI (guideline permits enlargement as interaction, not static layout).
+
+3. **Vellum sleeve retired.** The translucent card container (backdrop-blur, sheen, border, padding) is gone. A plate is now the guideline's editorial-plate pattern verbatim: mockup in a 1px ink rule + museum-label caption set directly on the notebook paper. Cuts one texture layer and two nested frames.
+
+4. **Caption compressed to three lines at rest.** Status pill folded into the fig line (`fig. 01 · 2024–2025 · full case study`), then title, then headline metric over a hairline rule. `canvasContext` moves to the aria-label and the case study.
+
+5. **Imprint mounted.** The "designed and shipped in 1 week with Claude Code · Colophon →" line (positioning claim #3, previously unmounted) sits bottom-right of the right page, where a printed book carries its imprint.
+
+**Mockup spec:** all four canvas tiles re-cropped to **16:10** (export 1920×1200 PNG). CHAI (was 1:1) and Agentic (was 4:3) need new crops.
+
+**Source:** conversation review, 2026-07-31. Implementation: `CanvasRoute.tsx/.module.css`, `ProjectPlate.tsx/.module.css`.
+
+---
+
 ## 2026-06-14 · Canvas v0.9 — notebook becomes backdrop, plates float and scroll (reverses two v0.8.1 calls)
 
 Planned the next canvas redesign after a competitive review of five designer portfolios (Jackie Hu, Emmi Wu, Sanvi Saya, Zhiyuan Chen, Yoorok Jeong). The shipped v0.8.1 canvas has four problems: forced 2×2 symmetry, single-viewport no-scroll spread, buried metrics, and no status signals. The fix is architectural — split the notebook (background) from the cards (content) — plus a content-treatment pass. Full spec in `00-brief/prd-canvas-v0.9-backdrop-plates.md`. **Planned, not built.**
