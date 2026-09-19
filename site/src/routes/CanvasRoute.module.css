@@ -1,11 +1,10 @@
 /* ─── Canvas route v1.0 (viewport-fitted spread) ─────────────────────────────
  *
- * The open notebook is a fixed, full-height background STAGE. The four
- * plates sit on ONE shared grid spanning both pages: two columns framing
- * the spine channel, two registered plate rows, intro in the top-left
- * register, imprint bottom-right. The whole spread fits a single desktop
- * viewport — no scrolling a paper page. `.canvas` keeps overflow-y:auto
- * purely as a fallback for short viewports and the <1100px single column.
+ * The open notebook is a fixed, full-height background STAGE. Four plates
+ * sit on one shared grid at a time: two columns framing the spine channel
+ * and two registered rows. Later projects continue onto another spread.
+ * Each spread fits one desktop viewport; below 1100px the complete project
+ * set becomes one scrolling column.
  * ────────────────────────────────────────────────────────────────────────── */
 
 .canvas {
@@ -22,11 +21,11 @@
   scrollbar-gutter: stable both-edges;
 }
 
-/* Direct /works visits and project-detail returns skip the staged entrance —
- * everything is shown immediately. */
-.canvas[data-entry-motion='instant'] *,
-.canvas[data-entry-motion='instant'] *::before,
-.canvas[data-entry-motion='instant'] *::after {
+/* Direct /works visits and project-detail returns skip the staged plate and
+ * footer entrance. Scope this narrowly so a later folio change can still
+ * settle even when the route itself mounted instantly. */
+.canvas[data-entry-motion='instant'] [data-plate],
+.canvas[data-entry-motion='instant'] .runningFooter {
   animation: none !important;
 }
 
@@ -84,18 +83,62 @@
  * cream pages at any window size.
  * ────────────────────────────────────────────────────────────────────────── */
 
+.spreadStage {
+  --spread-column-gap: clamp(40px, 8svh, 96px);
+
+  position: relative;
+  width: 100%;
+  /* svh-only: scales with the height-driven notebook. 118svh stays inside
+   * the cream pages (notebook is approximately 143.5svh wide). */
+  max-width: 118svh;
+}
+
 .spread {
   display: grid;
   width: 100%;
-  /* svh-only: scales with the height-driven notebook. A px cap here would
-   * re-shrink the plates on large displays. 118svh stays inside the cream
-   * pages (notebook is ~143.5svh wide). */
-  max-width: 118svh;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: auto auto;
-  column-gap: clamp(40px, 8svh, 96px);
+  column-gap: var(--spread-column-gap);
   row-gap: clamp(14px, 2.4svh, 28px);
   align-items: start;
+}
+
+/* The pager occupies the same right-page measure as project 4. On spread
+ * one it sits directly below that plate; on the continuation spread it
+ * aligns to the bottom-right opposite project 5. It lives outside the keyed
+ * plate grid so activating it does not discard keyboard focus. */
+.spreadPager {
+  position: absolute;
+  top: calc(100% + clamp(14px, 1.8svh, 22px));
+  left: calc(50% + var(--spread-column-gap) / 2);
+  width: min(46svh, calc(50% - var(--spread-column-gap) / 2));
+  display: flex;
+  justify-content: flex-end;
+  z-index: 1;
+}
+
+.spreadPagerContinuation {
+  top: auto;
+  bottom: 12px;
+}
+
+.spreadStage[data-current-spread='2'] .spread {
+  grid-template-rows: auto;
+}
+
+.spreadChanged {
+  animation: spreadSettle 360ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes spreadSettle {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 /* Column assignment by source order: odd plates left page, even right page.
@@ -128,7 +171,7 @@
   left: clamp(24px, 5vw, 60px);
   right: clamp(24px, 5vw, 60px);
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   font-family: var(--font-mono);
   font-size: var(--text-caption);
   letter-spacing: var(--chrome-tracking);
@@ -138,6 +181,25 @@
   pointer-events: none;
   animation: footerSettle 360ms cubic-bezier(0.4, 0, 0.2, 1) both;
   animation-delay: calc(var(--canvas-enter-delay, 0ms) + 900ms);
+}
+
+.runningFooter > span {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 10px;
+  background: color-mix(in srgb, var(--paper) 76%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ink) 14%, transparent);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+  box-shadow: 0 3px 12px color-mix(in srgb, var(--ink) 6%, transparent);
+}
+
+@supports not (
+  (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))
+) {
+  .runningFooter > span {
+    background: color-mix(in srgb, var(--paper) 92%, transparent);
+  }
 }
 
 @keyframes footerSettle {
@@ -150,6 +212,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .spreadChanged {
+    animation: none;
+  }
+
   .runningFooter {
     animation: none;
     opacity: 1;
@@ -164,11 +230,18 @@
     place-items: start center;
   }
 
+  .spreadStage {
+    max-width: 40rem;
+  }
+
   .spread {
     display: flex;
     flex-direction: column;
     gap: clamp(28px, 6vw, 52px);
-    max-width: 40rem;
+  }
+
+  .spreadChanged {
+    animation: none;
   }
 
   .spread > article:nth-of-type(n) {

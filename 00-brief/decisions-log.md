@@ -4,6 +4,18 @@ Track design and build decisions as they're made.
 
 ---
 
+## 2026-08-08 · Canvas v1.1 — Ebb enters at fig. 03; desktop gains a second spread
+
+The canvas project set expands from four to five. Ebb becomes the third project, SAP Fieldglass remains fourth, and Build with AI moves to fifth. Desktop preserves the viewport-fitted promise by showing at most four equal 16:10 plates at once: figures 01–04 remain on the first spread, and figure 05 continues onto a second spread without changing size or hierarchy.
+
+The bottom-right folio becomes the spread control (`next page` on spread one, `previous page` on spread two) with the active spread count beside it. The active spread is URL-addressable as `?page=2`, and project navigation preserves that origin on return. Below 1100px there is no pagination: all five projects remain one accessible scrolling column. This intentionally supersedes the v0.8 prohibition on within-canvas navigation while retaining v1.0's equal-plate geometry, notebook backdrop, close transition, and reduced-motion contract.
+
+**Mockup spec:** Ebb receives a dedicated 1920×1200 PNG under `site/public/canvas/mockups/`, matching the established lossless 16:10 tile format.
+
+**Source:** Yankun direction, 2026-08-08. Implementation: `projects.ts`, `CanvasRoute.tsx/.module.css`, `CanvasPager.tsx/.module.css`, `ProjectPlate.tsx`, `ProjectRoute.tsx`.
+
+---
+
 ## 2026-07-31 · Transition v1.4 — FLIP morph, mockup pre-decode, close-reveal easing
 
 Smoothness pass on the desk ↔ canvas transition. Choreography (beats, durations, easings of the open) untouched — the problems were rendering-level. Cover morph converted from animated `left/top/width/height` to a FLIP transform (`x/y/scale` against a static anchor rect: desk rect both directions, so the pixel-critical handoff frame — open's start, close's end — sits at transform identity). Eliminates per-frame layout/paint and per-frame drop-shadow re-rasterization during the hinge. Canvas mockup PNGs now pre-decode via idle callback on desk mount (plus at open start) so their decode doesn't stall the main thread at the mid-flight route swap. Close's desk reveal eased out (was linear). Plate entrance base delay 320→180ms to close the empty-notebook beat after the overlay clears. Transition CSS rgba literals → `color-mix(var(--ink))`. Known accepted trade-off: on viewports where the open-cover rect's aspect is clipped by the left page width, the FLIP scale is slightly non-uniform mid-flight — imperceptible against the rotation.

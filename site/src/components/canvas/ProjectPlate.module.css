@@ -3,8 +3,8 @@
  *
  * No container chrome: the mockup sits in a 1px ink rule (the guideline's
  * editorial-plate pattern) and the caption is set directly on the notebook
- * paper. One size, one 16:10 sleeve, for all four plates — the viewport-
- * fitted spread depends on uniform geometry.
+ * paper. One size and one 16:10 sleeve across the project set — each
+ * viewport-fitted spread depends on uniform geometry.
  *
  * Width is svh-driven because the notebook backdrop is height-driven
  * (100svh × 2600/1812): tying the plate to the viewport height keeps it on

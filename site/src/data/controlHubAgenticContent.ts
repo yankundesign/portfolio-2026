@@ -176,10 +176,10 @@ export const figures = {
     alt: 'Control Hub Agentic agents surface showing structured execution for a multi-step admin job.',
     width: 'column',
   },
-  frameworkSkills: {
-    src: '/images/control-hub-agentic/framework-skills.png',
-    caption: 'Skills — manage what your agents can do',
-    alt: 'Control Hub Agentic skills surface for managing the capabilities available to agents.',
+  frameworkCreateTestAgent: {
+    src: '/images/control-hub-agentic/create-test-agent.png',
+    caption: 'Create & test agent — configure and validate behavior before launch',
+    alt: 'Control Hub Agentic create-and-test flow showing agent profile configuration alongside a test conversation.',
     width: 'column',
   },
   frameworkActivity: {

@@ -222,17 +222,19 @@ This audit describes what is present in the written outlines. It does not mean t
 
 #### Project 2 updates already in the outline
 
-- The case study is now a focused 7-slide, 7-minute-45-second story.
+- The case study is now a 16-slide, 10-minute story with one primary visual and one interaction decision per slide.
 - The opening connects both projects through `Context -> Control`.
 - The project is framed as 0-to-1 product definition, not a speculative AI concept.
 - The workflow architecture is explicit:
   `intent -> data context -> analysis/evidence -> plan -> permission -> execution -> activity -> audit/rollback`.
 - The architecture names what the AI does and what the user sees or controls at every stage.
 - `Familiar Surface, Evidence When Needed` explains progressive disclosure for technical detail.
+- AI Home, Agents, and Agent Details are separate visual beats so product hierarchy and progressive disclosure are readable.
 - `Always Analyze And Plan First` includes the rejected alternative of moving directly from a natural-language request to execution.
-- Device Onboarding is the single end-to-end proof instead of touring several use cases.
+- Device Onboarding is the single operational proof, split into structured input, impact/approval, execution feedback, and Activity.
 - Permissioned or destructive work is kept as a short stress test or backup.
 - Activity is treated as the durable execution and audit surface.
+- Conversational agent creation shows an adaptive interview, an editable structured draft, sandbox testing, revision, and an explicit publish boundary.
 - The React prototype demonstrates how evidence review, timing, state, approval, intervention, handoff, audit, and rollback became testable.
 - The outcome is accurately framed as alignment and decision clarity rather than shipped metrics.
 - The closing returns to the shared positioning: complex data -> verifiable insight -> controlled action -> trace.
@@ -243,10 +245,11 @@ This audit describes what is present in the written outlines. It does not mean t
 - Confirm the shipped, beta, validated, prototype, or directional status of AI-Generated Reports and troubleshooting.
 - Adoption and Smart Search metrics still require final verification and external-sharing confirmation.
 - Replace the generic Project 2 alignment outcome with the exact uncertainty, disagreement, or implementation decision the prototype resolved.
+- Confirm whether each agent-creation step is implemented in the prototype or directional, and define what tests block publishing.
 - The written outlines request backup material, accessibility notes, validation answers, and readable trust visuals; those assets still need to be produced.
 - Both timed versions still need rehearsal with interruptions and Q&A.
 
-Portfolio status at a glance: **15 checklist items covered and 4 execution or verification items still open** in the written outlines.
+Portfolio status at a glance: **15 items in the original checklist are covered and 4 remain open**. The additional Project 2 implementation-status questions are listed above and should be resolved while building the slides.
 
 ### Portfolio checklist
 
@@ -278,7 +281,7 @@ Status key:
 - [x] Add generated-report history to the Project 1 lifecycle and Activity/audit history to Project 2.
 - [ ] Prepare backup slides for research, alternative concepts, system architecture, failure states, and metrics.
 - [x] Prepare a developer/researcher transfer statement without overstating direct domain experience.
-- [ ] Rehearse the current 15-minute and 7-8-minute versions with interruption points.
+- [ ] Rehearse the current 15-minute and 10-minute versions with interruption points.
 - [ ] Prepare 30-second answers for ownership, tradeoffs, validation, metrics, and what I would change.
 
 #### Definition of done

@@ -1,9 +1,10 @@
 import { useEffect, useLayoutEffect } from 'react';
-import { Link, useParams } from 'react-router';
+import { Link, useLocation, useParams } from 'react-router';
 import ChaiProject from '../components/project/ChaiProject';
 import ControlHubAgenticProject from '../components/project/ControlHubAgenticProject';
 import SapFieldglassProject from '../components/project/SapFieldglassProject';
 import BuildWithAiProject from '../components/project/BuildWithAiProject';
+import EbbProject from '../components/project/EbbProject';
 import Grain from '../components/shared/Grain';
 import { projects } from '../data/projects';
 import styles from './ProjectRoute.module.css';
@@ -11,8 +12,8 @@ import styles from './ProjectRoute.module.css';
 /**
  * /works/:slug — project detail route.
  *
- * CHAI, Control Hub Agentic, Build with AI, and SAP Fieldglass have bespoke
- * layouts. Other projects render a stub with the canvas-card info.
+ * CHAI, Control Hub Agentic, Build with AI, SAP Fieldglass, and Ebb have
+ * bespoke layouts. Other projects render a stub with the canvas-card info.
  *
  * /works/smart-search was retired in canvas v0.7 — the slug now resolves to
  * the 404 stub. Smart Search remains a proof beat *inside* the CHAI case
@@ -24,7 +25,16 @@ import styles from './ProjectRoute.module.css';
  */
 export default function ProjectRoute() {
   const { slug } = useParams<{ slug: string }>();
+  const location = useLocation();
   const project = projects.find((p) => p.slug === slug);
+  const fromCanvas = (
+    location.state as { fromCanvas?: unknown } | null
+  )?.fromCanvas;
+  const backToWorks =
+    typeof fromCanvas === 'string' &&
+    /^\/works(?:\?page=[1-9]\d*)?$/.test(fromCanvas)
+      ? fromCanvas
+      : '/works';
 
   // Enable scroll only while this route is mounted.
   useEffect(() => {
@@ -61,7 +71,7 @@ export default function ProjectRoute() {
       <Grain />
 
       <nav className={styles.topNav} aria-label="Primary">
-        <Link to="/works" className={styles.back}>
+        <Link to={backToWorks} className={styles.back}>
           <span aria-hidden="true">←</span>
           <span className={styles.backLabel}>back to works</span>
         </Link>
@@ -76,6 +86,8 @@ export default function ProjectRoute() {
           <BuildWithAiProject />
         ) : slug === 'sap-fieldglass' ? (
           <SapFieldglassProject />
+        ) : slug === 'ebb' ? (
+          <EbbProject />
         ) : project ? (
           <ProjectStub project={project} />
         ) : (

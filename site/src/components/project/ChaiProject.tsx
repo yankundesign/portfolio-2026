@@ -10,7 +10,7 @@ import TodoSlot from './TodoSlot';
 import RevealOnScroll from './RevealOnScroll';
 import {
   header,
-  openingProse,
+  // openingProse,
   contextProse,
   roadmapProse,
   evolutionProse,
@@ -69,7 +69,7 @@ export default function ChaiProject() {
         <SectionRail sections={sections} className={styles.rail} />
         <div className={styles.body}>
 
-          {/* ---- Beat 1 · Opening ---------------------------------- */}
+          {/* ---- Beat 1 · Opening (temporarily hidden) -------------
           <section id="beat-1" aria-label="Opening" className={styles.beat}>
             <SectionHeader label="Opening" />
             {openingProse ? (
@@ -84,6 +84,7 @@ export default function ChaiProject() {
             )}
             <EditorialPlate figure={figures.chai10} />
           </section>
+          */}
 
           {/* ---- Beat 2 · Context ---------------------------------- */}
           <section id="beat-2" aria-label="Context" className={styles.beat}>

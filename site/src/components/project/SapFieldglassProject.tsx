@@ -52,6 +52,7 @@ export default function SapFieldglassProject() {
             <ProseBlock paragraphs={prose.homepage} />
             <EditorialPlate figure={figures.personaMapping} />
             <EditorialPlate figure={figures.widgetSystem} />
+            <EditorialPlate figure={figures.homepageOutcome} />
           </section>
 
           <section id="worker" aria-label="Worker Management" className={styles.proof}>

@@ -75,9 +75,15 @@ export default function DeskRoute() {
       const scene = sceneRef.current;
       if (!scene) return;
 
-      const slots = gsap.utils.toArray<HTMLElement>(
-        '[data-desk-slot]',
-        scene,
+      // Keep the established desktop reveal sequence independent from the DOM
+      // order, which follows the mobile reading and keyboard-navigation order.
+      const slots = ['roulette', 'notebook', 'cv', 'about', 'pen'].flatMap(
+        (slotName) => {
+          const slot = scene.querySelector<HTMLElement>(
+            `[data-desk-slot="${slotName}"]`,
+          );
+          return slot ? [slot] : [];
+        },
       );
       const supports = gsap.utils.toArray<HTMLElement>(
         '[data-desk-support]',
@@ -145,7 +151,7 @@ export default function DeskRoute() {
         siteBuildLine={
           proofReveal.makeReadyLine
             ? undefined
-            : 'THIS SITE · DESIGNED AND SHIPPED IN 2 WEEKS WITH CLAUDE CODE.'
+            : 'Designed and built with Claude and Codex'
         }
         revealPhase={proofReveal.phase}
       >
@@ -163,13 +169,6 @@ export default function DeskRoute() {
           {/* Ephemera mounted before navigation objects so both ambient layers
            * paint behind the desk interaction targets. */}
           <Ephemera />
-
-          <div
-            className={`${styles.slot} ${styles.slotRoulette}`}
-            data-desk-slot="roulette"
-          >
-            <CatRoulette />
-          </div>
 
           <div
             className={`${styles.slot} ${styles.slotNotebook}`}
@@ -199,6 +198,13 @@ export default function DeskRoute() {
             data-desk-slot="pen"
           >
             <Pen />
+          </div>
+
+          <div
+            className={`${styles.slot} ${styles.slotRoulette}`}
+            data-desk-slot="roulette"
+          >
+            <CatRoulette />
           </div>
 
           <DeskWayfinder />

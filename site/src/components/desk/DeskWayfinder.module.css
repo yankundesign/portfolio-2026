@@ -69,8 +69,8 @@
   }
 }
 
-/* Below 768px the scene becomes a single-column flex stack — the notebook
- * is the only visible object, so the wayfinder is no longer needed. */
+/* Below 768px the scene becomes a single-column flex stack. The notebook is
+ * already the first object, so the wayfinder is no longer needed. */
 @media (max-width: 767px) {
   .wayfinder {
     display: none;

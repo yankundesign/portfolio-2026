@@ -24,11 +24,14 @@
   gap: 10px;
   width: auto;
   min-height: 44px;
-  padding: 10px 4px;
-  /* Quiet text chrome — same register as the running footer. No paper
-   * block; the top-left corner sits on plain page, not the notebook. */
-  background: none;
-  border: 0;
+  padding: 10px 12px;
+  /* A thin tracing-paper patch keeps the control legible as the fixed
+   * affordance crosses from the dotted canvas onto the notebook edge. */
+  background: color-mix(in srgb, var(--paper) 76%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ink) 14%, transparent);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+  box-shadow: 0 3px 12px color-mix(in srgb, var(--ink) 6%, transparent);
   margin: 0;
   cursor: pointer;
   outline: none;
@@ -39,7 +42,10 @@
   color: var(--ink-soft);
   text-transform: lowercase;
   z-index: 10;
-  transition: color var(--duration-hover) var(--ease-out);
+  transition:
+    color var(--duration-hover) var(--ease-out),
+    background-color var(--duration-hover) var(--ease-out),
+    border-color var(--duration-hover) var(--ease-out);
   /* Entrance: fades in after the plates have been placed. Chrome arrives
    * last, like marginalia on a letterpress specimen card. */
   animation: closeButtonSettle 360ms cubic-bezier(0.4, 0, 0.2, 1) both;
@@ -64,11 +70,21 @@
 
 .button:hover {
   color: var(--ink);
+  background: color-mix(in srgb, var(--paper) 88%, transparent);
+  border-color: color-mix(in srgb, var(--ink) 22%, transparent);
 }
 
 .button:focus-visible {
   outline: 1.5px solid var(--ink);
   outline-offset: 2px;
+}
+
+@supports not (
+  (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))
+) {
+  .button {
+    background: color-mix(in srgb, var(--paper) 92%, transparent);
+  }
 }
 
 .label {

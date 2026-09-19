@@ -1,7 +1,7 @@
 # Project 2 Outline - Control Hub Agentic
 
 Audience: Google AI Foundations onsite interviewers
-Target length: 7-8 minutes, planned at 7:45
+Target length: 9:30-10:00 minutes, planned at 10:00
 Project: Control Hub Agentic Experience  
 Role: Product Designer / design lead
 
@@ -15,7 +15,15 @@ Do not make this a generic "future of AI" talk. Keep it grounded in admin work, 
 
 The main point:
 
-> This was a 0-to-1 project about moving from an AI assistant that explains work to an AI agent that can help do work, without breaking user trust.
+> This was a 0-to-1 project about making agentic work approachable enough to try, precise enough to trust, and controllable enough to use in a real enterprise system.
+
+The interaction-design theme:
+
+> Low threshold to start. Deep evidence when needed. Clear control before, during, and after action.
+
+The problem statement:
+
+> A user can start an agentic task with one sentence, but enterprise work cannot safely end in one sentence. The product has to reveal the hidden data, dependencies, decisions, states, and consequences behind the request.
 
 For Google AI Foundations, the point I want them to hear is:
 
@@ -44,20 +52,40 @@ Better role-specific bridge:
 
 ## What This Project Should Prove
 
-- I can define a 0-to-1 AI product model under ambiguity and technical constraints.
-- I can design agentic workflows where the AI does work, but the human keeps judgment and control.
-- I understand trust patterns for AI: permissions, plans, approvals, audit logs, traceability, rollback, and failure states.
-- I can turn messy enterprise and infrastructure workflows into clear states: intent, data context, analysis/evidence, missing inputs, plan, approval, execution, blocked, completed, and audited.
-- I can prototype in code when static screens are too shallow to test timing, state, handoff, and trust.
-- I can align PM, engineering, design, and research partners around a buildable conceptual model.
-- I can connect AI product design to complex data and developer/admin tools, not just simple chat or consumer assistants.
-- I can define what the AI does and what the user must be able to inspect or control at every stage.
+### 1. Deep interaction-design craft
+
+- I move from a system model into specific screens, states, transitions, hierarchy, and feedback.
+- I design the whole behavior: discovery, setup, missing inputs, analysis, plan review, approval, progress, intervention, failure, completion, and history.
+- I use progressive disclosure so the interface feels approachable without hiding technical detail.
+- I care about timing and feel: when the product asks a question, when it changes modes, how progress communicates momentum, and how the user recovers.
+
+### 2. Enterprise depth with strong taste
+
+- I keep dense operational information calm, legible, and purposeful rather than accepting enterprise clutter.
+- I preserve familiar Control Hub navigation while introducing an AI-first interaction model.
+- I distinguish Overview, Agents, Details, Plans, and Activity by user purpose instead of combining everything into one dashboard.
+- I make powerful workflows approachable without removing evidence, permissions, or expert control.
+
+### 3. Systems thinking with product judgment
+
+- I model intent, data context, evidence, dependencies, permissions, execution states, audit, and recovery before designing screens.
+- I identify the real problem as hidden work and hidden consequences, not a need for a more impressive chat surface.
+- I make explicit product tradeoffs: easy entry versus deep evidence, speed versus review, autonomy versus approval, and flexibility versus reusable structure.
+- I align customer needs, technical constraints, and a product model that can scale across multiple agents and workflows.
+
+### 4. AI-native builder
+
+- I treat conversation, structured UI, system tools, and generated artifacts as one interaction material.
+- I use working code to test state, timing, feedback, handoff, approval, and recovery rather than stopping at static mockups.
+- I design AI around evidence, uncertainty, permissions, user correction, and reversible action.
+- I use AI itself to lower the cost of creating an agent: interview the user, draft a structured definition, test behavior, then publish.
 
 ## Google AI Foundations Angle
 
 - Present this as a conceptual model for AI-driven operational tools, not an abstract "agentic AI" vision.
 - The strongest role fit is the system model: intent -> data context -> analysis/evidence -> plan -> permission -> execution -> activity -> audit/rollback.
 - For Google Core / AI Foundations, emphasize data sources, access, system state, dependencies, limits, permissions, audit, and what the user needs to inspect before trusting an AI action.
+- Use conversational agent creation to show AI-native interaction judgment: conversation discovers intent, structured configuration creates precision, and testing establishes a publish boundary.
 - Keep the prototype as a cross-functional artifact: it made timing, handoff, approval, execution, and audit testable with product and engineering.
 - Be precise about outcome: this is direction-setting and alignment, not a shipped metrics story.
 - The Google readout should be: I can make ambiguous AI infrastructure work legible enough for users and teams to evaluate.
@@ -71,24 +99,23 @@ The onsite interviewers are deciding whether this was a credible act of product 
 - Problem solving: if an agent can act, the question changes from "how should it answer?" to "what must the user see before trusting action?"
 - Systems thinking: make dependencies across settings, users, permissions, execution state, audit, and rollback visible.
 - Product decisions: explain what alternatives I rejected and why the agent stayed familiar, evidence became progressive, and every action required a visible plan.
+- Interaction craft: make hierarchy, mode changes, validation, progress, feedback, intervention, error, and recovery visible in the screens rather than only describing the framework.
+- Taste: explain how progressive disclosure and focused surfaces make dense enterprise behavior feel calm without hiding expert detail.
+- AI-native building: show why conversation, structured UI, sandbox evaluation, and code prototyping each solve a different part of the product problem.
 - Influence: frame the prototype as how I helped product, design, and engineering evaluate a direction before the implementation path was obvious.
 - Outcome: be honest that this is not a shipped metrics story. The impact was alignment, decision clarity, and making trust problems visible sooner.
 - Growth: name the next validation: plan comprehension, approval confidence, error recovery, audit usefulness, and trust under higher-consequence actions.
 
 ## The Shape Of The Story
 
-This should not feel like a framework tour. The middle of the story should be about product definition under constraint.
+This should feel like one product story expressed at increasing levels of interaction detail.
 
-1. CHAI is the setup: context made the assistant useful.
-2. Agentic work raises the stakes because AI can move from answering to acting.
-3. The real user problem is hidden work: dependencies, exceptions, missing inputs, validation errors, permissions, approvals, and audit.
-4. I defined the agentic workflow architecture: intent -> data context -> analysis/evidence -> plan -> permission -> execution -> activity -> audit/rollback.
-5. I made four product decisions:
-   - AI-first, but familiar.
-   - Low threshold to try, deep evidence when needed.
-   - Always analyze dependencies and plan before action.
-   - Activity as the audit and trace surface.
-6. The prototype made the trust model testable with product, design, and engineering.
+1. **Frame the product problem:** AI can begin with a simple request, but enterprise action contains hidden work and consequences.
+2. **Define the system:** intent -> data context -> analysis/evidence -> plan -> permission -> execution -> activity -> audit/rollback.
+3. **Establish the product hierarchy:** Home makes agentic work approachable, Agents makes capabilities legible, and Details provides evidence and control.
+4. **Show one workflow deeply:** Device Onboarding moves through missing inputs, evidence, plan, approval, execution feedback, intervention, and Activity.
+5. **Show how the system grows:** conversational authoring helps users define an agent, converts the interview into a structured draft, and requires testing before publish.
+6. **Show how I worked:** the coded prototype made states, timing, feedback, and cross-functional product decisions tangible.
 
 Plain line to remember:
 
@@ -98,22 +125,20 @@ Sharper version for this role:
 
 > The design job was not to make the agent look powerful. It was to define the contract that lets a user safely say yes.
 
-## What I Would Cut Or Merge From The Current Deck
+## Slide Design Rule
 
-- Merge the project title, Context -> Control bridge, Hidden Work, and the Trust Constraint into one opening problem slide. Project 1 already established the product and assistant.
-- Keep the workflow architecture as its own slide. This is the strongest conceptual-model evidence for the Google role.
-- Merge AI-first/familiar with Low Threshold/Deep Evidence into one framework slide. Do not tour Overview, Agents, and Details separately.
-- Keep Always Analyze And Plan First as its own decision because it is the clearest expression of the user-agent contract.
-- Merge Activity As Audit into the Device Onboarding proof flow: intent -> plan -> approval -> execution -> activity record.
-- Use permissioned/destructive work only as a 15-second stress test or Q&A backup.
-- Keep the coded prototype and partnership story in the main presentation. It demonstrates execution and cross-functional influence under ambiguity.
-- Merge outcome, self-reflection, and takeaway. Be clear that the impact was alignment and decision clarity, not shipped metrics.
-- Move extra agent surfaces, the second use case, detailed Activity states, and hypothetical variants to Q&A backup.
-- Final main story: 7 slides, about 7 minutes 45 seconds.
+More slides do not mean more content. Use each slide for one visual, one interaction decision, and one sentence the interviewer should remember.
+
+- Do not place Home, Agents, and Details on one slide. Each surface proves a different hierarchy decision.
+- Do not place the whole Device Onboarding flow on one slide. Separate setup, plan/approval, execution feedback, and Activity.
+- Do not place conversation, generated agent definition, testing, and publishing on one slide. Each is a distinct state transition.
+- Prefer a large annotated screen, short interaction clip, or one state comparison over a grid of small screenshots.
+- Use progressive animation only to explain state change within the same visual, not to hide multiple slides inside one slide.
+- Final main story: 16 visually focused slides in 10 minutes.
 
 ## Status Labels To Use In The Deck
 
-- `Directional / prototype`: the agentic product model, React prototype, Device Onboarding proof flow, Activity model, and higher-consequence stress test unless a more advanced status is confirmed.
+- `Directional / prototype`: the agentic product model, React prototype, Device Onboarding proof flow, Activity model, conversational agent creation, testing flow, and higher-consequence stress test unless a more advanced status is confirmed.
 - `Outcome`: direction-setting, decision clarity, and cross-functional alignment. Replace this with the exact decision or uncertainty the prototype resolved.
 - `Next validation`: plan comprehension, approval confidence, dependency and evidence comprehension, error recovery, audit usefulness, accessibility, and trust when rollback is unavailable.
 
@@ -123,22 +148,43 @@ Do not present this as shipped impact or connect it to the Project 1 adoption me
 
 | Time | Slide | What I need to say | Visual |
 |---:|---|---|---|
-| 0:00-1:10 | 1. From Context To Control | This was the strategic next question after CHAI: how could AI help do work without taking control away? State my role in the 0-to-1 direction, then show the hidden dependencies, exceptions, permissions, approvals, and audit requirements that made this more than a chat redesign. | Context -> Control + role + hidden-work before state + trust constraints |
-| 1:10-2:15 | 2. Define The System Before The Screens | I aligned with product and engineering on the assumptions and constraints, then defined the conceptual model: intent -> data context -> analysis/evidence -> plan -> permission -> execution -> activity -> audit/rollback. For each stage, distinguish what the AI does from what the user sees or controls. | Assumptions/constraints -> data-to-action architecture + compact AI/user contract |
-| 2:15-3:05 | 3. Familiar Surface, Evidence When Needed | The agent stays inside Control Hub, with a low threshold to begin and deeper evidence as stakes rise: sources and access, dependencies found, steps proposed, systems touched, status, and recovery. | AI Home + compressed Overview -> Agents -> Details framework |
-| 3:05-4:15 | 4. Always Analyze And Plan First | Before anything changes, the agent gathers relevant state, identifies dependencies and limits, then turns intent into a visible plan. Name the rejected direction: direct natural-language request -> execution. The plan-first model adds a review step, but makes scope, evidence, permissions, expected changes, and failure handling inspectable before action. | Rejected direct execution -> evidence/dependencies -> reviewable plan |
-| 4:15-5:50 | 5. Reviewable Execution | Use Device Onboarding as the one complete proof: intent -> missing inputs -> data and requirement checks -> evidence/dependencies -> editable plan -> test batch -> approval -> execution -> Activity record. Avoid touring surfaces. If time allows, add a 15-second stress test showing that destructive work requires mandatory dependency review and stronger permission. | One end-to-end Device Onboarding flow + optional permissioned-work inset |
-| 5:50-7:05 | 6. The Prototype Made Trust Testable | A working React prototype exposed timing, state, handoff, evidence review, approval, execution, intervention, audit, and rollback in ways static screens could not. State the exact uncertainty, disagreement, or implementation decision it resolved with product and engineering. | Prototype interaction + code artifact + concrete decision/alignment outcome |
-| 7:05-7:45 | 7. Outcome, Reflection, And Takeaway | Label the work as directional/prototype. The outcome was decision clarity and alignment, not shipped metrics. Name the next validation: evidence and plan comprehension, approval confidence, error recovery, audit usefulness, and trust when rollback is unavailable. Return to the shared positioning: I help technical users move from complex data to clear insight and controlled action. Close: accountability is the interface. | Directional label + decision resolved + next validation + shared positioning |
+| 0:00-0:35 | 1. From Context To Control | Project 1 made AI useful through context. This project asks how AI can act without taking judgment and control away. State my 0-to-1 design-lead role. | One Context -> Control bridge visual |
+| 0:35-1:10 | 2. A Simple Request Hides Complex Work | Device onboarding sounds simple, but it contains missing inputs, requirements, dependencies, validation, permissions, retries, and audit. The problem is hidden work, not insufficient AI spectacle. | One before-state dependency map |
+| 1:10-1:50 | 3. Define The System Before The Screens | Show the model: intent -> data context -> analysis/evidence -> plan -> permission -> execution -> activity -> audit/rollback. Explain that each stage creates a user-visible contract. | One system architecture diagram |
+| 1:50-2:25 | 4. AI Home: A Familiar Starting Point | Keep the Control Hub shell and hierarchy so the AI feels additive. The Home surface explains value, current work, and a clear starting action without overwhelming the user. | One AI Home screen with 2-3 annotations |
+| 2:25-3:00 | 5. Agents: Make Capabilities Legible | The Agents view answers what agents exist, what each can access or do, who owns it, and whether it is ready, running, or needs attention. This is capability discovery, not a list of chat threads. | One Agents view |
+| 3:00-3:35 | 6. Details: Evidence When Trust Requires It | The detail view reveals sources, permissions, recent runs, behavior, limitations, and recovery. Progressive disclosure keeps entry easy while preserving expert depth. | One Agent Details view |
+| 3:35-4:15 | 7. Always Analyze And Plan First | Reject request -> immediate execution. The agent must inspect relevant state and dependencies, then present an editable plan with evidence, assumptions, impact, permissions, and failure handling. | One annotated plan anatomy |
+| 4:15-4:55 | 8. Intent Becomes Structured Input | In Device Onboarding, conversation captures the goal while focused components collect missing device, workspace, and policy details. Show mode changes and validation feedback. | One chat-to-structured-input transition |
+| 4:55-5:35 | 9. Approval Means Approving A Change | The user reviews scope, expected changes, exceptions, test batch, and approval boundary. The interface makes what will and will not change unmistakable. | One impact preview and approval state |
+| 5:35-6:15 | 10. Execution Needs Feedback And Intervention | Show step-level progress, current action, completed work, partial failure, retry, pause/stop, and what remains safe to change. Feedback should feel calm and operational, not theatrical. | One execution state with status hierarchy |
+| 6:15-6:55 | 11. Activity Makes Work Traceable | Agent work leaves chat and becomes durable operational history: needs attention, running, completed, approver, touched resources, result, and recovery. | One Activity view |
+| 6:55-7:35 | 12. Create An Agent Through Conversation | A blank configuration form assumes users already know how to define an agent. Instead, the assistant interviews them about goal, trigger, data, tools, boundaries, approval, and success criteria. | One conversational authoring screen |
+| 7:35-8:10 | 13. Turn The Interview Into A Structured Draft | The assistant converts the conversation into an editable agent definition: purpose, instructions, triggers, tools, data access, guardrails, approvals, outputs, and owner. Conversation creates intent; structure creates precision. | One generated agent-definition screen |
+| 8:10-8:50 | 14. Test Before Publish | The user runs representative cases in a sandbox, sees what the agent understood and attempted, inspects evidence and tool use, corrects the definition, and only then publishes. | One test result with revise/publish decision |
+| 8:50-9:30 | 15. The Prototype Made Behavior Tangible | The React prototype made transitions, timing, feedback, approval, intervention, and authoring testable. Name the exact product or engineering uncertainty it resolved. | One short prototype clip or interaction sequence |
+| 9:30-10:00 | 16. Accountability Is The Interface | Label the work directional. Summarize the design contract: approachable entry, deep evidence, visible plan, explicit approval, observable execution, durable trace, and recovery. | One closing principle with directional label |
+
+## How The Slides Prove The Four Signals
+
+Do not announce these four labels during the presentation. Let the interaction evidence accumulate.
+
+| Signal | Primary slides | Evidence the interviewer should see |
+|---|---|---|
+| Deep interaction-design craft | 4-14 | Information hierarchy, progressive disclosure, mode changes, validation, plan anatomy, approval boundary, progress, intervention, failure, history, authoring, and test feedback |
+| Enterprise depth with strong taste | 2, 4-6, 9-11, 13 | Dense operational complexity organized into calm, focused surfaces without removing access, evidence, exceptions, or expert controls |
+| Systems thinking with product judgment | 2-3, 7, 9, 11, 14 | Hidden dependencies, system architecture, rejected direct execution, impact preview, durable trace, evaluation, and publish criteria |
+| AI-native builder | 8, 12-15 | Conversation plus structured UI, AI-drafted configuration, sandbox evaluation, working-code prototype, and behavior made testable |
 
 ## Live Cut Order
 
 If the conversation is running long:
 
-1. Remove the 15-second permissioned-work stress test from the proof-flow slide.
-2. Compress `Familiar Surface, Evidence When Needed` to one design decision and one screenshot.
-3. Shorten the Activity portion of `Reviewable Execution`, but keep the audit principle.
-4. Do not cut the workflow architecture, Always Analyze And Plan First, prototype/partnership story, or honest outcome and reflection.
+1. Compress AI Home and Agents to 20 seconds each, but keep them as separate visuals.
+2. Compress the Device Onboarding setup slide; keep plan/approval, execution feedback, and Activity.
+3. Present Agent Draft and Test Before Publish as a rapid two-slide sequence without explaining every field.
+4. Cut the higher-consequence destructive-action example from the main story and keep it in backup.
+5. Do not cut the system architecture, plan-first decision, one detailed execution state, conversational authoring, prototype, or honest outcome.
 
 ## Onsite Follow-Ups To Prepare
 
@@ -150,10 +196,13 @@ If the conversation is running long:
 - What specific uncertainty or disagreement did the coded prototype resolve?
 - How would I validate trust before implementation, and what metrics would indicate success?
 - How would the model change if rollback were unavailable, the agent were read-only, or data access were more restricted?
+- Why use conversation to create an agent instead of a configuration form or template library?
+- Which agent fields must remain structured even if AI drafts them?
+- What must a test environment prove before an agent can be published?
 
 ## Expanded Talk Track And Q&A Bank
 
-The sections below preserve the fuller story. Do not present every section in the 7-8 minute version. Use them for interviewer follow-ups about alternative concepts, trust tradeoffs, prototype decisions, permissions, rollback, and validation.
+The sections below preserve the fuller story. Use the 16-slide plan as the 10-minute presentation spine and use this bank for follow-ups about interaction states, alternative concepts, trust tradeoffs, authoring, permissions, rollback, and validation.
 
 ### 1. Control Hub Agentic
 
@@ -437,7 +486,109 @@ Plain line:
 
 > The more consequential the action, the more visible the contract needs to be.
 
-### 12. Prototype Craft Made Trust Testable
+### 12. Create An Agent Through Conversation
+
+Say:
+
+> Operating an agent was only one side of the system. The other question was how a team creates one. A blank setup form assumes the user already understands triggers, tools, permissions, guardrails, and evaluation. But many users know the work they need done better than they know how to specify an agent.
+
+Then:
+
+> I used conversation as an interview. The assistant asks focused questions, adapts based on previous answers, and makes its progress visible. It helps the user move from a fuzzy job to a complete agent definition without pretending the conversation alone is precise enough.
+
+The interview gathers:
+
+- Goal: what job should the agent accomplish, and for whom?
+- Trigger: manual request, event, schedule, or threshold.
+- Context: which products, datasets, and system state matter?
+- Tools: what can the agent read, generate, or change?
+- Boundaries: what must it never do or infer?
+- Approval: which steps require a human decision?
+- Output: report, recommendation, notification, or system action.
+- Success and failure: what does a good result look like, and when should it stop or escalate?
+
+Interaction states to show:
+
+- Open question with examples, not an empty prompt alone.
+- Focused follow-up based on the previous answer.
+- Collected-information summary that updates during the interview.
+- Missing or conflicting requirement.
+- Ready-to-draft transition.
+- Back, skip, edit, and resume behavior.
+
+Craft point:
+
+> Conversation lowers the threshold, but visible progress and editable answers keep it from feeling vague or endless.
+
+### 13. Turn The Interview Into A Structured Draft
+
+Say:
+
+> The conversation does not become the agent directly. The assistant translates it into a structured draft that the user can inspect and edit.
+
+The draft includes:
+
+- Name, purpose, owner, and intended users.
+- Instructions and expected outputs.
+- Triggers and run conditions.
+- Data sources, tools, and permissions.
+- Guardrails and prohibited actions.
+- Approval checkpoints and escalation rules.
+- Failure behavior, retry policy, and recovery.
+- Test scenarios and success criteria.
+
+Interaction decisions:
+
+- Show where each field came from in the interview.
+- Mark inferred fields, assumptions, and missing requirements.
+- Let the user edit structured fields without restarting the conversation.
+- Let the user ask the assistant to revise one section without regenerating everything.
+- Keep status as `Draft`; generation never silently publishes an agent.
+
+Plain line:
+
+> Conversation captures intent. Structure creates precision.
+
+Enterprise-taste point:
+
+> The screen should feel like a calm product specification, not a wall of configuration. Group fields around purpose, access, behavior, control, and evaluation, with advanced details available when needed.
+
+### 14. Test Before Publish
+
+Say:
+
+> Before an agent can be published, the user should be able to test representative cases in a sandbox. The test is not only whether the final answer looks good. It should reveal what the agent understood, what data and tools it used, what it attempted, where it asked for approval, and how it handled a boundary or failure.
+
+Test flow:
+
+1. Choose or create a representative scenario.
+2. Review the input data, permissions, and expected outcome.
+3. Run the agent in a sandbox with no production changes.
+4. Watch step-level progress and tool use.
+5. Compare expected and actual behavior.
+6. Inspect warnings, unsupported assumptions, and blocked actions.
+7. Revise the agent definition or rerun the test.
+8. Publish a version only when required checks pass.
+
+States to show:
+
+- Test ready.
+- Running with current step and elapsed time.
+- Passed with evidence.
+- Passed with warnings.
+- Failed or blocked by a permission or guardrail.
+- Definition changed; test is now stale and must be rerun.
+- Ready to publish with owner, version, and access summary.
+
+Product judgment:
+
+> I would not promise that one test proves an agent is safe. The first version should require representative scenarios and make untested areas visible. Higher-consequence agents need stronger evaluation and approval before production access.
+
+Plain line:
+
+> Publishing is a product boundary, not the last button in a setup form.
+
+### 15. Prototype Craft Made Trust Testable
 
 Say:
 
@@ -445,11 +596,11 @@ Say:
 
 Then:
 
-> The prototype encoded the rules behind the experience: chat-to-workflow handoff, source and dependency review, agent overview, agent details, editable plans, approval states, execution and intervention, Activity, audit details, and rollback affordances.
+> The prototype encoded the rules behind the experience: chat-to-workflow handoff, source and dependency review, agent overview, agent details, editable plans, approval states, execution and intervention, Activity, conversational authoring, structured agent drafts, sandbox tests, audit details, and rollback affordances.
 
 Craft point:
 
-> Static screens could show the layout, but they could not test the trust moments. The prototype let us see where users needed more evidence, where the approval felt too early, how execution status and intervention should work, where the activity record needed more detail, and where rollback needed to be more visible.
+> Static screens could show the layout, but they could not test the trust moments. The prototype let us see where users needed more evidence, where the approval felt too early, how execution status and intervention should work, whether the authoring interview felt focused or endless, when a draft was testable, where the activity record needed more detail, and where rollback needed to be more visible.
 
 Outcome:
 
@@ -463,7 +614,7 @@ For this role:
 
 > This is also how I like to work on ambiguous AI products: use code when static mocks are too slow or too shallow, and turn the prototype into a shared product artifact.
 
-### 13. Takeaway
+### 16. Takeaway
 
 Say:
 
@@ -490,16 +641,25 @@ Final positioning line:
 ## Simple Slide Titles
 
 1. From context to control
-2. Define the system before the screens
-3. Familiar surface, evidence when needed
-4. Always analyze and plan first
-5. Reviewable execution
-6. The prototype made trust testable
-7. Outcome, reflection, and takeaway
+2. A simple request hides complex work
+3. Define the system before the screens
+4. AI Home: a familiar starting point
+5. Agents: make capabilities legible
+6. Details: evidence when trust requires it
+7. Always analyze and plan first
+8. Intent becomes structured input
+9. Approval means approving a change
+10. Execution needs feedback and intervention
+11. Activity makes work traceable
+12. Create an agent through conversation
+13. Turn the interview into a structured draft
+14. Test before publish
+15. The prototype made behavior tangible
+16. Accountability is the interface
 
 ## Visual Source Bank
 
-The final deck should use only the visuals named in the 7-slide plan. The rest are backup material for questions.
+The final deck should use one primary visual for each slide in the 16-slide plan. The rest are backup material for questions.
 
 - Agentic hero / AI Home screenshot.
 - CHAI -> Agentic bridge: Context -> Control.
@@ -507,12 +667,17 @@ The final deck should use only the visuals named in the 7-slide plan. The rest a
 - Agentic workflow architecture: Intent -> Data Context -> Analysis/Evidence -> Plan -> Permission -> Execution -> Activity -> Audit/Rollback.
 - Compact AI/user contract showing system responsibility and user control at each stage.
 - Constraint slide: Data Access, Evidence, Permission, Approval, Audit, Traceability, Rollback.
-- AI Home / Assistant tab showing the agentic surface inside Control Hub.
-- Overview -> Agents -> Details framework.
-- Analyze-and-plan-first screen or diagram: Intent -> Evidence/Dependencies -> Plan -> Approval -> Execution -> Activity.
+- AI Home / Assistant tab showing the familiar starting surface.
+- Agents view showing capabilities, ownership, access, and status.
+- Agent Details view showing evidence, permissions, runs, limits, and recovery.
+- Analyze-and-plan-first screen showing evidence, dependencies, impact, and approval boundary.
+- Device onboarding chat-to-structured-input transition.
+- Device onboarding impact preview and approval state.
+- Device onboarding execution state with progress, partial failure, retry, pause/stop, and recovery.
 - Activity view showing Needs Attention, Running Now, History, and details drawer.
-- Device onboarding plan canvas.
-- Device onboarding test batch / execution widget.
+- Conversational agent-creation interview with visible progress.
+- Generated structured agent draft with assumptions and missing fields.
+- Agent sandbox test with actual-versus-expected behavior and revise/publish decision.
 - Delete Virtual Line or voice gateway dependency review.
 - Activity entry showing approver, touched resources, trace, and rollback.
 - Prototype craft / Cursor / code artifact.
@@ -526,11 +691,15 @@ The final deck should use only the visuals named in the 7-slide plan. The rest a
 - Show the user contract at each stage: what the AI does and what the user sees or controls.
 - Include the hidden-work before state on the opening Context -> Control slide: dependencies, missing inputs, validation, approvals, and audit.
 - Add a light process thread across the deck: ambiguous AI direction -> user risk -> system model -> prototype -> alignment.
-- Compress Overview, Agents, and Details into `Familiar Surface, Evidence When Needed`; show the principle instead of touring each page.
+- Give AI Home, Agents, and Details separate visual beats because each proves a different information-hierarchy decision.
 - Rename the plan slide around the stronger thesis: `Always Analyze And Plan First`.
 - Name the rejected alternative directly: natural-language request -> immediate execution.
-- End the Device Onboarding flow in Activity so the audit principle is visible without requiring a separate Activity slide.
-- Name the trust pattern on each main proof: Device Onboarding is a multi-step plan with missing inputs and a test batch; Activity provides traceable execution; the prototype tests trust through real state and timing. Keep permissioned work as a brief stress test or backup.
+- Split Device Onboarding into setup, approval, execution feedback, and Activity so states and transitions remain readable at presentation size.
+- Use one visual per slide and annotate only the hierarchy, feedback, or behavior being discussed.
+- Show conversational agent creation as an adaptive interview, not a generic chatbot exchange.
+- Show the generated agent as an editable structured draft, not a block of AI prose.
+- Make sandbox testing and publish approval a hard boundary in the creation flow.
+- Name the trust pattern on each main proof: Device Onboarding is a multi-step plan with missing inputs and a test batch; Activity provides traceable execution; authoring moves from conversation to structure to test; the prototype tests trust through real state and timing. Keep permissioned work as a brief stress test or backup.
 - Keep the prototype/code beat in the main story, because it is directly relevant to Google's expectation that designers communicate flows, wireframes, prototypes, and conceptual models across technical teams.
 - Prepare for Google follow-ups by being ready to answer: what changes if rollback is unavailable, if the agent is read-only, if the user is less technical, or if the workflow has to work on mobile?
 
@@ -550,6 +719,10 @@ The final deck should use only the visuals named in the 7-slide plan. The rest a
 - Add one backup Q&A note on how I would validate trust before implementation: comprehension, approval confidence, error recovery, and audit usefulness.
 - Confirm the exact data sources, system-state checks, assumptions, and dependency evidence that can be shown in Device Onboarding.
 - Replace the generic prototype-alignment outcome with the exact uncertainty, disagreement, or implementation decision it resolved.
+- Confirm whether conversational agent creation, structured draft, sandbox testing, and publishing are implemented in the prototype or directional extensions; label each precisely.
+- Define the minimum fields required before an agent draft is testable.
+- Define which test results block publishing versus produce a warning.
+- Confirm how agent versions, ownership, permissions, and rollback are represented after publish.
 
 ## What Not To Do
 
@@ -557,6 +730,8 @@ The final deck should use only the visuals named in the 7-slide plan. The rest a
 - Do not lead with an autonomy ladder.
 - Do not present AI as replacing admins.
 - Do not turn the middle into a feature tour.
+- Do not place multiple unreadable product surfaces on one slide to reduce the slide count.
+- Do not present agent creation as prompt-writing; show the structured definition, evaluation, and publish boundary.
 - Do not overclaim shipped impact or metrics.
 - Do not hide the 0-to-1 product definition work.
 - Do not skip the hidden-work problem: dependencies, exceptions, missing inputs, validation, approvals, and audit.

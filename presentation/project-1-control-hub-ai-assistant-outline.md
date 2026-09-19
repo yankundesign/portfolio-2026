@@ -5,7 +5,7 @@ Target length: 15 minutes
 Project: Control Hub AI Assistant (CHAI)  
 Role: Product Designer, sole design lead
 
-Combined portfolio timing: Project 1 is the primary case study at 15 minutes. Project 2 is the focused follow-up at about 7 minutes 45 seconds. Together they provide 22 minutes 45 seconds of prepared content, leaving 2 minutes 15 seconds for transitions or brief interruptions before the 15-minute Q&A.
+Combined portfolio timing: Project 1 is the primary case study at 15 minutes. Project 2 is the interaction-design follow-up at 10 minutes. Together they provide 25 minutes of prepared content before the 15-minute Q&A. If interviewers interrupt during the presentation, use the live cut orders rather than running beyond 25 minutes.
 
 ## Current 40-Minute Portfolio Run Of Show
 
@@ -14,12 +14,11 @@ Keep this as the rehearsal format until the onsite portfolio timing and interrup
 | Segment | Target |
 |---|---:|
 | Project 1 | 15:00 |
-| Project 2, including the bridge and final takeaway | 7:45 |
-| Live flex for pauses, transitions, and short interviewer interruptions | 2:15 |
+| Project 2, including the bridge and final takeaway | 10:00 |
 | Interviewer questions | 15:00 |
 | Total | 40:00 |
 
-Do not fill the 2:15 flex with more prepared content. It protects the Q&A when the interviewer asks questions during the presentation.
+Do not let added Project 2 slides expand the presentation beyond 25 minutes. More slides are being used to make each visual readable, not to add a longer feature tour.
 
 ## How I Want This To Sound
 

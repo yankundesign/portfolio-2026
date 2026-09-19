@@ -13,9 +13,9 @@ export interface ProjectPlateProps {
  * The vellum container is retired (decisions-log 2026-07-31). The plate is
  * now the guideline's editorial-plate pattern verbatim: the mockup in a
  * 1px ink rule, with a museum-label caption set directly on the notebook
- * paper beneath it. All four plates are the same size and the same 16:10
- * sleeve — hierarchy comes from reading order, the fig line's status, and
- * the metric, never from card size.
+ * paper beneath it. Every plate uses the same size and 16:10 sleeve —
+ * hierarchy comes from reading order, the fig line's status, and the metric,
+ * never from card size.
  *
  * Caption at rest is three lines: fig line (status folded in) · title ·
  * headline metric. `canvasContext` moved into the aria-label and the case
@@ -26,7 +26,7 @@ export default function ProjectPlate({
   index,
   onClick,
 }: ProjectPlateProps) {
-  const number = String(index + 1).padStart(2, '0');
+  const number = String(project.figNumber).padStart(2, '0');
   const [headlineProof] = project.canvasProofs;
 
   const ariaLabel = `${project.title} — ${project.canvasContext} ${

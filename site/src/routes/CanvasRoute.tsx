@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useLocation, useNavigate, useSearchParams } from 'react-router';
 import ProjectPlate from '../components/canvas/ProjectPlate';
 import CanvasCloseButton from '../components/canvas/CanvasCloseButton';
+import CanvasPager from '../components/canvas/CanvasPager';
 import { SpotlightDotGrid } from '../components/canvas/SpotlightDotGrid';
 import Grain from '../components/shared/Grain';
 import { useTransitionState } from '../interactions/useTransitionState';
@@ -18,18 +19,39 @@ import styles from './CanvasRoute.module.css';
  * do not inherit this wait.
  */
 const CONTENT_ENTER_DELAY_AFTER_TRANSITION = 560;
+const DESKTOP_CANVAS_QUERY = '(min-width: 1101px)';
+const PROJECTS_PER_SPREAD = 4;
+
+function useDesktopCanvas(): boolean {
+  const [isDesktop, setIsDesktop] = useState(() => {
+    return (
+      typeof window !== 'undefined' &&
+      window.matchMedia(DESKTOP_CANVAS_QUERY).matches
+    );
+  });
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia(DESKTOP_CANVAS_QUERY);
+    const onChange = (event: MediaQueryListEvent) => {
+      setIsDesktop(event.matches);
+    };
+
+    mediaQuery.addEventListener('change', onChange);
+    return () => mediaQuery.removeEventListener('change', onChange);
+  }, []);
+
+  return isDesktop;
+}
 
 /**
  * CanvasRoute — canvas v1.0 (viewport-fitted spread).
  *
  * A real notebook spread is a fixed page: you turn it, you don't scroll it.
- * The four plates now sit on ONE shared grid spanning both notebook pages —
- * two equal plates per page, tops and bottoms registered across the spine,
- * the whole spread fitted to a single desktop viewport. Hierarchy comes
- * from reading order (fig. 01 top-left), status, and metric — never card
- * size. Intro occupies the top-left register; the site imprint (colophon
- * link) sits bottom-right like a printed book's imprint. Below 1100px the
- * spread degrades to the single-column scroll.
+ * Four equal plates sit on one shared desktop spread at a time, with later
+ * projects continuing onto a second viewport-fitted spread. Tops and bottoms
+ * stay registered across the spine; hierarchy comes from reading order,
+ * status, and metric — never card size. Below 1100px pagination disappears
+ * and all projects become one single-column scroll.
  *
  * The notebook backdrop carries `data-transition-source="spread"` so the
  * desk -> canvas close transition can measure it (see NotebookTransition).
@@ -37,7 +59,20 @@ const CONTENT_ENTER_DELAY_AFTER_TRANSITION = 560;
 
 export default function CanvasRoute() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { state, closeNotebook } = useTransitionState();
+  const isDesktop = useDesktopCanvas();
+  const [hasPaged, setHasPaged] = useState(false);
+
+  const pageCount = Math.max(
+    1,
+    Math.ceil(projects.length / PROJECTS_PER_SPREAD),
+  );
+  const requestedPage = Number(searchParams.get('page') ?? '1');
+  const currentPage = Number.isInteger(requestedPage)
+    ? Math.min(Math.max(requestedPage - 1, 0), pageCount - 1)
+    : 0;
 
   // Capture the transition state once on mount. The staged canvas entrance
   // only belongs to the desk -> canvas opening; direct /works visits and
@@ -53,9 +88,28 @@ export default function CanvasRoute() {
 
   const handleProjectClick = useCallback(
     (slug: string) => {
-      navigate(`/works/${slug}`);
+      navigate(`/works/${slug}`, {
+        state: { fromCanvas: `${location.pathname}${location.search}` },
+      });
     },
-    [navigate],
+    [location.pathname, location.search, navigate],
+  );
+
+  const handlePageChange = useCallback(
+    (page: number) => {
+      const nextPage = Math.min(Math.max(page, 0), pageCount - 1);
+      const nextParams = new URLSearchParams(searchParams);
+
+      if (nextPage === 0) {
+        nextParams.delete('page');
+      } else {
+        nextParams.set('page', String(nextPage + 1));
+      }
+
+      setHasPaged(true);
+      setSearchParams(nextParams);
+    },
+    [pageCount, searchParams, setSearchParams],
   );
 
   // Close routes through the transition hook — the NotebookTransition
@@ -74,12 +128,25 @@ export default function CanvasRoute() {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [handleClose]);
 
-  // Source order in data/projects.ts IS the spread composition: items
-  // auto-flow left→right, top→bottom across the shared grid (chai top-left,
-  // agentic top-right, build-with-ai bottom-left, fieldglass bottom-right).
+  // Source order in data/projects.ts IS the composition. Desktop slices that
+  // order into four-project spreads; tablet/mobile keep one complete list.
+  // `index` remains global so figure identity and entrance staggering never
+  // reset when the fifth project moves onto spread two.
   const plates = useMemo(
-    () => projects.map((project, index) => ({ project, index })),
-    [],
+    () => {
+      const startIndex = isDesktop
+        ? currentPage * PROJECTS_PER_SPREAD
+        : 0;
+      const visibleProjects = isDesktop
+        ? projects.slice(startIndex, startIndex + PROJECTS_PER_SPREAD)
+        : projects;
+
+      return visibleProjects.map((project, index) => ({
+        project,
+        index: isDesktop ? startIndex + index : index,
+      }));
+    },
+    [currentPage, isDesktop],
   );
 
   return (
@@ -113,23 +180,42 @@ export default function CanvasRoute() {
         <CanvasCloseButton onClick={handleClose} />
 
         <main className={styles.content}>
-          <div className={styles.spread}>
-            {plates.map(({ project, index }) => (
-              <ProjectPlate
-                key={project.slug}
-                project={project}
-                index={index}
-                onClick={handleProjectClick}
-              />
-            ))}
+          <div
+            className={styles.spreadStage}
+            data-current-spread={currentPage + 1}
+          >
+            <div
+              key={isDesktop ? `spread-${currentPage}` : 'spread-all'}
+              className={`${styles.spread} ${hasPaged ? styles.spreadChanged : ''}`}
+            >
+              {plates.map(({ project, index }) => (
+                <ProjectPlate
+                  key={project.slug}
+                  project={project}
+                  index={index}
+                  onClick={handleProjectClick}
+                />
+              ))}
+            </div>
+
+            {isDesktop && pageCount > 1 && (
+              <div
+                className={`${styles.spreadPager} ${currentPage > 0 ? styles.spreadPagerContinuation : ''}`}
+              >
+                <CanvasPager
+                  currentPage={currentPage}
+                  pageCount={pageCount}
+                  onPageChange={handlePageChange}
+                />
+              </div>
+            )}
           </div>
         </main>
 
-        {/* Running footer — the spread's only page furniture. Fixed to the
-         * viewport bottom, like a printed folio line. */}
+        {/* Running footer — decorative folio furniture only. The interactive
+         * pager is anchored to the project grid above for contrast. */}
         <div className={styles.runningFooter} aria-hidden="true">
-          <span>note / 001 — works</span>
-          <span>field notes · vol. v</span>
+          <span aria-hidden="true">note / 001 — works</span>
         </div>
       </div>
 

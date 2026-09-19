@@ -180,7 +180,7 @@ export const figures = {
   // Beat 1 · Opening
   chai10: {
     src: '/images/chai/chai-1-0.png',
-    caption: 'CHAI v1.0',
+    caption: 'CHAI V1.0 (Not my design)',
     alt:
       'Two side-by-side screenshots of the Cisco AI Assistant sidebar. Left panel shows an empty state with a welcome message and three suggested questions. Right panel shows a conversation where the user asks "How do I configure SSO?" and receives a seven-step numbered answer.',
     width: 'column',
@@ -339,7 +339,7 @@ export const credits = {
 // ---------------------------------------------------------------------------
 
 export const sections = [
-  { id: 'beat-1', label: 'Opening' },
+  // { id: 'beat-1', label: 'Opening' },
   { id: 'beat-2', label: 'Context' },
   { id: 'roadmap', label: 'Road Map' },
   { id: 'evolution', label: 'Evolution' },
