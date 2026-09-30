@@ -12,8 +12,7 @@ dashed-frame placeholder with the expected path — the page doesn't break.
 | `smart-search.png`      | fig. 02 · smart search with contextual tunnel           | Proof I                    |
 | `report-kickoff.png`    | fig. 03 · report kickoff with AI insights toggle        | Proof II                   |
 | `report-delivered.png`  | fig. 04 · report delivered with analysis in place       | Proof II                   |
-| `devices-clustering.png`| fig. 05 · multi-signal embedding clusters               | Proof III                  |
-| `devices-embed.png`     | fig. 06 · CHAI on the device page                       | Proof III                  |
+| `ai-insights.png`       | AI-generated insights — proactive troubleshooting with adjustable rules | Proof III |
 
 ## Formats
 

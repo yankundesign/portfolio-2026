@@ -1,0 +1,726 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f4f1ea" />
+    <title>Tipped-in silk · Works paper studies</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300&amp;family=JetBrains+Mono:wght@400&amp;display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #16265e;
+        --ink-soft: #2a3a7a;
+        --paper: #f4f1ea;
+        --silk-paper: #fffdfa;
+        --paper-soft: #ebe6d9;
+        --ink-muted: rgba(22, 38, 94, 0.2);
+        --ink-faint: rgba(22, 38, 94, 0.08);
+        --header-height: 68px;
+      }
+
+      * { box-sizing: border-box; }
+
+      html { background: var(--paper); }
+
+      body {
+        min-width: 320px;
+        margin: 0;
+        color: var(--ink);
+        background: var(--paper);
+        font-family: 'Fraunces', Georgia, serif;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      button, a { -webkit-tap-highlight-color: transparent; }
+
+      .review-bar {
+        position: relative;
+        z-index: 10;
+        height: var(--header-height);
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+        gap: 20px;
+        padding: 0 clamp(20px, 3vw, 44px);
+        border-bottom: 1px solid var(--ink-muted);
+        background: var(--paper);
+      }
+
+      .back-link,
+      .review-kicker,
+      .review-instruction {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 10px;
+        font-weight: 400;
+        line-height: 1.45;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      .back-link {
+        width: fit-content;
+        color: var(--ink);
+        text-decoration: none;
+        border-bottom: 1px solid transparent;
+        padding: 5px 0;
+        transition: border-color 160ms ease-out;
+      }
+
+      .back-link:hover,
+      .back-link:focus-visible { border-color: var(--ink); }
+
+      .back-link:focus-visible {
+        outline: 1.5px solid var(--ink);
+        outline-offset: 4px;
+      }
+
+      .review-name {
+        display: flex;
+        align-items: baseline;
+        gap: 12px;
+        white-space: nowrap;
+      }
+
+      .review-kicker { color: var(--ink-soft); }
+
+      .review-name strong {
+        font-size: clamp(19px, 2vw, 27px);
+        font-weight: 300;
+        font-style: italic;
+        line-height: 1;
+        letter-spacing: -0.02em;
+      }
+
+      .review-instruction {
+        margin: 0;
+        color: var(--ink-soft);
+        justify-self: end;
+        text-align: right;
+      }
+
+      .stage {
+        position: relative;
+        isolation: isolate;
+        min-height: calc(100svh - var(--header-height));
+        display: grid;
+        place-items: center;
+        overflow: hidden;
+        background: var(--paper);
+      }
+
+      .notebook {
+        position: absolute;
+        z-index: -1;
+        top: 50%;
+        left: 50%;
+        display: block;
+        width: calc((100svh - var(--header-height)) * 2600 / 1812);
+        height: calc(100svh - var(--header-height));
+        max-width: none;
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+        user-select: none;
+        filter: drop-shadow(0 12px 28px rgba(22, 38, 94, 0.16));
+      }
+
+      .spread {
+        position: relative;
+        z-index: 1;
+        width: min(100%, calc((100svh - var(--header-height)) * 1.18));
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        column-gap: clamp(40px, 8svh, 96px);
+        row-gap: clamp(14px, 2.1svh, 26px);
+        align-items: start;
+        padding: clamp(20px, 3svh, 40px) 0;
+      }
+
+      .print {
+        position: relative;
+        width: min(100%, calc((100svh - var(--header-height)) * 0.46));
+        margin: 0;
+        perspective: 950px;
+        perspective-origin: 50% 0;
+        --shadow-shift: 0px;
+        --shadow-opacity: 0.18;
+        --shadow-scale: 1;
+        --ambient-opacity: 0.42;
+        --ambient-shift: 0px;
+        --ambient-scale: 0.98;
+        --sheen-shift: 0px;
+      }
+
+      .print:nth-child(odd) { justify-self: end; }
+
+      .print:nth-child(even) { justify-self: start; }
+
+      .print:is(:hover, :focus-within, .is-pinned) { z-index: 2; }
+
+      /* The shadow separates from the free edge as the sheet bows. */
+      .print::before {
+        content: '';
+        position: absolute;
+        z-index: 0;
+        left: 7%;
+        right: 7%;
+        bottom: -4px;
+        height: 28px;
+        background: rgba(22, 38, 94, 0.42);
+        filter: blur(15px);
+        opacity: var(--shadow-opacity);
+        transform: translateY(var(--shadow-shift)) scaleX(var(--shadow-scale));
+        pointer-events: none;
+      }
+
+      /* A broad, quiet footprint beneath the paper gives its translucent
+         surface some weight without outlining it like a rigid card. */
+      .ambient-shadow {
+        position: absolute;
+        z-index: 0;
+        inset: 5px 4% 4px;
+        background: linear-gradient(
+          to bottom,
+          rgba(22, 38, 94, 0.06),
+          rgba(22, 38, 94, 0.21)
+        );
+        filter: blur(11px);
+        opacity: var(--ambient-opacity);
+        transform: translateY(var(--ambient-shift)) scale(var(--ambient-scale));
+        pointer-events: none;
+      }
+
+      /* A fixed contact crease gives the sheet an attachment point. */
+      .print::after {
+        content: '';
+        position: absolute;
+        z-index: 3;
+        top: 0;
+        left: clamp(8px, 1.1svh, 12px);
+        right: clamp(8px, 1.1svh, 12px);
+        height: 4px;
+        background: linear-gradient(to bottom, rgba(22, 38, 94, 0.085), transparent);
+        pointer-events: none;
+      }
+
+      .sheet {
+        position: relative;
+        z-index: 2;
+        display: block;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+        color: var(--ink);
+        text-align: left;
+        font: inherit;
+        cursor: pointer;
+        outline: none;
+        transform-style: preserve-3d;
+      }
+
+      .paper-face {
+        position: relative;
+        display: block;
+        width: 100%;
+        padding: clamp(8px, 1.1svh, 12px);
+        border: 1px solid rgba(22, 38, 94, 0.08);
+        background-color: color-mix(in srgb, var(--silk-paper) 97%, transparent);
+        background-image:
+          linear-gradient(105deg, transparent 14%, rgba(255, 253, 250, 0.36) 47%, transparent 76%),
+          url('./silk-paper-finish.svg');
+        background-size: 170% 100%, 256px 256px;
+        background-position: calc(50% + var(--sheen-shift)) 0, 0 0;
+        transition: border-color 160ms ease-out;
+      }
+
+      .paper-source { backface-visibility: hidden; }
+
+      @supports not (background: color-mix(in srgb, white 80%, transparent)) {
+        .paper-face { background-color: rgba(255, 253, 250, 0.97); }
+      }
+
+      /* A set of narrow, clipped copies of the same print forms one curved
+         surface. The flat source keeps sizing, semantics, and a no-JS view. */
+      .mesh {
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        display: block;
+        visibility: hidden;
+        transform-style: preserve-3d;
+        pointer-events: none;
+      }
+
+      .mesh-strip {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        overflow: hidden;
+        transform-origin: center top;
+        backface-visibility: hidden;
+        pointer-events: none;
+      }
+
+      .mesh-strip .paper-face {
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+
+      .print.is-bending .paper-source { visibility: hidden; }
+      .print.is-bending .mesh { visibility: visible; }
+
+      .print.is-active .paper-face {
+        border-color: rgba(22, 38, 94, 0.11);
+      }
+
+      /* Tipped-in paper: this narrow leaf is fixed to the notebook behind the
+         print. Only its upper fold is visible at rest. The print pivots at
+         that fold; the leaf never rises with it. */
+      .hinge {
+        position: absolute;
+        z-index: 1;
+        top: 0;
+        left: clamp(8px, 1.1svh, 12px);
+        right: clamp(8px, 1.1svh, 12px);
+        height: 14px;
+        background: var(--silk-paper);
+        background-image: url('./silk-paper-finish.svg');
+        background-size: 256px 256px;
+        pointer-events: none;
+      }
+
+      .sleeve {
+        position: relative;
+        display: block;
+        width: 100%;
+        aspect-ratio: 16 / 10;
+        overflow: hidden;
+        border: 1px solid var(--ink-muted);
+        background: var(--paper-soft);
+      }
+
+      .sleeve img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center top;
+        user-select: none;
+        -webkit-user-drag: none;
+      }
+
+      .caption {
+        display: flex;
+        flex-direction: column;
+        gap: clamp(3px, 0.45svh, 6px);
+        padding-top: clamp(8px, 1.1svh, 12px);
+      }
+
+      .fig {
+        color: var(--ink-soft);
+        font-family: 'JetBrains Mono', monospace;
+        font-size: clamp(8.5px, 1.05svh, 11px);
+        letter-spacing: 0.08em;
+        line-height: 1.35;
+        text-transform: uppercase;
+        white-space: nowrap;
+      }
+
+      .title {
+        font-size: clamp(17px, 1.9svh, 23px);
+        font-weight: 400;
+        letter-spacing: -0.01em;
+        line-height: 1.08;
+      }
+
+      .proof {
+        display: block;
+        margin-top: clamp(4px, 0.6svh, 7px);
+        padding-top: clamp(5px, 0.7svh, 8px);
+        border-top: 1px solid var(--ink-muted);
+        font-size: clamp(12px, 1.35svh, 16px);
+        line-height: 1.15;
+      }
+
+      .sheet:focus-visible {
+        outline: 1.5px solid var(--ink);
+        outline-offset: 4px;
+      }
+
+      @media (max-width: 1100px) {
+        .stage {
+          display: block;
+          overflow: visible;
+          padding: 52px 24px 80px;
+        }
+
+        .stage::before {
+          content: '';
+          position: fixed;
+          z-index: 0;
+          inset: var(--header-height) 0 0;
+          background: rgba(244, 241, 234, 0.46);
+          pointer-events: none;
+        }
+
+        .notebook {
+          position: fixed;
+          top: calc(var(--header-height) + (100svh - var(--header-height)) / 2);
+          opacity: 0.8;
+        }
+
+        .spread {
+          width: min(100%, 570px);
+          display: flex;
+          flex-direction: column;
+          gap: 36px;
+          margin: 0 auto;
+          padding: 0;
+        }
+
+        .print {
+          width: 100%;
+          max-width: none;
+          align-self: center;
+        }
+
+        .fig { font-size: 10px; }
+        .title { font-size: clamp(19px, 3vw, 24px); }
+        .proof { font-size: clamp(13px, 2vw, 16px); }
+      }
+
+      @media (max-width: 750px) {
+        :root { --header-height: 76px; }
+
+        .review-bar {
+          grid-template-columns: 1fr auto;
+          gap: 0 14px;
+          padding: 8px 18px;
+        }
+
+        .review-name {
+          justify-self: end;
+          gap: 7px;
+        }
+
+        .review-kicker { font-size: 9px; }
+        .review-name strong { font-size: 20px; }
+
+        .review-instruction {
+          grid-column: 1 / -1;
+          justify-self: start;
+          text-align: left;
+          font-size: 9px;
+        }
+
+        .stage { padding: 38px 24px 64px; }
+      }
+
+      @media (max-width: 420px) {
+        .review-kicker { display: none; }
+        .fig { white-space: normal; }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .back-link, .paper-face { transition: none; }
+        .print.is-bending .paper-source { visibility: visible; }
+        .print.is-bending .mesh { visibility: hidden; }
+        .print.is-active::before { opacity: 0.3; transform: translateY(7px) scaleX(1.06); }
+        .print.is-active .ambient-shadow { opacity: 0.6; transform: translateY(4px) scale(1.01); }
+        .print.is-active .paper-face { border-color: rgba(22, 38, 94, 0.16); }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="review-bar">
+      <a class="back-link" href="./works-paper-concepts.html" target="_top">← All concepts</a>
+      <div class="review-name">
+        <span class="review-kicker">01 / motion study</span>
+        <strong>Tipped-in silk</strong>
+      </div>
+      <p class="review-instruction">Hover to bow · click to hold · Esc to release</p>
+    </header>
+
+    <main class="stage" aria-label="Tipped-in silk project print prototype">
+      <img
+        class="notebook"
+        src="../site/public/canvas/open-notebook.webp"
+        alt=""
+        aria-hidden="true"
+        draggable="false"
+      />
+
+      <div class="spread">
+        <article class="print" data-print>
+          <span class="ambient-shadow" aria-hidden="true"></span>
+          <span class="hinge" aria-hidden="true"></span>
+          <button class="sheet" type="button" aria-pressed="false" aria-label="Hold Control Hub AI Assistant print in a bowed position">
+            <span class="paper-face paper-source">
+              <span class="sleeve"><img src="../site/public/canvas/mockups/chai.png" alt="" draggable="false" /></span>
+              <span class="caption">
+                <span class="fig">fig. 01 · 2024–2025 · Full case study</span>
+                <span class="title">Control Hub AI Assistant</span>
+                <span class="proof">3% → 18% adoption</span>
+              </span>
+            </span>
+            <span class="mesh" aria-hidden="true" inert></span>
+          </button>
+        </article>
+
+        <article class="print" data-print>
+          <span class="ambient-shadow" aria-hidden="true"></span>
+          <span class="hinge" aria-hidden="true"></span>
+          <button class="sheet" type="button" aria-pressed="false" aria-label="Hold Control Hub Agentic print in a bowed position">
+            <span class="paper-face paper-source">
+              <span class="sleeve"><img src="../site/public/canvas/mockups/control-hub-agentic.png" alt="" draggable="false" /></span>
+              <span class="caption">
+                <span class="fig">fig. 02 · 2026 · In progress</span>
+                <span class="title">Control Hub Agentic</span>
+                <span class="proof">Set the agentic direction</span>
+              </span>
+            </span>
+            <span class="mesh" aria-hidden="true" inert></span>
+          </button>
+        </article>
+
+        <article class="print" data-print>
+          <span class="ambient-shadow" aria-hidden="true"></span>
+          <span class="hinge" aria-hidden="true"></span>
+          <button class="sheet" type="button" aria-pressed="false" aria-label="Hold Ebb print in a bowed position">
+            <span class="paper-face paper-source">
+              <span class="sleeve"><img src="../site/public/canvas/mockups/ebb.png" alt="" draggable="false" /></span>
+              <span class="caption">
+                <span class="fig">fig. 03 · July 2026 · Independent iOS app</span>
+                <span class="title">Ebb</span>
+                <span class="proof">A pause between the tap and the feed</span>
+              </span>
+            </span>
+            <span class="mesh" aria-hidden="true" inert></span>
+          </button>
+        </article>
+
+        <article class="print" data-print>
+          <span class="ambient-shadow" aria-hidden="true"></span>
+          <span class="hinge" aria-hidden="true"></span>
+          <button class="sheet" type="button" aria-pressed="false" aria-label="Hold SAP Fieldglass print in a bowed position">
+            <span class="paper-face paper-source">
+              <span class="sleeve"><img src="../site/public/canvas/mockups/sap-fieldglass.png" alt="" draggable="false" /></span>
+              <span class="caption">
+                <span class="fig">fig. 04 · 2020–2024 · Earlier work</span>
+                <span class="title">SAP Fieldglass</span>
+                <span class="proof">Simplified vender management workflows</span>
+              </span>
+            </span>
+            <span class="mesh" aria-hidden="true" inert></span>
+          </button>
+        </article>
+      </div>
+    </main>
+
+    <script>
+      const prints = [...document.querySelectorAll('[data-print]')];
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+      const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
+      const segmentCount = 16;
+      const springs = new Map(prints.map((print) => [print, {
+        bend: 0,
+        bendVelocity: 0,
+        edge: 0,
+        edgeVelocity: 0,
+        target: 0,
+        height: 0,
+        strips: [],
+      }]));
+      let frameId = 0;
+      let lastFrameTime = 0;
+
+      function clamp(value, min, max) {
+        return Math.min(max, Math.max(min, value));
+      }
+
+      function buildMesh(print) {
+        const source = print.querySelector('.paper-source');
+        const mesh = print.querySelector('.mesh');
+        const spring = springs.get(print);
+        const fragment = document.createDocumentFragment();
+
+        for (let index = 0; index < segmentCount; index += 1) {
+          const strip = document.createElement('span');
+          strip.className = 'mesh-strip';
+          const copy = source.cloneNode(true);
+          copy.classList.remove('paper-source');
+          strip.append(copy);
+          fragment.append(strip);
+          spring.strips.push({ strip, copy });
+        }
+
+        mesh.append(fragment);
+        measure(print);
+      }
+
+      function measure(print) {
+        const spring = springs.get(print);
+        const height = print.querySelector('.sheet').offsetHeight;
+        if (!height) return;
+        spring.height = height;
+        const band = height / segmentCount;
+
+        spring.strips.forEach(({ strip, copy }, index) => {
+          // The overlap covers subpixel gaps when neighboring bands rotate.
+          strip.style.height = `${(band + 0.9).toFixed(3)}px`;
+          copy.style.transform = `translateY(${(-index * band).toFixed(3)}px)`;
+        });
+        paint(print, spring);
+      }
+
+      function paint(print, spring) {
+        if (!spring.height) return;
+        const band = spring.height / segmentCount;
+        let y = 0;
+        let z = 0;
+
+        spring.strips.forEach(({ strip }, index) => {
+          const u = (index + 0.5) / segmentCount;
+          const freeLength = clamp((u - 0.08) / 0.92, 0, 1);
+          const curve = Math.pow(freeLength, 1.6);
+          const angle = 0.27 * curve * (0.58 * spring.bend + 0.42 * spring.edge * freeLength);
+          strip.style.transform = `translate3d(0, ${y.toFixed(3)}px, ${z.toFixed(3)}px) rotateX(${angle.toFixed(5)}rad)`;
+          y += Math.cos(angle) * band;
+          z += Math.sin(angle) * band;
+        });
+
+        const depth = clamp(z / 30, 0, 1);
+        print.style.setProperty('--shadow-shift', `${(depth * 12).toFixed(2)}px`);
+        print.style.setProperty('--shadow-scale', `${(1 + depth * 0.11).toFixed(3)}`);
+        print.style.setProperty('--shadow-opacity', `${(0.18 + depth * 0.16).toFixed(3)}`);
+        print.style.setProperty('--ambient-opacity', `${(0.42 + depth * 0.26).toFixed(3)}`);
+        print.style.setProperty('--ambient-shift', `${(depth * 7).toFixed(2)}px`);
+        print.style.setProperty('--ambient-scale', `${(0.98 + depth * 0.055).toFixed(3)}`);
+        print.style.setProperty('--sheen-shift', `${(depth * 18).toFixed(2)}px`);
+      }
+
+      function step(now) {
+        const dt = lastFrameTime ? Math.min((now - lastFrameTime) / 1000, 0.032) : 0;
+        lastFrameTime = now;
+        let moving = false;
+
+        for (const print of prints) {
+          const spring = springs.get(print);
+          const previousBend = spring.bend;
+          const previousEdge = spring.edge;
+
+          spring.bendVelocity += ((spring.target - spring.bend) * 82 - spring.bendVelocity * 17) * dt;
+          spring.bend += spring.bendVelocity * dt;
+          spring.edgeVelocity += ((spring.target - spring.edge) * 50 - spring.edgeVelocity * 13.5) * dt;
+          spring.edge += spring.edgeVelocity * dt;
+
+          if (Math.abs(spring.target - spring.bend) < 0.002 && Math.abs(spring.bendVelocity) < 0.01) {
+            spring.bend = spring.target;
+            spring.bendVelocity = 0;
+          } else {
+            moving = true;
+          }
+          if (Math.abs(spring.target - spring.edge) < 0.002 && Math.abs(spring.edgeVelocity) < 0.01) {
+            spring.edge = spring.target;
+            spring.edgeVelocity = 0;
+          } else {
+            moving = true;
+          }
+
+          const bending = spring.target > 0 || spring.bend > 0.002 || spring.edge > 0.002;
+          print.classList.toggle('is-bending', bending);
+          if (spring.bend !== previousBend || spring.edge !== previousEdge) paint(print, spring);
+        }
+
+        if (moving) {
+          frameId = requestAnimationFrame(step);
+        } else {
+          frameId = 0;
+          lastFrameTime = 0;
+        }
+      }
+
+      function sync(print) {
+        const sheet = print.querySelector('.sheet');
+        const active = print.classList.contains('is-pinned') ||
+          sheet.matches(':focus-visible') ||
+          (finePointer.matches && print.matches(':hover'));
+        print.classList.toggle('is-active', active);
+
+        const spring = springs.get(print);
+        spring.target = active ? 1 : 0;
+        if (reducedMotion.matches) {
+          spring.bend = spring.bendVelocity = spring.edge = spring.edgeVelocity = 0;
+          print.classList.remove('is-bending');
+          paint(print, spring);
+          return;
+        }
+        if (active) print.classList.add('is-bending');
+        if (!frameId) frameId = requestAnimationFrame(step);
+      }
+
+      function syncAll() {
+        if (reducedMotion.matches && frameId) {
+          cancelAnimationFrame(frameId);
+          frameId = 0;
+          lastFrameTime = 0;
+        }
+        for (const print of prints) sync(print);
+      }
+
+      function setHeld(print, held) {
+        print.classList.toggle('is-pinned', held);
+        print.querySelector('.sheet').setAttribute('aria-pressed', String(held));
+      }
+
+      for (const print of prints) {
+        buildMesh(print);
+        print.addEventListener('pointerenter', () => sync(print));
+        print.addEventListener('pointerleave', () => sync(print));
+        print.addEventListener('focusin', () => sync(print));
+        print.addEventListener('focusout', () => queueMicrotask(() => sync(print)));
+        print.querySelector('.sheet').addEventListener('click', () => {
+          const hold = !print.classList.contains('is-pinned');
+          for (const other of prints) setHeld(other, false);
+          if (hold) setHeld(print, true);
+          syncAll();
+        });
+      }
+
+      document.addEventListener('click', (event) => {
+        if (event.target.closest('[data-print]')) return;
+        for (const print of prints) setHeld(print, false);
+        syncAll();
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key !== 'Escape') return;
+        for (const print of prints) setHeld(print, false);
+        if (document.activeElement?.classList.contains('sheet')) {
+          document.activeElement.blur();
+        }
+        syncAll();
+      });
+
+      reducedMotion.addEventListener('change', syncAll);
+      finePointer.addEventListener('change', syncAll);
+      const resizeObserver = new ResizeObserver((entries) => {
+        for (const entry of entries) measure(entry.target.closest('[data-print]'));
+      });
+      for (const print of prints) resizeObserver.observe(print.querySelector('.sheet'));
+      document.fonts.ready.then(() => {
+        for (const print of prints) measure(print);
+      });
+    </script>
+  </body>
+</html>

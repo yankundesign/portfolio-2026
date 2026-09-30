@@ -1,4 +1,5 @@
 import type { Project } from '../../data/projects';
+import { usePaperBend } from '../../interactions/usePaperBend';
 import styles from './ProjectPlate.module.css';
 
 export interface ProjectPlateProps {
@@ -8,14 +9,12 @@ export interface ProjectPlateProps {
 }
 
 /**
- * ProjectPlate — canvas v1.0 bare editorial plate.
+ * ProjectPlate — a tipped-in silk print on the notebook page.
  *
- * The vellum container is retired (decisions-log 2026-07-31). The plate is
- * now the guideline's editorial-plate pattern verbatim: the mockup in a
- * 1px ink rule, with a museum-label caption set directly on the notebook
- * paper beneath it. Every plate uses the same size and 16:10 sleeve —
- * hierarchy comes from reading order, the fig line's status, and the metric,
- * never from card size.
+ * The original paper face remains the semantic button and establishes the
+ * viewport-fitted plate size. On fine-pointer hover or keyboard focus, the
+ * face bends from its fixed top edge; touch keeps immediate navigation.
+ * The full-color mockup stays in its 1px editorial frame.
  *
  * Caption at rest is three lines: fig line (status folded in) · title ·
  * headline metric. `canvasContext` moved into the aria-label and the case
@@ -26,6 +25,7 @@ export default function ProjectPlate({
   index,
   onClick,
 }: ProjectPlateProps) {
+  const plateRef = usePaperBend();
   const number = String(project.figNumber).padStart(2, '0');
   const [headlineProof] = project.canvasProofs;
 
@@ -35,41 +35,48 @@ export default function ProjectPlate({
 
   return (
     <article
+      ref={plateRef}
       className={styles.plate}
       data-plate
       style={{ ['--plate-index' as string]: index }}
     >
+      <span className={styles.ambientShadow} aria-hidden="true" />
+      <span className={styles.hinge} aria-hidden="true" />
       <button
         type="button"
         className={styles.button}
+        data-paper-button
         onClick={() => onClick(project.slug)}
         aria-label={ariaLabel}
       >
-        <span className={styles.sleeve}>
-          {project.mockup ? (
-            <img
-              src={project.mockup}
-              alt=""
-              className={styles.mockup}
-              draggable={false}
-              loading="lazy"
-            />
-          ) : (
-            <span className={styles.mockupPlaceholder} aria-hidden="true" />
-          )}
-        </span>
-
-        <span className={styles.meta}>
-          <span className={styles.fig}>
-            fig. {number} · {project.year} · {project.canvasStatus}
+        <span className={`${styles.paperFace} ${styles.paperSource}`} data-paper-source>
+          <span className={styles.sleeve}>
+            {project.mockup ? (
+              <img
+                src={project.mockup}
+                alt=""
+                className={styles.mockup}
+                draggable={false}
+                loading="lazy"
+              />
+            ) : (
+              <span className={styles.mockupPlaceholder} aria-hidden="true" />
+            )}
           </span>
 
-          <h3 className={styles.title}>{project.title}</h3>
+          <span className={styles.meta}>
+            <span className={styles.fig}>
+              fig. {number} · {project.year} · {project.canvasStatus}
+            </span>
 
-          {headlineProof && (
-            <span className={styles.proof}>{headlineProof}</span>
-          )}
+            <h3 className={styles.title}>{project.title}</h3>
+
+            {headlineProof && (
+              <span className={styles.proof}>{headlineProof}</span>
+            )}
+          </span>
         </span>
+        <span className={styles.mesh} data-paper-mesh aria-hidden="true" inert />
       </button>
     </article>
   );

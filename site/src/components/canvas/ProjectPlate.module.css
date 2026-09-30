@@ -1,24 +1,21 @@
-/*
- * ProjectPlate — canvas v1.0 bare editorial plate.
- *
- * No container chrome: the mockup sits in a 1px ink rule (the guideline's
- * editorial-plate pattern) and the caption is set directly on the notebook
- * paper. One size and one 16:10 sleeve across the project set — each
- * viewport-fitted spread depends on uniform geometry.
- *
- * Width is svh-driven because the notebook backdrop is height-driven
- * (100svh × 2600/1812): tying the plate to the viewport height keeps it on
- * the cream page AND scaling with the notebook at every window size — no
- * rem cap, or plates read too small against a large notebook on big
- * displays. Two rows + intro always fit one viewport since every vertical
- * quantity is proportional to svh.
- */
+/* Tipped-in silk print. The 16:10 image and caption retain the established
+ * viewport-fitted plate geometry; only the paper support bends on approach. */
 
 .plate {
+  --silk-paper: #fffdfa;
+  --shadow-shift: 0px;
+  --shadow-opacity: 0.18;
+  --shadow-scale: 1;
+  --ambient-opacity: 0.42;
+  --ambient-shift: 0px;
+  --ambient-scale: 0.98;
+
   margin: 0;
   position: relative;
   width: 100%;
   max-width: 46svh;
+  perspective: 950px;
+  perspective-origin: 50% 0;
   animation: platePlace 720ms cubic-bezier(0.16, 1, 0.3, 1) both;
   /* Base delay 320→180ms (v1.4): the overlay finishes clearing at ~1540ms
    * into the open; 320ms left an empty-notebook beat before the first
@@ -26,6 +23,65 @@
   animation-delay: calc(
     var(--canvas-enter-delay, 0ms) + 180ms + var(--plate-index, 0) * 120ms
   );
+}
+
+.plate:is(:hover, :focus-within) {
+  z-index: 2;
+}
+
+/* The edge shadow separates from the notebook as the free end rises. */
+.plate::before {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  left: 7%;
+  right: 7%;
+  bottom: -4px;
+  height: 28px;
+  background: rgba(22, 38, 94, 0.42);
+  filter: blur(15px);
+  opacity: var(--shadow-opacity);
+  transform: translateY(var(--shadow-shift)) scaleX(var(--shadow-scale));
+  pointer-events: none;
+}
+
+.ambientShadow {
+  position: absolute;
+  z-index: 0;
+  inset: 5px 4% 4px;
+  background: linear-gradient(
+    to bottom,
+    rgba(22, 38, 94, 0.06),
+    rgba(22, 38, 94, 0.21)
+  );
+  filter: blur(11px);
+  opacity: var(--ambient-opacity);
+  transform: translateY(var(--ambient-shift)) scale(var(--ambient-scale));
+  pointer-events: none;
+}
+
+/* This restrained crease and leaf visibly hold the print to the notebook. */
+.plate::after {
+  content: '';
+  position: absolute;
+  z-index: 3;
+  top: 0;
+  left: clamp(8px, 1.2svh, 14px);
+  right: clamp(8px, 1.2svh, 14px);
+  height: 4px;
+  background: linear-gradient(to bottom, rgba(22, 38, 94, 0.085), transparent);
+  pointer-events: none;
+}
+
+.hinge {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: clamp(8px, 1.2svh, 14px);
+  right: clamp(8px, 1.2svh, 14px);
+  height: 14px;
+  background: var(--silk-paper) url('/textures/silk-paper-finish.svg') 0 0 / 256px 256px;
+  pointer-events: none;
 }
 
 @keyframes platePlace {
@@ -39,67 +95,94 @@
   }
 }
 
-/* ─── Button — tracing-paper sheet under plate + caption ─────────────────── *
- *
- * A whisper of the retired vellum: a barely-there translucent sheet with a
- * faint ink-toned grain (same feTurbulence pattern as the site-wide Grain,
- * inlined per the guideline) and a soft 2px blur of the notebook through it.
- * Far lighter than v0.9's frost — the notebook page stays clearly visible.
- */
+/* ─── Paper surface and visual bend mesh ─────────────────────────────────── */
 
 .button {
   position: relative;
-  display: flex;
-  flex-direction: column;
+  z-index: 2;
+  display: block;
   width: 100%;
   margin: 0;
-  padding: clamp(8px, 1.2svh, 14px);
-  border: 1px solid var(--ink-faint);
-  background-color: color-mix(in srgb, var(--paper) 40%, transparent);
-  -webkit-backdrop-filter: blur(2px);
-  backdrop-filter: blur(2px);
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
   text-align: left;
   font: inherit;
   color: inherit;
   cursor: pointer;
   outline: none;
-  transition:
-    transform 360ms cubic-bezier(0.16, 1, 0.3, 1),
-    background-color 360ms cubic-bezier(0.16, 1, 0.3, 1),
-    border-color 360ms cubic-bezier(0.16, 1, 0.3, 1);
+  transform-style: preserve-3d;
 }
 
-/* Tracing-paper tooth — ink-tinted noise, multiply, ~5%. Matches the
- * viewport Grain treatment so it reads as material, not a filter. */
-.button::after {
-  content: '';
+.paperFace {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: clamp(8px, 1.2svh, 14px);
+  border: 1px solid rgba(22, 38, 94, 0.08);
+  background-color: color-mix(in srgb, var(--silk-paper) 97%, transparent);
+  background-image:
+    linear-gradient(105deg, transparent 14%, rgba(255, 253, 250, 0.36) 47%, transparent 76%),
+    url('/textures/silk-paper-finish.svg');
+  background-size: 170% 100%, 256px 256px;
+  /* The broad satin sheen moves with each 3D strip without repainting its texture. */
+  background-position: 50% 0, 0 0;
+  transition: border-color 160ms ease-out;
+}
+
+.paperSource {
+  backface-visibility: hidden;
+}
+
+@supports not (background: color-mix(in srgb, white 80%, transparent)) {
+  .paperFace {
+    background-color: rgba(255, 253, 250, 0.97);
+  }
+}
+
+.mesh {
   position: absolute;
   inset: 0;
+  z-index: 1;
+  display: block;
+  visibility: hidden;
+  transform-style: preserve-3d;
   pointer-events: none;
-  mix-blend-mode: multiply;
-  opacity: 0.5;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='matrix' values='0 0 0 0 0.086 0 0 0 0 0.149 0 0 0 0 0.369 0 0 0 0.1 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
 }
 
-.button:hover,
-.button:focus-visible {
-  transform: translateY(-4px);
-  background-color: color-mix(in srgb, var(--paper) 54%, transparent);
-  border-color: var(--ink-muted);
+.mesh [data-paper-strip] {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  overflow: hidden;
+  transform-origin: center top;
+  backface-visibility: hidden;
+  pointer-events: none;
 }
 
-/* Without backdrop-filter support, lean more opaque for legibility. */
-@supports not (
-  (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))
-) {
-  .button {
-    background-color: color-mix(in srgb, var(--paper) 76%, transparent);
-  }
+.mesh [data-paper-strip] .paperFace {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.plate[data-paper-bending] [data-paper-source] {
+  visibility: hidden;
+}
+
+.plate[data-paper-bending] .mesh {
+  visibility: visible;
+}
+
+.plate:is(:hover, :focus-within) .paperFace {
+  border-color: rgba(22, 38, 94, 0.11);
 }
 
 .button:focus-visible {
   outline: 1.5px solid var(--ink);
-  outline-offset: 2px;
+  outline-offset: 4px;
 }
 
 /* ─── Sleeve — the editorial plate: 1px ink rule, crisp mockup ──────────── */
@@ -112,16 +195,6 @@
   aspect-ratio: 16 / 10;
   background: var(--paper);
   border: 1px solid var(--ink-muted);
-  box-shadow: 0 2px 10px color-mix(in srgb, var(--ink) 6%, transparent);
-  transition:
-    border-color 360ms cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow 360ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.button:hover .sleeve,
-.button:focus-visible .sleeve {
-  border-color: var(--ink-soft);
-  box-shadow: 0 10px 26px color-mix(in srgb, var(--ink) 14%, transparent);
 }
 
 .mockup,
@@ -195,14 +268,25 @@
     transform: none;
   }
 
-  .button,
-  .button:hover,
-  .button:focus-visible {
-    transform: none;
+  .paperFace {
     transition: none;
   }
 
-  .sleeve {
-    transition: border-color 200ms linear, box-shadow 200ms linear;
+  .plate[data-paper-bending] [data-paper-source] {
+    visibility: visible;
+  }
+
+  .plate[data-paper-bending] .mesh {
+    visibility: hidden;
+  }
+
+  .plate:is(:hover, :focus-within)::before {
+    opacity: 0.3;
+    transform: translateY(7px) scaleX(1.06);
+  }
+
+  .plate:is(:hover, :focus-within) .ambientShadow {
+    opacity: 0.6;
+    transform: translateY(4px) scale(1.01);
   }
 }

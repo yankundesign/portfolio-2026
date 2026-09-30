@@ -71,32 +71,22 @@ export const smartSearchProse: ProseSlot = [
   "The important design call was the handoff. Suggested questions appeared directly inside the search result, and clicking one opened CHAI with the search context intact. Search became an entry point into conversation, not a dead end.",
 ];
 
-/** Beat 6 — Report Analysis. Optional intro before the three sub-beats. */
-export const reportAnalysisIntroProse: ProseSlot = [
-  "The next expansion was analytics. Admins needed to understand adoption, usage, and issues, but the old workflow pushed that work into CSV exports, spreadsheets, and manual interpretation. We asked what would change if CHAI could tell them what was happening before they had to become the analyst.",
+/** Beat 6.1 — Report analysis → data analysis → widget system. */
+export const reportDataAnalysisProse: ProseSlot = [
+  "Report Analysis started with the report itself. I added an AI entry point to each report row, bringing the first read into Control Hub instead of sending admins back to CSVs and spreadsheets.",
+  "Data Analysis extended that model to live analytics. As the outputs grew beyond prose, I built a reusable widget system for charts, tables, sources, diagnoses, and next steps—giving each response the structure that fit the work.",
 ];
 
-/** Beat 6.1 — Contextual report analysis. Generate report → sparkle → Q&A. */
-export const reportAnalysisContextualProse: ProseSlot = [
-  "We started where the report already ended. I added a sparkle entry point to each report row, so CHAI could open immediately in that report's context. The question bank was visible, but not blocking: admins could pick a suggested question or start typing right away.",
-  "Keeping the assistant scoped to the report mattered. It made the answers feel grounded in the artifact on screen, and it gave the admin a clear way to ask follow-up questions without re-explaining the dataset.",
-];
-
-/** Beat 6.2 — Data analysis. Query the data lake directly. */
-export const dataAnalysisProse: ProseSlot = [
-  "That same pattern extended to live analytics dashboards. CHAI could explain what was happening in the data, not just display the chart: where adoption changed, which segments were affected, and what looked unusual enough to investigate. The dashboard stayed the source of truth; the assistant gave it a first read.",
-];
-
-/** Beat 6.3 — Custom report generation. Reframe: from report→insights to AI-generated reports. */
+/** Beat 6.2 — Custom report generation. Reframe: from report→insights to AI-generated reports. */
 export const customReportProse: ProseSlot = [
   "Custom reports flipped the workflow again. Instead of creating a report, waiting for output, and then asking CHAI for insight, admins could describe the report they wanted in natural language. CHAI translated that prompt into a structured report artifact.",
   "The artifact layout was the trust mechanism. It let users review the selected metrics, dimensions, filters, and schedule before committing. The efficiency gain was not just fewer clicks. It changed report building from a form-heavy setup task into a guided authoring flow where the admin still had control.",
 ];
 
-/** Beat 7 — Workspaces & Devices. */
-export const devicesProse: ProseSlot = [
-  "Workspaces and devices brought a different kind of ambiguity. An admin does not only need to know that a room is unhealthy. They need to understand what changed, who is affected, and whether the issue belongs to a device, a workspace pattern, or a broader environment problem.",
-  "I designed CHAI to read the context around that surface and return a diagnostic note: what the signals suggest, what the impact is, and what action to try next. For device troubleshooting, keeping the assistant attached to the device page was the key decision. The evidence stayed visible, and CHAI became a contextual guide instead of a blank chat window asking the admin to reconstruct the problem.",
+/** Beat 7 — Active troubleshooting with AI-generated insights. */
+export const aiInsightsProse: ProseSlot = [
+  "Troubleshooting in Control Hub was reactive: admins had to know where to look after something went wrong. I used AI as the foundation for a more proactive model. Each insight brought the issue, likely root cause, supporting evidence, and a recommended action into one place.",
+  "Proactive did not mean automatic. Admins could tune sensitivity, choose who and what to monitor, select insight categories, and inspect the rule and trigger history behind each insight.",
 ];
 
 /** Beat 8 — Outcome. What 3% → 18% means in lived terms. */
@@ -131,11 +121,11 @@ export const proofs = {
   },
   reportAnalysis: {
     title: 'Report Analysis',
-    summary: 'From report → insights to insight-first reports — three iterations on what AI does in the analytics flow.',
+    summary: 'From report analysis to live data, then a reusable system for how insight appears.',
   },
-  devices: {
-    title: 'Workspaces & Devices',
-    summary: 'Contextual insight and troubleshooting for shared workspaces, rooms, and device fleets.',
+  aiInsights: {
+    title: 'AI-generated insights',
+    summary: 'AI-generated insights surface emerging issues, explain why they matter, and recommend what to do next.',
   },
   evolution: {
     title: 'Evolution',
@@ -202,23 +192,29 @@ export const figures = {
     width: 'column',
   },
 
-  // Beat 4 · Evolution (3 images, stacked in reading order)
+  // Beat 4 · Evolution (4 images, stacked in reading order)
   evolution10: {
-    src: '/images/chai/evolution-1-0.png',
+    src: '/images/chai/chai-1.0-2.0.png',
     caption: 'CHAI 1.0 -> CHAI 2.0',
-    alt: 'CHAI 1.0 sidebar — initial form with three canned prompts and a numbered-answer flow.',
+    alt: 'Side-by-side comparison of CHAI 1.0 and CHAI 2.0, showing the redesigned home, recent threads, and contextual answer states.',
     width: 'column',
   },
   evolution20: {
-    src: '/images/chai/chai-2-0.png',
-    caption: 'CHAI 3.0',
-    alt: 'CHAI 2.0 sidebar — refined to surface reasoning alongside the answer.',
+    src: '/images/chai/chai-3-0.png',
+    caption: 'Control Hub AI Assistant - Docked view',
+    alt: 'Four docked Control Hub AI Assistant states showing the home screen, expanded suggestions, tools menu, and a device-list response.',
+    width: 'column',
+  },
+  evolutionFloating: {
+    src: '/images/chai/chai-floating.png',
+    caption: 'Control Hub AI Assistant - Floating Window view',
+    alt: 'Control Hub AI Assistant displayed in a floating window over the Control Hub overview screen.',
     width: 'column',
   },
   evolution30: {
-    src: '/images/chai/chai-3-0-full.png',
-    caption: 'CHAI 3.0 — Full screen',
-    alt: 'CHAI 3.0 — full-screen surface, embedded across the console and agentic in form.',
+    src: '/images/chai/chai-3.0-full.png',
+    caption: 'Control Hub AI Assistant - Full-page view',
+    alt: 'Two full-page Control Hub AI Assistant states showing the home screen and an analytical conversation with a calling and meeting engagement chart.',
     width: 'column',
   },
 
@@ -231,29 +227,27 @@ export const figures = {
     width: 'column',
   },
 
-  // Beat 6.1 · Report Analysis · Contextual analysis (2 images)
-  reportKickoff: {
+  // Beat 6.1 · Report analysis → data analysis → widget system
+  reportAnalysis: {
     src: '/images/chai/report-kickoff.png',
-    caption: 'Report kickoff — sparkle entry into CHAI',
-    alt: 'A delivered Control Hub report. The sparkle icon next to the report title opens a CHAI panel scoped to this report.',
+    caption: 'Report analysis — insight alongside the report',
+    alt: 'Control Hub Reports list with the AI Assistant opening analysis for a selected report and returning a visualization.',
     width: 'column',
   },
-  reportDelivered: {
-    src: '/images/chai/report-delivered.png',
-    caption: 'Q&A scoped to the report',
-    alt: 'A CHAI conversation panel sitting alongside the report. The user asks follow-up questions and receives answers grounded in the report data.',
-    width: 'column',
-  },
-
-  // Beat 6.2 · Report Analysis · Data analysis (1 image)
   dataAnalysis: {
     src: '/images/chai/data-analysis.png',
     caption: 'Data analysis — querying the data lake directly',
     alt: 'CHAI returning a generated visualization in response to a natural-language data question, sourced directly from the underlying data lake.',
     width: 'column',
   },
+  widgetSystem: {
+    src: '/images/chai/widget-system.png',
+    caption: 'Widget system — data, evidence, and action',
+    alt: 'A reusable Control Hub AI Assistant widget system showing data visualizations, source cards, troubleshooting evidence, action plans, suggested actions, and configuration updates.',
+    width: 'column',
+  },
 
-  // Beat 6.3 · Report Analysis · Custom report generation (2 images)
+  // Beat 6.2 · Report Analysis · Custom report generation (2 images)
   customReport1: {
     src: '/images/chai/custom-report-1.png',
     caption: 'Custom report — describing the question',
@@ -267,18 +261,12 @@ export const figures = {
     width: 'column',
   },
 
-  // Beat 7 · Workspaces & Devices
-  devicesEmbed: {
-    src: '/images/chai/device-troubleshooting.png',
-    caption: 'Device troubleshooting — impact and suggested action',
-    alt: 'A device detail page in Control Hub with CHAI embedded as a contextual troubleshooting panel.',
-    width: 'column',
-  },
-  devicesClustering: {
-    src: '/images/chai/device-workspace.png',
-    caption: 'Workspace insights — room context around device signals',
-    alt: 'Workspace and device view showing CHAI summarizing room context and device signals.',
-    width: 'column',
+  // Beat 7 · Active troubleshooting
+  aiInsights: {
+    src: '/images/chai/ai-insights.png',
+    caption: 'AI-generated insights — proactive troubleshooting with adjustable rules',
+    alt: 'Two Control Hub Notifications screens: an AI-generated insight with root-cause evidence and a recommended action, followed by configuration controls for sensitivity, monitored people and devices, insight categories, and retention.',
+    width: 'wide',
   },
 
   // Beat 9 · Next
@@ -334,7 +322,7 @@ export const credits = {
 // CSS text-transform to render them in mono caps, so they read naturally
 // in the source).
 //
-// Report Analysis sub-beats (6.1, 6.2, 6.3) are NOT in the rail — they
+// Report Analysis sub-beats (6.1, 6.2) are NOT in the rail — they
 // live as sub-headers inside the Report Analysis section.
 // ---------------------------------------------------------------------------
 
@@ -345,7 +333,7 @@ export const sections = [
   { id: 'evolution', label: 'Evolution' },
   { id: 'proof-1', label: 'Smart Search' },
   { id: 'proof-2', label: 'Report Analysis' },
-  { id: 'proof-3', label: 'Workspaces & Devices' },
+  { id: 'proof-3', label: 'AI-generated insights' },
   { id: 'outcome', label: 'Outcome' },
   { id: 'next', label: 'Next' },
   { id: 'credits', label: 'Credits' },

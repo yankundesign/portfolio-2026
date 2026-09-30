@@ -25,7 +25,7 @@ export interface SectionHeaderProps {
  * + label still mark the section so the page reads consistently.
  *
  * Full variant — used for the three proofs (Smart Search, Report Analysis,
- * Devices) where the section needs a real title and summary.
+ * Active Troubleshooting) where the section needs a real title and summary.
  */
 export default function SectionHeader({
   label,

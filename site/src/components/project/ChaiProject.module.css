@@ -121,7 +121,7 @@
 }
 
 .proof {
-  /* Smart Search · Report Analysis · Workspaces & Devices sit a little further apart
+  /* Smart Search · Report Analysis · Active Troubleshooting sit a little further apart
      than regular beats — they're the load-bearing sections. */
   margin-top: clamp(4rem, 8vw, 7rem);
 }
@@ -147,7 +147,7 @@
   margin: 0 0 clamp(2rem, 4vw, 3rem);
 }
 
-/* Report Analysis sub-beats (6.1, 6.2, 6.3).
+/* Report Analysis sub-beats (6.1, 6.2).
    Sub-headers are smaller than SectionHeader and sit above their prose
    + plates. A faint horizontal rule above each marks the break without
    competing with the parent SectionHeader's vertical rule. */

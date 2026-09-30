@@ -15,11 +15,9 @@ import {
   roadmapProse,
   evolutionProse,
   smartSearchProse,
-  reportAnalysisIntroProse,
-  reportAnalysisContextualProse,
-  dataAnalysisProse,
+  reportDataAnalysisProse,
   customReportProse,
-  devicesProse,
+  aiInsightsProse,
   outcomeProse,
   nextProse,
   proofs,
@@ -44,12 +42,11 @@ import styles from './ChaiProject.module.css';
  *   4. Road Map         release plan paragraph + roadmap plate
  *   5. Evolution        1.0 → 2.0 → 3.0, three plates side by side
  *   6. Smart Search     prose, inline metrics, plate
- *   7. Report Analysis  intro, then three sub-beats:
- *                         · 6.1 Contextual analysis (sparkle → Q&A) — 2 plates
- *                         · 6.2 Data analysis (direct queries)      — 1 plate
- *                         · 6.3 Custom report generation             — 2 plates
- *   8. Workspaces & Devices
- *                       prose, two plates stacked
+ *   7. Report Analysis  two sub-beats:
+ *                         · 6.1 Report + data analysis → widgets — 3 plates
+ *                         · 6.2 Custom report generation         — 2 plates
+ *   8. Active Troubleshooting
+ *                       AI-generated insights, one composite plate
  *   9. Outcome          3% → 18% display + context paragraph
  *  10. Next             transition into the Control Hub Agentic case study
  *  11. Credits          role-only, no names
@@ -134,6 +131,7 @@ export default function ChaiProject() {
             <div className={styles.evolutionRow}>
               <EditorialPlate figure={figures.evolution10} />
               <EditorialPlate figure={figures.evolution20} />
+              <EditorialPlate figure={figures.evolutionFloating} />
               <EditorialPlate figure={figures.evolution30} />
             </div>
           </section>
@@ -158,72 +156,44 @@ export default function ChaiProject() {
             <EditorialPlate figure={figures.smartSearch} />
           </section>
 
-          {/* ---- Beat 6 · Report Analysis (with 6.1 / 6.2 / 6.3) --- */}
+          {/* ---- Beat 6 · Report Analysis (with 6.1 / 6.2) --------- */}
           <section id="proof-2" aria-label="Report Analysis" className={styles.proof}>
             <SectionHeader label="Report Analysis" summary={proofs.reportAnalysis.summary} />
-            {reportAnalysisIntroProse ? (
-              <ProseBlock paragraphs={reportAnalysisIntroProse} />
-            ) : (
-              <TodoSlot
-                beat="Beat 6 · Report Analysis · Intro"
-                hint="One short paragraph framing the three iterations. Optional — can be omitted if the sub-beats stand on their own."
-                outlineRef="01-content/chai.md · Beat 6"
-                size="sm"
-              />
-            )}
 
-            {/* 6.1 · Contextual report analysis */}
+            {/* 6.1 · Report analysis → data analysis → widget system */}
             <div className={styles.subBeat}>
               <h3 className={styles.subBeatTitle}>
                 <span className={styles.subBeatNumeral}>6.1</span>
-                Report analysis — start contextually
+                Report analysis → data analysis
               </h3>
-              {reportAnalysisContextualProse ? (
-                <ProseBlock paragraphs={reportAnalysisContextualProse} />
+              {reportDataAnalysisProse ? (
+                <ProseBlock paragraphs={reportDataAnalysisProse} />
               ) : (
                 <TodoSlot
-                  beat="Beat 6.1 · Contextual report analysis"
-                  hint="Generate report → click sparkle on report → Q&A with CHAI scoped to that report. Name the design calls that kept it grounded."
+                  beat="Beat 6.1 · Report and data analysis"
+                  hint="Report analysis → live data → reusable widget system. Keep the progression concise."
                   outlineRef="01-content/chai.md · Beat 6.1"
                   size="md"
                 />
               )}
-              <EditorialPlate figure={figures.reportKickoff} />
-              <EditorialPlate figure={figures.reportDelivered} />
+              <EditorialPlate figure={figures.reportAnalysis} />
+              <EditorialPlate figure={figures.dataAnalysis} />
+              <EditorialPlate figure={figures.widgetSystem} />
             </div>
 
-            {/* 6.2 · Data analysis */}
+            {/* 6.2 · AI-generated reports (the reframe) */}
             <div className={styles.subBeat}>
               <h3 className={styles.subBeatTitle}>
                 <span className={styles.subBeatNumeral}>6.2</span>
-                Data analysis — query the lake directly
-              </h3>
-              {dataAnalysisProse ? (
-                <ProseBlock paragraphs={dataAnalysisProse} />
-              ) : (
-                <TodoSlot
-                  beat="Beat 6.2 · Data analysis"
-                  hint="What the capability gain enabled — direct natural-language queries against the data lake. What changed for admins."
-                  outlineRef="01-content/chai.md · Beat 6.2"
-                  size="md"
-                />
-              )}
-              <EditorialPlate figure={figures.dataAnalysis} />
-            </div>
-
-            {/* 6.3 · Custom report generation (the reframe) */}
-            <div className={styles.subBeat}>
-              <h3 className={styles.subBeatTitle}>
-                <span className={styles.subBeatNumeral}>6.3</span>
-                Custom reports — flipping the workflow
+                AI-generated reports — flipping the workflow
               </h3>
               {customReportProse ? (
                 <ProseBlock paragraphs={customReportProse} />
               ) : (
                 <TodoSlot
-                  beat="Beat 6.3 · Custom report generation"
+                  beat="Beat 6.2 · AI-generated reports"
                   hint="The reframe: from report → insights to using AI to generate the custom report itself. Name the call you changed your mind on."
-                  outlineRef="01-content/chai.md · Beat 6.3"
+                  outlineRef="01-content/chai.md · Beat 6.2"
                   size="md"
                 />
               )}
@@ -232,21 +202,20 @@ export default function ChaiProject() {
             </div>
           </section>
 
-          {/* ---- Beat 7 · Workspaces & Devices ---------------------- */}
-          <section id="proof-3" aria-label="Workspaces & Devices" className={styles.proof}>
-            <SectionHeader label="Workspaces & Devices" summary={proofs.devices.summary} />
-            {devicesProse ? (
-              <ProseBlock paragraphs={devicesProse} />
+          {/* ---- Beat 7 · Active Troubleshooting -------------------- */}
+          <section id="proof-3" aria-label="AI-generated insights" className={styles.proof}>
+            <SectionHeader label="AI-generated insights" summary={proofs.aiInsights.summary} />
+            {aiInsightsProse ? (
+              <ProseBlock paragraphs={aiInsightsProse} />
             ) : (
               <TodoSlot
-                beat="Beat 7 · Workspaces & Devices"
-                hint="The craft-depth moment. Multi-signal embeddings, root-cause clustering. Add one or two lines on what didn't work first."
+                beat="Beat 7 · Active Troubleshooting"
+                hint="Reactive troubleshooting → proactive insight → recommended action → adjustable generation rules."
                 outlineRef="01-content/chai.md · Beat 7"
                 size="md"
               />
             )}
-            <EditorialPlate figure={figures.devicesClustering} />
-            <EditorialPlate figure={figures.devicesEmbed} />
+            <EditorialPlate figure={figures.aiInsights} />
           </section>
 
           {/* ---- Beat 8 · Outcome ---------------------------------- */}
