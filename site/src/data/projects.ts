@@ -48,8 +48,17 @@ export interface Project {
    * `site/public/canvas/mockups/`.
    */
   mockup?: string;
+  /** Opens the live project directly instead of a portfolio case study. */
+  externalUrl?: string;
   /**
-   * Canvas v0.9 status chip (e.g. "Full case study", "Earlier work").
+   * Optional hover preview loop for the canvas plate (WebM first, MP4
+   * fallback). Its first and last frames match `mockup`, so both the
+   * cover-to-motion crossfade and the loop point are seamless.
+   * Place files under `site/public/canvas/previews/`.
+   */
+  preview?: { webm: string; mp4: string };
+  /**
+   * Canvas v0.9 status chip (e.g. "Features I shipped", "Earlier work").
    * Was `canvasTier` pre-v0.9. Rendered as a mono-caps pill on the plate.
    */
   canvasStatus: string;
@@ -86,7 +95,7 @@ export const projects: Project[] = [
     title: 'Control Hub AI Assistant',
     role: 'ai assistant for it admins',
     subtitle: 'An AI assistant for IT admins',
-    year: '2024–2025',
+    year: '2024–2026',
     collaborators: [],
     impact: 'adoption from 3% to 18%',
     figNumber: 1,
@@ -97,7 +106,11 @@ export const projects: Project[] = [
     alignVertical: 'start',
     aspect: '16-10',
     mockup: '/canvas/mockups/chai.png',
-    canvasStatus: 'Full case study',
+    preview: {
+      webm: '/canvas/previews/chai-preview.webm',
+      mp4: '/canvas/previews/chai-preview.mp4',
+    },
+    canvasStatus: 'Features I shipped',
     canvasTags: ['Cisco Webex', 'Enterprise AI', 'Shipped'],
     canvasProofs: ['3% → 18% adoption', '86% drop in no-result searches'],
     canvasContext:
@@ -106,12 +119,12 @@ export const projects: Project[] = [
   {
     slug: 'control-hub-agentic',
     title: 'Control Hub Agentic',
-    role: 'agentic experience for control hub',
+    role: 'agentic AI for control hub admins',
     subtitle:
-      'Designing agentic AI experience inside Webex Control Hub',
+      'Five prototypes, two platform shifts, and the one interaction that survived both',
     year: '2026',
     collaborators: [],
-    impact: 'Set direction of agentic AI in Control Hub',
+    impact: 'A direction two teams agreed on',
     figNumber: 2,
     size: 'main',
     colStart: 8,
@@ -120,11 +133,15 @@ export const projects: Project[] = [
     alignVertical: 'start',
     aspect: '4-5',
     mockup: '/canvas/mockups/control-hub-agentic.png',
-    canvasStatus: 'In progress',
+    preview: {
+      webm: '/canvas/previews/control-hub-agentic-preview.webm',
+      mp4: '/canvas/previews/control-hub-agentic-preview.mp4',
+    },
+    canvasStatus: 'Prototypes 01–05, never shipped',
     canvasTags: ['Cisco Webex', 'Agentic AI', 'Direction'],
-    canvasProofs: ['Set the agentic direction'],
+    canvasProofs: ['Direction adopted by two teams'],
     canvasContext:
-      'Explores how agents plan, explain, and execute admin work inside Control Hub.',
+      'How an admin asks, approves, and watches AI act in Control Hub — landed on Cloud Control Workflows.',
   },
   {
     slug: 'ebb',
@@ -143,11 +160,37 @@ export const projects: Project[] = [
     alignVertical: 'start',
     aspect: '1-1',
     mockup: '/canvas/mockups/ebb.png',
-    canvasStatus: 'Independent iOS app',
+    preview: {
+      webm: '/canvas/previews/ebb-preview.webm',
+      mp4: '/canvas/previews/ebb-preview.mp4',
+    },
+    canvasStatus: 'An App I built',
     canvasTags: ['iOS', 'Research prototype', 'On-device'],
     canvasProofs: ['A pause between the tap and the feed'],
     canvasContext:
       'A pause between the tap and the feed — that knows when you\'re in a loop.',
+  },
+  {
+    slug: 'zao',
+    title: 'ZAO',
+    externalUrl: 'https://zaoui.dev/',
+    role: 'designer & builder',
+    subtitle: 'Learning design systems by building one with AI.',
+    year: '2026',
+    collaborators: [],
+    impact: 'A design system for people and agents',
+    figNumber: 6,
+    size: 'standard',
+    colStart: 7,
+    colSpan: 5,
+    gridRow: 3,
+    alignVertical: 'end',
+    aspect: '16-10',
+    mockup: '/canvas/mockups/zao.png',
+    canvasStatus: 'A system I’m building',
+    canvasTags: ['Design system', 'AI-assisted build', 'In progress'],
+    canvasProofs: ['A design system for people and agents'],
+    canvasContext: 'Learning design systems by building one with AI.',
   },
   {
     slug: 'sap-fieldglass',

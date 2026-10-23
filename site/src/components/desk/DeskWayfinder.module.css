@@ -51,6 +51,21 @@
   display: block;
 }
 
+@media (min-width: 1280px) {
+  .wayfinder {
+    /* Point into the cover's lower-left area. Its visible ink starts
+     * about 6% inside the stable image frame; keep the tip 21–24px away. */
+    top: calc(100% - var(--desk-caption-space) - var(--desk-notebook-height) * 0.12);
+    right: calc(50% + var(--desk-notebook-width) * 0.44 + 16px);
+    left: auto;
+    width: max-content;
+  }
+  .arrow {
+    /* A shorter arrow fits the gap beside the roulette on small desktops. */
+    width: clamp(40px, calc(5vw - 24px), 60px);
+  }
+}
+
 @media (max-width: 1279px) {
   :root {
     --wayfinder-top: 68%;

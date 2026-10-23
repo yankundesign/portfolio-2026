@@ -1,0 +1,152 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+  html,body{margin:0;background:#3c3b3a;overflow:hidden}
+  #vp{position:relative;width:1280px;height:800px;overflow:hidden;background:#3c3b3a}
+  .world{position:absolute;left:0;top:0;width:1920px;height:1200px;transform-origin:0 0;will-change:transform}
+  .abs{position:absolute;left:0;top:0}
+  .panel{position:absolute;overflow:hidden}
+  .inner{position:absolute;left:0;top:0;transform-origin:0 0;transform:scale(.5)}
+  .bar{position:absolute;transform-origin:50% 100%}
+  .ring{position:absolute;border-radius:50%;border:2.5px solid rgb(229,72,98);box-sizing:border-box}
+  img{display:block}
+</style></head>
+<body>
+<div id="vp">
+  <div class="world" id="bgw"><img class="abs" src="layers/bg.png" width="1920" height="1200"></div>
+  <div class="world" id="w">
+    <div class="panel" id="P1" style="left:85px;top:234px;width:288px;height:632px">
+      <img class="inner" src="p1.png">
+    </div>
+    <div class="panel" id="P2" style="left:397px;top:234px;width:289px;height:632px">
+      <div class="inner" id="P2i"><img src="layers/p2-empty.png"></div>
+    </div>
+    <div class="panel" id="P3" style="left:710px;top:403px;width:1124px;height:632px">
+      <div class="inner" id="P3i"><img src="layers/p3-empty.png"></div>
+    </div>
+  </div>
+</div>
+<script>
+const M = META_JSON;
+const $ = (id) => document.getElementById(id);
+const P2i = $('P2i'), P3i = $('P3i');
+function mk(parent, tag, cls, css){const e=document.createElement(tag); if(cls) e.className=cls; Object.assign(e.style, css||{}); parent.appendChild(e); return e;}
+
+// ---- bars
+function makeBars(parent, spec){
+  return spec.bars.map(([x0,x1,top]) => mk(parent,'div','bar',{
+    left:x0+'px', width:(x1-x0+1)+'px', top:top+'px', height:(spec.bottom-top+1)+'px', background:spec.color}));
+}
+const bars2 = makeBars(P2i, M.bars2);
+const bars3 = makeBars(P3i, M.bars3);
+// ---- logo
+const logo = mk(P2i,'img','abs',{left:M.logo.x+'px',top:M.logo.y+'px',width:M.logo.size+'px',height:M.logo.size+'px'});
+logo.src='layers/logo.png';
+// ---- timeline
+const T = M.timeline;
+const tl = mk(P3i,'img','abs',{left:T.x+'px',top:T.y+'px',width:T.w+'px',height:T.h+'px'}); tl.src='layers/tl-line.png';
+const dots = T.dots.map(([x,y],i)=>{const d=mk(P3i,'img','abs',{left:x+'px',top:y+'px',width:T.size+'px',height:T.size+'px'}); d.src=`layers/dot${i}.png`; return d;});
+// ---- pins: two rings each
+const pinOrder=[3,4,0,2,1]; // W Hamilton, Puente, Grand Way, Pearl, Omio (list order)
+const rings = M.pins.map(p=>[0,1].map(()=>mk(P3i,'div','ring',{left:'0px',top:'0px',width:'0px',height:'0px',opacity:0})));
+
+// ---- easing
+const clamp=(v,a=0,b=1)=>Math.min(b,Math.max(a,v));
+const lerp=(a,b,u)=>a+(b-a)*u;
+const prog=(t,a,b)=>clamp((t-a)/(b-a));
+const inOutCubic=u=>u<.5?4*u*u*u:1-Math.pow(-2*u+2,3)/2;
+const inOutQuint=u=>u<.5?16*u**5:1-Math.pow(-2*u+2,5)/2;
+const inCubic=u=>u*u*u;
+const outCubic=u=>1-Math.pow(1-u,3);
+const outQuart=u=>1-Math.pow(1-u,4);
+// gentle overshoot (paper-weighted): peaks ~1.035
+const outBackSoft=u=>{const c1=0.9,c3=c1+1;return 1+c3*Math.pow(u-1,3)+c1*Math.pow(u-1,2);};
+const inOutSine=u=>-(Math.cos(Math.PI*u)-1)/2;
+
+// ---- camera keyframes (world coords, 1920x1200 cover space)
+const H={x:960,y:600,z:1};
+const A={x:541,y:500,z:2.75};
+const A2={x:548,y:508,z:2.9};
+const B={x:1412,y:752,z:2.1};
+const B2={x:1440,y:790,z:2.32};
+function camLerp(P,Q,u,hop=0){
+  const lz=lerp(Math.log(P.z),Math.log(Q.z),u) - hop*Math.sin(Math.PI*u);
+  return {x:lerp(P.x,Q.x,u), y:lerp(P.y,Q.y,u), z:Math.exp(lz)};
+}
+function camera(t){
+  if(t<0.4) return H;
+  if(t<1.7) return camLerp(H,A,inOutCubic(prog(t,0.4,1.7)));
+  if(t<2.35) return camLerp(A,A2,inOutSine(prog(t,1.7,2.35)));
+  if(t<3.75) return camLerp(A2,B,inOutCubic(prog(t,2.35,3.75)),0.28);
+  if(t<4.75) return camLerp(B,B2,inOutSine(prog(t,3.75,4.75)));
+  if(t<6.0)  return camLerp(B2,H,inOutCubic(prog(t,4.75,6.0)));
+  return H;
+}
+const K=1280/1920;
+function applyCam(el,c){
+  const s=c.z*K;
+  el.style.transform=`translate(${640-c.x*s}px,${400-c.y*s}px) scale(${s})`;
+}
+
+function render(t){
+  t=((t%6)+6)%6;
+  const c=camera(t);
+  applyCam($('w'),c);
+  // background: shallower zoom (depth), clamped to cover the viewport
+  const zb=1+(c.z-1)*0.45;
+  const halfW=960/zb, halfH=600/zb;
+  let bx=960+(c.x-960)*0.45, by=600+(c.y-600)*0.45;
+  bx=clamp(bx,halfW,1920-halfW); by=clamp(by,halfH,1200-halfH);
+  applyCam($('bgw'),{x:bx,y:by,z:zb});
+
+  // rack focus: while on panel 2, soften neighbours; while on report, soften the chat column side panels
+  const focus2 = t<2.35 ? inOutCubic(prog(t,0.7,1.6)) : 1-inOutCubic(prog(t,2.35,3.2));
+  const blur = 1.5*focus2;
+  $('P1').style.filter = blur>0.01?`blur(${blur.toFixed(3)}px) brightness(${(1-0.1*focus2).toFixed(3)})`:'';
+  $('P3').style.filter = blur>0.01?`blur(${blur.toFixed(3)}px) brightness(${(1-0.1*focus2).toFixed(3)})`:'';
+
+  // ---- panel 2: answer refresh
+  bars2.forEach((b,i)=>{
+    let h;
+    if(t<1.2) h=1-inCubic(prog(t,0.45,0.78));
+    else h=outBackSoft(prog(t,1.5+i*0.09,2.15+i*0.09));
+    if(t<0.45||t>=4) h=1;
+    b.style.transform=`scaleY(${Math.max(h,0).toFixed(4)})`;
+  });
+  const spin=inOutCubic(prog(t,1.0,1.95));
+  logo.style.transform=`rotate(${(spin*360).toFixed(2)}deg)`;
+
+  // ---- panel 3: report assembles (reset while off-frame at 1.3s)
+  const reset = t>=1.3 && t<5.99;
+  bars3.forEach((b,i)=>{
+    const h = reset ? outBackSoft(prog(t,3.35+i*0.08,4.0+i*0.08)) : 1;
+    b.style.transform=`scaleY(${h.toFixed(4)})`;
+  });
+  const rev = reset ? inOutCubic(prog(t,3.55,4.45)) : 1;
+  tl.style.clipPath=`inset(0 ${((1-rev)*100).toFixed(3)}% 0 0)`;
+  T.centers.forEach((cx,i)=>{
+    const frac=(cx-T.x)/T.w;
+    // time when reveal reaches this dot: invert approximately by sampling
+    let td=3.55; if(reset){ for(let s=0;s<=90;s++){const tt=3.55+s*0.01; if(inOutCubic(prog(tt,3.55,4.45))>=frac-0.01){td=tt;break;}} }
+    const u = reset ? prog(t,td,td+0.42) : 1;
+    const sc = reset ? (u<=0?0:outBackSoft(u)) : 1;
+    dots[i].style.transform=`scale(${sc.toFixed(4)})`;
+    dots[i].style.opacity = reset ? clamp(u*3) : 1;
+  });
+  pinOrder.forEach((pi,k)=>{
+    const p=M.pins[pi];
+    rings[pi].forEach((r,j)=>{
+      const st=3.95+k*0.13+j*0.28;
+      const u=prog(t,st,st+1.0);
+      const on=u>0&&u<1;
+      const rad=lerp(5,34,outCubic(u));
+      r.style.opacity=on?((1-u)*0.9).toFixed(3):0;
+      r.style.left=(p.cx-rad)+'px'; r.style.top=(p.cy-rad)+'px';
+      r.style.width=r.style.height=(2*rad)+'px';
+    });
+  });
+}
+window.render=render;
+render(0);
+</script>
+</body></html>

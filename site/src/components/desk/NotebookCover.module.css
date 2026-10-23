@@ -1,7 +1,7 @@
 /*
  * Notebook — fig. 01. Hero object, center of the plate.
  *
- * Width locked so the cover reads at a consistent weight across viewports.
+ * Layout width follows the central composition's responsive size token.
  * Hover: caption underline draws; the notebook body lifts and tilts while
  * a stable outer frame preserves the desk-to-canvas transition measurement.
  */
@@ -22,6 +22,7 @@
   --object-shadow-x: 0px;
   --object-shadow-y: 14px;
   --object-shadow-scale: 1.03;
+  --object-edge-opacity: 0.78;
   display: block;
   padding: 0;
   margin: 0;
@@ -31,7 +32,7 @@
   outline: none;
   border-radius: 6px;
   position: relative;
-  perspective: 900px;
+  perspective: calc(var(--desk-notebook-width, 340px) * 2.65);
 }
 
 .button:hover,
@@ -49,7 +50,8 @@
 
 .sourceFrame {
   display: block;
-  width: 340px;
+  width: var(--desk-notebook-width, 340px);
+  aspect-ratio: 947 / 1380;
   position: relative;
   transform-style: preserve-3d;
 }
@@ -70,7 +72,7 @@
       rgba(22, 38, 94, 0.17) 42%,
       rgba(22, 38, 94, 0) 72%
     );
-  filter: blur(11px);
+  filter: blur(calc(var(--desk-notebook-width, 340px) * 11 / 340));
   opacity: 0.7;
   transform:
     translate3d(
@@ -89,6 +91,7 @@
 .notebookBody {
   display: block;
   width: 100%;
+  aspect-ratio: 947 / 1380;
   position: relative;
   z-index: 2;
   isolation: isolate;
@@ -103,13 +106,21 @@
   will-change: transform;
 }
 
+/* GSAP controls the full 160ms click lift without a second CSS ease trailing it. */
+.button.opening .notebookBody,
+.button.opening .castShadow,
+.button.landing .notebookBody,
+.button.landing .castShadow {
+  transition: none;
+}
+
 .notebookBody::before,
 .notebookBody::after {
   content: '';
   position: absolute;
   z-index: 0;
   pointer-events: none;
-  opacity: 0.78;
+  opacity: var(--object-edge-opacity);
   border: 1px solid rgba(22, 38, 94, 0.2);
   background: var(--paper-soft);
   mix-blend-mode: multiply;
@@ -169,36 +180,6 @@
   transform: translateZ(1px);
   backface-visibility: hidden;
   filter: drop-shadow(0 1px 0 rgba(244, 241, 234, 0.32));
-}
-
-@media (min-width: 1600px) {
-  .sourceFrame {
-    width: 400px;
-  }
-}
-
-@media (min-width: 2000px) {
-  .sourceFrame {
-    width: 480px;
-  }
-}
-
-@media (max-width: 1279px) {
-  .sourceFrame {
-    width: 300px;
-  }
-}
-
-@media (max-width: 1023px) {
-  .sourceFrame {
-    width: 240px;
-  }
-}
-
-@media (max-width: 767px) {
-  .sourceFrame {
-    width: 200px;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {

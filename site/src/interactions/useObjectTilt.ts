@@ -19,7 +19,21 @@ export function useObjectTilt<T extends HTMLElement>({
 }: ObjectTiltOptions = {}) {
   const ref = useRef<T | null>(null);
   const frameRef = useRef<number | null>(null);
+  const suspendedRef = useRef(false);
   const reducedMotion = useReducedMotion();
+
+  // The notebook transition owns the object after click. Cancel a pending
+  // pointer frame so it cannot overwrite the click tween on its next tick.
+  const suspend = useCallback(() => {
+    suspendedRef.current = true;
+    if (frameRef.current !== null) window.cancelAnimationFrame(frameRef.current);
+    frameRef.current = null;
+  }, []);
+
+  // The desk notebook resumes normal hover after the close handoff lands.
+  const resume = useCallback(() => {
+    suspendedRef.current = false;
+  }, []);
 
   const writeVars = useCallback(
     (el: HTMLElement, x = 0, y = 0) => {
@@ -39,6 +53,7 @@ export function useObjectTilt<T extends HTMLElement>({
   );
 
   const resetTilt = useCallback(() => {
+    if (suspendedRef.current) return;
     const el = ref.current;
     if (!el) return;
 
@@ -59,6 +74,7 @@ export function useObjectTilt<T extends HTMLElement>({
     if (reducedMotion) return;
 
     const handleWindowPointerMove = (event: globalThis.PointerEvent) => {
+      if (suspendedRef.current) return;
       const el = ref.current;
       if (!el) return;
 
@@ -78,7 +94,7 @@ export function useObjectTilt<T extends HTMLElement>({
 
   const handlePointerMove = useCallback(
     (event: PointerEvent<T>) => {
-      if (reducedMotion || event.pointerType === 'touch') return;
+      if (suspendedRef.current || reducedMotion || event.pointerType === 'touch') return;
 
       const el = ref.current ?? event.currentTarget;
       const rect = el.getBoundingClientRect();
@@ -99,6 +115,8 @@ export function useObjectTilt<T extends HTMLElement>({
 
   return {
     ref,
+    suspend,
+    resume,
     tiltHandlers: {
       onPointerMove: handlePointerMove,
       onPointerLeave: resetTilt,

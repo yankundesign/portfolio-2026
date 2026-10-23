@@ -1,0 +1,96 @@
+/*
+ * Hand-drawn chrome. Strokes follow the site's mark rule (1.2–1.6px, ink,
+ * round caps); the heavy weight is kept for the one line that means
+ * "the direction". Washes are ink thinned to a tint — still two colors.
+ */
+
+.frame,
+.box {
+  position: relative;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.content {
+  position: relative;
+}
+
+/* Frame tones */
+
+.line,
+.soft,
+.dashed,
+.faint {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.soft {
+  opacity: 0.85;
+}
+
+.dashed {
+  stroke: var(--ink-soft);
+  stroke-width: 1.4;
+  stroke-dasharray: 7 4.5;
+  opacity: 0.8;
+}
+
+.faint {
+  stroke-width: 1.4;
+  stroke-dasharray: 6 4.5;
+  opacity: 0.35;
+}
+
+.ink,
+.inkFill {
+  fill: var(--ink);
+  stroke: none;
+}
+
+.frameInk .content {
+  color: var(--paper);
+}
+
+.wash {
+  fill: var(--ink-wash);
+  stroke: none;
+}
+
+/* Rules */
+
+.rule {
+  position: relative;
+  display: block;
+}
+
+.light {
+  stroke-width: 1.2;
+  opacity: 0.6;
+}
+
+.regular {
+  stroke-width: 1.6;
+}
+
+.heavy {
+  stroke-width: 2.4;
+}
+
+.ringPaper {
+  fill: var(--paper);
+  stroke: none;
+}
+
+.mark {
+  display: block;
+  overflow: visible;
+}

@@ -22,7 +22,7 @@ export function usePaperBend() {
     const plate = plateRef.current;
     if (!plate) return;
 
-    const button = plate.querySelector<HTMLButtonElement>('[data-paper-button]');
+    const button = plate.querySelector<HTMLElement>('[data-paper-button]');
     const source = plate.querySelector<HTMLElement>('[data-paper-source]');
     const mesh = plate.querySelector<HTMLElement>('[data-paper-mesh]');
     if (!button || !source || !mesh) return;
@@ -105,6 +105,15 @@ export function usePaperBend() {
         face.setAttribute('aria-hidden', 'true');
         face.querySelectorAll('img').forEach((image) => {
           image.loading = 'eager';
+        });
+        // A cloned <video> would start its own decoder per strip. Swap each
+        // for a canvas that usePlatePreview paints from the one real video.
+        face.querySelectorAll('video').forEach((video) => {
+          const mirror = document.createElement('canvas');
+          mirror.className = video.className;
+          mirror.dataset.paperVideoMirror = String(index);
+          mirror.setAttribute('aria-hidden', 'true');
+          video.replaceWith(mirror);
         });
         strip.append(face);
         fragment.append(strip);

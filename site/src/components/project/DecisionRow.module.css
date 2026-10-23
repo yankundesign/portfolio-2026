@@ -1,0 +1,41 @@
+.decision {
+  margin: clamp(2.75rem, 5vw, 4rem) 0 0;
+  padding-top: clamp(1.5rem, 3vw, 2rem);
+  border-top: 1px solid var(--ink-faint);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(1.25rem, 2.4vw, 1.5rem);
+  line-height: 1.25;
+  letter-spacing: -0.012em;
+  color: var(--ink);
+  margin: 0 0 1rem;
+  font-variation-settings: 'opsz' 96;
+  text-wrap: balance;
+}
+
+.plates {
+  margin: clamp(1.5rem, 3vw, 2.25rem) 0 0;
+}
+
+/* The chosen screen takes about two thirds; the weighed-against one
+   sits beside it, top-aligned, a third of the width. */
+.pair {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: clamp(1rem, 2.5vw, 1.75rem);
+  align-items: start;
+}
+
+/* Two classes, so it outranks EditorialPlate's own plate margin. */
+.plates .plate {
+  margin: 0;
+}
+
+@media (max-width: 720px) {
+  .pair {
+    grid-template-columns: 1fr;
+  }
+}

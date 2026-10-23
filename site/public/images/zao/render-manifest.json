@@ -1,0 +1,33 @@
+{
+  "source": "yankundesign/zao-design-system",
+  "sourceCommit": "28a85b813391fa00bd6fce1c07b651aa2a283638",
+  "renderer": "Chromium · lossless PNG",
+  "deviceScaleFactor": 3,
+  "cssWidth": 1120,
+  "assets": [
+    {
+      "name": "workspace.png",
+      "width": 3360,
+      "height": 2445,
+      "bytes": 497744
+    },
+    {
+      "name": "parts.png",
+      "width": 3360,
+      "height": 2445,
+      "bytes": 810619
+    },
+    {
+      "name": "button-anatomy.png",
+      "width": 3360,
+      "height": 1485,
+      "bytes": 81639
+    },
+    {
+      "name": "two-readers.png",
+      "width": 3360,
+      "height": 1026,
+      "bytes": 143489
+    }
+  ]
+}

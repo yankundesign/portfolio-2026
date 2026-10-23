@@ -17,7 +17,6 @@ import {
   smartSearchProse,
   reportDataAnalysisProse,
   customReportProse,
-  aiInsightsProse,
   outcomeProse,
   nextProse,
   proofs,
@@ -45,12 +44,10 @@ import styles from './ChaiProject.module.css';
  *   7. Report Analysis  two sub-beats:
  *                         · 6.1 Report + data analysis → widgets — 3 plates
  *                         · 6.2 Custom report generation         — 2 plates
- *   8. Active Troubleshooting
- *                       AI-generated insights, one composite plate
- *   9. Outcome          3% → 18% display + context paragraph
- *  10. Next             transition into the Control Hub Agentic case study
- *  11. Credits          role-only, no names
- *  12. Colophon         tiny mono footer
+ *   8. Outcome          3% → 18% display + context paragraph
+ *   9. Next             transition into the Control Hub Agentic case study
+ *  10. Credits          role-only, no names
+ *  11. Colophon         tiny mono footer
  *
  * Content comes from site/src/data/chaiContent.ts. Prose slots that
  * are null render a TodoSlot — explicit placeholder, never lorem ipsum.
@@ -200,22 +197,6 @@ export default function ChaiProject() {
               <EditorialPlate figure={figures.customReport1} />
               <EditorialPlate figure={figures.customReport2} />
             </div>
-          </section>
-
-          {/* ---- Beat 7 · Active Troubleshooting -------------------- */}
-          <section id="proof-3" aria-label="AI-generated insights" className={styles.proof}>
-            <SectionHeader label="AI-generated insights" summary={proofs.aiInsights.summary} />
-            {aiInsightsProse ? (
-              <ProseBlock paragraphs={aiInsightsProse} />
-            ) : (
-              <TodoSlot
-                beat="Beat 7 · Active Troubleshooting"
-                hint="Reactive troubleshooting → proactive insight → recommended action → adjustable generation rules."
-                outlineRef="01-content/chai.md · Beat 7"
-                size="md"
-              />
-            )}
-            <EditorialPlate figure={figures.aiInsights} />
           </section>
 
           {/* ---- Beat 8 · Outcome ---------------------------------- */}

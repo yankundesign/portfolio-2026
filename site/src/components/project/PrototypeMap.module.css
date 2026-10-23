@@ -1,0 +1,168 @@
+.figure {
+  margin: clamp(2rem, 4vw, 3rem) 0 clamp(2.5rem, 5vw, 4rem);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.moves {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  /* Each move is as wide as its stops; set inline from the data. */
+  grid-template-columns: var(--map-columns, 1fr);
+  column-gap: 0;
+  align-items: stretch;
+}
+
+.move {
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  row-gap: 0.75rem;
+  min-width: 0;
+}
+
+/* Move label on a hand-drawn bracket. */
+.bracket {
+  margin: 0 0.6rem;
+}
+
+.moveLabel {
+  margin: 0 0 0.15rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  letter-spacing: var(--chrome-tracking);
+  text-transform: uppercase;
+  color: var(--ink);
+  text-align: center;
+}
+
+.bracketRule {
+  height: 12px;
+}
+
+/* The line runs under every mark. Moves sit edge to edge (no column
+   gap), so the three hand-drawn runs meet as one line. */
+.track {
+  position: relative;
+}
+
+.line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 22px;
+}
+
+.stops {
+  position: relative;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: space-around;
+}
+
+.stop {
+  position: relative;
+}
+
+.stopLink {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  color: inherit;
+  text-decoration: none;
+  padding: 0 0.25rem;
+}
+
+.stopLink:focus-visible {
+  outline: 1.5px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.mark {
+  transition: transform var(--duration-hover) var(--ease-out);
+}
+
+.stopLink:hover .mark {
+  transform: scale(1.12);
+}
+
+.stopLabel {
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.stopLink:hover .stopLabel {
+  color: var(--ink);
+}
+
+/* Cloud Control, underneath. */
+.ground,
+.groundEmpty {
+  align-self: end;
+  margin: 0.5rem 0.6rem 0;
+  min-height: 3.6rem;
+}
+
+.groundInner {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.15rem;
+  min-height: 3.6rem;
+  padding: 0.55rem 0.85rem;
+}
+
+.groundLabel {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1rem;
+  line-height: 1.2;
+  color: var(--ink);
+}
+
+.groundFaint {
+  color: var(--ink-soft);
+  opacity: 0.75;
+}
+
+.groundNote {
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.caption {
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+  line-height: 1.6;
+}
+
+@media (max-width: 640px) {
+  .moves {
+    grid-template-columns: 1fr;
+    row-gap: 1.75rem;
+  }
+
+  .groundEmpty {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mark {
+    transition: none;
+  }
+}

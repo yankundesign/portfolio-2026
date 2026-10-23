@@ -1,47 +1,12 @@
-/* ─── NotebookTransition — desk → canvas signature transition ────────────────
- *
- * Full-screen overlay. Mounted at the app root, fixed-position so it covers
- * the route content during the open/close choreography.
- *
- * Two layers (v1.2 simplification), each animated separately:
- *
- *   .spreadLayer   The open-notebook spread. Fixed at canvas-centered
- *                   geometry from the first frame; only opacity animates.
- *                   When closed, opacity 0 — the spread is dormant in
- *                   the destination position.
- *   .coverLayer    The rotating notebook. Position and size morph from
- *                   desk-rect to spread-binding-center-rect. Rotation hinges
- *                   around its left edge (the spine). Uses the SAME asset
- *                   as the desk (`/plate/notebook.webp`) so the start/end
- *                   frames are pixel-identical to the desk's static image
- *                   — the overlay can fade in/out invisibly.
- *   .background    Paper-coloured wash. Covers the route swap by going
- *                   opaque mid-transition, then fading out to reveal the
- *                   destination route's content.
- *
- * Z-order (last-in-DOM wins): cover > spread > bg. The cover paints on
- * top of the spread so the spread reveals as the cover rotates away.
- *
- * NOTE: v1.1 had a third .closedLayer for the matched-pixel handoff at
- * each end of the timeline. v1.2 retired it: the cover IS the asset
- * matched to the desk, so a separate "closed" layer was redundant and
- * actually CAUSED the size mismatch (the closed asset had a different
- * aspect ratio than the desk asset, so it appeared narrower).
- * ────────────────────────────────────────────────────────────────────────── */
+/* Desk ↔ canvas portal v2. Every visible book surface shares one camera
+ * transform. The back of the cover and the left page are the same bitmap. */
 
 .root {
   position: fixed;
   inset: 0;
   z-index: 1000;
-  /* Perspective lives on the wrapper so the cover's rotateY hinge feels
-   * dimensional. Without this, the rotation is a flat skew. The token is
-   * tunable — 1600px is the PRD default; larger = more subtle, smaller =
-   * more pronounced. */
   perspective: var(--transition-perspective);
   perspective-origin: 50% 50%;
-  /* Idle: invisible and click-through. The component flips this to auto
-   * during transitions so the user can't click through to elements that
-   * are being animated. */
   pointer-events: none;
 }
 
@@ -49,192 +14,243 @@
   pointer-events: auto;
 }
 
-/* ─── Background ──────────────────────────────────────────────────────────── */
-
 .background {
   position: absolute;
   inset: 0;
   background: var(--paper);
-  /* No subtle gradient or chrome here. Plain paper. The spread + cover
-   * layers paint on top — they're the visible drama. */
 }
 
-/* ─── Spread layer ────────────────────────────────────────────────────────── */
-
-.spreadLayer {
+.book {
   position: absolute;
-  /* Inline left/top/width/height set by the component (computed canvas-spread
-   * geometry). Only opacity is animated by Framer Motion. */
-  pointer-events: none;
-  transform-origin: 50% 50%;
-}
-
-.spreadImg {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  user-select: none;
-  -webkit-user-drag: none;
-  /* Drop shadow matches NotebookSpread.module.css so the overlay's spread
-   * reads identically to the canvas's spread when they're stacked. */
-  filter: drop-shadow(0 12px 28px color-mix(in srgb, var(--ink) 16%, transparent));
-}
-
-/* ─── Cover layer ─────────────────────────────────────────────────────────── *
- *
- * Two-element split (v1.2.1) so position morph and rotation can animate
- * INDEPENDENTLY without their `transform` strings clobbering each other:
- *
- *   .coverLayer (wrapper) — handles position + size + lift translateY.
- *                            Animated via inline left/top/width/height + a
- *                            transform of just `translate3d`. No rotation
- *                            here.
- *   .coverFace (child)    — handles rotateY around the spine. It carries
- *                            the front image plus a paper-colored back
- *                            face, so the cover reads as two-sided when
- *                            it passes 90deg.
- *
- * Why this matters: the rotation needs ease-in-out (so the visible 0°→90°
- * portion gets enough time for the eye to register it) while the position
- * morph wants ease-out-expo (confident decel into the binding). These are
- * different curves, so they stay on separate GSAP tweens. Splitting onto
- * parent + child keeps the transform channels independent.
- * ────────────────────────────────────────────────────────────────────────── */
-
-.coverLayer {
-  position: absolute;
-  /* Inline left/top/width/height set by the component. Transform is
-   * just `translate3d(0, ty, 0)` for the lift offset. No rotation. */
+  transform-origin: 0 0;
   transform-style: preserve-3d;
   pointer-events: none;
 }
 
-.coverFace {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  transform-style: preserve-3d;
-  /* Spine pivot for the rotation. The img fills the wrapper so this is
-   * also the wrapper's left edge — same pivot point either way. */
-  transform-origin: 0% 50%;
-}
-
-.rootActive .coverLayer {
-  /* v1.4 FLIP model: the rect (left/top/width/height) is a static anchor
-   * set once per choreography — only the transform animates. */
+.rootActive .book,
+.rootActive .cover,
+.rootActive .pageShadow,
+.rootActive .shadowLeft {
   will-change: transform;
 }
 
-.rootActive .coverFace {
-  will-change: transform;
+/* Static blurred contact plates sit behind the photographed paper. Their
+ * opacity and horizontal extent move; their blur never does. */
+.shadowRight,
+.shadowLeft {
+  position: absolute;
+  top: calc(3.1% + 12px);
+  height: 96.5%;
+  width: 49.57%;
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--ink) 16%, transparent);
+  filter: blur(28px);
+  pointer-events: none;
+  opacity: 0;
 }
 
-.coverImg,
-.coverBack {
+.shadowRight {
+  left: 50%;
+}
+
+.shadowLeft {
+  left: 0.43%;
+  transform-origin: 100% 50%;
+}
+
+/* Only the right board exists until the front cover lies flat. The clip
+ * changes once at touchdown, in the same frame the cover disappears. */
+.pages {
   position: absolute;
   inset: 0;
+  z-index: 1;
+  clip-path: inset(0 0 0 50%);
+  opacity: 0;
+}
+
+.pages > img {
   display: block;
   width: 100%;
   height: 100%;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-}
-
-.coverImg {
-  object-fit: contain;
+  object-fit: fill;
   user-select: none;
   -webkit-user-drag: none;
-  filter: drop-shadow(0 8px 18px color-mix(in srgb, var(--ink) 14%, transparent));
-  image-rendering: -webkit-optimize-contrast;
 }
 
-.coverBack {
-  /* The inside of the cover is intentionally abstract: paper, ink rules,
-   * and a spine gutter. It is visible only after the cover passes 90deg,
-   * replacing the previous "cover disappears" beat with a more physical
-   * two-sided object without introducing another bitmap asset. */
-  box-sizing: border-box;
-  background:
-    linear-gradient(
-      90deg,
-      color-mix(in srgb, var(--ink) 18%, transparent) 0,
-      color-mix(in srgb, var(--ink) 9%, transparent) 5%,
-      transparent 18%
-    ),
-    linear-gradient(
-      0deg,
-      color-mix(in srgb, var(--ink) 5%, transparent) 0 1px,
-      transparent 1px 18px
-    ),
-    var(--paper);
-  border: 1px solid color-mix(in srgb, var(--ink) 18%, transparent);
-  box-shadow:
-    inset 10px 0 18px color-mix(in srgb, var(--ink) 8%, transparent),
-    inset -1px 0 0 color-mix(in srgb, var(--ink) 8%, transparent);
-  filter: drop-shadow(0 8px 18px color-mix(in srgb, var(--ink) 12%, transparent));
-  transform: rotateY(180deg);
+/* Both surfaces hold a full-spread snapshot in the same local coordinates.
+ * The right-page clip and the turning cover show their respective halves. */
+.pagesContent {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
 }
 
+.pagesContent *,
+.backContent * {
+  animation: none !important;
+  transition: none !important;
+}
+
+.pages::after,
 .coverBack::before {
   content: '';
   position: absolute;
-  left: 9%;
-  top: 10%;
-  width: 32%;
-  height: 16%;
-  border: 1px solid color-mix(in srgb, var(--ink) 18%, transparent);
-}
-
-.coverBack::after {
-  content: '';
-  position: absolute;
-  left: 9%;
-  top: 30%;
-  width: 42%;
-  height: 1px;
-  background: color-mix(in srgb, var(--ink) 16%, transparent);
-  box-shadow:
-    0 16px 0 color-mix(in srgb, var(--ink) 10%, transparent),
-    0 32px 0 color-mix(in srgb, var(--ink) 8%, transparent);
-}
-
-.spineShadow {
-  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--paper) 18%, transparent);
   pointer-events: none;
+}
+
+/* Light retreats toward the gutter as the right-hand board is uncovered. */
+.pageShadow {
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  top: 3.1%;
+  width: 49.57%;
+  height: 96.5%;
+  background: linear-gradient(
+    90deg,
+    var(--ink) 0,
+    color-mix(in srgb, var(--ink) 60%, transparent) 36%,
+    transparent 100%
+  );
+  mix-blend-mode: multiply;
+  transform-origin: 0 50%;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.gutter {
+  position: absolute;
+  z-index: 3;
+  left: calc(50% - 3px);
+  top: 4%;
+  width: 6px;
+  height: 92%;
   border-radius: 999px;
-  background:
-    linear-gradient(
-      90deg,
-      transparent,
-      color-mix(in srgb, var(--ink) 20%, transparent) 44%,
-      color-mix(in srgb, var(--ink) 26%, transparent) 50%,
-      color-mix(in srgb, var(--ink) 12%, transparent) 58%,
-      transparent
-    );
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--ink) 20%, transparent) 45%,
+    color-mix(in srgb, var(--ink) 28%, transparent) 52%,
+    transparent
+  );
   filter: blur(1.5px);
-  transform-origin: 50% 50%;
+  pointer-events: none;
 }
 
-/* ─── Reduced motion ──────────────────────────────────────────────────────── */
-
-.reducedMotion .coverLayer,
-.reducedMotion .spreadLayer,
-.reducedMotion .spineShadow {
-  /* Hide the morphing layers entirely under reduced motion — only the
-   * background paper cross-fades. Cleaner than animating to a static
-   * frame. */
-  display: none;
+.cover {
+  position: absolute;
+  z-index: 4;
+  left: 50%;
+  top: 0;
+  width: 50%;
+  height: 100%;
+  transform-origin: 0 50%;
+  transform-style: preserve-3d;
+  pointer-events: none;
 }
 
-/* ─── Asset preload ───────────────────────────────────────────────────────── */
+/* The visible closed-cover board begins 7.18% into its image. This
+ * negative offset puts that board edge on the real spine. */
+.coverFront {
+  position: absolute;
+  left: -8.2%;
+  top: -1.23%;
+  width: 114.2%;
+  height: 104.75%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  isolation: isolate;
+}
+
+.coverFront img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.frontShade {
+  position: absolute;
+  inset: 0;
+  background: var(--ink);
+  mix-blend-mode: multiply;
+  -webkit-mask-image: url('/plate/notebook.webp');
+  mask-image: url('/plate/notebook.webp');
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  pointer-events: none;
+  opacity: 0;
+}
+
+/* At -180 degrees this is pixel-aligned with the left half of .pages. */
+.coverBack {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  isolation: isolate;
+  background: url('/canvas/open-notebook.webp') 0 0 / 200% 100% no-repeat;
+  transform: rotateY(180deg);
+  overflow: hidden;
+}
+
+.backContent {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 200%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.backShade {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  background: linear-gradient(90deg, var(--ink), transparent 70%);
+  mix-blend-mode: multiply;
+  pointer-events: none;
+  opacity: 0;
+}
+
+/* The fore-edge remains visible when the board passes through 90 degrees. */
+.coverEdge {
+  position: absolute;
+  left: 99.14%;
+  top: 3.1%;
+  width: 1.2%;
+  height: 96.5%;
+  margin-left: -0.6%;
+  background: var(--ink);
+  box-shadow: inset -1px 0 0 color-mix(in srgb, var(--paper) 55%, transparent);
+  transform: rotateY(90deg);
+  backface-visibility: visible;
+}
 
 .preload {
   position: absolute;
+  left: -9999px;
+  top: -9999px;
   width: 1px;
   height: 1px;
   opacity: 0;
   pointer-events: none;
-  left: -9999px;
-  top: -9999px;
+}
+
+.reducedMotion .book {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .book {
+    display: none;
+  }
 }

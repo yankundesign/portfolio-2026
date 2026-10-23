@@ -4,6 +4,84 @@ Track design and build decisions as they're made.
 
 ---
 
+## 2026-10-23 · Canvas order, and a new Agentic hover loop
+
+Canvas order is now CHAI, Control Hub Agentic, Ebb, ZAO (spread one), then SAP Fieldglass and Build with AI. Agentic moved from fourth to second; ZAO from second to fourth (Yankun's call). Order is the array order in `data/projects.ts`; the plates don't show fig numbers, so those were left alone.
+
+Yankun replaced the Agentic cover with the Assistant mid-run (steps 1–2 complete, 3 in progress, 4 not started). The hover loop is rebuilt around it. It pushes into the step list, step 3 completes and step 4 runs and completes, then the run resets during a glide up, replays to the cover's state, and pulls back. Every changing pixel is cut from the cover itself, so states match it exactly; frame 0 is the cover and the loop seam is invisible. The pipeline is now Swift (AVFoundation for the H.264 MP4) plus Playwright's bundled ffmpeg (VP8 for the WebM), because PIL, Python Playwright and Homebrew ffmpeg aren't installed. The previous loop and its source moved to `02-assets/control-hub-agentic-preview-motion/v1/`. **Source:** that folder's README.
+
+---
+
+## 2026-10-23 · Control Hub Agentic case study v2 — the real story
+
+The Agentic page now tells the version the Chrome Disco deck tells: one task (clone ATA-1 to ATA-2), five prototypes, two turns caused by platform moves above the team, and a landing on Cloud Control Workflows. It no longer tells the idealized four-surface framework with three proofs. Status is stated at the top: prototype, never shipped. The Cisco Live buy-in claim is gone; it was unverified. Canvas title "Control Hub AI Agents" became "Control Hub Agentic", since the key call was *not* an agent.
+
+Structure is answer first, then the story: the task → where it ended up (full run plus four stills, so it reads without pressing play) → how we got there (explore · turn · bridge, with the deck's cut timeline map back as the section's index) → four decisions (my screen large, the option it beat small and dashed) → how I worked (widget studio) → where the work went → what I learned. Headings are the deck's slide titles. Prose is Yankun's deck notes condensed into a first draft; Yankun rewrites before ship. Diagrams are redrawn as HTML/inline SVG rather than exported from Figma (Figma's SVG was 2.2 MB with text outlined). Cisco's October 22 approval of the deck screens covers the site (Yankun, October 23). Names, an email and `%Impacted%` placeholders are cropped out of the Workflows and audit-log captures. Old four-surface images stay in `public/` but are no longer referenced. **Source:** 00-brief/prd-agentic-case-study-v2.md.
+
+**Revision, same day (Yankun's notes).** The hero recording keeps its own proportions instead of the 16:10 crop (`aspectRatio` on the header's hero video). Prototype 04 shows the full skills page. The bridge beat follows slide 32: the quote on ink with the full, original Workflows screenshot beside it. Prototype 05 follows slide 33: two panels standing on a dashed Workflows ground. The pivot, layers and map diagrams are now hand-drawn in the deck's style: single wobbly ink strokes, soft uneven corners, overshooting rings, a lidded box and an open one, washes in thinned ink (`--ink-wash`). They come from a small seeded generator (`sketchGeometry.ts`, `Sketch.tsx`) that draws at each element's measured size, so labels stay real text and the rows still turn vertical on phones. The task-path diagram stays geometric, like its slide.
+
+---
+
+## 2026-10-17 · Google interview prep moves out
+
+The Chrome Disco deck and its prep now live in `/Users/yankunwang/google-interview`, with their own `CLAUDE.md`, `AGENTS.md`, and decisions log. The eleven Google panel deck entries from October 15–17 moved there too. Moved: `presentation/Google/`, `presentation/theme-explorations/google-chrome-disco/` (now `theme/`), and `presentation/google-ai-foundations-onsite-prep.md` (now `reference/`, not active). The case-study outlines in `presentation/` and the site's content files stay here; the interview project reads them in place.
+
+---
+
+## 2026-09-30 · Transition v2 close — shut, pull back, set down
+
+The close now shuts the cover over a snapshot of the visible project plates while the camera pulls the book and desk back together. At 0.70s the overlay hands the lifted cover to the real desk notebook, which settles over the next 0.20s. The desk is measured after it mounts, so direct `/works` visits and resizes land on the live slot. Closing from a direct link marks the first-visit proof reveal as seen: the close itself is the desk entrance.
+
+Desktop spreads keep their plates and pager on the turning paper. Single-column layouts and plates still entering use a short paper fade; reduced-motion and narrow screens retain the 240ms crossfade. The browser Back animation remains optional. This supersedes the minimum close port in the v2 open decision. No new assets or dependencies. **Source:** 00-brief/prd-desk-canvas-transition-v2-close.md.
+
+---
+
+## 2026-09-30 · Transition v2 — one book, one camera gesture
+
+The desk notebook and canvas spread now share one animated book group. The cover's inside is the left half of the spread image; the right page is revealed as the cover turns. The desk notebook is hidden at takeover, and the desk plate scales with the book until the paper wash covers the route swap. Angular progress also drives the turning shades, page shadow, gutter, and left contact shadow.
+
+**Anchor reversal from v1.4:** the FLIP anchor is now the final spread rect, not the desk rect. The landing frame is larger and needs a crisp, identity-transform raster. The desk image is matched by downscaling that final book at the start. This supersedes v1.4's desk-anchored choice while keeping per-frame movement on transforms and opacity.
+
+The open uses one 160ms trigger and a 1.16s overlay score; the first project plate starts at touchdown. Close uses the same book layers and retains the shorter return and settle. Narrow viewports and reduced-motion users receive the 240ms paper crossfade. No new assets or dependencies. **Source:** 00-brief/prd-desk-canvas-transition-v2.md.
+
+---
+
+## 2026-09-30 · Canvas — Ebb plate breathes on hover
+
+Fig. 03 now plays on hover, using the same system as CHAI and Agentic. The cover is unchanged, so the loop starts and ends on the existing mockup.
+
+**The loop:** it stays on the two phones that are already in the cover and tells the case study's central idea: waiting becomes depositing. "Turn back" takes the weight of a tap. The wave folds into a single mark on the line. The camera glides to the record, where the newest black mark drops in and a breath runs along the ticks. Then back to the intercept, where the three breaths draw again with the red point riding the tip. The whole page takes two slow breaths across the 6 seconds. The phone out of focus goes soft (rack focus) so the eye stays on one screen at a time. I rebuilt only the record ticks and the wave, as layers lifted from the cover. No new text or fonts were set, so nothing can drift from the real screens.
+
+**Why not the real screen recording:** `images/ebb/video.MP4` is the honest capture of the flow, and it stays as fig. 03 in the case study. But its copy ("No rush. Three breaths."), its 13:33 status bar and its record indicator don't match the cover. A hover loop has to begin on the exact cover frame.
+
+WebM ~0.67MB, MP4 ~0.94MB, 60fps, 1280×800. **Source:** Yankun direction, 2026-09-30. Pipeline: `02-assets/ebb-preview-motion/`.
+
+---
+
+## 2026-09-30 · Canvas — Control Hub Agentic plate gets its own preview loop
+
+Fig. 02 now plays on hover, using the same system as CHAI (`preview` field, `usePlatePreview`, 320ms fade, rewind on leave). Its cover is unchanged: the loop starts and ends on the existing mockup.
+
+**The loop:** it all stays inside the one Cloud Control window, since this project is about the work, not a panel. The camera pushes into the plan and "Yes, go ahead" is selected. The five steps check off in order. The camera pulls back as the AI agents page slides in and the cards settle. The agent detail follows, with its On-demand and Schedule triggers ticking on. Then Overview, where the camera pushes into the prompt as it types itself. The plan answers top-down and the camera returns to the cover. That reads as plan → execute → make it repeatable → ask again. Page changes slide the new screen in solid over a dimming old one, so there's no double exposure. 60fps, 180° shutter motion blur, 1280×800. WebM ~1.3MB, MP4 ~1.4MB.
+
+**Source:** Yankun direction, 2026-09-30. Render pipeline and screens: `02-assets/control-hub-agentic-preview-motion/`.
+
+---
+
+## 2026-09-30 · Canvas — CHAI plate plays a 6s preview loop on hover
+
+The fig. 01 plate now moves when hovered or keyboard-focused. The still mockup crossfades (320ms, ease-out) into a 6s loop that starts and ends on that exact still, so neither the fade nor the loop point shows. On leave it fades back and rewinds.
+
+**The loop:** hold on the cover → the camera pushes into the conversation panel while the neighbouring panels fall out of focus, the logo turns once and the answer's bars regrow → the camera glides to the expanded report, where the bars rise, the end-of-life timeline fills dot by dot and the location pins ripple → it pulls back to the cover. The move reads as ask → answer → artifact, which is the case study's argument. Easing is in-out cubic with a slight zoom-out "hop" on the long glide. Camera moves carry a 180° shutter motion blur at 60fps. 1280×800. WebM (VP9, ~1.1MB) first, MP4 (H.264, ~1.4MB) fallback.
+
+**Cover change:** `canvas/mockups/chai.png` is replaced by the composition the loop was built from. Its first two panels are the earlier empty-state and chat screens. The loop needed hi-res sources for every panel, and only that set had them.
+
+**Implementation:** `preview` field on `Project`. `usePlatePreview` owns play, fade and reset. While `usePaperBend` has the print lifted, its 16 cloned strips carry canvas mirrors instead of cloned `<video>` elements. The hook paints each mirror's visible band from the one real video (requestVideoFrameCallback), so there is one decoder and one fetch. The video preloads quietly 1.2s after the canvas mounts. Touch and `prefers-reduced-motion` keep the still: no fetch, no playback.
+
+**Source:** Yankun direction, 2026-09-30. Render pipeline and panel sources: `02-assets/chai-preview-motion/`.
+
+---
+
 ## 2026-08-08 · Canvas v1.1 — Ebb enters at fig. 03; desktop gains a second spread
 
 The canvas project set expands from four to five. Ebb becomes the third project, SAP Fieldglass remains fourth, and Build with AI moves to fifth. Desktop preserves the viewport-fitted promise by showing at most four equal 16:10 plates at once: figures 01–04 remain on the first spread, and figure 05 continues onto a second spread without changing size or hierarchy.

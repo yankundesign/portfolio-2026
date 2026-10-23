@@ -1,0 +1,107 @@
+.identity {
+  position: relative;
+  z-index: 4;
+  margin: 0 0 32px;
+  width: fit-content;
+  max-width: 100%;
+}
+
+.heading {
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: var(--desk-identity-font-size, clamp(2rem, 2.3vw, 4rem));
+  font-weight: 200;
+  font-variation-settings: 'opsz' 144;
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+  width: fit-content;
+  max-width: 100%;
+}
+
+.ink {
+  display: inline-block;
+  max-width: 100%;
+  color: var(--ink);
+}
+
+.word {
+  display: inline-block;
+  /* Fraunces descenders extend beyond its tight display line box. Give
+   * the clipped background paint room without changing the layout box. */
+  padding-block: 0.16em;
+  margin-block: -0.16em;
+}
+
+.phrase {
+  /* Keep the ampersand with Builder when the desktop rail needs two lines. */
+  white-space: nowrap;
+}
+
+@supports ((background-clip: text) or (-webkit-background-clip: text)) and (color: color-mix(in srgb, #16265e 22%, #f4f1ea)) {
+  .word {
+    /* A narrow wash moves across a few letters at a time. Its pale blue center
+     * retains a little ink, with a softer trailing return to full ink. */
+    background-image: linear-gradient(
+      90deg,
+      var(--ink) 0%,
+      var(--ink) 42%,
+      var(--ink-soft) 45%,
+      color-mix(in srgb, var(--ink) 22%, var(--paper)) 49%,
+      color-mix(in srgb, var(--ink) 22%, var(--paper)) 51%,
+      var(--ink-soft) 52%,
+      var(--ink) 53%,
+      var(--ink) 100%
+    );
+    background-size: 200% 100%;
+    background-position: 116% 50%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .identity[data-proof-phase='paper'],
+  .identity[data-proof-phase='rulings'] {
+    /* Reserve the complete text box while the plate is still printing. */
+    visibility: hidden;
+  }
+}
+
+@media (min-width: 1280px) {
+  .identity {
+    position: absolute;
+    /* Follow the cover label at 20% of the source frame's height. The
+     * font offset aligns the painted capitals, rather than the line box. */
+    top: calc(
+      100% - var(--desk-caption-space) - var(--desk-notebook-height) * 0.8 -
+      var(--desk-identity-font-size) * 0.3
+    );
+    left: -24px;
+    /* The rotated sketch begins 1.12 notebook widths left of center.
+     * Reserve a 32–48px gutter between its edge and the identity rail. */
+    max-width: calc(
+      50% + 24px - var(--desk-notebook-width) * 1.12 - clamp(32px, 2vw, 48px)
+    );
+    margin: 0;
+  }
+}
+
+@media (max-width: 767px) {
+  .heading {
+    text-align: center;
+  }
+  .identity {
+    margin-inline: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .word {
+    background: none;
+    color: var(--ink);
+    -webkit-text-fill-color: currentColor;
+  }
+}

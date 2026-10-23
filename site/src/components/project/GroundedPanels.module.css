@@ -1,0 +1,70 @@
+.figure {
+  margin: clamp(2rem, 4vw, 3rem) 0;
+}
+
+/* The APIs list is a tall, narrow capture; the preview is wide. Both
+   wells share one height and the screens sit inside, whole. */
+.panels {
+  display: grid;
+  grid-template-columns: minmax(0, 0.6fr) minmax(0, 1fr);
+  gap: clamp(1rem, 3vw, 2rem);
+  align-items: end;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.label {
+  margin: 0 0 0.75rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  letter-spacing: var(--chrome-tracking);
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.well {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: clamp(15rem, 30vw, 22rem);
+  padding: 0.75rem;
+}
+
+.image {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  box-shadow: 0 6px 18px -10px rgba(22, 38, 94, 0.4);
+}
+
+.footing {
+  align-self: center;
+  width: 22px;
+  height: 2.25rem;
+}
+
+.groundLabel {
+  padding: 1.05rem 1.35rem;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: clamp(1rem, 1.7vw, 1.15rem);
+  color: var(--ink);
+}
+
+@media (max-width: 720px) {
+  .panels {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  /* Stacked, only the last panel stands directly on the ground. */
+  .panel:not(:last-child) .footing {
+    display: none;
+  }
+}

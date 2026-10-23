@@ -180,6 +180,16 @@
   height: auto;
 }
 
+.heroVideo {
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+}
+
+/* Screen recordings keep their own proportions (set inline). */
+.heroVideoNative {
+  object-fit: contain;
+}
+
 .heroPlaceholder {
   min-height: clamp(18rem, 46vw, 34rem);
   display: flex;

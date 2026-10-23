@@ -15,6 +15,33 @@
  * row 2, top-aligned (so the polaroid below isn't crowded).
  */
 
+.composition {
+  --desk-fig-caption-size: 0.75rem;
+  --desk-caption-space: calc(42px + var(--desk-fig-caption-size) * 1.3);
+  --desk-chrome-space: calc(
+    2 * var(--plate-margin) + var(--chrome-top) + var(--chrome-bottom) +
+    2 * var(--chrome-meta-height) + var(--chrome-numbers-gap) +
+    2 * var(--chrome-numbers-to-rule) + 48px
+  );
+  --desk-identity-font-size: clamp(2rem, 2.3vw, 4rem);
+  --desk-identity-space: calc(var(--desk-identity-font-size) * 1.08 + 32px);
+  --desk-notebook-width: max(
+    300px,
+    min(
+      clamp(340px, calc(18vw + 108px), 720px),
+      calc((100svh - var(--desk-chrome-space) - var(--desk-identity-space) - var(--desk-caption-space)) / 1.607)
+    )
+  );
+  --desk-notebook-height: calc(var(--desk-notebook-width) * 1380 / 947);
+  --desk-sketch-overhang: calc(var(--desk-notebook-width) * 0.15);
+  position: relative;
+  width: 100%;
+}
+
+.composition [data-figcaption] {
+  font-size: var(--desk-fig-caption-size);
+}
+
 .scene {
   display: grid;
   grid-template-columns: repeat(8, 1fr);
@@ -23,10 +50,9 @@
   row-gap: 0;
   align-items: start;
   width: 100%;
-  /* No max-width: the 8 object columns share the same geometry as the
-   * chrome's 8 column-number positions, so objects snap to the visible
-   * column rules. Cap at 4K for sanity. */
-  max-width: 2400px;
+  /* Object slots retain their 8-column composition inside 12-column chrome. */
+  max-width: calc(var(--desk-notebook-width) * 25 / 6);
+  padding-top: var(--desk-sketch-overhang);
   margin: 0 auto;
   /* Anchor for absolutely-positioned scene overlays (DeskWayfinder). */
   position: relative;
@@ -92,16 +118,20 @@
   pointer-events: none;
 }
 
-.scene[data-proof-phase='objects'] .slot,
-.scene[data-proof-phase='objects'] > :not(.slot) {
+.scene[data-proof-phase='objects'] .slot {
   opacity: 0;
   filter: blur(2px);
   transform: translateY(10px);
 }
 
+.scene[data-proof-phase='objects'] [data-desk-support] {
+  opacity: 0;
+  transform: translateY(4px);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .scene[data-proof-phase='objects'] .slot,
-  .scene[data-proof-phase='objects'] > :not(.slot) {
+  .scene[data-proof-phase='objects'] [data-desk-support] {
     opacity: 1;
     filter: none;
     transform: none;
@@ -110,13 +140,28 @@
 
 /* ─── Responsive ─── */
 
+@media (min-width: 1280px) {
+  .composition {
+    --desk-identity-font-size: clamp(3rem, 2.5vw, 4rem);
+    --desk-identity-space: 0px;
+  }
+}
+
 @media (max-width: 1279px) {
+  .composition {
+    --desk-notebook-width: 300px;
+  }
   .scene {
     column-gap: 16px;
+    max-width: none;
   }
 }
 
 @media (max-width: 1023px) {
+  .composition {
+    --desk-notebook-width: 240px;
+    --desk-sketch-overhang: 0px;
+  }
   .scene {
     grid-template-columns: repeat(6, 1fr);
     column-gap: 16px;
@@ -139,6 +184,9 @@
 }
 
 @media (max-width: 767px) {
+  .composition {
+    --desk-notebook-width: 200px;
+  }
   .scene {
     display: flex;
     flex-direction: column;

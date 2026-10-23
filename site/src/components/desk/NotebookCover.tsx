@@ -1,9 +1,10 @@
-import { useCallback } from 'react';
+import { useCallback, useLayoutEffect, useRef } from 'react';
 import FigCaption from '../shared/FigCaption';
 import { gsap } from '../../interactions/gsap';
 import { useObjectTilt } from '../../interactions/useObjectTilt';
 import { useReducedMotion } from '../../interactions/useReducedMotion';
-import { useTransitionState } from '../../interactions/useTransitionState';
+import { TRANSITION_EVENTS, useTransitionState } from '../../interactions/useTransitionState';
+import type { TransitionState } from '../../interactions/useTransitionState';
 import styles from './NotebookCover.module.css';
 
 export interface NotebookCoverProps {
@@ -26,11 +27,92 @@ export interface NotebookCoverProps {
  * hover/click state frame-for-frame.
  */
 export default function NotebookCover({ className }: NotebookCoverProps) {
-  const { openNotebook } = useTransitionState();
-  const { ref, tiltHandlers } = useObjectTilt<HTMLButtonElement>();
+  const { state, openNotebook } = useTransitionState();
+  const { ref, suspend, resume, tiltHandlers } = useObjectTilt<HTMLButtonElement>();
   const reducedMotion = useReducedMotion();
+  const openingRef = useRef(false);
+  const landingOnMount = useRef(
+    state === 'closing' &&
+      !reducedMotion &&
+      typeof window !== 'undefined' &&
+      window.matchMedia('(min-width: 768px)').matches,
+  );
+
+  useLayoutEffect(() => {
+    const button = ref.current;
+    if (!landingOnMount.current || !button) return;
+    const body = button.querySelector<HTMLElement>(
+      '[data-transition-visual-source="notebook"]',
+    );
+    if (!body) return;
+
+    // The overlay measures this lifted, hidden body after the desk mounts.
+    // Layout effect runs before its first paint, so there is no second cover.
+    const previousVisibility = body.style.visibility;
+    suspend();
+    button.classList.add(styles.landing);
+    body.style.visibility = 'hidden';
+    gsap.set(button, {
+      '--object-tilt-x': '0deg',
+      '--object-tilt-y': '0deg',
+      '--object-lift-y': '-14px',
+      '--object-scale': 1.025,
+      '--object-shadow-x': '0px',
+      '--object-shadow-y': '24px',
+      '--object-shadow-scale': 1.08,
+      '--object-edge-opacity': 0,
+    });
+
+    let setDown: gsap.core.Tween | null = null;
+    const onState = (event: Event) => {
+      const next = (event as CustomEvent<{ state: TransitionState }>).detail?.state;
+      if (next !== 'idle' || setDown) return;
+
+      // The overlay hides its book and broadcasts idle in the same tick.
+      // Reveal the real notebook at the lifted pose, then let it settle.
+      body.style.visibility = previousVisibility;
+      setDown = gsap.to(button, {
+        '--object-lift-y': '0px',
+        '--object-scale': 1,
+        '--object-shadow-y': '14px',
+        '--object-shadow-scale': 1.03,
+        '--object-edge-opacity': 0.78,
+        duration: 0.2,
+        ease: 'power2.out',
+        onComplete: () => {
+          button.classList.remove(styles.landing);
+          for (const property of [
+            '--object-tilt-x',
+            '--object-tilt-y',
+            '--object-lift-y',
+            '--object-scale',
+            '--object-shadow-x',
+            '--object-shadow-y',
+            '--object-shadow-scale',
+            '--object-edge-opacity',
+          ]) {
+            button.style.removeProperty(property);
+          }
+          resume();
+        },
+      });
+    };
+
+    window.addEventListener(TRANSITION_EVENTS.state, onState);
+    return () => {
+      window.removeEventListener(TRANSITION_EVENTS.state, onState);
+      setDown?.kill();
+      body.style.visibility = previousVisibility;
+      button.classList.remove(styles.landing);
+      resume();
+    };
+  }, [ref, resume, suspend]);
 
   const handleOpen = useCallback(() => {
+    if (openingRef.current) return;
+    openingRef.current = true;
+    suspend();
+
     const button = ref.current;
     if (reducedMotion || !button) {
       openNotebook();
@@ -38,23 +120,20 @@ export default function NotebookCover({ className }: NotebookCoverProps) {
     }
 
     gsap.killTweensOf(button);
-    gsap
-      .timeline({ onComplete: openNotebook })
-      .to(button, {
-        '--object-scale': 1.025,
-        '--object-lift-y': '-8px',
-        '--object-shadow-y': '18px',
-        duration: 0.06,
-        ease: 'power2.out',
-      })
-      .to(button, {
-        '--object-scale': 1.025,
-        '--object-lift-y': '-14px',
-        '--object-shadow-y': '24px',
-        duration: 0.12,
-        ease: 'power3.out',
-      });
-  }, [openNotebook, reducedMotion, ref]);
+    button.classList.add(styles.opening);
+    gsap.to(button, {
+      '--object-tilt-x': '0deg',
+      '--object-tilt-y': '0deg',
+      '--object-lift-y': '-14px',
+      '--object-scale': 1.025,
+      '--object-shadow-x': '0px',
+      '--object-shadow-y': '24px',
+      '--object-edge-opacity': 0,
+      duration: 0.16,
+      ease: 'power2.out',
+      onComplete: openNotebook,
+    });
+  }, [openNotebook, reducedMotion, ref, suspend]);
 
   return (
     <figure className={`${styles.figure} ${className ?? ''}`}>

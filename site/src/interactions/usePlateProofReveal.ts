@@ -38,7 +38,7 @@ function shouldShowStartHint(): boolean {
   return window.localStorage.getItem(NOTEBOOK_OPENED_KEY) !== 'true';
 }
 
-function markRevealSeen(): void {
+export function markRevealSeen(): void {
   if (typeof window === 'undefined') return;
   window.sessionStorage.setItem(REVEAL_SEEN_KEY, 'true');
 }

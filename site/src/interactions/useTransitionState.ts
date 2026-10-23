@@ -168,17 +168,31 @@ export function readSourceRect(name: 'notebook' | 'spread'): TransitionRect | nu
  * user is on /works and the desk's notebook is NOT in the DOM, so a
  * direct measurement returns null).
  *
- * Without this cache, the close falls back to a hardcoded 340px-wide
- * rect — but the desk's actual notebook is responsive (340/400/480px
- * across viewports), so the cover lands at a too-small size at the end
- * of close, making the reveal-to-desk a visible jump.
+ * The responsive fallback has only a provisional centered position. The
+ * cache preserves the measured position while the viewport is unchanged;
+ * resizing invalidates it so the close cannot reuse obsolete geometry.
  */
-let cachedDeskRect: TransitionRect | null = null;
+let cachedDeskRect: {
+  rect: TransitionRect;
+  viewportWidth: number;
+  viewportHeight: number;
+} | null = null;
 
 export function cacheDeskRect(rect: TransitionRect): void {
-  cachedDeskRect = rect;
+  if (typeof window === 'undefined') return;
+  cachedDeskRect = {
+    rect,
+    viewportWidth: window.innerWidth,
+    viewportHeight: window.innerHeight,
+  };
 }
 
 export function getCachedDeskRect(): TransitionRect | null {
-  return cachedDeskRect;
+  if (
+    typeof window === 'undefined' ||
+    !cachedDeskRect ||
+    cachedDeskRect.viewportWidth !== window.innerWidth ||
+    cachedDeskRect.viewportHeight !== window.innerHeight
+  ) return null;
+  return cachedDeskRect.rect;
 }

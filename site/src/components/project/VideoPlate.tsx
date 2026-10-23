@@ -89,6 +89,7 @@ export default function VideoPlate({ figure, className }: VideoPlateProps) {
             ref={videoRef}
             className={hasBackground ? styles.compositeVideo : styles.image}
             aria-label={figure.alt}
+            poster={figure.poster}
             controls
             loop
             muted

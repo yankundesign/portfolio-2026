@@ -25,9 +25,11 @@ export const header = {
   yearRange: '2024 — present',
   context: 'Cisco Webex · Control Hub',
   role: 'Product Designer, sole design lead',
-  heroImage: {
-    src: '/images/chai/hero.png',
-    alt: 'CHAI in Webex Control Hub — the assistant in its native console.',
+  heroVideo: {
+    webm: '/canvas/previews/chai-preview.webm',
+    mp4: '/canvas/previews/chai-preview.mp4',
+    poster: '/canvas/mockups/chai.png',
+    alt: 'CHAI interfaces moving from the assistant conversation to an expanded report and back.',
   },
 } as const;
 
@@ -91,8 +93,7 @@ export const aiInsightsProse: ProseSlot = [
 
 /** Beat 8 — Outcome. What 3% → 18% means in lived terms. */
 export const outcomeProse: ProseSlot = [
-  "The number I care about is not that more people opened a chatbot. It is that admins began entering CHAI from the moments where Control Hub became too dense to read alone: a failed search, a delivered report, a live dashboard, a device issue.",
-  "Monthly adoption moved from 3% to 18% because the assistant stopped feeling like a separate destination. It became a layer of help attached to the work.",
+  "Monthly adoption across Control Hub rose from 3% to 18% between 2024 and 2025. Over that period, I redesigned CHAI from a help-only chatbot into contextual entry points across search, reports, dashboards, and device workflows. The adoption figure covers CHAI across Control Hub; it doesn’t isolate the effect of any one feature.",
 ];
 
 /** Beat 9 — Next. Transition to the Control Hub Agentic Experience case study. */
@@ -164,6 +165,11 @@ export interface Figure {
   linkTo?: string;
   /** Plate width: 'column' (inside prose col), 'medium' (breaks out), 'wide' (page width). */
   width?: 'column' | 'medium' | 'wide';
+  /**
+   * 'dashed' — another team's screen, or an option weighed and dropped.
+   * Dashed rule, quieter frame: size and line weight show authorship.
+   */
+  variant?: 'dashed';
 }
 
 export const figures = {
@@ -333,7 +339,6 @@ export const sections = [
   { id: 'evolution', label: 'Evolution' },
   { id: 'proof-1', label: 'Smart Search' },
   { id: 'proof-2', label: 'Report Analysis' },
-  { id: 'proof-3', label: 'AI-generated insights' },
   { id: 'outcome', label: 'Outcome' },
   { id: 'next', label: 'Next' },
   { id: 'credits', label: 'Credits' },

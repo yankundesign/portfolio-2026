@@ -18,7 +18,7 @@ import styles from './CanvasRoute.module.css';
  * Project-detail returns skip these entrance animations entirely, so they
  * do not inherit this wait.
  */
-const CONTENT_ENTER_DELAY_AFTER_TRANSITION = 560;
+const CONTENT_ENTER_DELAY_AFTER_TRANSITION = 360;
 const DESKTOP_CANVAS_QUERY = '(min-width: 1101px)';
 const PROJECTS_PER_SPREAD = 4;
 
@@ -77,8 +77,13 @@ export default function CanvasRoute() {
   // Capture the transition state once on mount. The staged canvas entrance
   // only belongs to the desk -> canvas opening; direct /works visits and
   // returns from project detail should show the full canvas immediately.
+  // The narrow-screen portal uses a short paper crossfade, so its plates
+  // are already on the page when that crossfade clears.
   const canvasEntryMotion = useMemo(() => {
-    return state === 'opening' ? 'staged' : 'instant';
+    const narrowCrossfade =
+      typeof window !== 'undefined' &&
+      window.matchMedia('(max-width: 767px)').matches;
+    return state === 'opening' && !narrowCrossfade ? 'staged' : 'instant';
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const contentEnterDelay =
@@ -200,7 +205,8 @@ export default function CanvasRoute() {
 
             {isDesktop && pageCount > 1 && (
               <div
-                className={`${styles.spreadPager} ${currentPage > 0 ? styles.spreadPagerContinuation : ''}`}
+                className={styles.spreadPager}
+                data-book-content
               >
                 <CanvasPager
                   currentPage={currentPage}
@@ -214,7 +220,7 @@ export default function CanvasRoute() {
 
         {/* Running footer — decorative folio furniture only. The interactive
          * pager is anchored to the project grid above for contrast. */}
-        <div className={styles.runningFooter} aria-hidden="true">
+        <div className={styles.runningFooter} data-canvas-chrome aria-hidden="true">
           <span aria-hidden="true">note / 001 — works</span>
         </div>
       </div>

@@ -1,0 +1,158 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+  html,body{margin:0;background:#555;overflow:hidden}
+  #vp{position:relative;width:1280px;height:800px;overflow:hidden;background:#555}
+  .world{position:absolute;left:0;top:0;width:1920px;height:1200px;transform-origin:0 0;will-change:transform}
+  .abs{position:absolute;left:0;top:0}
+  img{display:block}
+  #win{position:absolute;left:211px;top:161px;width:1498px;height:877px;border-radius:8px;overflow:hidden;background:#1a1a1a}
+  .units{position:absolute;left:0;top:0;width:2996px;height:1754px;transform-origin:0 0;transform:scale(.5)}
+  .screen{position:absolute;left:0;top:0;width:2996px;height:1754px;overflow:hidden}
+  .src{position:absolute;left:0;top:0;transform-origin:0 0}
+</style></head>
+<body>
+<div id="vp">
+  <div class="world" id="bgw"><img class="abs" src="layers/bg.png" width="1920" height="1200"></div>
+  <div class="world" id="w">
+    <div id="win"><div class="units">
+      <div class="screen" id="Sagents" style="background:#000"><div class="src" id="agentsSrc" style="transform:scale(1.04245)">
+        <img src="layers/agents-empty.png"></div></div>
+      <div class="screen" id="Sdetail" style="background:#1a1a1a"><div class="src" id="detailSrc" style="transform:scale(1.04245)">
+        <img src="layers/detail.png"></div></div>
+      <div class="screen" id="Sover" style="background:#07080d"><div class="src" id="overSrc" style="transform:scale(.780208)">
+        <img src="layers/overview.png"></div></div>
+      <div class="screen" id="Splan"><div class="src" id="planSrc"><img src="layers/plan.png"></div></div>
+    </div></div>
+  </div>
+</div>
+<script>
+const M = META_JSON;
+const $ = (id) => document.getElementById(id);
+function mk(parent, tag, css, src){const e=document.createElement(tag); e.style.position='absolute'; Object.assign(e.style, css||{}); if(src) e.src=src; parent.appendChild(e); return e;}
+const px=v=>v+'px';
+
+// plan overlays
+const planSrc=$('planSrc');
+const [yx0,yy0,yx1,yy1]=M.yesRow;
+const yes=mk(planSrc,'div',{left:px(yx0),top:px(yy0),width:px(yx1-yx0),height:px(yy1-yy0),borderRadius:'12px',
+  background:'rgba(100,180,250,0.10)',boxShadow:'inset 0 0 0 2px rgba(100,180,250,0.55)',opacity:0});
+const badges=M.badges.map(([x,y,w,h])=>{
+  const b=mk(planSrc,'img',{left:px(x),top:px(y),width:px(w),height:px(h),borderRadius:'8px',opacity:0},'layers/cb-on0.png');
+  return b;
+});
+// agents cards
+const agentsSrc=$('agentsSrc');
+const cards=M.cards.map(([x0,y0,x1,y1],i)=>mk(agentsSrc,'img',{left:px(x0),top:px(y0),width:px(x1-x0),height:px(y1-y0)},`layers/card${i}.png`));
+// detail checkboxes
+const detailSrc=$('detailSrc');
+const cbs=M.checks.map(([x,y],i)=>({
+  off:mk(detailSrc,'img',{left:px(x),top:px(y),width:'30px',height:'30px'},'layers/cb-off.png'),
+  on:mk(detailSrc,'img',{left:px(x),top:px(y),width:'30px',height:'30px'},`layers/cb-on${i}.png`)}));
+// overview prompt typing
+const overSrc=$('overSrc');
+const [px0,py0,px1,py1]=M.prompt;
+mk(overSrc,'div',{left:px(px0),top:px(py0),width:px(px1-px0),height:px(py1-py0),background:'#000'});
+const prompt=mk(overSrc,'img',{left:px(px0),top:px(py0),width:px(px1-px0),height:px(py1-py0)},'layers/prompt.png');
+const caret=mk(overSrc,'div',{left:px(px0),top:px(py0+2),width:'3px',height:px(py1-py0-4),background:'#e8e8e8'});
+
+// easing
+const clamp=(v,a=0,b=1)=>Math.min(b,Math.max(a,v));
+const lerp=(a,b,u)=>a+(b-a)*u;
+const prog=(t,a,b)=>clamp((t-a)/(b-a));
+const inOutCubic=u=>u<.5?4*u*u*u:1-Math.pow(-2*u+2,3)/2;
+const outCubic=u=>1-Math.pow(1-u,3);
+const outQuart=u=>1-Math.pow(1-u,4);
+const outBackSoft=u=>{const c1=0.9,c3=c1+1;return 1+c3*Math.pow(u-1,3)+c1*Math.pow(u-1,2);};
+const inOutSine=u=>-(Math.cos(Math.PI*u)-1)/2;
+
+// camera (cover coords)
+const H={x:960,y:600,z:1};
+const P={x:1093,y:690,z:1.75}, P2={x:1093,y:702,z:1.82};
+const W={x:960,y:600,z:1.04}, D={x:1010,y:632,z:1.1};
+const O={x:1053,y:470,z:1.42}, O2={x:1060,y:474,z:1.48};
+function camLerp(A,B,u){return {x:lerp(A.x,B.x,u),y:lerp(A.y,B.y,u),z:Math.exp(lerp(Math.log(A.z),Math.log(B.z),u))};}
+function camera(t){
+  if(t<0.30) return H;
+  if(t<1.20) return camLerp(H,P,inOutCubic(prog(t,0.30,1.20)));
+  if(t<2.05) return camLerp(P,P2,inOutSine(prog(t,1.20,2.05)));
+  if(t<2.80) return camLerp(P2,W,inOutCubic(prog(t,2.05,2.80)));
+  if(t<3.30) return W;
+  if(t<4.30) return camLerp(W,D,inOutSine(prog(t,3.30,4.30)));
+  if(t<5.00) return camLerp(D,O,inOutCubic(prog(t,4.30,5.00)));
+  if(t<5.30) return camLerp(O,O2,inOutSine(prog(t,5.00,5.30)));
+  if(t<6.00) return camLerp(O2,H,inOutCubic(prog(t,5.30,6.00)));
+  return H;
+}
+const K=1280/1920;
+function applyCam(el,c){const s=c.z*K; el.style.transform=`translate(${640-c.x*s}px,${400-c.y*s}px) scale(${s})`;}
+
+// screen transitions: incoming slides from +X, outgoing drifts to -X
+function screenIn(el,t,a,b,z){const u=inOutCubic(prog(t,a,b)); return u;}
+function setScreen(el,op,x,z){el.style.opacity=op.toFixed(4); el.style.transform=`translateX(${x.toFixed(2)}px)`; el.style.zIndex=z; el.style.visibility=op<=0.001?'hidden':'visible';}
+
+function render(t){
+  t=((t%6)+6)%6;
+  const c=camera(t); applyCam($('w'),c);
+  const zb=1+(c.z-1)*0.45, hw=960/zb, hh=600/zb;
+  let bx=clamp(960+(c.x-960)*0.45,hw,1920-hw), by=clamp(600+(c.y-600)*0.45,hh,1200-hh);
+  applyCam($('bgw'),{x:bx,y:by,z:zb});
+
+  // Page changes: the incoming screen slides in and becomes opaque quickly;
+  // the outgoing one stays solid underneath, dims and drifts left. No double exposure.
+  function page(el,t,inA,inB,outA,outB,z,alwaysIn){
+    const ui=alwaysIn?1:inOutCubic(prog(t,inA,inB)), uo=inOutCubic(prog(t,outA,outB));
+    const visible=(alwaysIn||t>=inA)&&t<outB;
+    const op=visible?clamp(alwaysIn?1:prog(t,inA,inA+(inB-inA)*0.45)):0;
+    setScreen(el,op,110*(1-ui)-60*uo,z);
+    el.style.filter=uo>0.001&&uo<1?`brightness(${(1-0.45*uo).toFixed(3)})`:'';
+  }
+  const Splan=$('Splan');
+  if(t<5.3){
+    page(Splan,t,0,0,2.25,2.75,1,true);
+    Splan.style.webkitMaskImage=Splan.style.maskImage='none';
+  } else {
+    const w=inOutCubic(prog(t,5.35,5.9));
+    setScreen(Splan,w>0?1:0,0,5); Splan.style.filter='';
+    const edge=w*130;
+    const m=`linear-gradient(to bottom, #000 ${(edge-30).toFixed(2)}%, transparent ${edge.toFixed(2)}%)`;
+    Splan.style.webkitMaskImage=Splan.style.maskImage=(w>=1?'none':m);
+  }
+  page($('Sagents'),t,2.25,2.75,3.25,3.75,2);
+  page($('Sdetail'),t,3.25,3.75,4.3,4.8,3);
+  page($('Sover'),t,4.3,4.8,9,9.5,4);
+  if(t>=5.9) setScreen($('Sover'),0,0,4);
+
+  // plan details — reset while the plan is off-screen
+  const live = t<2.9;
+  yes.style.opacity = live ? outCubic(prog(t,0.95,1.2)).toFixed(3) : 0;
+  badges.forEach((b,i)=>{
+    const u = live ? prog(t,1.2+i*0.17,1.55+i*0.17) : 0;
+    b.style.opacity = clamp(u*2.5).toFixed(3);
+    b.style.transform = `scale(${(u<=0?0.6:0.6+0.4*outBackSoft(u)).toFixed(4)})`;
+  });
+  // cards cascade
+  cards.forEach((cd,i)=>{
+    const u = t<2.3 ? 1 : outQuart(prog(t,2.42+i*0.07,2.95+i*0.07));
+    cd.style.opacity=u.toFixed(3); cd.style.transform=`translateY(${((1-u)*28).toFixed(2)}px)`;
+  });
+  // checkboxes
+  cbs.forEach((cb,i)=>{
+    const u = (t>=3.2 && t<5.9) ? prog(t,3.95+i*0.2,4.25+i*0.2) : 1;
+    cb.on.style.opacity=clamp(u*2).toFixed(3);
+    cb.on.style.transform=`scale(${(0.7+0.3*outBackSoft(u)).toFixed(4)})`;
+  });
+  // typing
+  const nChars=86;
+  const tp = (t>=4.2) ? prog(t,4.85,5.32) : 1;
+  const shown = Math.round(tp*nChars)/nChars;
+  prompt.style.clipPath=`inset(0 ${((1-shown)*100).toFixed(3)}% 0 0)`;
+  const cx = px0 + shown*(px1-px0) + 2;
+  caret.style.left=px(cx);
+  const blinkOn = (t>=4.6 && t<5.45) && (tp<1 || Math.floor((t-5.32)/0.12)%2===0);
+  caret.style.opacity = blinkOn?1:0;
+}
+window.render=render;
+render(0);
+</script>
+</body></html>

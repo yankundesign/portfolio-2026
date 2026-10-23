@@ -7,6 +7,7 @@ import AboutObject from '../components/desk/AboutObject';
 import Pen from '../components/desk/Pen';
 import CatRoulette from '../components/desk/CatRoulette';
 import DeskLight from '../components/desk/DeskLight';
+import DeskWaveGrid from '../components/desk/DeskWaveGrid';
 import DeskWayfinder from '../components/desk/DeskWayfinder';
 import DeskJellyfishLayer from '../components/desk/DeskJellyfishLayer';
 import Ephemera from '../components/desk/Ephemera';
@@ -17,14 +18,15 @@ import { useReducedMotion } from '../interactions/useReducedMotion';
 import styles from './DeskRoute.module.css';
 
 const SHOW_DESK_JELLYFISH = false;
+const PLATE_COLUMNS = 12;
 
 /**
  * DeskRoute — v0.4 Swiss editorial plate register.
  *
  * The homepage is `EDITORIAL PLATE — 01 · DESK OBJECTS`. Five real-asset
  * specimens (notebook, cv, about, pen, roulette) sit on an 8-column grid
- * inside the plate chrome. No composing animation, no ambient light,
- * no parallax — the plate is still and information-forward, per v0.4.
+ * inside the plate chrome. A responsive central composition grows with
+ * the viewport; the papers settle during the first entrance.
  */
 export default function DeskRoute() {
   const navigate = useNavigate();
@@ -42,27 +44,15 @@ export default function DeskRoute() {
   }, []);
 
   useEffect(() => {
-    const media = window.matchMedia('(max-width: 767px)');
     const prev = {
       htmlOverflow: document.documentElement.style.overflow,
       bodyOverflow: document.body.style.overflow,
     };
 
-    const syncOverflow = () => {
-      if (media.matches) {
-        document.documentElement.style.overflow = 'auto';
-        document.body.style.overflow = 'auto';
-        return;
-      }
-      document.documentElement.style.overflow = prev.htmlOverflow;
-      document.body.style.overflow = prev.bodyOverflow;
-    };
-
-    syncOverflow();
-    media.addEventListener('change', syncOverflow);
+    document.documentElement.style.overflow = 'auto';
+    document.body.style.overflow = 'auto';
 
     return () => {
-      media.removeEventListener('change', syncOverflow);
       document.documentElement.style.overflow = prev.htmlOverflow;
       document.body.style.overflow = prev.bodyOverflow;
     };
@@ -89,13 +79,12 @@ export default function DeskRoute() {
         '[data-desk-support]',
         scene,
       );
-      const allObjects = [...slots, ...supports];
-
-      gsap.set(allObjects, {
+      gsap.set(slots, {
         autoAlpha: 0,
         filter: 'blur(2px)',
         y: 10,
       });
+      gsap.set(supports, { autoAlpha: 0, y: 4 });
 
       gsap
         .timeline({ defaults: { ease: 'power3.out' } })
@@ -116,7 +105,6 @@ export default function DeskRoute() {
               (target as HTMLElement).dataset.deskSupport === 'wayfinder'
                 ? 0.7
                 : 1,
-            filter: 'blur(0px)',
             y: 0,
             duration: 0.56,
             stagger: 0.08,
@@ -145,8 +133,8 @@ export default function DeskRoute() {
         system="12 COLUMN GRID"
         brand={{ title: 'Yankun Wang', subtitle: 'Portfolio' }}
         format={format}
-        columns={12}
-        grid={{ columns: 12, gutter: 24, margin: 60 }}
+        columns={PLATE_COLUMNS}
+        grid={{ columns: PLATE_COLUMNS, gutter: 24, margin: 60 }}
         currentlyLine={bottomRightLine}
         siteBuildLine={
           proofReveal.makeReadyLine
@@ -156,58 +144,63 @@ export default function DeskRoute() {
         revealPhase={proofReveal.phase}
       >
         <DeskLight />
-
-        <div
-          ref={sceneRef}
-          className={styles.scene}
-          data-proof-phase={proofReveal.phase}
-          aria-hidden={proofReveal.sceneHidden ? true : undefined}
-          inert={proofReveal.sceneHidden ? true : undefined}
-        >
-          {SHOW_DESK_JELLYFISH ? <DeskJellyfishLayer /> : null}
-
-          {/* Ephemera mounted before navigation objects so both ambient layers
-           * paint behind the desk interaction targets. */}
-          <Ephemera />
-
+        <DeskWaveGrid
+          columns={PLATE_COLUMNS}
+          active={proofReveal.phase === 'ready'}
+        />
+        <div className={styles.composition}>
           <div
-            className={`${styles.slot} ${styles.slotNotebook}`}
-            data-desk-slot="notebook"
+            ref={sceneRef}
+            className={styles.scene}
+            data-proof-phase={proofReveal.phase}
+            aria-hidden={proofReveal.sceneHidden ? true : undefined}
+            inert={proofReveal.sceneHidden ? true : undefined}
           >
-            {/* No onClick — NotebookCover dispatches the transition event;
-             * the NotebookTransition overlay owns the route change. */}
-            <NotebookCover />
-          </div>
+            {SHOW_DESK_JELLYFISH ? <DeskJellyfishLayer /> : null}
 
-          <div
-            className={`${styles.slot} ${styles.slotCv}`}
-            data-desk-slot="cv"
-          >
-            <ResumePaper onClick={() => navigate('/cv')} />
-          </div>
+            {/* Ephemera mounted before navigation objects so both ambient layers
+             * paint behind the desk interaction targets. */}
+            <Ephemera />
 
-          <div
-            className={`${styles.slot} ${styles.slotAbout}`}
-            data-desk-slot="about"
-          >
-            <AboutObject onClick={() => navigate('/about')} />
-          </div>
+            <div
+              className={`${styles.slot} ${styles.slotNotebook}`}
+              data-desk-slot="notebook"
+            >
+              {/* No onClick — NotebookCover dispatches the transition event;
+               * the NotebookTransition overlay owns the route change. */}
+              <NotebookCover />
+            </div>
 
-          <div
-            className={`${styles.slot} ${styles.slotPen}`}
-            data-desk-slot="pen"
-          >
-            <Pen />
-          </div>
+            <div
+              className={`${styles.slot} ${styles.slotCv}`}
+              data-desk-slot="cv"
+            >
+              <ResumePaper onClick={() => navigate('/cv')} />
+            </div>
 
-          <div
-            className={`${styles.slot} ${styles.slotRoulette}`}
-            data-desk-slot="roulette"
-          >
-            <CatRoulette />
-          </div>
+            <div
+              className={`${styles.slot} ${styles.slotAbout}`}
+              data-desk-slot="about"
+            >
+              <AboutObject onClick={() => navigate('/about')} />
+            </div>
 
-          <DeskWayfinder />
+            <div
+              className={`${styles.slot} ${styles.slotPen}`}
+              data-desk-slot="pen"
+            >
+              <Pen />
+            </div>
+
+            <div
+              className={`${styles.slot} ${styles.slotRoulette}`}
+              data-desk-slot="roulette"
+            >
+              <CatRoulette />
+            </div>
+
+            <DeskWayfinder />
+          </div>
         </div>
       </EditorialPlate>
 

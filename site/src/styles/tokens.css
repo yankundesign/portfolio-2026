@@ -4,6 +4,7 @@
   --ink-soft: #2a3a7a;
   --ink-muted: rgba(22, 38, 94, 0.2);
   --ink-faint: rgba(22, 38, 94, 0.08);
+  --ink-wash: rgba(22, 38, 94, 0.11);   /* hand-drawn diagram washes: ink, thinned */
   --paper: #f4f1ea;
   --paper-soft: #ebe6d9;
   --paper-shadow: #ddd6c2;
@@ -87,7 +88,7 @@
   --transition-duration-close: 850ms;
   --transition-ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --transition-ease-paper: cubic-bezier(0.42, 0, 0.32, 1);
-  --transition-perspective: 1600px;
+  --transition-perspective: 260svh;
 
   /* Editorial plate chrome (v0.4 — Swiss register) */
   --rule-plate: rgba(22, 38, 94, 0.16);        /* bleed frame, column ruling, hairlines */

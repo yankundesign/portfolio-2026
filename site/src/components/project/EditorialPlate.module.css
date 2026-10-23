@@ -44,6 +44,20 @@
   min-height: 0;
 }
 
+/* Dashed plate — another team's screen, or an option weighed and dropped.
+   A dashed rule offset from the image and no lift shadow: it sits on the
+   page quieter than the work it's compared against. */
+.frameDashed {
+  border: 1px dashed var(--ink-soft);
+  padding: 6px;
+  background: transparent;
+  box-shadow: none;
+}
+
+.frameDashed .image {
+  opacity: 0.88;
+}
+
 /* Stacked plate — two or more images sharing one frame + caption. Images
    stack with a 24px paper gap between them, so the plate reads as a single
    registered specimen holding a short sequence. */

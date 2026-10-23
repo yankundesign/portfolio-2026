@@ -87,6 +87,8 @@ export interface VideoFigure {
   }[];
   caption: string;
   alt: string;
+  /** Still shown before playback and to reduced-motion visitors. */
+  poster?: string;
   backgroundSrc?: string;
   width?: 'column' | 'medium' | 'wide';
 }

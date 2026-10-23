@@ -1,0 +1,83 @@
+/*
+ * Control Hub Agentic — page-specific layout on top of ChaiProject.module.css
+ * (article, grid, rail, beat, subBeat). Holds the plate groupings and the
+ * explore · turn · bridge headings.
+ */
+
+/* Move headings inside "How we got there": mono caps on a full rule,
+   the same three words as the map above. */
+.move {
+  margin: clamp(3.5rem, 7vw, 5rem) 0 0;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--ink);
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.prototype,
+.anchor {
+  scroll-margin-top: 2rem;
+}
+
+.prototype {
+  margin: clamp(2.25rem, 4vw, 3rem) 0 0;
+}
+
+/* Plates laid out in a grid lose their own vertical margin. Two classes
+   so this outranks EditorialPlate's .plate margin. */
+.quad .gridPlate,
+.pair .gridPlate {
+  margin: 0;
+}
+
+/* The run, as four stills: readable without pressing play. */
+.quad {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(1.25rem, 2.5vw, 1.75rem) clamp(1rem, 2.5vw, 1.5rem);
+  margin: clamp(1.5rem, 3vw, 2rem) 0 clamp(2rem, 4vw, 3rem);
+}
+
+.pair {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: clamp(1rem, 2.5vw, 1.5rem);
+  align-items: start;
+  margin: clamp(1.5rem, 3vw, 2.25rem) 0 0;
+}
+
+/* What I learned: two lines carry it; the prose explains. */
+.lessons {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1.75rem, 4vw, 2.5rem);
+}
+
+.lesson {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.lessonLine {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-style: italic;
+  font-size: clamp(1.6rem, 3.6vw, 2.25rem);
+  line-height: 1.1;
+  letter-spacing: -0.018em;
+  color: var(--ink);
+  font-variation-settings: 'opsz' 96;
+}
+
+@media (max-width: 720px) {
+  .quad,
+  .pair {
+    grid-template-columns: 1fr;
+  }
+}

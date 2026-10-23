@@ -4,6 +4,8 @@ import styles from './PullQuote.module.css';
 export interface PullQuoteProps {
   phrase: string;
   attribution?: string;
+  /** False for a paraphrased finding: the same weight, no quote marks. */
+  quoted?: boolean;
 }
 
 /**
@@ -14,14 +16,14 @@ export interface PullQuoteProps {
  * crystallizes. The pull quote should read before any other text around
  * it, and its typography should demand a second look.
  */
-export default function PullQuote({ phrase, attribution }: PullQuoteProps) {
+export default function PullQuote({ phrase, attribution, quoted = true }: PullQuoteProps) {
   return (
     <RevealOnScroll as="blockquote" className={styles.quote} translate={28}>
       <div className={styles.rule} aria-hidden="true" />
       <p className={styles.phrase}>
-        <span className={styles.openMark} aria-hidden="true">&ldquo;</span>
+        {quoted && <span className={styles.openMark} aria-hidden="true">&ldquo;</span>}
         {phrase}
-        <span className={styles.closeMark} aria-hidden="true">&rdquo;</span>
+        {quoted && <span className={styles.closeMark} aria-hidden="true">&rdquo;</span>}
       </p>
       {attribution && (
         <footer className={styles.attribution}>

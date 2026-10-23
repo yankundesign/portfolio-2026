@@ -37,6 +37,7 @@ export default function EditorialPlate({ figure, className }: EditorialPlateProp
         loadState === 'error' ? styles.framePlaceholder : '',
         loadState === 'loaded' ? styles.frameLoaded : '',
         srcs.length > 1 ? styles.frameStacked : '',
+        figure.variant === 'dashed' ? styles.frameDashed : '',
       ]
         .join(' ')
         .trim()}

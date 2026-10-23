@@ -18,6 +18,7 @@ export default function CanvasCloseButton({ onClick }: CanvasCloseButtonProps) {
     <button
       type="button"
       className={styles.button}
+      data-canvas-chrome
       onClick={onClick}
       aria-label="Close notebook, return to desk"
     >

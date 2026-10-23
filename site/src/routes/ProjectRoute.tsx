@@ -27,6 +27,7 @@ export default function ProjectRoute() {
   const { slug } = useParams<{ slug: string }>();
   const location = useLocation();
   const project = projects.find((p) => p.slug === slug);
+  const externalUrl = project?.externalUrl;
   const fromCanvas = (
     location.state as { fromCanvas?: unknown } | null
   )?.fromCanvas;
@@ -35,6 +36,11 @@ export default function ProjectRoute() {
     /^\/works(?:\?page=[1-9]\d*)?$/.test(fromCanvas)
       ? fromCanvas
       : '/works';
+
+  // Existing project URLs still reach the live site when the card links out.
+  useEffect(() => {
+    if (externalUrl) window.location.replace(externalUrl);
+  }, [externalUrl]);
 
   // Enable scroll only while this route is mounted.
   useEffect(() => {
@@ -65,6 +71,8 @@ export default function ProjectRoute() {
 
     return () => window.cancelAnimationFrame(frame);
   }, [slug]);
+
+  if (externalUrl) return null;
 
   return (
     <div className={styles.page}>

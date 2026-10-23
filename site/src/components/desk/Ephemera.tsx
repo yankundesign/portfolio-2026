@@ -24,16 +24,18 @@ export default function Ephemera() {
       data-desk-support="ephemera"
       aria-hidden="true"
     >
-      <img
-        className={styles.sketch}
-        src="/desk/architectural-sketch.webp"
-        alt=""
-      />
-      <img
-        className={styles.blueprint}
-        src="/desk/blueprint-fragment.webp"
-        alt=""
-      />
+      <div className={styles.notebookAnchor}>
+        <img
+          className={styles.sketch}
+          src="/desk/architectural-sketch.webp"
+          alt=""
+        />
+        <img
+          className={styles.blueprint}
+          src="/desk/blueprint-fragment.webp"
+          alt=""
+        />
+      </div>
       <img
         className={styles.postage}
         src="/desk/postage-stamp.webp"

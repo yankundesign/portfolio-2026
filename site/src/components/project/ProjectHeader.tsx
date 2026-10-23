@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useReducedMotion } from '../../interactions/useReducedMotion';
 import styles from './ProjectHeader.module.css';
 
 const ACTION_STATUS_DURATION_MS = 4600;
@@ -6,6 +7,19 @@ const ACTION_STATUS_DURATION_MS = 4600;
 export interface ProjectHeaderHeroImage {
   src: string;
   alt: string;
+}
+
+export interface ProjectHeaderHeroVideo {
+  webm?: string;
+  mp4: string;
+  poster: string;
+  alt: string;
+  /**
+   * The recording's own proportions, e.g. '1846 / 1114'. When set, the
+   * whole frame shows (no 16:10 crop) — for screen recordings where the
+   * edges carry the product chrome.
+   */
+  aspectRatio?: string;
 }
 
 export interface ProjectHeaderAction {
@@ -24,12 +38,13 @@ export interface ProjectHeaderProps {
   /** Optional primary CTA with a temporary status popover. */
   primaryAction?: ProjectHeaderAction;
   /**
-   * Optional hero image. Sits between the italic subtitle and the meta
+   * Optional hero media. Sits between the italic subtitle and the meta
    * strip — a single uncaptioned plate that opens the chapter visually.
    * Treated as plate chrome (1px ink rule, paper-soft fill) so it stays
    * inside the editorial language; it is not a numbered figure.
    */
   heroImage?: ProjectHeaderHeroImage;
+  heroVideo?: ProjectHeaderHeroVideo;
 }
 
 /**
@@ -56,17 +71,45 @@ export default function ProjectHeader({
   role,
   primaryAction,
   heroImage,
+  heroVideo,
 }: ProjectHeaderProps) {
+  const reducedMotion = useReducedMotion();
   const [heroFailed, setHeroFailed] = useState(false);
   const [actionStatusVisible, setActionStatusVisible] = useState(false);
   const [actionStatusKey, setActionStatusKey] = useState(0);
   const actionStatusTimer = useRef<number | null>(null);
+  const heroVideoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => () => {
     if (actionStatusTimer.current !== null) {
       window.clearTimeout(actionStatusTimer.current);
     }
   }, []);
+
+  useEffect(() => {
+    const video = heroVideoRef.current;
+    if (!video || !heroVideo) return;
+
+    if (typeof IntersectionObserver === 'undefined') {
+      if (reducedMotion) video.pause();
+      else void video.play().catch(() => {});
+      return;
+    }
+
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting && !reducedMotion) {
+        void video.play().catch(() => {});
+      } else {
+        video.pause();
+      }
+    }, { threshold: 0.1 });
+
+    observer.observe(video);
+    return () => {
+      observer.disconnect();
+      video.pause();
+    };
+  }, [heroVideo, reducedMotion]);
 
   const showActionStatus = () => {
     if (actionStatusTimer.current !== null) {
@@ -101,14 +144,35 @@ export default function ProjectHeader({
         <em>{subtitle}</em>
       </p>
       {primaryAction && metaStrip}
-      {heroImage && (
+      {(heroImage || heroVideo) && (
         <figure className={styles.hero}>
-          {heroFailed ? (
+          {heroVideo ? (
+            heroFailed ? (
+              <img src={heroVideo.poster} alt={heroVideo.alt} className={styles.heroImage} />
+            ) : (
+              <video
+                ref={heroVideoRef}
+                className={`${styles.heroImage} ${heroVideo.aspectRatio ? styles.heroVideoNative : styles.heroVideo}`}
+                style={heroVideo.aspectRatio ? { aspectRatio: heroVideo.aspectRatio } : undefined}
+                aria-label={heroVideo.alt}
+                poster={heroVideo.poster}
+                controls
+                loop
+                muted
+                playsInline
+                preload="metadata"
+                onError={() => setHeroFailed(true)}
+              >
+                {heroVideo.webm && <source src={heroVideo.webm} type="video/webm" />}
+                <source src={heroVideo.mp4} type="video/mp4" />
+              </video>
+            )
+          ) : heroImage && heroFailed ? (
             <div className={styles.heroPlaceholder} role="img" aria-label={heroImage.alt}>
               <span className={styles.heroPlaceholderLabel}>Hero image pending</span>
               <code className={styles.heroPlaceholderPath}>{heroImage.src}</code>
             </div>
-          ) : (
+          ) : heroImage ? (
             <img
               src={heroImage.src}
               alt={heroImage.alt}
@@ -116,7 +180,7 @@ export default function ProjectHeader({
               loading="eager"
               onError={() => setHeroFailed(true)}
             />
-          )}
+          ) : null}
         </figure>
       )}
       {primaryAction && (

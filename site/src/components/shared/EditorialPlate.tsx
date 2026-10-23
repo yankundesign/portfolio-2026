@@ -160,7 +160,12 @@ export default function EditorialPlate({
   );
 
   return (
-    <div ref={plateRef} className={styles.plate} data-proof-phase={revealPhase}>
+    <div
+      ref={plateRef}
+      className={styles.plate}
+      data-proof-phase={revealPhase}
+      data-transition-stage="desk"
+    >
       {showBleedFrame && (
         <div
           className={styles.bleedFrame}
@@ -272,7 +277,6 @@ export default function EditorialPlate({
           data-plate-text
           aria-hidden="true"
         >
-          <span className={styles.metaLine}>GRID SYSTEM</span>
           <span className={styles.metaLine}>COLUMNS: {grid.columns}</span>
           <span className={styles.metaLine}>GUTTER: {grid.gutter} PX</span>
           <span className={styles.metaLine}>MARGIN: {grid.margin} PX</span>

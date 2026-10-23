@@ -71,7 +71,7 @@
   min-height: 100svh;
   display: grid;
   place-items: center;
-  padding: clamp(40px, 6svh, 72px) clamp(24px, 5vw, 60px);
+  padding: clamp(24px, 3svh, 40px) clamp(24px, 5vw, 60px);
   box-sizing: border-box;
 }
 
@@ -84,42 +84,48 @@
  * ────────────────────────────────────────────────────────────────────────── */
 
 .spreadStage {
+  --spread-plate-width: 55svh;
   --spread-column-gap: clamp(40px, 8svh, 96px);
+  --spread-row-gap: clamp(12px, 1.6svh, 20px);
+  --plate-paper-padding: 8px;
+  --plate-caption-gap: 3px;
+  --plate-caption-padding: 8px;
+  --plate-proof-padding: 5px;
 
   position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  column-gap: var(--spread-column-gap);
+  row-gap: var(--space-2);
   width: 100%;
-  /* svh-only: scales with the height-driven notebook. 118svh stays inside
-   * the cream pages (notebook is approximately 143.5svh wide). */
-  max-width: 118svh;
+  /* Fill the paper outward from the spine. Both the plates and folio share
+   * this measure; shorter viewports reduce it to reserve caption space. */
+  max-width: calc(2 * var(--spread-plate-width) + var(--spread-column-gap));
 }
 
 .spread {
   display: grid;
+  grid-column: 1 / -1;
+  grid-row: 1;
   width: 100%;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   grid-template-rows: auto auto;
   column-gap: var(--spread-column-gap);
-  row-gap: clamp(14px, 2.4svh, 28px);
+  row-gap: var(--spread-row-gap);
   align-items: start;
 }
 
-/* The pager occupies the same right-page measure as project 4. On spread
- * one it sits directly below that plate; on the continuation spread it
- * aligns to the bottom-right opposite project 5. It lives outside the keyed
- * plate grid so activating it does not discard keyboard focus. */
+/* Reserve the folio's complete hit area when centering the first spread.
+ * It stays outside the keyed plate grid to retain focus after a page turn.
+ * Every spread reserves a separate row below its cards for the folio. */
 .spreadPager {
-  position: absolute;
-  top: calc(100% + clamp(14px, 1.8svh, 22px));
-  left: calc(50% + var(--spread-column-gap) / 2);
-  width: min(46svh, calc(50% - var(--spread-column-gap) / 2));
+  grid-column: 2;
+  grid-row: 2;
+  width: 100%;
+  min-height: 44px;
   display: flex;
   justify-content: flex-end;
   z-index: 1;
-}
-
-.spreadPagerContinuation {
-  top: auto;
-  bottom: 12px;
 }
 
 .spreadStage[data-current-spread='2'] .spread {
@@ -222,15 +228,38 @@
   }
 }
 
+/* The clip and tape sit above the paper's usable area. On larger spreads,
+ * bias the composition down while retaining room for the bottom folio. */
+@media (min-width: 1101px) and (min-height: 901px) {
+  .spreadStage {
+    transform: translateY(1.8svh);
+  }
+}
+
+/* Captions have a readable minimum size, so the media yields a little on
+ * laptops. Below these heights the canvas may scroll instead of clipping. */
+@media (min-width: 1101px) and (max-height: 800px) {
+  .spreadStage {
+    --spread-plate-width: 52svh;
+  }
+}
+
 /* ─── Tablet / mobile: single column scroll, faint backdrop ──────────────── */
 
 @media (max-width: 1100px) {
   .content {
     min-height: 100svh;
     place-items: start center;
+    padding: clamp(40px, 6svh, 72px) clamp(24px, 5vw, 60px);
   }
 
   .spreadStage {
+    --plate-paper-padding: clamp(8px, 1.2svh, 14px);
+    --plate-caption-gap: clamp(3px, 0.5svh, 6px);
+    --plate-caption-padding: clamp(8px, 1.2svh, 12px);
+    --plate-proof-padding: clamp(5px, 0.8svh, 8px);
+
+    display: block;
     max-width: 40rem;
   }
 
