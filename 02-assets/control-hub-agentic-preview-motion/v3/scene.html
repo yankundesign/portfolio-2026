@@ -1,0 +1,132 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<!--
+  Control Hub Agentic hover preview, v3 (stack cover). render(0) and
+  render(6) are cover.html. Same slab geometry as the cover; the camera
+  pushes into prototype 05, the stack eases apart, the camera glides down
+  through 04 · 03 · 02 to 01, then pulls back to the cover.
+-->
+<style>
+  html,body{margin:0;background:#4e5060;overflow:hidden}
+  #vp{position:relative;width:1280px;height:800px;overflow:hidden;background:#4e5060}
+  .world{position:absolute;left:0;top:0;width:1920px;height:1200px;transform-origin:0 0}
+  .bg{position:absolute;left:0;width:1920px;height:1200px;display:block}
+  .slab{
+    position:absolute;overflow:hidden;border-radius:18px;
+    transform:rotateX(58deg) rotateZ(-38deg);
+    box-shadow:0 0 0 1px rgba(255,255,255,.08),0 2px 4px rgba(0,0,0,.3),0 34px 80px -10px rgba(0,0,0,.6);
+  }
+  .slab img{position:absolute;left:0;top:0;display:block}
+</style></head>
+<body>
+<div id="vp">
+  <div class="world" id="bgw">
+    <img class="bg" src="agentic-bg.png" style="top:0">
+    <!-- mirrored copy below, so the backdrop continues past the cover's bottom edge -->
+    <img class="bg" src="agentic-bg.png" style="top:1200px;transform:scaleY(-1)">
+  </div>
+  <div class="world" id="w"></div>
+</div>
+<script>
+const $ = (id) => document.getElementById(id);
+const IMG = '../../../site/public/images/control-hub-agentic/';
+// Same table and constants as cover.html
+const slabs = [
+  ['p01-run-view.png',                2087, 1171, 1960, 1171],
+  ['p02-agent-studio-poster.png',     1858, 1118, 1858, 1118],
+  ['p03-plan-in-assistant-poster.png',2400, 1470, 2400, 1470],
+  ['p04-skills.png',                  2000, 1455, 2000, 1205],
+  ['run-loop-poster.png',             1846, 1114, 1846, 1114],
+];
+const W = 930, GAP = 172, CX = 985, TOP_CY = 330, N = slabs.length;
+const els = slabs.map(([src, iw, ih, cw, ch]) => {
+  const s = W / cw, h = ch * s;
+  const el = document.createElement('div');
+  el.className = 'slab';
+  Object.assign(el.style, { left: `${CX - W / 2}px`, width: `${W}px`, height: `${h}px` });
+  el.dataset.h = h;
+  el.innerHTML = `<img src="${IMG}${src}" style="width:${iw * s}px;height:${ih * s}px">`;
+  $('w').appendChild(el);
+  return el;
+});
+window.ready = Promise.all([...document.images].map(i => i.decode())).then(() => render(0));
+
+// ---- easing
+const clamp=(v,a=0,b=1)=>Math.min(b,Math.max(a,v));
+const lerp=(a,b,u)=>a+(b-a)*u;
+const prog=(t,a,b)=>clamp((t-a)/(b-a));
+const inOutCubic=u=>u<.5?4*u*u*u:1-Math.pow(-2*u+2,3)/2;
+const inOutSine=u=>-(Math.cos(Math.PI*u)-1)/2;
+
+// ---- keyframes: cover → 05 → 04 → 03 → 02 → 01 → cover.
+// Camera and focus follow one C1 Hermite path through these keys, so
+// velocity is continuous everywhere: the camera eases to DWELL of its cruise
+// speed at each prototype instead of stopping, turns smoothly where its
+// direction reverses (05, 01), and only comes to rest on the cover.
+const KT = [0.35, 1.45, 2.2, 2.95, 3.7, 4.45, 6.0];   // key times
+const KF = [4, 4, 3, 2, 1, 0, 0];                     // focused slab at each key
+const KZ = [1, 1.85, 1.88, 1.91, 1.94, 1.98, 1];      // zoom at each key (slow drift in)
+const DWELL = 0.45;
+function hermite(vals, t){
+  const n = KT.length - 1;
+  if (t <= KT[0]) return vals[0];
+  if (t >= KT[n]) return vals[n];
+  let i = 0; while (t >= KT[i+1]) i++;
+  // tangent: zero at the ends and at turning points, else DWELL × the secant
+  const tan = j => {
+    if (j === 0 || j === n) return 0;
+    if ((vals[j]-vals[j-1])*(vals[j+1]-vals[j]) <= 0) return 0;
+    return DWELL*(vals[j+1]-vals[j-1])/(KT[j+1]-KT[j-1]);
+  };
+  const dt = KT[i+1]-KT[i], u = (t-KT[i])/dt, u2 = u*u, u3 = u2*u;
+  return (2*u3-3*u2+1)*vals[i] + (u3-2*u2+u)*dt*tan(i) + (-2*u3+3*u2)*vals[i+1] + (u3-u2)*dt*tan(i+1);
+}
+const focus = t => hermite(KF, t);
+
+// ---- stack: gaps ease open while the camera is in, close on the way out.
+// The gap just above the focused slab opens further (LIFT), so the slab in
+// front lifts away and the focused prototype shows — flipping through pages.
+const SPREAD = 0.32, LIFT = 300;
+const explode = t => t < KT[5] ? inOutCubic(prog(t,KT[0],KT[1])) : 1-inOutCubic(prog(t,KT[5],5.9));
+const bump = x => Math.exp(-((x/0.6)**2));
+// gap between slab j and slab j+1
+const gapAt = (j,t) => { const e = explode(t); return GAP*(1+SPREAD*e) + LIFT*e*bump(j - focus(t)); };
+// centre y of slab k (0 = prototype 01 … 4 = 05); 05 stays anchored
+function cy(k,t){ let y = TOP_CY; for (let j = N-2; j >= k; j--) y += gapAt(j,t); return y; }
+
+// ---- camera (world coords, 1920×1200 cover space)
+const H = {x:960,y:600,z:1};
+const ZIN = 1.9;
+function camera(t){
+  // waypoints evaluated at t, since the stack itself moves
+  const xs = KF.map((f,i) => (i === 0 || i === KT.length-1) ? H.x : CX);
+  const ys = KF.map((f,i) => (i === 0 || i === KT.length-1) ? H.y : cy(f,t));
+  return { x: hermite(xs,t), y: hermite(ys,t), z: Math.exp(hermite(KZ.map(Math.log),t)) };
+}
+const K=1280/1920;
+function applyCam(el,c){
+  const s=c.z*K;
+  el.style.transform=`translate(${640-c.x*s}px,${400-c.y*s}px) scale(${s})`;
+}
+
+function render(t){
+  t=((t%6)+6)%6;
+  const c=camera(t);
+  applyCam($('w'),c);
+  // backdrop: shallower zoom for depth
+  const zb=1+(c.z-1)*0.45;
+  applyCam($('bgw'),{x:960+(c.x-960)*0.45, y:600+(c.y-600)*0.45, z:zb});
+
+  // slabs: positions follow the gap; slabs away from the focus soften
+  const zoomed = clamp((c.z-1)/(ZIN-1));
+  const f = focus(t);
+  els.forEach((el,k)=>{
+    el.style.top = `${cy(k,t) - el.dataset.h/2}px`;
+    const d = Math.min(Math.abs(k-f), 1.5);
+    const b = 0.7*d*zoomed;
+    el.style.filter = b>0.01 ? `blur(${b.toFixed(3)}px) brightness(${(1-0.05*d*zoomed).toFixed(3)})` : '';
+  });
+}
+window.render=render;
+</script>
+</body></html>

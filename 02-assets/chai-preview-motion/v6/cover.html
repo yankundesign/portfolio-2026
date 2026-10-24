@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>CHAI cover v6</title>
+<!--
+  CHAI canvas cover, v6. v5 with the assistant panel zoomed out to show its header. Renders at exactly 1920×1200.
+  Same layering as v1, built from the real screens instead of a redesign:
+    back  · p3.png report pane (CHAI builds it), vector rebuild at 1.4×
+    front · p2.png analytics answer (CHAI explains a chart), vector rebuild at 1.45×
+  The rebuilds live in chai-components.js, drawn in each PNG's own pixel space
+  and checked against it with a difference overlay — zoomed, the text stays sharp.
+-->
+<style>
+  :root {
+    --paper: #e9e2d2;
+    --paper-hi: #f1ece0;
+    --paper-lo: #dbd2be;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1920px; height: 1200px; overflow: hidden; }
+  body {
+    position: relative;
+    background:
+      radial-gradient(120% 90% at 18% 8%, var(--paper-hi) 0%, transparent 60%),
+      radial-gradient(90% 80% at 100% 100%, var(--paper-lo) 0%, transparent 70%),
+      var(--paper);
+  }
+  .grain { position: absolute; inset: 0; pointer-events: none; opacity: .55; mix-blend-mode: multiply; }
+  .layer { position: absolute; display: block; }
+  .layer svg { display: block; }
+  #report { filter: drop-shadow(0 1px 1px rgba(52, 40, 18, .08)) drop-shadow(0 18px 26px rgba(52, 40, 18, .16)); }
+  #answer { filter: drop-shadow(0 1px 1px rgba(52, 40, 18, .10)) drop-shadow(-10px 0 34px rgba(52, 40, 18, .26)); }
+</style>
+</head>
+<body>
+<svg class="grain" width="1920" height="1200" aria-hidden="true">
+  <filter id="n"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="3" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 .32  0 0 0 0 .26  0 0 0 0 .16  0 0 0 .22 0"/></filter>
+  <rect width="100%" height="100%" filter="url(#n)"/>
+</svg>
+<div class="layer" id="report"></div>
+<div class="layer" id="answer"></div>
+
+<script src="chai-components.js"></script>
+<script>
+  // place(el, svgMarkup, scale, [srcX, srcY] → [frameX, frameY])
+  function place(id, markup, z, src, dst) {
+    const el = document.getElementById(id);
+    el.innerHTML = markup;
+    const svg = el.querySelector('svg');
+    const w = +svg.getAttribute('width'), h = +svg.getAttribute('height');
+    svg.setAttribute('width', w * z);
+    svg.setAttribute('height', h * z);
+    el.style.left = (dst[0] - src[0] * z) + 'px';
+    el.style.top = (dst[1] - src[1] * z) + 'px';
+  }
+  Promise.all(['400', '500', '600'].map(w => document.fonts.load(`${w} 16px Inter`))).then(() => {
+    if (location.hash === '#bg') return; // paper + grain only → bg.png for scene.html
+    // Report pane's top-left corner sits at (110, 190) — well below the
+    // answer panel's top (64), so the front layer clearly leads. The answer
+    // panel covers the rest of it, so only the report's left side
+    // (p3 x ≤ 1285) shows — the timeline card further right stays hidden.
+    place('report', chaiP3Report(), 1.4, [590.5, 60.5], [110, 190]);
+    // Answer panel's rounded top-left corner at (1082, 64), header in view;
+    // it bleeds off the right and bottom edges (p2 y 0–783).
+    place('answer', chaiP2Answer('../'), 1.45, [0, 0], [1082, 64]);
+  });
+</script>
+</body>
+</html>

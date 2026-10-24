@@ -1,0 +1,134 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<!--
+  CHAI hover preview, v6 cover. Same beats and camera language as ../scene.html,
+  driven by the v6 cover's vector layers (chai-components.js) instead of the
+  0.5× panel PNGs. render(0) and render(6) are the cover itself.
+-->
+<style>
+  html,body{margin:0;background:#3c3b3a;overflow:hidden}
+  #vp{position:relative;width:1280px;height:800px;overflow:hidden;background:#3c3b3a}
+  .world{position:absolute;left:0;top:0;width:1920px;height:1200px;transform-origin:0 0}
+  .abs{position:absolute;left:0;top:0}
+  .layer{position:absolute;display:block}
+  .layer svg{display:block}
+  img{display:block}
+</style></head>
+<body>
+<div id="vp">
+  <div class="world" id="bgw"><img class="abs" src="bg.png" width="1920" height="1200"></div>
+  <div class="world" id="w">
+    <div class="layer" id="report"></div>
+    <div class="layer" id="answer"></div>
+  </div>
+</div>
+<script src="chai-components.js"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+
+// ---- layers: identical placement to cover.html
+function place(id, markup, z, src, dst) {
+  const el = $(id);
+  el.innerHTML = markup;
+  const svg = el.querySelector('svg');
+  const w = +svg.getAttribute('width'), h = +svg.getAttribute('height');
+  svg.setAttribute('width', w * z);
+  svg.setAttribute('height', h * z);
+  el.style.left = (dst[0] - src[0] * z) + 'px';
+  el.style.top = (dst[1] - src[1] * z) + 'px';
+}
+const SHADOW = {
+  report: 'drop-shadow(0 1px 1px rgba(52,40,18,.08)) drop-shadow(0 18px 26px rgba(52,40,18,.16))',
+  answer: 'drop-shadow(0 1px 1px rgba(52,40,18,.10)) drop-shadow(-10px 0 34px rgba(52,40,18,.26))',
+};
+let bars2 = [], bars3 = [], logo = null;
+
+window.ready = Promise.all(['400', '500', '600'].map(w => document.fonts.load(`${w} 16px Inter`))).then(() => {
+  place('report', chaiP3Report(), 1.4, [590.5, 60.5], [110, 190]);
+  place('answer', chaiP2Answer('../'), 1.45, [0, 0], [1082, 64]);
+  const grow = el => { el.style.transformBox = 'fill-box'; el.style.transformOrigin = '50% 100%'; return el; };
+  bars2 = [...$('answer').querySelectorAll('rect[fill="#00a3b5"]')].filter(r => +r.getAttribute('height') > 50).map(grow);
+  bars3 = [...$('report').querySelectorAll('rect[fill="#7e8bff"]')].map(grow);
+  logo = $('answer').querySelector('image[clip-path="url(#p2logo)"]');
+  return Promise.all([...document.images].map(i => i.decode()));
+}).then(() => render(0));
+
+// ---- easing (same as ../scene.html)
+const clamp=(v,a=0,b=1)=>Math.min(b,Math.max(a,v));
+const lerp=(a,b,u)=>a+(b-a)*u;
+const prog=(t,a,b)=>clamp((t-a)/(b-a));
+const inOutCubic=u=>u<.5?4*u*u*u:1-Math.pow(-2*u+2,3)/2;
+const inCubic=u=>u*u*u;
+// gentle overshoot (paper-weighted): peaks ~1.035
+const outBackSoft=u=>{const c1=0.9,c3=c1+1;return 1+c3*Math.pow(u-1,3)+c1*Math.pow(u-1,2);};
+const inOutSine=u=>-(Math.cos(Math.PI*u)-1)/2;
+
+// ---- camera keyframes (world coords, 1920x1200 cover space)
+const H={x:960,y:600,z:1};
+const A={x:1450,y:885,z:2.05};   // push into the answer: header row, explanation, chart
+const A2={x:1458,y:893,z:2.15};
+const B={x:700,y:880,z:1.9};     // glide to the report: Key Insights and its bars
+const B2={x:712,y:884,z:1.98};
+function camLerp(P,Q,u,hop=0){
+  const lz=lerp(Math.log(P.z),Math.log(Q.z),u) - hop*Math.sin(Math.PI*u);
+  return {x:lerp(P.x,Q.x,u), y:lerp(P.y,Q.y,u), z:Math.exp(lz)};
+}
+// The v6 layers run off the cover's right and bottom edges, so the view is
+// kept inside the 1920×1200 world (no-op at every keyframe; bites mid-hop).
+function inWorld(c){
+  const hw=960/c.z, hh=600/c.z;
+  return {x:clamp(c.x,hw,1920-hw), y:clamp(c.y,hh,1200-hh), z:c.z};
+}
+function camera(t){
+  if(t<0.4) return H;
+  if(t<1.7) return camLerp(H,A,inOutCubic(prog(t,0.4,1.7)));
+  if(t<2.35) return camLerp(A,A2,inOutSine(prog(t,1.7,2.35)));
+  if(t<3.75) return camLerp(A2,B,inOutCubic(prog(t,2.35,3.75)),0.28);
+  if(t<4.75) return camLerp(B,B2,inOutSine(prog(t,3.75,4.75)));
+  if(t<6.0)  return camLerp(B2,H,inOutCubic(prog(t,4.75,6.0)));
+  return H;
+}
+const K=1280/1920;
+function applyCam(el,c){
+  const s=c.z*K;
+  el.style.transform=`translate(${640-c.x*s}px,${400-c.y*s}px) scale(${s})`;
+}
+
+function render(t){
+  t=((t%6)+6)%6;
+  const c=inWorld(camera(t));
+  applyCam($('w'),c);
+  // background: shallower zoom (depth), clamped to cover the viewport
+  const zb=1+(c.z-1)*0.45;
+  const halfW=960/zb, halfH=600/zb;
+  let bx=960+(c.x-960)*0.45, by=600+(c.y-600)*0.45;
+  bx=clamp(bx,halfW,1920-halfW); by=clamp(by,halfH,1200-halfH);
+  applyCam($('bgw'),{x:bx,y:by,z:zb});
+
+  // rack focus: on the answer, the report behind softens; on the report,
+  // the answer panel in front softens
+  const focusA = t<2.35 ? inOutCubic(prog(t,0.7,1.6)) : 1-inOutCubic(prog(t,2.35,3.2));
+  const focusB = t<4.75 ? inOutCubic(prog(t,2.9,3.7)) : 1-inOutCubic(prog(t,4.75,5.6));
+  $('report').style.filter = SHADOW.report + (focusA>0.001 ? ` blur(${(1.5*focusA).toFixed(3)}px) brightness(${(1-0.1*focusA).toFixed(3)})` : '');
+  $('answer').style.filter = SHADOW.answer + (focusB>0.001 ? ` blur(${(1.5*focusB).toFixed(3)}px) brightness(${(1-0.06*focusB).toFixed(3)})` : '');
+
+  // ---- answer: bars collapse and regrow, logo turns
+  bars2.forEach((b,i)=>{
+    let h;
+    if(t<1.2) h=1-inCubic(prog(t,0.45,0.78));
+    else h=outBackSoft(prog(t,1.5+i*0.09,2.15+i*0.09));
+    if(t<0.45||t>=4) h=1;
+    b.style.transform=`scaleY(${Math.max(h,0).toFixed(4)})`;
+  });
+  const spin=inOutCubic(prog(t,1.0,1.95));
+  logo.setAttribute('transform',`rotate(${(spin*360).toFixed(2)} 64.5 361)`);
+
+  // ---- report: bars ease down while it is out of focus, then rise on arrival
+  bars3.forEach((b,i)=>{
+    const h = t<2.1 ? 1-inCubic(prog(t,1.75,2.1)) : outBackSoft(prog(t,3.35+i*0.08,4.0+i*0.08));
+    b.style.transform=`scaleY(${Math.max(h,0).toFixed(4)})`;
+  });
+}
+window.render=render;
+</script>
+</body></html>

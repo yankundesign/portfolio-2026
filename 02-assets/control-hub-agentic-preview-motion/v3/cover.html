@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Agentic cover · stack</title>
+<!--
+  Control Hub Agentic canvas cover. Renders at 1920×1200 (render at 2× and
+  downsample for crisp tilted screens).
+  Prototypes 01 → 05 as an exploded isometric stack, 05 on top — the case
+  study's subtitle as a picture: five prototypes, one interaction that
+  survived. Every slab is the real case-study PNG, scaled down (never up) and
+  only cropped at its edges. Backdrop: agentic-bg.png, the soft gradient
+  reconstructed from the previous cover's surround.
+-->
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1920px; height: 1200px; overflow: hidden; }
+  body { position: relative; background: #4e5060 url(agentic-bg.png) 0 0 / 1920px 1200px no-repeat; }
+  .slab {
+    position: absolute; overflow: hidden; border-radius: 18px;
+    transform: rotateX(var(--tilt)) rotateZ(var(--turn));
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, .08),
+      0 2px 4px rgba(0, 0, 0, .3),
+      0 34px 80px -10px rgba(0, 0, 0, .6);
+  }
+  .slab img { position: absolute; left: 0; top: 0; display: block; }
+</style>
+</head>
+<body>
+<script>
+  const IMG = '../../../site/public/images/control-hub-agentic/';
+  // [file, natural w, natural h, crop w, crop h] — crops trim the right or bottom edge only
+  const slabs = [
+    ['p01-run-view.png',                2087, 1171, 1960, 1171],  // 01 · agent studio run view
+    ['p02-agent-studio-poster.png',     1858, 1118, 1858, 1118],  // 02 · split view
+    ['p03-plan-in-assistant-poster.png',2400, 1470, 2400, 1470],  // 03 · plan in the Assistant
+    ['p04-skills.png',                  2000, 1455, 2000, 1205],  // 04 · skills
+    ['run-loop-poster.png',             1846, 1114, 1846, 1114],  // 05 · Cloud Control Workflows
+  ];
+  const W = 930;              // slab width on the cover
+  const GAP = 172;            // vertical step between slab centres
+  const CX = 985;             // stack centre x
+  const TOP_CY = 330;         // centre y of slab 05
+  document.documentElement.style.setProperty('--tilt', '58deg');
+  document.documentElement.style.setProperty('--turn', '-38deg');
+  slabs.forEach(([src, iw, ih, cw, ch], k) => {
+    const s = W / cw, h = ch * s;
+    const cy = TOP_CY + (slabs.length - 1 - k) * GAP;
+    const el = document.createElement('div');
+    el.className = 'slab';
+    Object.assign(el.style, { left: `${CX - W / 2}px`, top: `${cy - h / 2}px`, width: `${W}px`, height: `${h}px` });
+    el.innerHTML = `<img src="${IMG}${src}" style="width:${iw * s}px;height:${ih * s}px">`;
+    document.body.appendChild(el);
+  });
+</script>
+</body>
+</html>
