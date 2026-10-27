@@ -160,7 +160,7 @@ export default function NotebookCover({ className }: NotebookCoverProps) {
           </span>
         </span>
       </button>
-      <FigCaption number={1} label="works" align="center" />
+      <FigCaption label="works" align="center" />
     </figure>
   );
 }

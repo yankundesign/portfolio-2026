@@ -30,6 +30,8 @@ function prefersReducedMotion(): boolean {
 
 function shouldPlayReveal(): boolean {
   if (typeof window === 'undefined' || prefersReducedMotion()) return false;
+  // ?intro replays the opening on every load, for tuning it.
+  if (new URLSearchParams(window.location.search).has('intro')) return true;
   return window.sessionStorage.getItem(REVEAL_SEEN_KEY) !== 'true';
 }
 
@@ -87,6 +89,8 @@ export function usePlateProofReveal(): PlateProofRevealState {
       return;
     }
 
+    // The rulings beat runs long enough for DeskWaveGrid's opening ripple to
+    // cross the empty plate before any object lands.
     const timeline = gsap.timeline();
     timeline
       .call(() => {
@@ -97,14 +101,14 @@ export function usePlateProofReveal(): PlateProofRevealState {
         setPhase('objects');
         setMakeReadyLine(MAKE_READY_LINES[1]);
         markRevealSeen();
-      }, undefined, 1.12)
+      }, undefined, 1.64)
       .call(() => {
         setMakeReadyLine(MAKE_READY_LINES[2]);
-      }, undefined, 1.76)
+      }, undefined, 2.28)
       .call(() => {
         setPhase('ready');
         setMakeReadyLine(null);
-      }, undefined, 2.42);
+      }, undefined, 2.94);
 
     return () => {
       timeline.kill();

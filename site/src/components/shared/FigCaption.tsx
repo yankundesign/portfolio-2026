@@ -17,8 +17,9 @@ import styles from './FigCaption.module.css';
  */
 
 export interface FigCaptionProps {
-  /** Fig. number, zero-padded string or number. `1` renders as `01`. */
-  number: number | string;
+  /** Fig. number, zero-padded string or number. `1` renders as `01`.
+   *  Omit to render the label alone (desk objects). */
+  number?: number | string;
   /** Caption text — lowercase-preferred per plate convention. */
   label: string;
   /** Alignment within the caption block. Default `left`. */
@@ -35,6 +36,7 @@ export default function FigCaption({
 }: FigCaptionProps) {
   const numberStr =
     typeof number === 'number' ? String(number).padStart(2, '0') : number;
+  const text = numberStr === undefined ? label : `fig. ${numberStr} — ${label}`;
 
   const alignClass =
     align === 'center'
@@ -49,9 +51,7 @@ export default function FigCaption({
       data-figcaption
     >
       <span className={styles.rule} aria-hidden="true" />
-      <span className={styles.text}>
-        fig. {numberStr} — {label}
-      </span>
+      <span className={styles.text}>{text}</span>
       <span
         className={styles.underline}
         data-figcaption-underline

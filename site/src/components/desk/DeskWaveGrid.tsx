@@ -1,5 +1,10 @@
+import { useEffect } from 'react';
 import { useReducedMotion } from '../../interactions/useReducedMotion';
-import { useWaveGrid, type WaveGridParams } from '../../interactions/useWaveGrid';
+import {
+  useWaveGrid,
+  type WaveDrop,
+  type WaveGridParams,
+} from '../../interactions/useWaveGrid';
 import styles from './DeskWaveGrid.module.css';
 
 /**
@@ -21,22 +26,92 @@ const DESK_WAVE: WaveGridParams = {
   idleDrops: false,
 };
 
+/** How the empty plate moves during the opening's rulings beat. */
+export type DeskIntroStyle = 'ring' | 'scatter';
+
+interface ScheduledDrop {
+  /** ms after the rulings beat begins. */
+  at: number;
+  x: number;
+  y: number;
+  ripple: WaveDrop;
+}
+
+/*
+ * Both openings fit inside the rulings beat that usePlateProofReveal holds
+ * before the objects arrive (~1.4s).
+ *
+ * ring — one drop at the centre once the rulings settle. Strong enough to
+ * hold full height to the corners, and about twice pointer speed so it
+ * crosses the plate in ~1s.
+ *
+ * scatter — eight lighter drops at random points and moments, like the first
+ * rain on paper. Points come from a shuffled 4×2 grid, jittered within each
+ * cell, so they land everywhere without clumping; each ring dies out within
+ * a few columns and the overlaps interfere.
+ */
+function introDrops(style: DeskIntroStyle): ScheduledDrop[] {
+  if (style === 'ring') {
+    return [{ at: 360, x: 0.5, y: 0.5, ripple: { strength: 6, speed: 700 } }];
+  }
+
+  const cells = Array.from({ length: 8 }, (_, i) => ({ col: i % 4, row: i >> 2 }));
+  const times = cells
+    .map(() => 280 + Math.random() * 680)
+    .sort((a, b) => a - b);
+  return shuffle(cells).map((cell, i) => ({
+    at: times[i],
+    x: (cell.col + 0.15 + Math.random() * 0.7) / 4,
+    y: (cell.row + 0.15 + Math.random() * 0.7) / 2,
+    ripple: {
+      strength: 1.6 + Math.random() * 1.2,
+      speed: 420 + Math.random() * 120,
+    },
+  }));
+}
+
+function shuffle<T>(items: T[]): T[] {
+  const out = [...items];
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}
+
 export interface DeskWaveGridProps {
   /** Plate column count; tiles subdivide these. */
   columns: number;
-  /** False while the plate proof is still revealing. */
+  /** False until the plate's surface is showing. */
   active: boolean;
+  /** True for the rulings beat of the opening reveal; plays the intro drops. */
+  intro: boolean;
+  introStyle: DeskIntroStyle;
 }
 
 /**
  * DeskWaveGrid — paper tiles under the plate ruling that ripple as the
- * pointer crosses the desk. Sits above DeskLight and below the grid rules,
- * so the column rules stay crisp on top of the shading. Off entirely under
- * reduced motion.
+ * pointer crosses the desk, and on their own as the plate opens.
+ * Mounted in the plate underlay: above DeskLight, under the column rules.
+ * Off entirely under reduced motion.
  */
-export default function DeskWaveGrid({ columns, active }: DeskWaveGridProps) {
+export default function DeskWaveGrid({
+  columns,
+  active,
+  intro,
+  introStyle,
+}: DeskWaveGridProps) {
   const reducedMotion = useReducedMotion();
-  const canvasRef = useWaveGrid(DESK_WAVE, columns, active && !reducedMotion);
+  const enabled = active && !reducedMotion;
+  const { canvasRef, drop } = useWaveGrid(DESK_WAVE, columns, enabled);
+
+  useEffect(() => {
+    if (!intro || !enabled) return;
+    const timers = introDrops(introStyle).map((d) =>
+      window.setTimeout(() => drop(d.x, d.y, d.ripple), d.at),
+    );
+    return () => timers.forEach((timer) => window.clearTimeout(timer));
+  }, [intro, enabled, introStyle, drop]);
 
   return (
     <div className={styles.field} aria-hidden="true">

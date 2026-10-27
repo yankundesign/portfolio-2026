@@ -28,7 +28,7 @@ export default function AboutObject({ onClick, className }: AboutObjectProps) {
           draggable={false}
         />
       </button>
-      <FigCaption number={3} label="about" align="left" />
+      <FigCaption label="about" align="left" />
     </figure>
   );
 }

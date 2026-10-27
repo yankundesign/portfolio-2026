@@ -7,7 +7,7 @@ import AboutObject from '../components/desk/AboutObject';
 import Pen from '../components/desk/Pen';
 import CatRoulette from '../components/desk/CatRoulette';
 import DeskLight from '../components/desk/DeskLight';
-import DeskWaveGrid from '../components/desk/DeskWaveGrid';
+import DeskWaveGrid, { type DeskIntroStyle } from '../components/desk/DeskWaveGrid';
 import DeskWayfinder from '../components/desk/DeskWayfinder';
 import DeskJellyfishLayer from '../components/desk/DeskJellyfishLayer';
 import Ephemera from '../components/desk/Ephemera';
@@ -33,6 +33,14 @@ export default function DeskRoute() {
   const proofReveal = usePlateProofReveal();
   const sceneRef = useRef<HTMLDivElement>(null);
   const reducedMotion = useReducedMotion();
+  // The opening scatters drops across the plate; ?intro=ring brings back the
+  // single centre ring for comparison.
+  const [introStyle] = useState<DeskIntroStyle>(() =>
+    typeof window !== 'undefined' &&
+    new URLSearchParams(window.location.search).get('intro') === 'ring'
+      ? 'ring'
+      : 'scatter',
+  );
 
   // Report the live viewport in the top-right chrome. Quiet technical
   // touch that matches the real behavior of a specimen sheet.
@@ -122,7 +130,7 @@ export default function DeskRoute() {
   const bottomRightLine =
     proofReveal.makeReadyLine ??
     (proofReveal.showStartHint
-      ? 'START WITH FIG. 01 — FIELD NOTEBOOK'
+      ? 'START WITH THE FIELD NOTEBOOK'
       : 'CURRENTLY — Building something fun.');
 
   return (
@@ -142,12 +150,18 @@ export default function DeskRoute() {
             : 'Designed and built with Claude and Codex'
         }
         revealPhase={proofReveal.phase}
+        underlay={
+          <>
+            <DeskLight />
+            <DeskWaveGrid
+              columns={PLATE_COLUMNS}
+              active={proofReveal.phase !== 'paper'}
+              intro={proofReveal.phase === 'rulings'}
+              introStyle={introStyle}
+            />
+          </>
+        }
       >
-        <DeskLight />
-        <DeskWaveGrid
-          columns={PLATE_COLUMNS}
-          active={proofReveal.phase === 'ready'}
-        />
         <div className={styles.composition}>
           <div
             ref={sceneRef}

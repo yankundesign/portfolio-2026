@@ -1,7 +1,8 @@
 /*
  * DeskWaveGrid — the ripple field shares the plate ruling's box exactly
  * (same insets as EditorialPlate's .gridLines), so tile columns land on the
- * column rules. z-index 0 paints it after DeskLight and under the rules.
+ * column rules. It lives in the plate underlay, after DeskLight and under
+ * the rules.
  */
 
 .field {

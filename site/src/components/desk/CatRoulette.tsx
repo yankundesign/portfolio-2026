@@ -116,13 +116,12 @@ export default function CatRoulette({ className }: CatRouletteProps) {
 
   const selected = cats[selectedIndex];
   const cardCat = cats[cardPose];
-  const specimenNumber = String(cardPose + 1).padStart(2, '0');
 
   const captionLabel = isSpinning
-    ? 'yogurt roulette — spinning'
+    ? 'cat roulette — spinning'
     : hasSpun
-      ? `yogurt roulette — ${selected.id}`
-      : 'yogurt roulette';
+      ? `cat roulette — ${selected.id}`
+      : 'cat roulette';
 
   return (
     <figure className={`${styles.figure} ${className ?? ''}`}>
@@ -137,7 +136,7 @@ export default function CatRoulette({ className }: CatRouletteProps) {
             <YogurtSVG pose={cardCat.id} size={180} />
           </div>
           <div className={styles.specimenCaption}>
-            fig. {specimenNumber} · yogurt — {cardCat.label}
+            yogurt — {cardCat.label}
           </div>
         </div>
 
@@ -148,10 +147,10 @@ export default function CatRoulette({ className }: CatRouletteProps) {
           disabled={isSpinning}
           aria-label={
             isSpinning
-              ? 'Yogurt roulette spinning'
+              ? 'Cat roulette spinning'
               : hasSpun
-                ? `Yogurt roulette. Showing: ${selected.ariaLabel}. Press to spin again.`
-                : 'Yogurt roulette. Press to spin.'
+                ? `Cat roulette. Showing: ${selected.ariaLabel}. Press to spin again.`
+                : 'Cat roulette. Press to spin.'
           }
         >
           {/* Layer 1: base paper disc. */}
@@ -253,7 +252,7 @@ export default function CatRoulette({ className }: CatRouletteProps) {
         </button>
       </div>
 
-      <FigCaption number={4} label={captionLabel} align="left" />
+      <FigCaption label={captionLabel} align="left" />
     </figure>
   );
 }

@@ -56,7 +56,7 @@ export default function ResumePaper({ onClick, className }: ResumePaperProps) {
           />
         </svg>
       </button>
-      <FigCaption number={2} label="resume" align="left" />
+      <FigCaption label="resume" align="left" />
     </figure>
   );
 }

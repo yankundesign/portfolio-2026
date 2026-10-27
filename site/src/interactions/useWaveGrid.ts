@@ -1,4 +1,4 @@
-import { useEffect, useRef, type RefObject } from 'react';
+import { useCallback, useEffect, useRef, type RefObject } from 'react';
 
 /**
  * useWaveGrid — ripple field under the desk plate's column ruling.
@@ -44,11 +44,27 @@ export interface WaveGridParams {
   idleDrops: boolean;
 }
 
+/** A scripted ripple, for moments the pointer didn't cause. */
+export interface WaveDrop {
+  /** Weight of the source; above ~1 the ring holds full height further out. */
+  strength: number;
+  /** Ring speed, px / s. Defaults to the field's own speed. */
+  speed?: number;
+}
+
+export interface WaveGrid {
+  canvasRef: RefObject<HTMLCanvasElement | null>;
+  /** Drop a ripple at a point given as fractions of the field (0–1). */
+  drop: (x: number, y: number, ripple: WaveDrop) => void;
+}
+
 interface RippleSource {
   x: number;
   y: number;
   age: number;
   strength: number;
+  /** Fixed at birth, so retuning the field never jumps a live ring. */
+  speed: number;
   /** Per-frame cache: wavefront radius, px. */
   front: number;
   /** Per-frame cache: strength × time fade. */
@@ -83,10 +99,15 @@ export function useWaveGrid(
   params: WaveGridParams,
   columns: number,
   active: boolean,
-): RefObject<HTMLCanvasElement | null> {
+): WaveGrid {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const paramsRef = useRef(params);
   const wakeRef = useRef<(() => void) | null>(null);
+  const dropRef = useRef<WaveGrid['drop'] | null>(null);
+  const drop = useCallback<WaveGrid['drop']>(
+    (x, y, ripple) => dropRef.current?.(x, y, ripple),
+    [],
+  );
 
   useEffect(() => {
     paramsRef.current = params;
@@ -113,9 +134,14 @@ export function useWaveGrid(
     let sinceDrop = 0;
     let lastPointer: { x: number; y: number } | null = null;
 
-    const addSource = (x: number, y: number, strength: number) => {
+    const addSource = (
+      x: number,
+      y: number,
+      strength: number,
+      speed = paramsRef.current.speed,
+    ) => {
       if (sources.length >= MAX_SOURCES) sources.shift();
-      sources.push({ x, y, age: 0, strength, front: 0, weight: 0 });
+      sources.push({ x, y, age: 0, strength, speed, front: 0, weight: 0 });
     };
 
     const render = (p: WaveGridParams) => {
@@ -134,7 +160,7 @@ export function useWaveGrid(
       const reach = p.ringWidth * 3;
       const jitter = JITTER * tileW;
       for (const s of sources) {
-        s.front = p.speed * s.age;
+        s.front = s.speed * s.age;
         s.weight = s.strength * Math.exp(-s.age / p.fade);
       }
 
@@ -313,6 +339,12 @@ export function useWaveGrid(
     observer.observe(canvas);
     window.addEventListener('pointermove', onPointerMove, { passive: true });
     wakeRef.current = wake;
+    // Measured at call time: a drop can land before the first resize.
+    dropRef.current = (x, y, ripple) => {
+      const rect = canvas.getBoundingClientRect();
+      addSource(x * rect.width, y * rect.height, ripple.strength, ripple.speed);
+      wake();
+    };
     wake();
 
     return () => {
@@ -320,12 +352,13 @@ export function useWaveGrid(
       observer.disconnect();
       window.removeEventListener('pointermove', onPointerMove);
       wakeRef.current = null;
+      dropRef.current = null;
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
     };
   }, [active, columns]);
 
-  return canvasRef;
+  return { canvasRef, drop };
 }
 
 /** Stable per-tile offset in [-0.5, 0.5]. */

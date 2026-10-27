@@ -177,6 +177,15 @@
   background: var(--rule-plate);
 }
 
+/* ─── Underlay — surface layers beneath the ruling ─── */
+
+.underlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
 /* ─── Grid lines overlay — the blueprint ruling ─── */
 
 .gridLines {
@@ -275,6 +284,7 @@
 /* ─── Homepage plate proof reveal ─── */
 
 .plate[data-proof-phase] .bleedFrame,
+.plate[data-proof-phase] .underlay,
 .plate[data-proof-phase] .gridLines,
 .plate[data-proof-phase] .columnRow,
 .plate[data-proof-phase] .registerMark,
@@ -286,6 +296,7 @@
 }
 
 .plate[data-proof-phase='paper'] .bleedFrame,
+.plate[data-proof-phase='paper'] .underlay,
 .plate[data-proof-phase='paper'] .gridLines,
 .plate[data-proof-phase='paper'] .columnRow,
 .plate[data-proof-phase='paper'] .registerMark,
@@ -321,6 +332,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .plate[data-proof-phase] .bleedFrame,
+  .plate[data-proof-phase] .underlay,
   .plate[data-proof-phase] .gridLines,
   .plate[data-proof-phase] .columnRow,
   .plate[data-proof-phase] .registerMark,

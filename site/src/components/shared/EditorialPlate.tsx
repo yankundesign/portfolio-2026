@@ -59,6 +59,13 @@ export interface EditorialPlateProps {
 
   revealPhase?: 'paper' | 'rulings' | 'objects' | 'ready';
 
+  /**
+   * Surface layers painted under the ruling — light, texture, the paper
+   * itself moving. Unlike `children`, they arrive with the rulings during
+   * the proof reveal rather than with the objects.
+   */
+  underlay?: ReactNode;
+
   children?: ReactNode;
 }
 
@@ -88,6 +95,7 @@ export default function EditorialPlate({
   showBleedFrame = true,
   showGridLines = true,
   revealPhase,
+  underlay,
   children,
 }: EditorialPlateProps) {
   const plateRef = useRef<HTMLDivElement>(null);
@@ -172,6 +180,12 @@ export default function EditorialPlate({
           data-plate-rule
           aria-hidden="true"
         />
+      )}
+
+      {underlay && (
+        <div className={styles.underlay} aria-hidden="true">
+          {underlay}
+        </div>
       )}
 
       {/* Blueprint grid ruling — top rule, bottom rule, vertical column rules. */}
