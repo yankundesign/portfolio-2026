@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import CvCover from '../components/cv/CvCover';
 import CvRole from '../components/cv/CvRole';
 import CvMetric from '../components/cv/CvMetric';
+import CvProjects from '../components/cv/CvProjects';
 import CvSkills from '../components/cv/CvSkills';
 import CvEducation from '../components/cv/CvEducation';
 import CvDownload from '../components/cv/CvDownload';
@@ -18,8 +19,9 @@ import styles from './CvRoute.module.css';
  *   Intro     → short first-person paragraph
  *   § 01      → Experience: stacked roles, margin year-ranges, expandable bullets
  *   Metric    → pull-out metric moments that anchor to a role
- *   § 02      → Skills specimen grid
- *   § 03      → Education
+ *   § 02      → Independent projects
+ *   § 03      → Skills specimen grid
+ *   § 04      → Education
  *   Colophon  → tiny mono footer line, download echo
  *
  * Scroll is enabled on this route only; global body has overflow hidden for
@@ -86,12 +88,13 @@ export default function CvRoute() {
             })}
           </section>
 
+          <CvProjects />
           <CvSkills />
           <CvEducation />
 
           <footer className={styles.colophon}>
             <p className={styles.colophonLine}>
-              Typeset in <em>Fraunces</em> &amp; JetBrains Mono · last updated 2026&ndash;04&ndash;22
+              Typeset in <em>Fraunces</em> &amp; JetBrains Mono · last updated 2026&ndash;10&ndash;27
             </p>
             <CvDownload variant="inline" label="Download the PDF version" />
           </footer>

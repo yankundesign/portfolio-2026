@@ -12,7 +12,7 @@ export default function CvSkills() {
   return (
     <section className={styles.skills} aria-labelledby="cv-skills-heading">
       <header className={styles.sectionHeader}>
-        <span className={styles.sectionNumber}>§ 02</span>
+        <span className={styles.sectionNumber}>§ 03</span>
         <h2 id="cv-skills-heading" className={styles.sectionTitle}>
           A <em>working</em> vocabulary
         </h2>

@@ -5,7 +5,7 @@ export default function CvEducation() {
   return (
     <section className={styles.education} aria-labelledby="cv-education-heading">
       <header className={styles.sectionHeader}>
-        <span className={styles.sectionNumber}>§ 03</span>
+        <span className={styles.sectionNumber}>§ 04</span>
         <h2 id="cv-education-heading" className={styles.sectionTitle}>
           Education
         </h2>

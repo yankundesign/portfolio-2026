@@ -33,10 +33,14 @@ export default function CvCover() {
       <p className={styles.tagline}>
         Curriculum vitae,
         <br />
-        <span>April 2026</span>
+        <span>October 2026</span>
       </p>
 
       <dl className={styles.contact}>
+        <div className={styles.contactRow}>
+          <dt>base</dt>
+          <dd>{contact.location}</dd>
+        </div>
         <div className={styles.contactRow}>
           <dt>tel</dt>
           <dd>{contact.phone}</dd>

@@ -3,12 +3,8 @@
  *
  * Voice note (hybrid, per decisions-log):
  * - `intro` is first-person, reflective, written by Yankun.
- * - `role.bullets` are résumé-voice, verbatim from the PDF with small typo fixes flagged below.
- *
- * Typo fixes against the uploaded PDF (all logged in 00-brief/decisions-log.md):
- * - "clearer clearer" → "clearer" (intern bullet 1)
- * - "data-drivenAI" → "data-driven AI" (SAP bullet 3)
- * - "Palo Alto,CA" → "Palo Alto, CA" (SAP location)
+ * - `role.bullets`, `projects`, and `skillGroups` are résumé-voice, verbatim
+ *   from the October 2026 PDF (public/Yankun-Wang-CV-2026.pdf).
  */
 
 export interface CvRole {
@@ -40,6 +36,21 @@ export interface CvMetric {
   anchor: string;
 }
 
+export interface CvProject {
+  id: string;
+  name: string;
+  /** Italic descriptor after the name, e.g. "iOS app, live on the App Store" */
+  kind: string;
+  /** Year shown in the margin */
+  year: string;
+  /** Full range shown in the meta line, e.g. "Sep 2026 — Present" */
+  range: string;
+  description: string;
+  /** Internal route ("/works/ebb") or external URL */
+  href: string;
+  linkLabel: string;
+}
+
 export interface CvSkillGroup {
   label: string;
   skills: string[];
@@ -53,9 +64,10 @@ export interface CvEducationEntry {
 }
 
 export const contact = {
+  location: 'San Francisco Bay Area, CA',
   phone: '(734) 548-7871',
   email: 'yankunux@gmail.com',
-  portfolio: 'yankun.one',
+  portfolio: 'yankun.design',
 };
 
 export const pdfHref = '/Yankun-Wang-CV-2026.pdf';
@@ -76,16 +88,15 @@ export const roles: CvRole[] = [
     summary:
       'Designing an AI assistant inside Webex Control Hub — helping IT admins read the dashboards they already have.',
     bullets: [
-      'Own end-to-end design of an AI assistant for IT admins in Webex Control Hub; grew adoption 3% → 18% by redesigning entry points, onboarding, and the analytics landing experience.',
-      'Integrated an AI assistant into existing analytics dashboards and reports, enabling IT admins to surface insights, interpret complex data, and troubleshoot issues through natural-language interactions instead of manual analysis.',
-      'Lead interaction design for agentic AI workflows and generative UI: defined human-in-the-loop patterns, transparent working steps, and a reusable widget library adopted as a scalable design framework.',
-      'Reduced enterprise search no-result rate by 86% through iterative query-log analysis and an LLM-based retrieval-and-ranking layer.',
-      'Prototype rapidly with GenAI tools (Cursor, v0, Figma Make) to build interactive, system-driven prototypes; shipped an internal Figma plugin to boost design team throughput.',
+      'Own end-to-end interaction design for the Control Hub AI Assistant, evolving it from a help bot into contextual assistance across search, reports, dashboards, and device workflows; grew monthly adoption from 3% to 18%.',
+      'Designed Smart Search for enterprise admins from query-log analysis, LLM retrieval and ranking behavior, and user feedback, cutting search dead ends by 86%.',
+      'Defined the interaction patterns for agentic AI in Control Hub: editable plans, human approval moments, visible execution, and audit trails for admin-controlled actions.',
+      'Built the team’s AI-native design workflow: a prototyping playground on the product codebase, reusable AI skills, and Write Like Webex, a Figma plugin for UI copy. Moved the team from static mockups to live React prototypes.',
     ],
   },
   {
     id: 'sap',
-    company: 'SAP',
+    company: 'SAP Fieldglass',
     title: 'UX Designer',
     location: 'Palo Alto, CA',
     range: '2020 — 2024',
@@ -94,9 +105,8 @@ export const roles: CvRole[] = [
     summary:
       'Four years on SAP Fieldglass — a contingent workforce platform where every screen was somebody\u2019s hiring cycle.',
     bullets: [
-      'Led UX across a contingent workforce management platform in a complex cross-functional org — research, journey mapping, wireframing, prototyping, and engineering handoff.',
-      'Redesigned Homepage, My Worker, and SoW dashboards into modular, role-based layouts with configurable data views, improving task completion for procurement and hiring managers.',
-      'Designed data-driven AI features: automated resume ranking with scoring visualizations and AI-assisted procurement descriptions, reducing hiring-cycle time.',
+      'Led design of modular homepage, worker dashboard, and worker profile patterns that surface pending tasks, spend signals, key dates, and role-specific actions; framework adopted by 1,000+ enterprise customers.',
+      'Designed AI-assisted hiring and procurement concepts, including resume-ranking visualizations and generated procurement descriptions, to reduce manual decision prep in complex hiring workflows.',
     ],
   },
   {
@@ -110,9 +120,32 @@ export const roles: CvRole[] = [
     summary:
       'First design job — educational web apps and the team\u2019s first pass at a design system.',
     bullets: [
-      'Improved educational web apps with clearer data visualizations.',
-      'Helped build the team\u2019s first design system with new visualization and interaction patterns.',
+      'Designed educational web apps and helped build the team\u2019s first design system.',
     ],
+  },
+];
+
+export const projects: CvProject[] = [
+  {
+    id: 'ebb',
+    name: 'Ebb',
+    kind: 'iOS app, live on the App Store',
+    year: '2026',
+    range: 'Jul 2026',
+    description:
+      'A three-breath pause before TikTok or Instagram opens, designed and built in SwiftUI in two weeks.',
+    href: '/works/ebb',
+    linkLabel: 'Read the case study',
+  },
+  {
+    id: 'zao',
+    name: 'ZAO',
+    kind: 'Agent-friendly design system, in progress',
+    year: '2026',
+    range: 'Sep 2026 \u2014 Present',
+    description: 'A React design system that gives AI coding agents fewer choices and clearer rules.',
+    href: 'https://zaoui.dev/',
+    linkLabel: 'zaoui.dev',
   },
 ];
 
@@ -122,7 +155,7 @@ export const metrics: CvMetric[] = [
     figure: '18',
     suffix: '%',
     countTo: 18,
-    caption: 'CHAI adoption, up from 3%. Control Hub AI, 2024–25.',
+    caption: 'monthly CHAI adoption, up from 3%. Control Hub AI, 2024–25.',
     anchor: 'cisco',
   },
   {
@@ -130,46 +163,26 @@ export const metrics: CvMetric[] = [
     figure: '86',
     suffix: '%',
     countTo: 86,
-    caption: 'drop in dead-end searches. Enterprise search rework.',
+    caption: 'drop in search dead ends. Smart Search for enterprise admins.',
     anchor: 'cisco',
   },
 ];
 
 export const skillGroups: CvSkillGroup[] = [
   {
-    label: 'Product & Interaction Design',
+    label: 'Design',
     skills: [
-      'End-to-end product design',
       'Interaction design',
-      'Information architecture',
+      'Prototyping',
       'Design systems',
-      'Accessibility (WCAG)',
-      'Motion / interaction prototyping',
+      'Agentic AI UX',
+      'User research',
+      'Accessibility',
     ],
   },
   {
-    label: 'AI Product Design',
-    skills: [
-      'LLM / GenAI UX',
-      'Agentic workflows',
-      'Conversational UX',
-      'RAG / search UX',
-      'Trust & safety patterns',
-    ],
-  },
-  {
-    label: 'Research & Validation',
-    skills: [
-      'Problem framing',
-      'User interviews',
-      'Usability testing',
-      'Rapid concept validation',
-      'Design reviews',
-    ],
-  },
-  {
-    label: 'Tools & Systems',
-    skills: ['Figma', 'Framer', 'Cursor', 'v0', 'HTML / CSS'],
+    label: 'Build',
+    skills: ['Figma', 'React', 'TypeScript', 'Tailwind CSS', 'SwiftUI', 'Claude', 'Codex', 'Cursor'],
   },
 ];
 

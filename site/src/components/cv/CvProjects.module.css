@@ -1,0 +1,141 @@
+/*
+ * CvProjects — margin-year list, matching CvEducation, with a description
+ * line and a mono meta/link line borrowed from CvRole.
+ */
+
+.projects {
+  padding: clamp(3rem, 8vw, 6rem) 0;
+  border-top: 1px solid var(--ink-muted);
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: baseline;
+  gap: 1.5rem;
+  margin-bottom: clamp(2rem, 5vw, 3rem);
+}
+
+.sectionNumber {
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  letter-spacing: 0.12em;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+}
+
+.sectionTitle {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: clamp(2rem, 5vw, 3rem);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  margin: 0;
+  color: var(--ink);
+  font-variation-settings: 'opsz' 72;
+}
+
+.sectionTitle em {
+  font-style: italic;
+  font-weight: 400;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1.25rem, 3vw, 2rem);
+}
+
+.entry {
+  display: grid;
+  grid-template-columns: 5rem 1fr;
+  gap: clamp(1rem, 3vw, 2rem);
+  align-items: baseline;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--ink-muted);
+}
+
+.year {
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  letter-spacing: 0.12em;
+  color: var(--ink);
+}
+
+.detail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.heading {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin: 0;
+  font-family: var(--font-display);
+  line-height: 1.15;
+  color: var(--ink);
+}
+
+.name {
+  font-weight: 400;
+  font-size: clamp(1.25rem, 2.4vw, 1.625rem);
+  letter-spacing: -0.01em;
+  font-variation-settings: 'opsz' 36;
+}
+
+.kind {
+  font-style: italic;
+  font-weight: 300;
+  font-size: var(--text-body);
+  color: var(--ink-soft);
+}
+
+.description {
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  font-weight: 300;
+  line-height: 1.6;
+  color: var(--ink);
+  margin: 0;
+  max-width: 62ch;
+}
+
+.metaLine {
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin: 0.25rem 0 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.metaDot {
+  color: var(--ink-muted);
+}
+
+.link {
+  color: var(--ink);
+  text-decoration: none;
+  border-bottom: 1px solid var(--ink-muted);
+  transition: border-color var(--duration-hover) var(--ease-out);
+}
+
+.link:hover,
+.link:focus-visible {
+  border-bottom-color: var(--ink);
+}
+
+@media (max-width: 640px) {
+  .entry {
+    grid-template-columns: 1fr;
+  }
+}
