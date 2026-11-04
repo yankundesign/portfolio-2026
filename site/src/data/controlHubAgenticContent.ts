@@ -79,8 +79,8 @@ export const prose = {
     'Cloud Control, the platform above Control Hub, was building its own Agent Builder. Our agent work looked redundant, and the PM asked whether we should stop. I didn’t argue in the abstract. I answered with a model.',
   ],
   call: [
-    'Not an agent that decides on its own, but step-by-step instructions the Assistant runs, with the admin at each checkpoint. Two things decided it. Admins need to check each step, so the steps have to be visible. That’s the intern. And the builder was Cloud Control’s to build. What was still ours was how an admin asks, checks and approves.',
-    'Automation the admin can check, not autonomy. We start with tasks that are high value, low risk and pre-built.',
+    'Their Agent Builder makes fully autonomous agents: you give it a goal, and it uses the tools it’s allowed. Ours was different: step-by-step instructions the Assistant runs, with the admin’s input and approval at each checkpoint. The builder was Cloud Control’s to build. What was still ours was how an admin asks, checks and approves.',
+    'The trade-off: admins give up full autonomy. That’s fine for now. They’re still learning what AI can do. The PM and engineering agreed it was the right direction, so we built our own instead of waiting.',
   ],
   p04: [
     'Here’s the model, built. Prototype 04 turns a task into instructions the Assistant follows step by step. I showed it to the wider Cisco design team, and showing it is what found us the next step.',
@@ -284,6 +284,8 @@ export interface Decision {
   id: string;
   title: string;
   paragraphs: readonly string[];
+  /** Where the decision started — shown first, when the deck shows it. */
+  started?: VideoFigure;
   chosen: Figure;
   weighedAgainst?: Figure;
 }
@@ -293,18 +295,19 @@ export const decisions: readonly Decision[] = [
     id: 'find',
     title: 'Show the tasks where admins start their day',
     paragraphs: [
-      'CHAI v1 sat beside the product. Admins tried it once and never came back. So the AI moves to the first page admins see, and what it can do is grouped by job, not by feature. “Set up a similar device” is Francis’s ticket, in the admin’s own words.',
+      'In prototype 02, I explored an AI-first overview that surfaces insights. In testing, admins felt it was too big a change to the overview they’re used to. They still wanted the charts they pin there. So the final overview keeps those, and adds a direct way into the AI on the first page they see. What it can do is grouped by job, not by feature, with the workflows they can run.',
+      'The trade-off: the AI section pushes the usual overview content down, for everyone. Admins can hide it. It’s worth it: the AI can do much more now, and this is where admins discover it.',
     ],
+    started: {
+      sources: [{ src: '/images/control-hub-agentic/p02-overview.mp4', type: 'video/mp4' }],
+      poster: '/images/control-hub-agentic/p02-overview-poster.png',
+      caption: 'Where it started · prototype 02 · my design',
+      alt: 'Silent recording of prototype 02’s AI-first overview: a greeting and three insight cards; clicking the certificate warning opens the AI assistant, which explains what will break and for whom.',
+    },
     chosen: {
       src: '/images/control-hub-agentic/overview-tasks.png',
-      caption: 'AI-first overview · my design · sample data',
-      alt: 'The AI-first overview: a greeting, an Ask box, and four task groups above the usual metrics. Automate with Workflows is open: copy settings to a new user, set up a similar device, create a workflow for a recurring task, schedule a configuration check.',
-    },
-    weighedAgainst: {
-      src: '/images/chai/chai-1-0.png',
-      caption: 'Weighed against · v1’s chat beside the product · not my design',
-      alt: 'CHAI v1.0: a chat panel beside Control Hub with three canned prompts.',
-      variant: 'dashed',
+      caption: 'Where it ended up · my design · sample data',
+      alt: 'The final overview: a greeting, an Ask box, and four task groups above the usual pinned charts. Automate with Workflows is open: copy settings to a new user, set up a similar device, create a workflow for a recurring task, schedule a configuration check.',
     },
   },
   {
@@ -312,7 +315,7 @@ export const decisions: readonly Decision[] = [
     title: 'It shows the plan before it touches anything',
     paragraphs: [
       'In Report Analysis, the admin saw the scope before the AI answered. Here, the admin sees the plan before the AI acts. The earlier plan named what it found and the cost before the yes. Where it landed: four plain steps, what it copies from and to, and one button to run it.',
-      'The trade-off: approval adds a step. A miss breaks a line for someone else, so one approval costs less than one undo.',
+      'The trade-off: approval adds a step. It’s worth it: a pause to review and approve keeps the admin in control. That’s how trust gets built.',
     ],
     chosen: {
       src: '/images/control-hub-agentic/plan-current.png',
@@ -327,42 +330,25 @@ export const decisions: readonly Decision[] = [
     },
   },
   {
-    id: 'work',
-    title: 'It shows its work…',
-    paragraphs: [
-      'Every step is shown as it runs, checked against the same steps the plan promised. The outcome is predictable, and the admin can see where it is. It answers the last stop of the task: did I get everything?',
-    ],
-    chosen: {
-      src: '/images/control-hub-agentic/run-step-steps.png',
-      caption: 'Execution · prototype 05 · my design',
-      alt: 'The four steps of the clone running in the Assistant: three complete, verify settings on ATA-2 in progress.',
-    },
-  },
-  {
     id: 'record',
     title: '…and keeps a record where admins already look',
     paragraphs: [
-      'I first proposed a separate Agent Activity view. The PM’s concern was that two audit systems would fragment Control Hub. We landed on agent events inside the existing audit log, next to the changes people make. One place to check is better for the admin.',
+      'Trust also needs a record. Admins want to see the trace. I first explored a separate Agent Activity view. But one place to check is better. So agent events go into the audit log admins already use, next to the changes people make, with a mark that shows a change was made with AI. Every AI change is traceable.',
+      'What’s lost is the full detail: the expected outcome, and what the agent did at each step. In the workflow, the admin can still open any step and read a summary of what the Assistant did.',
     ],
     chosen: {
       src: '/images/control-hub-agentic/audit-log.png',
-      caption: 'Audit log · prototype — the Assistant’s and agents’ changes beside people’s',
-      alt: 'The Control Hub audit log, with Assistant and agent entries listed alongside admin changes and logins.',
-    },
-    weighedAgainst: {
-      src: '/images/control-hub-agentic/framework-activity.png',
-      caption: 'Weighed against · a separate Agent Activity view',
-      alt: 'A separate AI agents audit log page listing agent runs, the agent, time, user and trigger.',
-      variant: 'dashed',
+      caption: 'Audit log · prototype — AI changes beside people’s, each marked as AI activity',
+      alt: 'The Control Hub audit log with AI clients (Assistant, Copilot, ChatGPT, an agent) beside admin changes, and an event opened on the right: tagged AI activity, with the AI client, the change type, the configuration and its value change.',
     },
   },
 ];
 
-/** Slide 30's drawing: the agent model dropped, the checkable model kept. */
+/** Slide 34's drawing: the agent model dropped, the checkable model kept. */
 export const pivot = {
   dropped: { from: 'Goal', box: 'Agent decides', to: 'Outcome' },
   kept: { from: 'Instruction', inputs: 'Inputs', steps: 'Steps', to: 'Review' },
-  checkLabel: 'The admin checks',
+  checkLabel: 'Admin checks',
 } as const;
 
 /** Slide 40's drawing: my layer between the admin's task and the platform. */

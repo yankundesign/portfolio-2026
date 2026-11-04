@@ -50,11 +50,12 @@
   display: grid;
   /* Rail is bounded (not greedy) so it stays a slim label column; the
      reading column takes the measure; the trailing gutter only mops up
-     the small remainder. This keeps content wide and the empty right
-     gutter minimal — the article max-width is sized to match. */
+     the small remainder. The reading column is capped at the measure but
+     may shrink: rail + measure + gaps is wider than the window between
+     about 1024 and 1480px, and a fixed column ran past the right edge. */
   grid-template-columns:
     minmax(10rem, 12rem)
-    min(var(--reading-measure), 100%)
+    minmax(0, var(--reading-measure))
     minmax(0, 1fr);
   column-gap: clamp(1.25rem, 2.5vw, 2.5rem);
   align-items: start;

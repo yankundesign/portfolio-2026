@@ -96,6 +96,35 @@ export function sketchLine(a: Point, b: Point, rand: Rand, { amp = 0.8, step = 1
   return smoothPath(points);
 }
 
+/**
+ * A hand-drawn run through several points — resampled along the polyline,
+ * wobbled along each segment's normal, then smoothed. Ends stay exact.
+ */
+export function sketchThrough(points: readonly Point[], rand: Rand, { amp = 0.8, step = 10 }: LineOptions = {}) {
+  const wobble = makeWobble(rand, amp);
+  const out: Point[] = [];
+  let s = 0;
+  for (let i = 0; i < points.length - 1; i++) {
+    const a = points[i];
+    const b = points[i + 1];
+    const len = Math.hypot(b[0] - a[0], b[1] - a[1]);
+    if (len === 0) continue;
+    const nx = -(b[1] - a[1]) / len;
+    const ny = (b[0] - a[0]) / len;
+    const n = Math.max(1, Math.ceil(len / step));
+    for (let k = out.length ? 1 : 0; k <= n; k++) {
+      const t = k / n;
+      const off = wobble(s + len * t);
+      out.push([a[0] + (b[0] - a[0]) * t + nx * off, a[1] + (b[1] - a[1]) * t + ny * off]);
+    }
+    s += len;
+  }
+  if (out.length < 2) return '';
+  out[0] = points[0];
+  out[out.length - 1] = points[points.length - 1];
+  return smoothPath(out);
+}
+
 /** An open arrowhead (a V) at `tip`, pointing along `angle` radians. */
 export function sketchArrowhead(tip: Point, angle: number, rand: Rand, size = 7) {
   const spread = between(rand, 0.48, 0.58);

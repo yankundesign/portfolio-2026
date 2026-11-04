@@ -4,6 +4,21 @@ Track design and build decisions as they're made.
 
 ---
 
+## 2026-10-31 · Agentic case study follows the October 31 deck
+
+Four changes from Yankun, matched to the deck (outline rev. October 31; Figma slides 34, 41–42, 45):
+
+- **"Not an agent" diagram** now draws slide 34 itself on wide screens: one SVG where the kept line runs into the open box and dips under "Inputs" and "Steps", three check rings, "Admin checks" labeled once, and the "Dropped / My call" tags gone. Phones keep the vertical version. A new `sketchThrough` helper draws the woven line.
+- **"Show the tasks where admins start their day"** drops v1's chat as the weighed-against plate. Following slides 41–42, it now shows where it started (prototype 02's AI-first overview video) and where it ended up (the final overview).
+- **"…and keeps a record"** uses slide 45's capture (the audit log with an event open and the AI activity mark) and drops the Agent Activity view.
+- **"It shows its work"** is removed, as in the deck (cut October 26).
+
+Copy for the pivot, the overview, the plan's trade-off and the record follows the October 31 speaker notes. "One approval costs less than one undo" is retired in the deck too. The slide 45 capture still carries lorem ipsum in its detail panel, plus "Jack Whome" and the ChatGPT/Copilot rows (the outline's to-do for 32).
+
+**Layout fix, all case studies.** The reading column was a fixed `min(measure, 100%)`. Rail plus measure plus gaps is wider than the window from about 1024 to 1480px, so every case study scrolled sideways there: 132px at 1100, 53px at 1280. The column is now `minmax(0, measure)`: capped at the measure, free to shrink. Checked on CHAI, Agentic, Ebb and SAP at 1024, 1100, 1280, 1366, 1440 and 1920 with no sideways scroll; the 1920 layout is unchanged.
+
+---
+
 ## 2026-10-23 · Canvas order, and a new Agentic hover loop
 
 Canvas order is now CHAI, Control Hub Agentic, Ebb, ZAO (spread one), then SAP Fieldglass and Build with AI. Agentic moved from fourth to second; ZAO from second to fourth (Yankun's call). Order is the array order in `data/projects.ts`; the plates don't show fig numbers, so those were left alone.
