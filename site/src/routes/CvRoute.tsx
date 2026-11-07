@@ -94,7 +94,7 @@ export default function CvRoute() {
 
           <footer className={styles.colophon}>
             <p className={styles.colophonLine}>
-              Typeset in <em>Fraunces</em> &amp; JetBrains Mono · last updated 2026&ndash;10&ndash;27
+              Typeset in <em>Fraunces</em> &amp; JetBrains Mono · last updated 2026&ndash;11&ndash;07
             </p>
             <CvDownload variant="inline" label="Download the PDF version" />
           </footer>

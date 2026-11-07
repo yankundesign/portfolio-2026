@@ -4,7 +4,7 @@
  * Voice note (hybrid, per decisions-log):
  * - `intro` is first-person, reflective, written by Yankun.
  * - `role.bullets`, `projects`, and `skillGroups` are résumé-voice, verbatim
- *   from the October 2026 PDF (public/Yankun-Wang-CV-2026.pdf).
+ *   from the November 2026 PDF (public/Yankun-Wang-CV-2026.pdf).
  */
 
 export interface CvRole {
@@ -88,10 +88,12 @@ export const roles: CvRole[] = [
     summary:
       'Designing an AI assistant inside Webex Control Hub — helping IT admins read the dashboards they already have.',
     bullets: [
-      'Own end-to-end interaction design for the Control Hub AI Assistant, evolving it from a help bot into contextual assistance across search, reports, dashboards, and device workflows; grew monthly adoption from 3% to 18%.',
-      'Designed Smart Search for enterprise admins from query-log analysis, LLM retrieval and ranking behavior, and user feedback, cutting search dead ends by 86%.',
-      'Defined the interaction patterns for agentic AI in Control Hub: editable plans, human approval moments, visible execution, and audit trails for admin-controlled actions.',
-      'Built the team’s AI-native design workflow: a prototyping playground on the product codebase, reusable AI skills, and Write Like Webex, a Figma plugin for UI copy. Moved the team from static mockups to live React prototypes.',
+      'Own end-to-end design for the Control Hub AI Assistant, growing monthly adoption from 3% to 18%.',
+      'Designed Smart Search for enterprise admins, cutting search dead ends by 86%.',
+      'Defined and prototyped agentic AI patterns in Control Hub: editable plans, human approval, and audit trails.',
+      'Designed Webex developer experience: Control Hub settings for apps, agentic apps, MCP, and integrations.',
+      'Defined the UX for Control Hub Workspace MCP for external AI clients.',
+      'Moved the team from static mockups to live React prototypes on the product codebase.',
     ],
   },
   {
@@ -105,7 +107,7 @@ export const roles: CvRole[] = [
     summary:
       'Four years on SAP Fieldglass — a contingent workforce platform where every screen was somebody\u2019s hiring cycle.',
     bullets: [
-      'Led design of modular homepage, worker dashboard, and worker profile patterns that surface pending tasks, spend signals, key dates, and role-specific actions; framework adopted by 1,000+ enterprise customers.',
+      'Led design of the modular homepage and built its widget system, plus worker dashboard and profile patterns that surface pending tasks, spend signals, key dates, and role-specific actions; adopted by 1,000+ enterprise customers.',
       'Designed AI-assisted hiring and procurement concepts, including resume-ranking visualizations and generated procurement descriptions, to reduce manual decision prep in complex hiring workflows.',
     ],
   },
