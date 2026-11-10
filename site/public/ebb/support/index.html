@@ -184,8 +184,8 @@
         <h1>Support</h1>
         <p class="lede">
           Ebb adds three breaths between opening a supported feed and entering
-          it. It works through a Personal Automation that you create and
-          control in Apple Shortcuts.
+          it. It works through an automation that you create and control in
+          Apple Shortcuts.
         </p>
         <p class="updated">Last updated · November 7, 2026</p>
       </header>
@@ -194,23 +194,44 @@
         <section aria-labelledby="setup-heading">
           <h2 id="setup-heading">Set up an app</h2>
           <div class="copy">
+            <p>
+              Open Ebb, choose TikTok or Instagram, and tap
+              <strong>Open Shortcuts</strong>. Ebb shows a picture of each tap.
+            </p>
+            <p><strong>On iOS 27</strong></p>
             <ol>
-              <li>Open Ebb and choose TikTok or Instagram.</li>
-              <li>Tap <strong>Open Shortcuts</strong>.</li>
               <li>
-                Create a Personal Automation: App → choose the same app → Is
-                Opened → Run Immediately.
-              </li>
-              <li>Turn <strong>Notify When Run</strong> off.</li>
-              <li>
-                Add the action <strong>Check Ebb Intercept</strong> and set
-                Target to the same app.
+                Tap <strong>Automation</strong>, then <strong>+</strong>, then
+                <strong>Edit</strong>.
               </li>
               <li>
-                Return to Ebb, tap <strong>I've set it up</strong>, then open
-                the selected app to verify it.
+                Tap <strong>App</strong>. In the trigger, tap
+                <strong>App</strong> and choose the same app. Leave
+                <strong>Automation</strong> on and <strong>Notify</strong> off.
+              </li>
+              <li>
+                Search “Ebb”, tap <strong>Check Ebb Intercept</strong>, tap
+                <strong>Target</strong>, and choose the same app.
               </li>
             </ol>
+            <p><strong>On iOS 26</strong></p>
+            <ol>
+              <li>
+                Create a Personal Automation: App → choose the same app → Is
+                Opened → Run Immediately, with <strong>Notify When Run</strong>
+                off.
+              </li>
+              <li>
+                Tap <strong>New Blank Automation</strong>, add
+                <strong>Check Ebb Intercept</strong>, and set Target to the same
+                app.
+              </li>
+            </ol>
+            <p>
+              Then open the app. Ebb confirms it is armed. To set up another app
+              later, tap <strong>Add an app</strong> on Ebb's Home or in
+              Settings.
+            </p>
           </div>
         </section>
 
@@ -219,8 +240,13 @@
           <div class="copy">
             <ul>
               <li>
-                Confirm that the automation is enabled and set to Run
-                Immediately.
+                Confirm that the automation is on. On iOS 27, its Automation
+                switch is on. On iOS 26, it is set to Run Immediately.
+              </li>
+              <li>
+                If a notification asks before it runs: on iOS 27, open the
+                shortcut, tap ⓘ, then Privacy, and turn on Allow Running When
+                Locked. On iOS 26, choose Run Immediately.
               </li>
               <li>
                 Confirm that Check Ebb Intercept targets the same app as the
@@ -243,8 +269,9 @@
             <p>
               In Ebb, open Settings and choose Remove for that app, for
               example <strong>Remove TikTok</strong>. Then delete the matching
-              automation in Shortcuts. Removing it only inside Ebb does not
-              delete the Shortcuts automation.
+              automation in Shortcuts (on iOS 27, the shortcut that holds it).
+              Removing it only inside Ebb does not delete the Shortcuts
+              automation.
             </p>
           </div>
         </section>
