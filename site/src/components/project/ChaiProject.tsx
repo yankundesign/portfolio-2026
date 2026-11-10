@@ -1,6 +1,7 @@
 import ProjectHeader from './ProjectHeader';
 import ProseBlock from './ProseBlock';
 import EditorialPlate from './EditorialPlate';
+import VideoPlate from './VideoPlate';
 import InlineMetric from './InlineMetric';
 import MetricDisplay from './MetricDisplay';
 import SectionHeader from './SectionHeader';
@@ -16,11 +17,14 @@ import {
   evolutionProse,
   smartSearchProse,
   reportDataAnalysisProse,
+  reportsEntryProse,
   customReportProse,
+  otherFeaturesPoints,
   outcomeProse,
   nextProse,
   proofs,
   figures,
+  videos,
   metrics,
   credits,
   sections,
@@ -42,8 +46,9 @@ import styles from './ChaiProject.module.css';
  *   5. Evolution        1.0 → 2.0 → 3.0, three plates side by side
  *   6. Smart Search     prose, inline metrics, plate
  *   7. Report Analysis  two sub-beats:
- *                         · 6.1 Report + data analysis → widgets — 3 plates
- *                         · 6.2 Custom report generation         — 2 plates
+ *                         · 6.1 Report + data analysis → widgets — 4 plates + reports-entry note & video
+ *                         · 6.2 Custom report generation         — 1 video plate
+ *                         · 6.3 Other features (config, devices)  — 2 plates
  *   8. Outcome          3% → 18% display + context paragraph
  *   9. Next             transition into the Control Hub Agentic case study
  *  10. Credits          role-only, no names
@@ -173,8 +178,14 @@ export default function ChaiProject() {
                   size="md"
                 />
               )}
+              <EditorialPlate figure={figures.reportProblem} />
               <EditorialPlate figure={figures.reportAnalysis} />
               <EditorialPlate figure={figures.dataAnalysis} />
+              <ProseBlock
+                paragraphs={reportsEntryProse.paragraphs}
+                points={reportsEntryProse.points}
+              />
+              <VideoPlate figure={videos.askAcrossReports} />
               <EditorialPlate figure={figures.widgetSystem} />
             </div>
 
@@ -194,8 +205,18 @@ export default function ChaiProject() {
                   size="md"
                 />
               )}
-              <EditorialPlate figure={figures.customReport1} />
-              <EditorialPlate figure={figures.customReport2} />
+              <VideoPlate figure={videos.customReport} />
+            </div>
+
+            {/* 6.3 · Other features delivered for CHAI */}
+            <div className={styles.subBeat}>
+              <h3 className={styles.subBeatTitle}>
+                <span className={styles.subBeatNumeral}>6.3</span>
+                Other features we delivered
+              </h3>
+              <ProseBlock points={otherFeaturesPoints} />
+              <EditorialPlate figure={figures.configCompare} />
+              <EditorialPlate figure={figures.deviceAssistant} />
             </div>
           </section>
 

@@ -11,6 +11,35 @@
   margin: 0;
 }
 
+/* Short list after the paragraphs. Ink-rule markers, same as the
+   Build-with-AI learning list. */
+.points {
+  display: grid;
+  gap: 0.5em;
+  list-style: none;
+  padding: 0;
+  margin: 1.1em 0 0;
+}
+
+.points:first-child {
+  margin-top: 0;
+}
+
+.points li {
+  position: relative;
+  padding-left: 1.2rem;
+}
+
+.points li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.8em;
+  width: 0.45rem;
+  height: 1px;
+  background: var(--ink);
+}
+
 /* Variants ---------------------------------------------------------- */
 
 .lead {

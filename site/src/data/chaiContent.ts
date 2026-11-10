@@ -14,6 +14,8 @@
  * Voice rules: `.claude/rules/voice.md`. Writing outline: `01-content/chai.md`.
  */
 
+import type { VideoFigure } from './ebbContent';
+
 // ---------------------------------------------------------------------------
 // Header
 // ---------------------------------------------------------------------------
@@ -79,11 +81,28 @@ export const reportDataAnalysisProse: ProseSlot = [
   "Data Analysis extended that model to live analytics. As the outputs grew beyond prose, I built a reusable widget system for charts, tables, sources, diagnoses, and next steps—giving each response the structure that fit the work.",
 ];
 
+/** Beat 6.1 (cont.) — the entry grows to the Reports page once the model reads across reports. */
+export const reportsEntryProse = {
+  paragraphs: [
+    'Then we improved the model, so the AI could read across reports, not just one. So the entry grew.',
+  ],
+  points: [
+    'The Reports page got its own way in: ask across your recent reports.',
+    'It only grew once the context was reliable.',
+  ],
+} as const;
+
 /** Beat 6.2 — Custom report generation. Reframe: from report→insights to AI-generated reports. */
 export const customReportProse: ProseSlot = [
   "Custom reports flipped the workflow again. Instead of creating a report, waiting for output, and then asking CHAI for insight, admins could describe the report they wanted in natural language. CHAI translated that prompt into a structured report artifact.",
   "The artifact layout was the trust mechanism. It let users review the selected metrics, dimensions, filters, and schedule before committing. The efficiency gain was not just fewer clicks. It changed report building from a form-heavy setup task into a guided authoring flow where the admin still had control.",
 ];
+
+/** Beat 6.3 — Other features delivered for CHAI. */
+export const otherFeaturesPoints = [
+  'The Assistant for configuration questions, like comparing calling settings across two locations.',
+  'And the Assistant for devices and workspaces: understand a device, find the issue, fix it.',
+] as const;
 
 /** Beat 7 — Active troubleshooting with AI-generated insights. */
 export const aiInsightsProse: ProseSlot = [
@@ -184,9 +203,9 @@ export const figures = {
 
   // Beat 2 · Context
   context: {
-    src: '/images/chai/context.png',
+    src: '/images/chai/context.webp',
     caption: 'Webex Control Hub — the console CHAI sits inside',
-    alt: 'Control Hub overview screen showing the navigation tree, monitoring widgets, and admin controls.',
+    alt: 'Two overlapping screenshots. Left: Control Hub Organization Settings, where admins set Webex app security, idle timeouts, and authenticated sign-in. Right: the Webex app, where everyone else works under those settings. Labels read "Admins set it here — Control Hub" and "Everyone else uses it here — Webex".',
     width: 'column',
   },
 
@@ -206,21 +225,21 @@ export const figures = {
     width: 'column',
   },
   evolution20: {
-    src: '/images/chai/chai-3-0.png',
+    src: '/images/chai/chai-3-0-docked.png',
     caption: 'Control Hub AI Assistant - Docked view',
-    alt: 'Four docked Control Hub AI Assistant states showing the home screen, expanded suggestions, tools menu, and a device-list response.',
+    alt: 'Four docked Control Hub AI Assistant states: the home screen, the Troubleshoot issues suggestions expanded, the add menu with files, agents, workflows, and prompts, and a response listing devices to refresh with a CSV download.',
     width: 'column',
   },
   evolutionFloating: {
-    src: '/images/chai/chai-floating.png',
+    src: '/images/chai/chai-3-0-floating.png',
     caption: 'Control Hub AI Assistant - Floating Window view',
-    alt: 'Control Hub AI Assistant displayed in a floating window over the Control Hub overview screen.',
+    alt: 'Control Hub in dark mode with the AI Assistant open as a floating window over the Overview page, showing its home screen and four suggestion categories.',
     width: 'column',
   },
   evolution30: {
-    src: '/images/chai/chai-3.0-full.png',
+    src: '/images/chai/chai-3.0-full.webp',
     caption: 'Control Hub AI Assistant - Full-page view',
-    alt: 'Two full-page Control Hub AI Assistant states showing the home screen and an analytical conversation with a calling and meeting engagement chart.',
+    alt: 'Two full-page Control Hub AI Assistant states, stacked: the home screen with a threads sidebar, and a conversation where the assistant answers a calling question with key insights and a calling and meeting engagement chart.',
     width: 'column',
   },
 
@@ -234,36 +253,28 @@ export const figures = {
   },
 
   // Beat 6.1 · Report analysis → data analysis → widget system
+  reportProblem: {
+    src: '/images/chai/report-problem.webp',
+    caption: 'Before — every report ended in a .csv download',
+    alt: 'Slide titled "Reports delivered data, not understanding." Left: the Control Hub Reports list, with every row\'s status circled as "Ready to download" and a handwritten note reading "every report ends in a download." Right: the downloaded Device Power Consumption report open in Excel as a dense grid of raw numbers.',
+    width: 'column',
+  },
   reportAnalysis: {
-    src: '/images/chai/report-kickoff.png',
+    src: '/images/chai/report-analysis.png',
     caption: 'Report analysis — insight alongside the report',
-    alt: 'Control Hub Reports list with the AI Assistant opening analysis for a selected report and returning a visualization.',
+    alt: 'Control Hub Reports list with an AI entry point on each row. The Cisco AI Assistant opens on the Device Power Consumption report with suggested questions, then answers one with a bar chart of the five most power-hungry devices.',
     width: 'column',
   },
   dataAnalysis: {
-    src: '/images/chai/data-analysis.png',
+    src: '/images/chai/data-analysis-calling.png',
     caption: 'Data analysis — querying the data lake directly',
-    alt: 'CHAI returning a generated visualization in response to a natural-language data question, sourced directly from the underlying data lake.',
+    alt: 'Control Hub Calling Analytics for media quality, with an Ask AI entry point above the charts. The AI Assistant panel is scoped to Calling Analytics - Media Quality and offers recommended questions about packet loss, device CPU usage, and meeting duration.',
     width: 'column',
   },
   widgetSystem: {
     src: '/images/chai/widget-system.png',
     caption: 'Widget system — data, evidence, and action',
     alt: 'A reusable Control Hub AI Assistant widget system showing data visualizations, source cards, troubleshooting evidence, action plans, suggested actions, and configuration updates.',
-    width: 'column',
-  },
-
-  // Beat 6.2 · Report Analysis · Custom report generation (2 images)
-  customReport1: {
-    src: '/images/chai/custom-report-1.png',
-    caption: 'Custom report — describing the question',
-    alt: 'CHAI prompting the user to describe what kind of report they want, with parameter scaffolding inline.',
-    width: 'column',
-  },
-  customReport2: {
-    src: '/images/chai/custom-report-2.png',
-    caption: 'Custom report — generated output',
-    alt: 'A CHAI-generated report rendered in the standard Control Hub report format, ready for review and export.',
     width: 'column',
   },
 
@@ -276,6 +287,20 @@ export const figures = {
   },
 
   // Beat 9 · Next
+  // Beat 6.3 · Other features (2 images)
+  configCompare: {
+    src: '/images/chai/config-compare.webp',
+    caption: 'Configuration — comparing calling settings across two locations',
+    alt: 'Full-page Cisco AI Assistant answering "Compare the calling settings between SJC-21 and SEA-2" with a table of key differences, including PSTN connection type, caller ID, address, time zone, and ECBN, followed by a list of settings that are the same at both locations.',
+    width: 'column',
+  },
+  deviceAssistant: {
+    src: '/images/chai/device-assistant.webp',
+    caption: 'Devices — understand a device, find the issue, fix it',
+    alt: 'Control Hub device page for a Cisco Room Kit EQX with an issues list and an Ask AI assistant button. The AI Assistant panel, scoped to the device, explains an ultrasound pairing issue with a description, impact, and a suggested calibration step, plus a View configuration button.',
+    width: 'column',
+  },
+
   nextPreview: {
     src: '/canvas/mockups/control-hub-agentic.png',
     caption: 'Next — Control Hub Agentic',
@@ -284,6 +309,24 @@ export const figures = {
     width: 'column',
   },
 } as const satisfies Record<string, Figure>;
+
+export const videos = {
+  // Beat 6.1 (cont.) · the Reports page gets its own entry
+  askAcrossReports: {
+    sources: [{ src: '/images/chai/ask-across-reports.mp4', type: 'video/mp4' }],
+    poster: '/images/chai/ask-across-reports-poster.png',
+    caption: 'Reports page — ask across your recent reports',
+    alt: 'Silent recording: on the Control Hub Reports page, an "Analyze reports with AI Assistant" banner sits above the report list. Clicking Ask AI Assistant opens the assistant scoped to Reports, with suggested questions that span reports, such as which device spent the most hours in call mode and average meeting duration by site.',
+  },
+
+  // Beat 6.2 · AI-generated reports
+  customReport: {
+    sources: [{ src: '/images/chai/ai-generated-report.mp4', type: 'video/mp4' }],
+    poster: '/images/chai/ai-generated-report-poster.png',
+    caption: 'Custom report — prompt, generated report, refined in chat',
+    alt: 'Silent recording: on the Control Hub Reports page, an admin asks the AI Assistant for a report of all End-of-Life assets in the next 6 months with refresh recommendations and cost. The assistant lists what the report will include and opens it beside the chat: key insights, affected assets by product family as a donut chart, an end-of-life timeline, and a map of impacted locations. The admin selects the donut chart, asks to turn it into a bar chart, and the report updates to version 2.',
+  },
+} as const satisfies Record<string, VideoFigure>;
 
 // ---------------------------------------------------------------------------
 // Metrics

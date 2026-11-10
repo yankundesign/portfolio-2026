@@ -23,11 +23,11 @@
   margin-right: calc(-1 * var(--content-inset, 0px));
 }
 
-/* Frame — 1px ink rule, paper-soft fill behind. */
+/* Frame — 1px hairline ink rule (muted, so the screenshot leads), paper-soft fill behind. */
 
 .frame {
   position: relative;
-  border: 1px solid var(--ink);
+  border: 1px solid var(--ink-muted);
   background: var(--paper-soft);
   /* Image sits flush to the ink rule — no mat. The screenshot itself
      carries the composition; the frame is just the cut. */
@@ -48,7 +48,7 @@
    A dashed rule offset from the image and no lift shadow: it sits on the
    page quieter than the work it's compared against. */
 .frameDashed {
-  border: 1px dashed var(--ink-soft);
+  border: 1px dashed var(--ink-muted);
   padding: 6px;
   background: transparent;
   box-shadow: none;

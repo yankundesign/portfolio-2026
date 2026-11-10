@@ -162,12 +162,12 @@
 }
 
 /* Hero image — chapter-opening plate. Same plate chrome as EditorialPlate
-   (1px ink rule, paper-soft fill) so it speaks the editorial language,
+   (1px muted ink rule, paper-soft fill) so it speaks the editorial language,
    but no caption: it is the opener, not a numbered figure. */
 
 .hero {
   margin: clamp(1.5rem, 3vw, 2.25rem) 0 0.25rem;
-  border: 1px solid var(--ink);
+  border: 1px solid var(--ink-muted);
   background: var(--paper-soft);
   box-shadow: 0 4px 18px -8px rgba(22, 38, 94, 0.15);
   overflow: hidden;
