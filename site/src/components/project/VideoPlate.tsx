@@ -27,6 +27,7 @@ export default function VideoPlate({ figure, className }: VideoPlateProps) {
   const widthClass = styles[`width-${figure.width ?? 'column'}`];
   const sourcePaths = figure.sources.map(({ src }) => src);
   const hasBackground = Boolean(figure.backgroundSrc);
+  const markLoaded = () => setLoadState((state) => (state === 'loading' ? 'loaded' : state));
 
   useEffect(() => {
     const frame = frameRef.current;
@@ -41,9 +42,24 @@ export default function VideoPlate({ figure, className }: VideoPlateProps) {
     return () => observer.disconnect();
   }, []);
 
+  // React sets `muted` only as a property. Safari lets a page start a video
+  // unprompted only when it is muted as an attribute too. And on a cached
+  // load the metadata can already be in before the listeners below exist.
   useEffect(() => {
     const video = videoRef.current;
-    if (!video || loadState !== 'loaded') return;
+    if (!video) return;
+    video.muted = true;
+    video.setAttribute('muted', '');
+    if (video.readyState >= HTMLMediaElement.HAVE_METADATA) markLoaded();
+  }, []);
+
+  // Playback follows visibility alone. It must not wait for the first frame:
+  // with a poster and preload="metadata", Safari (and Chrome at times) never
+  // decodes that frame until play() is called, so waiting for it meant the
+  // plate never started.
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || loadState === 'error') return;
 
     if (reducedMotion || !isInView) {
       video.pause();
@@ -95,7 +111,8 @@ export default function VideoPlate({ figure, className }: VideoPlateProps) {
             muted
             playsInline
             preload="metadata"
-            onLoadedData={() => setLoadState('loaded')}
+            onLoadedMetadata={markLoaded}
+            onLoadedData={markLoaded}
             onError={() => setLoadState('error')}
             onPause={() => setIsPlaying(false)}
             onPlay={() => setIsPlaying(true)}

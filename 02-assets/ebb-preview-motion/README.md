@@ -1,5 +1,8 @@
 # Ebb hover preview — source
 
+> Superseded 2026-11-10 by `next/`, rebuilt on the cover with current screens. This
+> folder is the September cut, kept for reference.
+
 6s loop for the fig. 03 plate. It starts and ends on `cover-src.png`, which is
 `site/public/canvas/mockups/ebb.png`, so the hover crossfade and the loop point
 don't show. The whole scene takes two slow breaths across the loop (page scale
