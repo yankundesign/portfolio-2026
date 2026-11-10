@@ -79,6 +79,15 @@
     box-shadow var(--duration-hover) var(--ease-out);
 }
 
+/* The same button, as a link once there is somewhere to go. */
+.actionLink {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
 .actionButton:hover {
   transform: translateY(-1px);
   box-shadow: 0 6px 16px -9px rgba(22, 38, 94, 0.55);

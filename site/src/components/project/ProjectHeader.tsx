@@ -24,8 +24,11 @@ export interface ProjectHeaderHeroVideo {
 
 export interface ProjectHeaderAction {
   label: string;
-  statusLabel: string;
-  statusMessage: string;
+  /** External destination. When set, the action is a link that opens in a new tab. */
+  href?: string;
+  /** Shown in a status popover when the action has no destination yet. */
+  statusLabel?: string;
+  statusMessage?: string;
 }
 
 export interface ProjectHeaderProps {
@@ -185,16 +188,27 @@ export default function ProjectHeader({
       )}
       {primaryAction && (
         <div className={styles.actionGroup}>
-          <button
-            type="button"
-            className={styles.actionButton}
-            aria-expanded={actionStatusVisible}
-            aria-controls="project-primary-action-status"
-            onClick={showActionStatus}
-          >
-            {primaryAction.label}
-          </button>
-          {actionStatusVisible && (
+          {primaryAction.href ? (
+            <a
+              className={`${styles.actionButton} ${styles.actionLink}`}
+              href={primaryAction.href}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {primaryAction.label}
+            </a>
+          ) : (
+            <button
+              type="button"
+              className={styles.actionButton}
+              aria-expanded={actionStatusVisible}
+              aria-controls="project-primary-action-status"
+              onClick={showActionStatus}
+            >
+              {primaryAction.label}
+            </button>
+          )}
+          {!primaryAction.href && actionStatusVisible && (
             <div
               key={actionStatusKey}
               id="project-primary-action-status"

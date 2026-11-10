@@ -149,7 +149,7 @@ export const projects: Project[] = [
     role: 'designer & builder',
     subtitle:
       'A pause between the tap and the feed — that knows when you\'re in a loop.',
-    year: 'July 2026',
+    year: '2026',
     collaborators: [],
     impact: 'A pause between the tap and the feed',
     figNumber: 3,

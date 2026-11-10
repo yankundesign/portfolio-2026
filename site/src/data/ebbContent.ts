@@ -22,8 +22,7 @@ export const header = {
   role: 'Designed & built by me',
   primaryAction: {
     label: 'Download on the  App Store',
-    statusLabel: 'App Store release',
-    statusMessage: 'Ebb went to App Review on November 9. It isn\'t on the App Store yet.',
+    href: 'https://apps.apple.com/us/app/ebb-pause-before-feeds/id6804468030',
   },
   heroImage: {
     src: '/images/ebb/hero.png',
