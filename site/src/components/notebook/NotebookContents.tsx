@@ -1,6 +1,7 @@
 import type { MouseEvent } from 'react';
 import type { Project } from '../../data/projects';
 import { useContentsSelection } from '../../interactions/useContentsSelection';
+import { usePlateLoop } from '../../interactions/usePlateLoop';
 import styles from './NotebookContents.module.css';
 
 export interface NotebookContentsProps {
@@ -18,10 +19,14 @@ const nn = (i: number) => String(i + 1).padStart(2, '0');
  * plates as a contact sheet until the reader points at a title, then that
  * one plate with its subtitle. Pointing draws the row's rule in ink and swaps
  * the year for "Read →"; nothing shifts, so no row ever looks misaligned.
+ * Pointing at a plate on the sheet marks its row the same way and leaves the
+ * sheet in place. A project with a preview loop plays it in the single plate.
  */
 export default function NotebookContents({ projects, onOpenProject }: NotebookContentsProps) {
-  const { active, point, release } = useContentsSelection();
-  const current = active >= 0 ? projects[active] : null;
+  const { active, source, point, release } = useContentsSelection();
+  // Only a title swaps the right page; a plate on the sheet just marks its row.
+  const current = active >= 0 && source === 'contents' ? projects[active] : null;
+  const { playLoop, videoRef } = usePlateLoop();
 
   const linkProps = (project: Project) => {
     if (project.externalUrl) return { href: project.externalUrl };
@@ -77,7 +82,7 @@ export default function NotebookContents({ projects, onOpenProject }: NotebookCo
                 className={styles.thumb}
                 tabIndex={-1}
                 aria-hidden="true"
-                onPointerEnter={() => point(i)}
+                onPointerEnter={() => point(i, 'sheet')}
                 onPointerLeave={release}
               >
                 <span className={styles.thumbFrame}>
@@ -94,7 +99,24 @@ export default function NotebookContents({ projects, onOpenProject }: NotebookCo
             {current && (
               <>
                 <span className={styles.plateFrame}>
-                  {current.mockup && <img key={current.slug} src={current.mockup} alt="" draggable={false} />}
+                  {current.mockup && <img key={`still-${current.slug}`} src={current.mockup} alt="" draggable={false} />}
+                  {playLoop && current.preview && (
+                    <video
+                      key={`loop-${current.slug}`}
+                      ref={videoRef}
+                      className={styles.loop}
+                      muted
+                      loop
+                      playsInline
+                      disablePictureInPicture
+                      preload="auto"
+                      aria-hidden="true"
+                      tabIndex={-1}
+                    >
+                      <source src={current.preview.webm} type="video/webm" />
+                      <source src={current.preview.mp4} type="video/mp4" />
+                    </video>
+                  )}
                 </span>
                 <figcaption>
                   <span className={styles.cap}>
