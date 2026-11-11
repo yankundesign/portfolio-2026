@@ -48,7 +48,7 @@ Their files are left in place for now.
 - `npm run build` passes.
 - On the dev server and the production preview: open, close (tab and Esc), a direct `/works` visit, case study and Back, reduced motion and phone all work, with no console errors or failed requests.
 
-**Not yet done:** committed, deployed, and the desk and canvas file cleanup.
+**Shipped** on 2026-11-11 as commit 8f0c13c (Pages deploy 291be55a). The same checks passed on yankun.design. **Still to do:** delete the unwired desk and canvas files, and update CLAUDE.md, which still describes the desk homepage.
 
 ---
 
