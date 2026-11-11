@@ -23,12 +23,15 @@ export interface NotebookProps {
  * React only renders structure and state, never per-frame motion.
  *
  * Closing lives on the book: a tab slides out from under the fore-edge, the
- * paper around the book closes it (the cursor says so), and Esc.
+ * paper around the book closes it (there the cursor becomes “Close ×”), and Esc.
  */
 export default function Notebook({ engine, state, onClose, keyboardOpen, children }: NotebookProps) {
   const insideRef = useRef<HTMLDivElement>(null);
-  const { labelRef, onPointerMove, onPointerLeave } = useFollowLabel();
+  const { labelRef, onPointerMove, onPointerLeave, onPointerDown, hide } = useFollowLabel();
   const open = state === 'open';
+
+  // The label belongs to the open book only.
+  useEffect(() => { if (!open) hide(); }, [open, hide]);
 
   // Land focus inside the book when it opens: on the first title for
   // keyboard readers, on the contents (nothing highlighted) for pointers.
@@ -51,11 +54,12 @@ export default function Notebook({ engine, state, onClose, keyboardOpen, childre
         onClick={onClose}
         onPointerMove={onPointerMove}
         onPointerLeave={onPointerLeave}
+        onPointerDown={onPointerDown}
         aria-hidden="true"
       />
       <div className={styles.book} ref={engine.ref('book')}>
-        <div className={`${styles.shadow} ${styles.shadowLeft}`} />
-        <div className={`${styles.shadow} ${styles.shadowRight}`} />
+        <div className={`${styles.shadow} ${styles.shadowLeft}`} ref={engine.ref('shadowL')} />
+        <div className={`${styles.shadow} ${styles.shadowRight}`} ref={engine.ref('shadowR')} />
         <img className={styles.ribbon} ref={engine.ref('ribbon')} src={NOTEBOOK_ASSETS.ribbon} alt="" draggable={false} />
         <button
           type="button"
@@ -91,7 +95,7 @@ export default function Notebook({ engine, state, onClose, keyboardOpen, childre
           <div className={styles.edge} ref={engine.ref('edge')} />
         </div>
       </div>
-      <div className={styles.cursor} ref={labelRef} aria-hidden="true">Close ×</div>
+      <div className={styles.cursor} ref={labelRef} aria-hidden="true"><span>Close ×</span></div>
     </div>
   );
 }

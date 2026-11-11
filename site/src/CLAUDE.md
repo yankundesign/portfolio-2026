@@ -33,20 +33,32 @@ In `src/interactions/`:
 
 - **`notebookEngine.ts`**: a plain class, `NotebookEngine`.
   - Two numbers drive the book: camera `t` (from the slot on the homepage to the centred spread) and cover `p` (closed to flat).
-  - It writes transforms and lighting straight to the DOM, with no React render per frame.
-  - API: `open()`, `close()`, `showOpen()` (instant, for direct `/works` visits), `aim()` for pointer extras, and `ref(part)` callbacks.
+  - It writes transforms and lighting straight to the DOM, with no React render per frame. Lighting variables go on the two shadows that read them, never on the book (that restyled the whole book every frame). The shadows keep one blur radius.
+  - While closed it cracks the cover on request (`peek`, a critically damped spring) and swings the ribbon tail as a damped pendulum.
+  - API: `open()`, `close()`, `showOpen()` (instant, for direct `/works` visits), `aim()` for pointer extras, `peek()`, and `ref(part)` callbacks.
 - **`useNotebook`**: creates the engine once, configures it, and attaches it to the slot element.
-- **`useMonographPointer`**: one frame loop for three effects: the lamp (`--mx` and `--my`), the book's tilt and shadow, and the name's per-letter weight and SOFT.
-- **`useTrailingPeek`**: the About photo that trails the cursor.
-- **`useContentsSelection`**: nothing selected by default, with a short grace period on leave.
+- **`monographPointer.ts`** (`MonographPointer`, via `useMonographPointer`): the homepage's one frame loop.
+  - The lamp, moved by transform.
+  - The book's tilt and shadow, with an eased hover amount.
+  - The name's per-letter weight and SOFT. Letter centres are measured once, never inside the write loop.
+  - The top rule that rings where the cursor crosses it.
+  - “Open →” as the cursor over the book.
+  - Each part writes only when its value changes.
+- **`cursorLabel.ts`** (`CursorLabel`): a label that is the cursor over one surface (“Open →”, and “Close ×” via `useFollowLabel`). Position goes in `translate`, size in `transform: scale()` about the pointer, and centring on an inner span. Don't put `scale` and `transform` on one rule: the CSS minifier merges them.
+- **`plateFlight.ts`** (`PlateFlight`, via `usePlateFlight`): on the works page, the plate grows out of its thumbnail and flies home. It animates the frame's box in px, and every flight starts from where the frame is.
+- **`useTrailingPeek`**: the About photo that trails the cursor (its loop runs only while shown).
+- **`useContentsSelection`**: nothing selected by default, with a short grace period on leave. A thumbnail only marks its row. `last` keeps the plate's picture while it flies home.
+- **`usePlateLoop`**: the preview loop in the raised plate.
 - **Smaller helpers:**
-  - `useFollowLabel`: the "Close ×" label.
   - `useInputModality`: keyboard vs. pointer.
   - `useMediaQuery`.
   - `useReducedMotion`.
-- **`motion.ts`**: cubic-bezier easing and a cancellable tween.
+- **`motion.ts`**: cubic-bezier easing and a cancellable tween. The interface easing is the `--ease-settle` token: the cover's spring, gentled.
 
-Reduced motion: the book's open and close become a short cross-fade; the name, lamp and peek effects are off.
+Reduced motion:
+- The book's open and close become a short cross-fade.
+- The intro, name, lamp, tilt, rule, pendulum, peek and plate flight are off.
+- The cursor labels still replace the cursor.
 
 ## Routing
 

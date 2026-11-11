@@ -462,6 +462,10 @@ class Book extends EventTarget {
     this.cast = q('.bk-cast');
     this.edge = q('.bk-edge');
     this.ribbon = q('.bk-ribbon');
+    // The lighting variables go on the elements that read them, not on .bk:
+    // a custom property set on .bk restyles everything inside the book each frame.
+    this.shadows = [...layer.querySelectorAll('.bk-shadow')];
+    this.shadowL = q('.bk-shadow.l');
     this.inside = q('.bk-inside');
     this.plateImg = q('[data-plate]');
     const url = (u) => `url("${new URL(u, location.href).href}")`;
@@ -579,13 +583,13 @@ class Book extends EventTarget {
     this.el.style.transform =
       `translate3d(${tx}px, ${ty}px, 0) scale3d(${sx}, ${sy}, ${sz}) translate(${px}px, ${py}px) ` +
       `rotateZ(${rz}deg) rotateX(${u.tiltX * k}deg) rotateY(${u.tiltY * k}deg) scale(${s}) translate(${-px}px, ${-py}px)`;
-    const st = this.el.style;
-    st.setProperty('--lx', `${u.lx * k}px`);
-    st.setProperty('--ly', `${lerp(u.ly, 18, t)}px`);
-    st.setProperty('--shadow-blur', `${lerp(u.blur, 30, t)}px`);
-    st.setProperty('--shadow-o', `${lerp(u.shadow, 0.5, t)}`);
+    const lx = `${u.lx * k}px`, ly = `${lerp(u.ly, 18, t)}px`, sb = `${lerp(u.blur, 30, t)}px`, so = `${lerp(u.shadow, 0.5, t)}`;
+    for (const sh of this.shadows) {
+      const st = sh.style;
+      st.setProperty('--lx', lx); st.setProperty('--ly', ly); st.setProperty('--shadow-blur', sb); st.setProperty('--shadow-o', so);
+    }
     // the ribbon hangs from the spine and swings against the tilt
-    st.setProperty('--rib', `${3 - u.tiltY * 1.3 + u.rz * 0.5}deg`);
+    this.ribbon?.style.setProperty('--rib', `${3 - u.tiltY * 1.3 + u.rz * 0.5}deg`);
   }
 
   // Smooth page-driven extras toward their targets.
@@ -612,7 +616,7 @@ class Book extends EventTarget {
     this.bshade.style.opacity = a >= 90 ? 0.32 * s : 0;
     this.cast.style.opacity = 0.34 * s;
     this.cast.style.transform = `scaleX(${clamp(c + 0.35 * s)})`;
-    this.el.style.setProperty('--left-shadow', Math.max(0, -c));
+    this.shadowL.style.setProperty('--left-shadow', Math.max(0, -c));
     this.pages.style.opacity = p > 0.0005 || this.state !== 'closed' ? 1 : 0;
   }
 

@@ -129,7 +129,13 @@ When adding a new image:
 - `interactions/`:
   - `notebookEngine.ts`: a plain class that drives the book. It works from two numbers, camera `t` and cover `p`, and writes transforms straight to the DOM.
   - `useNotebook.ts`: the thin hook around the engine.
-  - Pointer and selection hooks: `useMonographPointer`, `useTrailingPeek`, `useContentsSelection`, `useFollowLabel`, `useInputModality`, `useMediaQuery`.
+  - Plain classes for per-frame work:
+    - `monographPointer.ts`: the homepage's lamp, tilt, name, rule and “Open →”.
+    - `cursorLabel.ts`: labels that replace the cursor.
+    - `plateFlight.ts`: the works plate that grows from its thumbnail.
+  - Hooks:
+    - Pointer and selection: `useMonographPointer`, `useTrailingPeek`, `useContentsSelection`, `useFollowLabel`, `usePlateFlight`, `usePlateLoop`.
+    - Helpers: `useInputModality`, `useMediaQuery`.
   - `useReducedMotion`.
   - `motion.ts`: easing and tween.
 - `data/projects.ts`: project metadata (titles, years, subtitles, mockups, external links). `data/notebook.ts`: the notebook's geometry and asset paths.

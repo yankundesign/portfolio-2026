@@ -15,6 +15,27 @@ import styles from './HomeRoute.module.css';
 
 const NARROW = '(max-width: 900px)';
 
+/** The faces the intro waits for. `document.fonts.ready` can resolve before the
+ * font stylesheet has even been read, so the intro asks for the faces. */
+const FACES = ["300 100px Fraunces", "italic 300 100px Fraunces", "400 12px 'JetBrains Mono'"];
+
+const SF_TIME = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Los_Angeles', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+
+/** San Francisco time in the top bar, the colon breathing. */
+function LocalTime() {
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const id = window.setInterval(() => setNow(new Date()), 15000);
+    return () => window.clearInterval(id);
+  }, []);
+  const parts = Object.fromEntries(SF_TIME.formatToParts(now).map((x) => [x.type, x.value]));
+  return (
+    <span className={styles.clock}>
+      San Francisco · {parts.hour}<b>:</b>{parts.minute}
+    </span>
+  );
+}
+
 /** The name, one span per letter so each can carry its own weight. */
 function Letters({ text, line }: { text: string; line: number }) {
   return (
@@ -51,12 +72,25 @@ export default function HomeRoute() {
   const rootRef = useRef<HTMLDivElement>(null);
   const slotRef = useRef<HTMLButtonElement>(null);
   const nameRef = useRef<HTMLHeadingElement>(null);
+  const lampRef = useRef<HTMLDivElement>(null);
+  const ruleRef = useRef<SVGSVGElement>(null);
+  const openLabelRef = useRef<HTMLDivElement>(null);
   const firstSync = useRef(true);
+
+  // The intro: 'wait' (fonts loading, everything hidden) → 'run' (the rule draws,
+  // the name rises, the notebook is set down) → 'done'. A visit that starts on
+  // the open book, and reduced motion, skip it.
+  const [intro, setIntro] = useState<'wait' | 'run' | 'done'>(() => (wantOpen || reducedMotion ? 'done' : 'wait'));
+  const playIntro = useRef(intro === 'wait');
 
   const [bookState, setBookState] = useState<NotebookState>('closed');
   const engine = useNotebook({ slotRef, reducedMotion, onStateChange: setBookState });
   const { peekRef, show: showPeek, hide: hidePeek } = useTrailingPeek(reducedMotion);
-  useMonographPointer({ rootRef, slotRef, nameRef, engine, active: bookState === 'closed' && !narrow, reducedMotion });
+  const pointer = useMonographPointer({
+    engine, slotRef, nameRef, lampRef, ruleRef, openLabelRef,
+    active: bookState === 'closed' && !narrow,
+    reducedMotion,
+  });
 
   // The URL decides; the book follows. Re-runs when an animation settles, so
   // a back/forward press mid-animation is honoured once the book is still.
@@ -82,12 +116,29 @@ export default function HomeRoute() {
     return () => root.removeEventListener('scroll', onScroll);
   }, [engine, narrow]);
 
-  // A homepage visit starts with the book lifted and shadowless; it settles.
+  // The intro, timed from when the faces are in:
+  //   0 ms    the rule under the top bar draws (700 ms)
+  //   200 ms  the name rises, letter by letter
+  //   520 ms  the notebook comes down, opaque within ~40 ms, and settles
+  //   950 ms  the index and the aside
+  //   1900 ms the name starts answering the cursor
   useEffect(() => {
-    if (!wantOpen) engine.settleFrom({ lift: 0.07, shadow: 0, blur: 40 });
-    // only on first mount
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (!playIntro.current) { pointer.land(); return; }
+    let cancelled = false;
+    const timers: number[] = [];
+    const wait = (ms: number) => new Promise<void>((r) => { timers.push(window.setTimeout(r, ms)); });
+    void (async () => {
+      await Promise.race([Promise.all(FACES.map((f) => document.fonts.load(f))).catch(() => undefined), wait(2500)]);
+      await new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r())));
+      if (cancelled) return;
+      setIntro('run');
+      pointer.drawRule(700);
+      // the book is set down as it appears: a little lifted, no contact shadow yet
+      timers.push(window.setTimeout(() => engine.settleFrom({ lift: 0.05, shadow: 0.12 }), 520));
+      timers.push(window.setTimeout(() => { setIntro('done'); pointer.land(); }, 1900));
+    })();
+    return () => { cancelled = true; timers.forEach((t) => window.clearTimeout(t)); };
+  }, [engine, pointer]);
 
   const openWorks = useCallback(() => {
     navigate('/works', { state: { fromHome: true } });
@@ -118,15 +169,18 @@ export default function HomeRoute() {
       className={styles.home}
       data-book={narrow ? (wantOpen ? 'open' : 'closed') : bookState}
       data-start={wantOpen ? 'open' : 'closed'}
+      data-intro={intro}
     >
-      <div className={styles.lamp} aria-hidden="true" />
+      <div ref={lampRef} className={styles.lamp} aria-hidden="true" />
 
       <main className={styles.frame} inert={homeHidden}>
         <header className={styles.top}>
           <span className={styles.c1}>Yankun Wang</span>
           <span className={styles.c2}>Senior product designer</span>
-          <span className={styles.c3}>San Francisco · 2026</span>
+          <span className={styles.c3}><LocalTime /></span>
         </header>
+        {/* The top bar's hairline, drawn as a line that can ring (MonographPointer). */}
+        <svg ref={ruleRef} className={styles.rule} aria-hidden="true"><path d="" /></svg>
 
         <h1 ref={nameRef} className={styles.name} aria-label="Yankun Wang">
           <span className={`${styles.line} ${styles.l1}`} aria-hidden="true"><Letters text="Yankun" line={0} /></span>
@@ -180,6 +234,9 @@ export default function HomeRoute() {
       {narrow && wantOpen && (
         <MobileContents projects={projects} onOpenProject={openProject} onClose={closeWorks} />
       )}
+
+      {/* Over the closed notebook, this label is the cursor. */}
+      <div ref={openLabelRef} className={styles.openLabel} aria-hidden="true"><span>Open →</span></div>
 
       <div ref={peekRef} className={styles.peek} aria-hidden="true">
         <img src="/images/about/me.png" alt="" />

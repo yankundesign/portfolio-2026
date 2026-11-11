@@ -1,6 +1,7 @@
-import type { MouseEvent } from 'react';
+import { useRef, type MouseEvent } from 'react';
 import type { Project } from '../../data/projects';
 import { useContentsSelection } from '../../interactions/useContentsSelection';
+import { usePlateFlight } from '../../interactions/usePlateFlight';
 import { usePlateLoop } from '../../interactions/usePlateLoop';
 import styles from './NotebookContents.module.css';
 
@@ -16,17 +17,25 @@ const nn = (i: number) => String(i + 1).padStart(2, '0');
  * NotebookContents — what the open notebook shows: the works page.
  *
  * Left page: the contents, one ruled row per project. Right page: all six
- * plates as a contact sheet until the reader points at a title, then that
- * one plate with its subtitle. Pointing draws the row's rule in ink and swaps
- * the year for "Read →"; nothing shifts, so no row ever looks misaligned.
- * Pointing at a plate on the sheet marks its row the same way and leaves the
- * sheet in place. A project with a preview loop plays it in the single plate.
+ * plates as a contact sheet. Pointing at a title raises that project's plate
+ * out of its own thumbnail (usePlateFlight); leaving flies it home. Pointing
+ * draws the row's rule in ink and swaps the year for "Read →"; nothing shifts,
+ * so no row ever looks misaligned. Pointing at a plate on the sheet marks its
+ * row and leaves the sheet in place. A project with a preview loop plays it in
+ * the raised plate.
+ *
+ * The contents title and the plates start on one line: the title is trimmed to
+ * its caps, so the top of the C sits on the plates' top edge.
  */
 export default function NotebookContents({ projects, onOpenProject }: NotebookContentsProps) {
-  const { active, source, point, release } = useContentsSelection();
-  // Only a title swaps the right page; a plate on the sheet just marks its row.
-  const current = active >= 0 && source === 'contents' ? projects[active] : null;
+  const { active, source, last, point, release } = useContentsSelection();
+  // Only a title raises a plate; a plate on the sheet just marks its row.
+  const current = active >= 0 && source === 'contents' ? active : -1;
+  const shown = last >= 0 ? projects[last] : null;
+  const playing = current >= 0 ? projects[current] : null;
   const { playLoop, videoRef } = usePlateLoop();
+  const pageRef = useRef<HTMLElement>(null);
+  usePlateFlight(pageRef, current);
 
   const linkProps = (project: Project) => {
     if (project.externalUrl) return { href: project.externalUrl };
@@ -70,11 +79,11 @@ export default function NotebookContents({ projects, onOpenProject }: NotebookCo
         </div>
       </section>
 
-      <section className={styles.pageRight} aria-label="Plates">
-        <p className={`${styles.kicker} ${styles.reveal}`}>{current ? 'Selected work' : 'Plates'}</p>
+      <section ref={pageRef} className={styles.pageRight} aria-label="Plates">
+        <p className={`${styles.kicker} ${styles.reveal}`}>{current >= 0 ? 'Selected work' : 'Plates'}</p>
 
         <div className={`${styles.sheetWrap} ${styles.reveal}`} style={{ transitionDelay: '160ms' }}>
-          <div className={styles.sheet} data-hidden={Boolean(current)}>
+          <div className={styles.sheet} data-sheet>
             {projects.map((project, i) => (
               <a
                 key={project.slug}
@@ -82,53 +91,64 @@ export default function NotebookContents({ projects, onOpenProject }: NotebookCo
                 className={styles.thumb}
                 tabIndex={-1}
                 aria-hidden="true"
+                data-thumb
                 onPointerEnter={() => point(i, 'sheet')}
                 onPointerLeave={release}
               >
-                <span className={styles.thumbFrame}>
+                <span className={styles.thumbFrame} data-thumb-frame>
                   {project.mockup && <img src={project.mockup} alt="" loading="lazy" draggable={false} />}
                 </span>
-                <span className={styles.thumbCaption}><b>{nn(i)}</b>{project.title}</span>
+                <span className={styles.thumbCaption}>
+                  <span className={styles.capN}>{nn(i)}</span>
+                  <span className={styles.capT}>{project.title}</span>
+                </span>
               </a>
             ))}
           </div>
         </div>
 
-        <div className={styles.soloWrap} aria-live="polite">
-          <figure className={styles.solo} data-shown={Boolean(current)}>
-            {current && (
+        <figure className={styles.plate} aria-live="polite">
+          <span className={styles.plateSlot} data-plate-slot>
+            <span className={styles.plateFrame} data-plate-frame>
+              {projects.map((project, i) =>
+                project.mockup ? (
+                  <img key={project.slug} src={project.mockup} alt="" loading="lazy" draggable={false} data-on={i === last} />
+                ) : null,
+              )}
+              {playLoop && playing?.preview && (
+                <video
+                  key={`loop-${playing.slug}`}
+                  ref={videoRef}
+                  className={styles.loop}
+                  muted
+                  loop
+                  playsInline
+                  disablePictureInPicture
+                  preload="auto"
+                  aria-hidden="true"
+                  tabIndex={-1}
+                >
+                  <source src={playing.preview.webm} type="video/webm" />
+                  <source src={playing.preview.mp4} type="video/mp4" />
+                </video>
+              )}
+            </span>
+          </span>
+          <figcaption className={styles.plateCaption}>
+            {shown && (
               <>
-                <span className={styles.plateFrame}>
-                  {current.mockup && <img key={`still-${current.slug}`} src={current.mockup} alt="" draggable={false} />}
-                  {playLoop && current.preview && (
-                    <video
-                      key={`loop-${current.slug}`}
-                      ref={videoRef}
-                      className={styles.loop}
-                      muted
-                      loop
-                      playsInline
-                      disablePictureInPicture
-                      preload="auto"
-                      aria-hidden="true"
-                      tabIndex={-1}
-                    >
-                      <source src={current.preview.webm} type="video/webm" />
-                      <source src={current.preview.mp4} type="video/mp4" />
-                    </video>
-                  )}
-                </span>
-                <figcaption>
-                  <span className={styles.cap}>
-                    <span>{nn(active)} · {current.title}</span>
-                    <span>{current.year}</span>
+                <span className={styles.cap}>
+                  <span className={styles.capLine}>
+                    <span className={styles.capN}>{nn(last)}</span>
+                    <span className={styles.capT}>{shown.title}</span>
                   </span>
-                  <span className={styles.sub}>{current.subtitle}</span>
-                </figcaption>
+                  <span>{shown.year}</span>
+                </span>
+                <span className={styles.sub}>{shown.subtitle}</span>
               </>
             )}
-          </figure>
-        </div>
+          </figcaption>
+        </figure>
       </section>
     </>
   );

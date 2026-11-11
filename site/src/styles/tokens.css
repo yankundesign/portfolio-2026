@@ -9,6 +9,10 @@
   --paper-soft: #ebe6d9;
   --paper-shadow: #ddd6c2;
   --sticky: #f1e6b8;
+  /* Ink's own hue (227°) at a lighter weight, for the labels that sit on the navy
+   * cloth: “Open →”, the Close tab, “Close ×”. An ink pill vanished on the cover
+   * (#101c3b). Paper type on it is 7.0:1. Not a third colour: the same ink, lifted. */
+  --ink-lift: #3049a6;
 
   /* Typography */
   --font-display: 'Fraunces', serif;
@@ -58,6 +62,10 @@
   --ease-out: cubic-bezier(0.0, 0.0, 0.2, 1);
   --ease-page: cubic-bezier(0.4, 0.0, 0.2, 1);
   --ease-unfold: cubic-bezier(0.34, 1.2, 0.64, 1);
+  /* Settle — the site's motion curve. The cover's line is a damped spring,
+   * e^(−4.4u)·cos(2π·3.2u); interface motion uses the same family, gentled to one
+   * overshoot of about 10%: 1 − e^(−6.5u)·cos(2π·1.25u), sampled at 41 points. */
+  --ease-settle: linear(0, 0.1663, 0.3325, 0.4893, 0.6309, 0.7535, 0.8557, 0.9375, 1, 1.0452, 1.0754, 1.093, 1.1006, 1.1006, 1.095, 1.0857, 1.0743, 1.0619, 1.0496, 1.0379, 1.0274, 1.0183, 1.0107, 1.0046, 1, 0.9966, 0.9944, 0.9931, 0.9925, 0.9925, 0.9929, 0.9936, 0.9945, 0.9954, 0.9963, 0.9972, 0.998, 0.9986, 0.9992, 0.9997, 1);
   --duration-hover: 160ms;
   --duration-reveal: 240ms;
   --duration-transition: 480ms;
@@ -99,4 +107,9 @@
   --plate-margin: 40px;                        /* chrome inset from viewport on desktop */
   --plate-margin-tablet: 24px;
   --plate-margin-mobile: 16px;
+}
+
+/* Browsers without linear() easing get the nearest curve without the overshoot. */
+@supports not (transition-timing-function: linear(0, 1)) {
+  :root { --ease-settle: cubic-bezier(0.16, 1, 0.3, 1); }
 }

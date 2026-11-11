@@ -11,6 +11,7 @@
   z-index: 10;
   pointer-events: none;
   perspective: 2200px;
+  will-change: transform;
 }
 
 .backdrop {
@@ -33,7 +34,8 @@
   will-change: transform;
 }
 
-/* Contact shadows: blurred ink plates under each half. */
+/* Contact shadows: blurred ink plates under each half. One blur radius: lifting
+ * changes only their offset and opacity (composited), never the blur (re-raster). */
 .shadow {
   position: absolute;
   top: 3.4%;
@@ -41,9 +43,10 @@
   width: 48%;
   border-radius: 2% / 1.4%;
   background: rgba(22, 38, 94, 0.34);
-  filter: blur(var(--shadow-blur, 22px));
+  filter: blur(24px);
   opacity: var(--shadow-o, 0.55);
   transform: translate(var(--lx, 0px), var(--ly, 14px));
+  will-change: transform, opacity;
   pointer-events: none;
 }
 
@@ -63,7 +66,7 @@
   width: 1.25%;
   height: auto;
   transform-origin: 50% 0;
-  transform: rotate(var(--rib, 3deg));
+  transform: rotate(3deg); /* the engine swings it as a damped pendulum */
   user-select: none;
   pointer-events: none;
 }
@@ -192,13 +195,13 @@
   padding: 0;
   border: 0;
   border-radius: 0 7px 7px 0;
-  background: var(--ink);
+  background: var(--ink-lift);
   color: var(--paper);
   font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  box-shadow: 2px 3px 8px rgba(22, 38, 94, 0.18);
+  box-shadow: 2px 3px 8px rgba(22, 38, 94, 0.24);
   cursor: pointer;
   opacity: 0;
   transform: translateX(-26px);
@@ -222,7 +225,7 @@
 .layer[data-state='open'] .tab:hover,
 .layer[data-state='open'] .tab:focus-visible {
   transform: translateX(5px);
-  background: var(--ink-soft);
+  background: var(--ink); /* pressed in */
   transition-delay: 0s;
 }
 
@@ -231,24 +234,53 @@
   outline-offset: 2px;
 }
 
+/* “Close ×” is the cursor over the paper around the open book. */
+/* Position in `translate` (CursorLabel, inline), size in `transform: scale()` about
+ * origin 0 0 (the pointer), centring on the inner span. Kept on separate
+ * elements and properties on purpose: a minifier folds `scale` into `transform`
+ * when both sit on one rule, which broke the size change in production. */
 .cursor {
   position: fixed;
   left: 0;
   top: 0;
   z-index: 2;
+  pointer-events: none;
+  transform-origin: 0 0;
+  transform: scale(0.35);
+  opacity: 0;
+  will-change: transform;
+  transition: opacity 150ms cubic-bezier(0.4, 0, 1, 1), transform 190ms cubic-bezier(0.4, 0, 1, 1);
+}
+
+.cursor > span {
+  display: block;
   padding: 7px 10px 6px;
   border-radius: 999px;
-  background: var(--ink);
+  background: var(--ink-lift);
   color: var(--paper);
   font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   white-space: nowrap;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 160ms var(--ease-out);
+  box-shadow: 0 6px 16px rgba(8, 14, 34, 0.3);
+  transform: translate(-50%, -50%);
 }
 
-.cursor[data-on='true'] { opacity: 1; }
+.cursor[data-on='true'] {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 120ms var(--ease-out), transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.cursor[data-on='true'][data-press='true'] { transform: scale(0.9); transition-duration: 120ms, 120ms; }
+
 .layer:not([data-state='open']) .cursor { opacity: 0; }
+
+@media (hover: hover) and (pointer: fine) {
+  .layer[data-state='open'] .backdrop { cursor: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cursor { transform: scale(1); }
+}

@@ -4,6 +4,62 @@ Track design and build decisions as they're made.
 
 ---
 
+## 2026-11-11 · Craft pass shipped to yankun.design
+
+Yankun asked to apply the craft pass to the site, commit and deploy.
+
+**Homepage**
+- The intro waits for the fonts, then runs as one sequence. The rule draws, the name rises, the notebook is set down and settles, and the index follows.
+- The top rule rings where the cursor crosses it.
+- The book eases into its hover tilt, its cover cracks a few degrees, and its ribbon swings.
+- Index rows draw their rule.
+- San Francisco time sits in the top bar.
+- Over the book, “Open →” is the cursor.
+
+**Works page**
+- The plate grows out of its thumbnail and flies home.
+- The contents title and the plates start on one line.
+- Plates have hairline edges, captions use a mono number and a Fraunces title, and hovering lifts a plate without zooming it.
+- “Close ×” and the Close tab use the lifted ink.
+
+**Performance:** the per-frame fixes from the prototype are applied.
+- Layout is measured outside the write loop.
+- The lamp moves by transform.
+- The shadows keep a fixed blur, and their variables are scoped to them.
+- Nothing runs in idle frames.
+
+**Kept from the live site:** the preview loops in the raised plate. They are live behaviour from earlier the same day, separate from the dropped W3.
+
+---
+
+## 2026-11-11 · Craft pass: homepage details kept; works page keeps only the plate that grows
+
+Yankun reviewed the craft prototype (`03-prototype-explore/homepage-awwwards/craft.html`). Shipped to the live site the same day (see below).
+
+**Homepage: all seven kept**
+- H1 Settle easing: the cover's spring, gentled, is the interface easing.
+- H2 Plucked rule: the top-bar hairline rings where the cursor crosses it.
+- H3 Line-first intro.
+- H4 Ribbon pendulum.
+- H5 Cracked cover with “Open →”. The label sits on the navy cloth (#101c3b), where an ink pill disappeared, so it uses ink's own hue lifted to #3049a6 (`--ink-lift`). Paper type on it is 7.0:1. The Close tab and “Close ×” use the same colour, so the book's action labels match. Hovering the tab presses it to ink.
+  - The labels are the cursor. Over the notebook the system cursor is hidden and “Open →” sits centred on the pointer; it grows in and presses in on click. “Close ×” does the same over the paper around the open book.
+- H6 Index rules, with no italic swap.
+- H7 Local time.
+
+**Works page: only W4, the plate that grows from its thumbnail**
+- Dropped: the status line, the proof on the plate, the motion previews, the read marks, the page turn, the arrow keys and folios, and the margin note.
+- W4 was rebuilt after Yankun's screen recording showed it buggy:
+  - One frame flies between the sheet and the plate; its box animates in px, so its rule stays 1px.
+  - Every flight starts from where the frame is, so an interruption turns around instead of jumping.
+  - The caption leaves before the frame flies home. The thumbnail takes over in the same frame it lands, so no ghost plate fades on top.
+- Pointing at a thumbnail no longer raises the plate. It only marks the title, because a plate rising over the sheet the pointer is reading made selection jump between hidden thumbnails. The live site has the same pattern (`point(i, 'sheet')`), so the port should change it.
+
+**Plates (the contact sheet and the grown plate)**
+- **Position:** the plates keep their place. The contents block comes down so the cap top of “Contents” starts on the plates' top line, 19 cqh on both pages.
+- **Edge:** the rule is the contents' hairline (ink at 20%), flush to the screenshot. Yankun rejected the paper mat and the full-strength ink rule as too heavy, and didn't want the space between rule and image.
+- **Captions:** the number is mono, tracked like the left page; the title is Fraunces, on one line.
+- **Hover:** a plate lifts slightly; the screenshot is never zoomed, because zooming cropped it.
+
 ## 2026-11-11 · Homepage rebuilt as 01 Monograph; notebook cover is “Settle”
 
 Yankun chose cover **M · Settle** and approved rebuilding the site on prototype 01, with the prototype's opened notebook as the new works page and no “FIG.” labels.

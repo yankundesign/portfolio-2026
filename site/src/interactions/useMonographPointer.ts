@@ -1,88 +1,44 @@
-import { useEffect, type RefObject } from 'react';
-import { clamp, lerp } from './motion';
+import { useEffect, useState, type RefObject } from 'react';
+import { MonographPointer } from './monographPointer';
 import type { NotebookEngine } from './notebookEngine';
 
 /**
- * useMonographPointer — the homepage's response to the cursor, in one frame
- * loop:
- *  - the lamp: --mx / --my on the root for a soft light under the cursor;
- *  - the notebook: tilts toward the cursor, its shadow falls away from it;
- *  - the name: each letter's weight and softness swell under the cursor
- *    (Fraunces' own axes, not a font swap).
- * Off while the book is open, and entirely off under reduced motion.
+ * useMonographPointer — creates the homepage's pointer layer once (see
+ * MonographPointer), attaches it to the page's parts, and keeps it in step with
+ * the book state and reduced motion. Returns the instance, so the route can
+ * draw the rule and land the name when its intro reaches those beats.
  */
 export function useMonographPointer({
-  rootRef,
+  engine,
   slotRef,
   nameRef,
-  engine,
+  lampRef,
+  ruleRef,
+  openLabelRef,
   active,
   reducedMotion,
 }: {
-  rootRef: RefObject<HTMLElement | null>;
+  engine: NotebookEngine;
   slotRef: RefObject<HTMLElement | null>;
   nameRef: RefObject<HTMLElement | null>;
-  engine: NotebookEngine;
+  lampRef: RefObject<HTMLElement | null>;
+  ruleRef: RefObject<SVGSVGElement | null>;
+  openLabelRef: RefObject<HTMLElement | null>;
   active: boolean;
   reducedMotion: boolean;
-}) {
+}): MonographPointer {
+  const [pointer] = useState(() => new MonographPointer(engine));
+
   useEffect(() => {
-    if (reducedMotion) return;
-    const pointer = { x: window.innerWidth / 2, y: window.innerHeight * 0.4, inside: false };
-    const onMove = (e: PointerEvent) => {
-      pointer.x = e.clientX;
-      pointer.y = e.clientY;
-      const slot = slotRef.current;
-      if (slot) {
-        const r = slot.getBoundingClientRect();
-        pointer.inside = e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
-      }
-    };
-    window.addEventListener('pointermove', onMove, { passive: true });
+    const slot = slotRef.current, name = nameRef.current, lamp = lampRef.current, rule = ruleRef.current, openLabel = openLabelRef.current;
+    if (!slot || !name || !lamp || !rule || !openLabel) return;
+    pointer.attach({ slot, name, lamp, rule, openLabel });
+    return () => pointer.detach();
+  }, [pointer, slotRef, nameRef, lampRef, ruleRef, openLabelRef]);
 
-    const letters = Array.from(nameRef.current?.querySelectorAll<HTMLElement>('[data-letter]') ?? []);
-    const state = letters.map(() => ({ w: 300, soft: 0 }));
-    let raf = 0;
+  useEffect(() => {
+    pointer.configure({ active, reducedMotion });
+  }, [pointer, active, reducedMotion]);
 
-    const frame = () => {
-      const root = rootRef.current, slot = slotRef.current;
-      const vw = window.innerWidth, vh = window.innerHeight;
-      if (root) {
-        root.style.setProperty('--mx', `${pointer.x}px`);
-        root.style.setProperty('--my', `${pointer.y}px`);
-      }
-      if (active && slot) {
-        const r = slot.getBoundingClientRect();
-        const dx = (pointer.x - (r.left + r.width / 2)) / vw;
-        const dy = (pointer.y - (r.top + r.height / 2)) / vh;
-        const inside = pointer.inside;
-        engine.aim({
-          lx: clamp(-dx * 70, -40, 40),
-          ly: clamp(18 - dy * 30, 6, 34),
-          tiltY: (inside ? 9 : 3) * clamp(dx * 2, -1, 1),
-          tiltX: (inside ? -7 : -2) * clamp(dy * 2, -1, 1),
-          lift: inside ? 0.025 : 0,
-          blur: inside ? 30 : 22,
-          shadow: inside ? 0.45 : 0.55,
-        });
-        const R = vw * 0.2;
-        letters.forEach((el, i) => {
-          const b = el.getBoundingClientRect();
-          const d = Math.hypot(pointer.x - (b.left + b.width / 2), pointer.y - (b.top + b.height * 0.55));
-          const f = Math.exp(-((d / R) ** 2));
-          const s = state[i];
-          s.w = lerp(s.w, 300 + 330 * f, 0.14);
-          s.soft = lerp(s.soft, 100 * f, 0.14);
-          el.style.fontWeight = s.w.toFixed(1);
-          el.style.fontVariationSettings = `'opsz' 144, 'SOFT' ${s.soft.toFixed(1)}, 'WONK' 1`;
-        });
-      }
-      raf = requestAnimationFrame(frame);
-    };
-    raf = requestAnimationFrame(frame);
-    return () => {
-      window.removeEventListener('pointermove', onMove);
-      cancelAnimationFrame(raf);
-    };
-  }, [active, engine, nameRef, reducedMotion, rootRef, slotRef]);
+  return pointer;
 }

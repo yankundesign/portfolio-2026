@@ -1,0 +1,694 @@
+<!doctype html>
+<html lang="en" class="intro">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" href="data:," />
+<title>Craft pass · homepage + works</title>
+<!-- Prototype only. 01 Monograph as shipped (Settle cover) plus the craft
+     details Yankun kept: H1–H7 on the homepage, W4 on the works spread.
+     Each is switchable from the panel. Works from disk (file://) and
+     localhost: classic scripts, no modules, no image masks. -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..600&family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,100..900,0..100,0..1;1,9..144,100..900,0..100,0..1&family=JetBrains+Mono:wght@300..500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="shared/base.css" />
+<style>
+  :root { --m: clamp(24px, 4.2vw, 60px); --name: min(17.5vw, 31vh); --ease-settle: var(--ease-out);
+    /* Ink's own hue (227°) at a lighter weight, for the one label that sits on the navy cloth (#101c3b).
+       Paper text on it is 7.0:1. */
+    --ink-lift: #3049a6; }
+
+  /* ═════════ Homepage (01 as shipped) ═════════ */
+  /* The lamp is a fixed-size light moved by transform: the GPU moves it, nothing repaints. */
+  .lamp { position: fixed; left: 0; top: 0; width: 48vmax; height: 48vmax; margin: -24vmax 0 0 -24vmax; pointer-events: none; z-index: 2;
+    background: radial-gradient(circle closest-side, rgba(255, 252, 243, 0.75), rgba(255, 252, 243, 0));
+    mix-blend-mode: soft-light; transform: translate3d(50vw, 40vh, 0); will-change: transform; transition: opacity 600ms var(--ease-paper); }
+  /* The book's shadow keeps one blur radius; lifting changes its opacity and offset only, so it never re-rasterises. */
+  .bk-shadow { filter: blur(24px); will-change: transform, opacity; }
+  .frame { position: fixed; inset: 0; z-index: 1; }
+  .top { position: absolute; left: var(--m); right: var(--m); top: 0; height: 64px; display: grid; grid-template-columns: repeat(12, 1fr); column-gap: 24px; align-items: end; padding-bottom: 14px; border-bottom: 1px solid var(--ink-muted); }
+  html.c-h2 .top { border-bottom-color: transparent; }
+  .top .c1 { grid-column: 1 / 5; } .top .c2 { grid-column: 5 / 9; text-align: center; } .top .c3 { grid-column: 9 / 13; text-align: right; }
+  .clock { font-variant-numeric: tabular-nums; }
+  .clock b { font-weight: inherit; animation: blink 2s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0.25; } }
+  html.rm .clock b { animation: none; }
+
+  .name { position: absolute; inset: 0; pointer-events: none; font-weight: 300; z-index: 1; margin: 0; }
+  .line { position: absolute; display: block; white-space: nowrap; font-size: var(--name); line-height: 1; letter-spacing: -0.045em;
+    font-variation-settings: 'opsz' 144, 'SOFT' 0, 'WONK' 1; clip-path: inset(-0.1em -0.2em -0.3em -0.2em);
+    transition: transform 1000ms var(--ease-paper), opacity 700ms var(--ease-paper);
+    contain: layout style; /* a weight change re-lays out this line only, not the page */ }
+  .ch { display: inline-block; }
+  .l1 { left: calc(var(--m) - 0.05em); top: calc(64px + 2.2vh); }
+  .l2 { right: calc(var(--m) - 0.02em); bottom: calc(18px + 2.2vh); font-style: italic; }
+  .slot { position: absolute; left: 50%; top: calc(50% + 4px); height: min(54vh, 62vw); aspect-ratio: var(--nb-aspect, 0.7395); transform: translate(-50%, -50%); border-radius: 6px; cursor: pointer; z-index: 3; }
+  .index { position: absolute; left: var(--m); top: calc(50% + 2vh); z-index: 3; list-style: none; width: min(25vw, 360px); border-top: 1px solid var(--ink-muted); }
+  .index li { position: relative; border-bottom: 1px solid var(--ink-muted); }
+  .index a, .index button { display: grid; grid-template-columns: 34px 1fr auto; align-items: baseline; width: 100%; padding: 11px 0 10px; text-align: left; }
+  .index .n { color: var(--ink-soft); transition: color 160ms var(--ease-out); }
+  .index .arrow { transition: transform 160ms var(--ease-out); }
+  .index a:hover .arrow, .index button:hover .arrow { transform: translateX(4px); }
+  html:not(.c-h6) .index a:hover .lbl, html:not(.c-h6) .index button:hover .lbl { font-style: italic; }
+  .index .lbl { font-family: var(--serif); font-size: 19px; font-weight: 350; letter-spacing: -0.005em; text-transform: none; font-variation-settings: 'opsz' 24; }
+  /* H6 · the index draws its rule the way the contents rows do; no style swap */
+  html.c-h6 .index li::after { content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px; background: var(--ink); transform: scaleX(0); transform-origin: 0 50%; transition: transform 520ms var(--ease-settle); }
+  html.c-h6 .index li:hover::after, html.c-h6 .index li:focus-within::after { transform: scaleX(1); }
+  html.c-h6 .index li:hover .n, html.c-h6 .index li:focus-within .n { color: var(--ink); }
+  html.c-h6 .index .arrow { transition: transform 520ms var(--ease-settle); }
+  html.c-h6 .index li:hover .arrow { transform: translateX(7px); }
+  .aside { position: absolute; right: var(--m); top: calc(64px + 4.4vh); z-index: 3; text-align: right; display: grid; gap: 6px; color: var(--ink-soft); }
+
+  /* H2 · the plucked rule: an SVG line that replaces the top bar's border, same pixel row */
+  .rule { position: fixed; left: var(--m); top: 48.5px; width: calc(100vw - 2 * var(--m)); height: 30px; z-index: 2; pointer-events: none; overflow: visible; display: none; }
+  html.c-h2 .rule { display: block; }
+  .rule path { fill: none; stroke: var(--ink-muted); stroke-width: 1; vector-effect: non-scaling-stroke; }
+
+  /* H5 · “Open →” follows the cursor over the closed book, mirroring “Close ×” */
+  /* The label is the cursor: centred on the pointer (its hotspot is its middle), the system cursor hidden.
+     It grows in on the settle curve and presses in on click. */
+  /* Leaving, it shrinks into the arrow and fades, still under the pointer (it never stays behind at the edge).
+     Arriving, it grows out of the pointer. No overshoot: a cursor shouldn't bounce. */
+  /* Position lives in `translate` (set by script), centring in `transform`, size in `scale`, origin at 0 0.
+     The browser composes them as translate · scale · transform, so the pill scales about its own centre,
+     which stays on the pointer. (With the position in `transform`, the scale multiplied it: a pill at
+     scale 0.35 sat at 0.35× its coordinates and flew in from the top-left.) book.js writes an inline
+     transform on .bk-cursor, hence !important. */
+  .open-label, .bk-cursor { transform-origin: 0 0; transform: translate(-50%, -50%) !important; scale: 0.35; opacity: 0; will-change: transform;
+    transition: opacity 150ms cubic-bezier(0.4, 0, 1, 1), scale 190ms cubic-bezier(0.4, 0, 1, 1); }
+  .open-label { position: fixed; left: 0; top: 0; z-index: 30; pointer-events: none; padding: 7px 10px 6px; border-radius: 999px; background: var(--ink-lift); color: var(--paper); box-shadow: 0 6px 16px rgba(8, 14, 34, 0.35); }
+  .open-label.on, .bk-cursor.on { opacity: 1; scale: 1; transition: opacity 120ms var(--ease-out), scale 320ms cubic-bezier(0.22, 1, 0.36, 1); }
+  .open-label.on.press { scale: 0.9; transition-duration: 120ms, 120ms; }
+  @media (hover: hover) and (pointer: fine) {
+    html.c-h5:not(.nb-open) .slot { cursor: none; }
+    .book-layer.is-open .bk-backdrop { cursor: none; }
+  }
+  html.rm .open-label, html.rm .bk-cursor { scale: 1; }
+  /* The book's action labels share one colour: “Open →”, the Close tab and “Close ×” */
+  .bk-tab, .bk-cursor { background: var(--ink-lift); }
+  .bk-tab { box-shadow: 2px 3px 8px rgba(22, 38, 94, 0.24); }
+  .bk.is-open .bk-tab:hover, .bk.is-open .bk-tab:focus-visible { background: var(--ink); }
+
+  /* Intro. H3: the rule draws, the name rises, then the notebook drops onto the page and settles */
+  .intro .frame > .top, .intro .index, .intro .aside { opacity: 0; }
+  /* Letters wait 140% below their line: the line's clip reaches 0.3em below it (for the g), so 110% left their tops showing. */
+  .intro .ch { transform: translate3d(0, 140%, 0); }
+  /* Until the script has split the name into letters, the plain name would paint once and vanish. */
+  html.intro .line:not(.split) { visibility: hidden; }
+  .ch { transition: transform 1000ms cubic-bezier(0.16, 1, 0.3, 1); transition-delay: calc(var(--d0) + var(--i) * 45ms + var(--ln) * 120ms); --d0: 120ms; }
+  /* Each letter and the notebook layer keep their own GPU layer: a weight change re-rasterises one letter, not the page,
+     and nothing is demoted when the intro ends (that demotion was a 33 ms hitch). */
+  .ch, .book-layer { will-change: transform; }
+  html.intro .book-layer { opacity: 0; }
+  html:not(.c-h3) .book-layer { transition: opacity 700ms var(--ease-paper) 250ms; }
+  /* H3: the rule draws (0–700 ms) while the name rises (from 200 ms); the notebook comes down at 520 ms,
+     opaque within ~40 ms so it never reads as a grey ghost, and settles; the index follows at 950 ms. */
+  html.c-h3 .ch { --d0: 200ms; }
+  html.c-h3.intro .book-layer { transform: translate3d(0, -28px, 0); }
+  html.c-h3 .book-layer { transition: opacity 140ms cubic-bezier(0.2, 0, 0, 1) 520ms, transform 1100ms var(--ease-settle) 520ms; }
+  html.c-h3 .index, html.c-h3 .aside { transition: opacity 500ms var(--ease-paper) 950ms; }
+  html.rm .ch { transition: none; }
+
+  /* choreography around the open (as shipped) */
+  .frame > .top, .index, .aside, .rule { transition: opacity 360ms var(--ease-paper); }
+  html.nb-open .frame > .top, html.nb-open .index, html.nb-open .aside, html.nb-open .rule { opacity: 0; pointer-events: none; transition-delay: 0ms; }
+  html.nb-open .l1 { transform: translateX(-38vw); opacity: 0; }
+  html.nb-open .l2 { transform: translateX(38vw); opacity: 0; }
+  html.nb-open .lamp { opacity: 0; }
+
+  .peek { position: fixed; left: 0; top: 0; width: 190px; z-index: 20; pointer-events: none; border: 1px solid var(--ink); background: var(--paper); padding: 8px 8px 30px; box-shadow: 0 18px 30px rgba(22, 38, 94, 0.18); opacity: 0; transition: opacity 200ms var(--ease-out); }
+  .peek img { width: 100%; aspect-ratio: 1; object-fit: cover; }
+  .peek span { position: absolute; left: 10px; bottom: 9px; }
+  .peek.on { opacity: 1; }
+
+  /* ═════════ Works (the open spread): as shipped, plus W4 ═════════ */
+  .cr { opacity: 0; transform: translateY(1.2cqh); transition: opacity 420ms var(--ease-out), transform 520ms var(--ease-out); }
+  .bk.show-inside .cr { opacity: 1; transform: none; }
+  .wl, .wr { position: absolute; top: 11.5%; bottom: 7%; }
+  .wl { left: 7.5%; width: 37%; } .wr { left: 55.5%; width: 37.5%; }
+  .mono-s { font-family: var(--mono); font-size: clamp(11px, 1.4cqh, 13px); letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); }
+  .wtitle { margin: 2.4cqh 0 4.2cqh; font-size: 7.2cqh; font-weight: 300; font-style: italic; line-height: 1; letter-spacing: -0.02em; font-variation-settings: 'opsz' 144, 'SOFT' 50, 'WONK' 1; }
+  .wfoot { position: absolute; left: 0; right: 0; bottom: 0; display: flex; justify-content: space-between; }
+
+  .wtoc { list-style: none; border-top: 1px solid var(--ink-muted); }
+  .wtoc li { position: relative; border-bottom: 1px solid var(--ink-muted); }
+  .wrow { position: relative; display: grid; grid-template-columns: 4.2cqh 1fr auto; align-items: baseline; column-gap: 1.2cqh; padding: 1.55cqh 0 1.45cqh; transition: opacity 160ms var(--ease-out); }
+  .wrow::after { content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px; background: var(--ink); transform: scaleX(0); transform-origin: 0 50%; transition: transform 420ms var(--ease-settle); }
+  .wrow .n, .wrow .y, .wrow .go { font-family: var(--mono); font-size: clamp(11px, 1.4cqh, 13px); letter-spacing: 0.12em; color: var(--ink-soft); }
+  .wrow .t { font-size: 2.85cqh; font-weight: 350; line-height: 1.1; letter-spacing: -0.01em; }
+  .wrow .y, .wrow .go { grid-column: 3; grid-row: 1; justify-self: end; white-space: nowrap; transition: opacity 200ms var(--ease-out), transform 320ms var(--ease-settle); }
+  .wrow .go { color: var(--ink); opacity: 0; transform: translateX(-0.8cqh); }
+  .wrow:is(:hover, :focus-visible, .on)::after { transform: scaleX(1); }
+  .wrow:is(:hover, :focus-visible, .on, .hint) .n { color: var(--ink); }
+  .wrow.hint::after { transform: scaleX(1); }
+  .wrow:is(:hover, :focus-visible, .on) .y { opacity: 0; transform: translateX(0.8cqh); }
+  .wrow:is(:hover, :focus-visible, .on) .go { opacity: 1; transform: none; }
+  .wrow:focus-visible { outline: none; }
+  .wtoc:hover .wrow:not(:hover):not(.on) { opacity: 0.45; }
+
+  /* right page: the contact sheet, and one plate */
+  .wsheet { position: absolute; left: 0; right: 0; top: 7.5cqh; display: grid; grid-template-columns: 1fr 1fr; gap: 3.4cqh 2.4cqh; transition: opacity 260ms var(--ease-out); }
+  .wthumb { display: grid; gap: 1.1cqh; min-width: 0; transition: opacity 200ms var(--ease-out), transform 420ms var(--ease-out); }
+  .wf { display: block; border: 1px solid var(--ink); background: var(--paper); aspect-ratio: 1920 / 1200; overflow: hidden; }
+  .wf img { width: 100%; height: 100%; object-fit: cover; transition: transform 600ms var(--ease-out); }
+  .wthumb:hover .wf img { transform: scale(1.035); }
+  .wcap { font-family: var(--mono); font-size: clamp(11px, 1.3cqh, 12px); letter-spacing: 0.06em; line-height: 1.35; text-transform: uppercase; color: var(--ink-soft); }
+  .wsheet:hover .wthumb:not(:hover) { opacity: 0.45; }
+
+  .wplate { position: absolute; left: 0; right: 0; top: 7.5cqh; margin: 0; pointer-events: none; }
+  .wslot { position: relative; display: block; aspect-ratio: 1920 / 1200; }
+  .wpf { position: absolute; left: 0; top: 0; width: 100%; height: 100%; border: 1px solid var(--ink); background: var(--paper); overflow: hidden; }
+  .wpf img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 200ms var(--ease-out); }
+  .wpf img.on { opacity: 1; }
+  .wpf.instant img { transition: none; }
+  .wpcap { display: flex; justify-content: space-between; gap: 2cqh; margin-top: 1.4cqh; }
+  .wsub { display: block; margin-top: 2.4cqh; font-size: 2.3cqh; font-weight: 300; line-height: 1.3; font-style: italic; max-width: 92%; }
+
+  /* As shipped (W4 off): the sheet fades out, the plate fades in */
+  html:not(.c-w4) .wr.one .wsheet { opacity: 0; pointer-events: none; }
+  html:not(.c-w4) .wplate { opacity: 0; transition: opacity 240ms var(--ease-out); }
+  html:not(.c-w4) .wr.one .wplate { opacity: 1; }
+
+  /* W4 · one frame flies between the sheet and the plate.
+     lift:   the chosen thumbnail's frame becomes the flyer; the other plates step back
+     open:   the flyer lands with the settle curve; the caption follows it in
+     swap:   pointing at another title changes the picture, not the frame
+     return: the caption leaves first; the flyer goes home; the sheet comes back as it lands */
+  html.c-w4 .wpf { visibility: hidden; }
+  html.c-w4 .wr.fly .wpf { visibility: visible; }
+  html.c-w4 .wf.lifted { visibility: hidden; }
+  html.c-w4 .wr.back .wthumb { opacity: 0; transform: scale(0.98); pointer-events: none; }
+  html.c-w4 .wr.back .wsheet { pointer-events: none; }
+  html.c-w4 .wr.returning .wthumb { transition: opacity 300ms var(--ease-out) 140ms, transform 460ms var(--ease-out) 60ms; }
+  html.c-w4 .wplate figcaption { opacity: 0; transform: translateY(0.9cqh); transition: opacity 120ms var(--ease-out), transform 160ms var(--ease-out); }
+  html.c-w4 .wr.cap .wplate figcaption { opacity: 1; transform: none; transition: opacity 300ms var(--ease-out) 260ms, transform 520ms var(--ease-settle) 260ms; }
+  html.rm .wplate figcaption, html.rm .wthumb { transform: none !important; }
+
+  /* Captions (both modes): number, then title; the dot shows only in the shipped mono line */
+  .wcap .cn { color: var(--ink); font-weight: 400; margin-right: 0.9em; }
+
+  /* P1 · top-aligned pages: the plates stay where they were (7.5 cqh under the page top);
+     the contents block comes down so the cap height of “Contents” starts on the same line.
+     text-box trims the title to its caps, so its box top is the top of the C. */
+  html.c-p1 .wl > .mono-s, html.c-p1 .wr > .mono-s { line-height: 1.3; }
+  html.c-p1 .wtitle { text-box: trim-both cap alphabetic; margin-top: calc(7.5cqh - clamp(11px, 1.4cqh, 13px) * 1.3); margin-bottom: 5.8cqh; } /* baseline to rule, as before the trim */
+
+  /* P2 · hairline edge: the plate's rule is the contents' row hairline (ink at 20%),
+     flush to the screenshot, no mat, no shadow */
+  html.c-p2 .wf, html.c-p2 .wpf { border-color: var(--ink-muted); }
+
+  /* P3 · captions in the contents' voice: mono number (0.12em, as on the left page),
+     the title in Fraunces, one line */
+  html.c-p3 .wcap { display: flex; align-items: baseline; gap: 0.9em; letter-spacing: 0.12em; white-space: nowrap; }
+  html.c-p3 .wcap .cn { margin-right: 0; }
+  html.c-p3 .ct { font-family: var(--serif); font-size: 1.8cqh; font-weight: 350; letter-spacing: -0.005em; text-transform: none; color: var(--ink); font-variation-settings: 'opsz' 24; }
+  html.c-p3 .wpcap .cdot { display: none; }
+  html.c-p3 .wpcap [data-cap] { display: flex; align-items: baseline; gap: 0.9em; }
+  html.c-p3 .wpcap .ct { font-size: 2.1cqh; }
+
+  /* P4 · hover lifts the plate instead of zooming the screenshot (zooming crops it) */
+  html.c-p4 .wthumb:hover .wf img { transform: none; }
+  html.c-p4 .wthumb .wf { transition: transform 420ms var(--ease-settle), box-shadow 420ms var(--ease-out); }
+  html.c-p4 .wthumb:hover .wf { transform: translateY(-0.5cqh); box-shadow: 0 1.1cqh 1.8cqh rgba(22, 38, 94, 0.16); }
+
+  /* ═════════ the switch panel (prototype chrome, not part of the design) ═════════ */
+  .switches { position: fixed; right: 14px; bottom: 14px; z-index: 300; width: 330px; max-height: calc(100vh - 28px); overflow: auto;
+    background: rgba(255, 255, 255, 0.97); border: 1px solid rgba(0, 0, 0, 0.12); border-radius: 10px; padding: 12px 14px 10px;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12); font: 12.5px/1.4 -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #222; }
+  .switches h2 { font-size: 13px; margin: 0 0 4px; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .switches h2 small { font-weight: 400; color: #888; margin-left: 6px; }
+  .switches h2 button { font: inherit; font-weight: 400; color: #555; padding: 2px 6px; border-radius: 5px; }
+  .switches h2 button:hover { background: #f1f1f1; }
+  .switches h3 { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.08em; color: #888; margin: 10px 0 2px; }
+  .switches label { display: grid; grid-template-columns: 18px 1fr; gap: 6px; padding: 5px 0; cursor: pointer; border-top: 1px solid #f0f0f0; }
+  .switches label b { font-weight: 600; }
+  .switches label span span { display: block; color: #6b6b6b; font-size: 11.5px; }
+  .switches .hint { margin: 6px 0 0; color: #777; font-size: 11.5px; }
+  .switches.min { width: auto; } .switches.min .list, .switches.min .hint, .switches.min [data-all], .switches.min [data-none] { display: none; }
+</style>
+</head>
+<body>
+<div class="lamp" aria-hidden="true"></div>
+<svg class="rule" aria-hidden="true"><path d=""/></svg>
+
+<main class="frame">
+  <header class="top mono">
+    <span class="c1">Yankun Wang</span>
+    <span class="c2">Senior product designer</span>
+    <span class="c3" data-place>San Francisco · 2026</span>
+  </header>
+  <h1 class="name" aria-label="Yankun Wang"><span class="line l1" aria-hidden="true">Yankun</span><span class="line l2" aria-hidden="true">Wang</span></h1>
+  <div class="aside mono"><span>Field Notebook</span><span>Selected work, 2020–2026</span></div>
+  <button class="slot" type="button" aria-expanded="false" aria-label="Open the notebook: selected work"></button>
+  <ul class="index mono" aria-label="Pages">
+    <li><button type="button" data-open><span class="n">01</span><span class="lbl">Works</span><span class="arrow">→</span></button></li>
+    <li><a href="../../site/public/Yankun-Wang-CV-2026.pdf" target="_blank" rel="noopener"><span class="n">02</span><span class="lbl">Résumé</span><span class="arrow">PDF ↗</span></a></li>
+    <li><a href="https://yankun.design/about" target="_blank" rel="noopener" data-peek><span class="n">03</span><span class="lbl">About</span><span class="arrow">→</span></a></li>
+    <li><a href="mailto:yankunux@gmail.com"><span class="n">04</span><span class="lbl">Email</span><span class="arrow">↗</span></a></li>
+  </ul>
+</main>
+
+<div class="open-label mono" aria-hidden="true">Open →</div>
+<div class="peek" aria-hidden="true"><img src="../../site/public/images/about/me.png" alt=""><span class="mono">Yankun, 2026</span></div>
+<div class="grain" aria-hidden="true"></div>
+
+<aside class="switches min" aria-label="Craft details">
+  <h2><span>Craft details<small data-count></small></span><span><button type="button" data-all>All on</button><button type="button" data-none>All off</button><button type="button" data-replay title="Replay the intro">Replay</button><button type="button" data-min aria-label="Show the switches">+</button></span></h2>
+  <p class="hint">“All off” is the site as shipped. Each switch is kept in the URL.</p>
+  <div class="list"></div>
+</aside>
+
+<script src="shared/book.js"></script>
+<script>
+(async () => {
+const { Book, ASSET, reduced, clamp, lerp, wait } = window.NB;
+const root = document.documentElement;
+const RM = reduced();
+const SPRING = { decay: 4.4, freq: 3.2 }; // the Settle cover's line: y = e^(−4.4u)·cos(2π·3.2u)
+
+/* ─── The details Yankun kept, and the plate refinements under review ─── */
+const DETAILS = [
+  ['h', 'h1', 'Settle easing', 'The cover’s spring, gentled to a 10% overshoot, becomes the site’s easing curve. Rows, rules and the plate all land with it.'],
+  ['h', 'h2', 'Plucked rule', 'Cross the top bar’s hairline and it rings where you crossed, then settles: the cover’s own curve, played in time.'],
+  ['h', 'h3', 'Line-first intro', 'The hairline draws across, the name rises, then the notebook drops onto the page and settles.'],
+  ['h', 'h4', 'Ribbon pendulum', 'The ribbon tail swings as the book tilts and comes to rest, instead of following the tilt rigidly.'],
+  ['h', 'h5', 'Cracked cover + Open', 'Pointing at the book lifts its cover a few degrees, and “Open →” follows the cursor, mirroring “Close ×”.'],
+  ['h', 'h6', 'Index rules', 'The four index rows draw their rule like the contents rows do. No italic swap.'],
+  ['h', 'h7', 'Local time', 'San Francisco time in the top bar, the colon breathing.'],
+  ['p', 'p1', 'Top-aligned pages', 'The plates keep their place; the contents block comes down so “Contents” starts on the plates’ top line.'],
+  ['p', 'p2', 'Hairline edge', 'The plate’s rule becomes the contents’ hairline (ink at 20%), flush to the screenshot.'],
+  ['p', 'p3', 'Captions in the contents’ voice', 'Mono number tracked like the left page, the title in Fraunces, on one line.'],
+  ['p', 'p4', 'Lift, don’t zoom', 'Hovering a plate lifts it a little; the screenshot is no longer zoomed (zooming cropped its edges).'],
+  ['w', 'w4', 'Plate grows from its thumbnail', 'Point at a title: its plate lifts out of the sheet and lands; leave and it flies home. Pointing at a thumbnail only marks its title.'],
+];
+const on = (id) => root.classList.contains('c-' + id);
+const params = new URLSearchParams(location.search);
+const off = new Set((params.get('off') || '').split(',').filter(Boolean));
+DETAILS.forEach(([, id]) => root.classList.toggle('c-' + id, !off.has(id)));
+const list = document.querySelector('.switches .list');
+const row = ([, id, name, why]) => `<label><input type="checkbox" data-id="${id}" ${on(id) ? 'checked' : ''}><span><b>${id.toUpperCase()} · ${name}</b><span>${why}</span></span></label>`;
+list.innerHTML = `<h3>Homepage</h3>${DETAILS.filter((d) => d[0] === 'h').map(row).join('')}<h3>Works (open the notebook)</h3>${DETAILS.filter((d) => d[0] === 'w').map(row).join('')}<h3>Plates</h3>${DETAILS.filter((d) => d[0] === 'p').map(row).join('')}`;
+const save = () => {
+  const o = DETAILS.map((d) => d[1]).filter((id) => !on(id));
+  const q = new URLSearchParams(location.search);
+  if (o.length) q.set('off', o.join(',')); else q.delete('off');
+  history.replaceState(null, '', q.toString() ? `?${q}` : location.pathname);
+};
+list.addEventListener('change', (e) => { root.classList.toggle('c-' + e.target.dataset.id, e.target.checked); save(); applyAll(); });
+const setAll = (v) => { DETAILS.forEach(([, id]) => root.classList.toggle('c-' + id, v)); list.querySelectorAll('input').forEach((i) => { i.checked = v; }); save(); applyAll(); };
+document.querySelector('[data-all]').onclick = () => setAll(true);
+document.querySelector('[data-none]').onclick = () => setAll(false);
+document.querySelector('[data-replay]').onclick = () => location.reload();
+document.querySelector('[data-min]').onclick = (e) => { const p = document.querySelector('.switches'); p.classList.toggle('min'); e.target.textContent = p.classList.contains('min') ? '+' : '–'; };
+if (params.get('embed')) document.querySelector('.switches').remove();
+
+/* ─── H1 · the spring as an easing curve ───
+ * The cover's line is a damped spring, e^(−4.4u)·cos(2π·3.2u). Interface
+ * motion uses the same family, gentled to one overshoot of about 10%:
+ * 1 − e^(−6.5u)·cos(2π·1.25u), sampled into CSS linear(). */
+const settleAt = (u) => 1 - Math.exp(-6.5 * u) * Math.cos(2 * Math.PI * 1.25 * u);
+const SETTLE = `linear(${Array.from({ length: 41 }, (_, i) => (i === 40 ? '1' : settleAt(i / 40).toFixed(4))).join(', ')})`;
+const EXPO = 'cubic-bezier(0.16, 1, 0.3, 1)';
+const PAPER = 'cubic-bezier(0.4, 0, 0.2, 1)';
+const easeNow = () => (on('h1') ? SETTLE : EXPO);
+function applyAll() {
+  root.style.setProperty('--ease-settle', easeNow());
+  const count = document.querySelector('[data-count]');
+  if (count) count.textContent = `${DETAILS.filter((d) => on(d[1])).length} of ${DETAILS.length} on`;
+  clock();
+  resetContents?.();
+}
+
+/* ─── Name letters ─── */
+const letters = [];
+document.querySelectorAll('.line').forEach((line, li) => {
+  const text = line.textContent; line.textContent = '';
+  [...text].forEach((c, i) => {
+    const s = document.createElement('span');
+    s.className = 'ch'; s.textContent = c;
+    s.style.setProperty('--i', i); s.style.setProperty('--ln', li);
+    line.appendChild(s);
+    letters.push({ el: s, w: 300, soft: 0, ww: 300, ws: 0, cx: 0, cy: 0 });
+  });
+  line.classList.add('split');
+});
+
+/* ─── The book: Settle cover; the inside is this page's own ─── */
+const slot = document.querySelector('.slot');
+const book = new Book({ slot, cover: 'archive', coverVariant: 'm' });
+book.setActive = () => {}; book.clearActive = () => {};
+const WORK = [
+  { slug: 'chai', title: 'Control Hub AI Assistant', year: '2024–2026', sub: 'An AI assistant for IT admins', img: '/canvas/mockups/chai-v6.png' },
+  { slug: 'control-hub-agentic', title: 'Control Hub Agentic', year: '2026', sub: 'Five prototypes, two platform shifts, and the one interaction that survived both', img: '/canvas/mockups/control-hub-agentic-stack.png' },
+  { slug: 'ebb', title: 'Ebb', year: '2026', sub: 'A pause between the tap and the feed — that knows when you’re in a loop.', img: '/canvas/mockups/ebb.png' },
+  { slug: 'zao', title: 'ZAO', year: '2026', sub: 'Learning design systems by building one with AI.', img: '/canvas/mockups/zao.png', href: 'https://zaoui.dev/' },
+  { slug: 'sap-fieldglass', title: 'SAP Fieldglass', year: '2020–2024', sub: 'Making a complex system handleable — earlier work', img: '/canvas/mockups/sap-fieldglass.png' },
+  { slug: 'build-with-ai', title: 'Build with AI', year: '2025–2026', sub: 'A working shelf of AI builds.', img: '/canvas/mockups/build-with-ai.png' },
+];
+const nn = (i) => String(i + 1).padStart(2, '0');
+const hrefOf = (p) => p.href || `https://yankun.design/works/${p.slug}`;
+const inside = book.inside;
+inside.innerHTML = `
+  <div class="wl">
+    <p class="mono-s cr">Field Notebook</p>
+    <h2 class="wtitle cr">Contents</h2>
+    <ol class="wtoc cr" style="transition-delay:80ms">${WORK.map((p, i) => `<li><a class="wrow" href="${hrefOf(p)}" target="_blank" rel="noopener" data-i="${i}"><span class="n">${nn(i)}</span><span class="t">${p.title}</span><span class="y">${p.year}</span><span class="go" aria-hidden="true">Read →</span></a></li>`).join('')}</ol>
+    <div class="wfoot mono-s cr" style="transition-delay:300ms"><span>Yankun Wang</span><span>2020–2026</span></div>
+  </div>
+  <div class="wr">
+    <p class="mono-s cr" data-k>Plates</p>
+    <div class="wsheet cr" style="transition-delay:140ms">${WORK.map((p, i) => `<a class="wthumb" href="${hrefOf(p)}" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true" data-i="${i}"><span class="wf"><img src="${ASSET}${p.img}" alt=""></span><span class="wcap"><span class="cn">${nn(i)}</span><span class="ct">${p.title}</span></span></a>`).join('')}</div>
+    <figure class="wplate" aria-live="polite">
+      <span class="wslot"><span class="wpf">${WORK.map((p) => `<img src="${ASSET}${p.img}" alt="">`).join('')}</span></span>
+      <figcaption>
+        <span class="wpcap mono-s"><span data-cap></span><span data-yr></span></span>
+        <span class="wsub" data-sub></span>
+      </figcaption>
+    </figure>
+  </div>`;
+const rows = [...inside.querySelectorAll('.wrow')];
+book.rows = rows;
+const R = inside.querySelector('.wr'), plate = R.querySelector('.wplate'), wslot = R.querySelector('.wslot'), pf = R.querySelector('.wpf');
+const pimgs = [...pf.querySelectorAll('img')];
+const thumbs = [...inside.querySelectorAll('.wthumb')];
+const frames = thumbs.map((t) => t.querySelector('.wf'));
+const sheet = R.querySelector('.wsheet');
+
+/* The plate.
+ * active: the title the reader points at (−1: none; nothing is pre-selected).
+ * shown:  the project on the plate. dir: 'in' | 'out' | null while flying.
+ * W4 moves one element, the plate's frame, by animating its box in px, so its
+ * 1px rule stays 1px at every size. Every flight starts from wherever the frame
+ * is on screen right now, so an interruption turns around instead of jumping. */
+let active = -1, shown = -1, dir = null, anim = null, graceT = 0;
+const W4 = () => on('w4');
+function picture(i, instant) {
+  if (instant) pf.classList.add('instant');
+  pimgs.forEach((im, k) => im.classList.toggle('on', k === i));
+  if (instant) { void pf.offsetWidth; pf.classList.remove('instant'); }
+}
+function caption(i) {
+  const p = WORK[i];
+  plate.querySelector('[data-cap]').innerHTML = `<span class="cn">${nn(i)}</span><span class="cdot"> · </span><span class="ct">${p.title}</span>`;
+  plate.querySelector('[data-yr]').textContent = p.year;
+  plate.querySelector('[data-sub]').textContent = p.sub;
+}
+const homeRect = () => wslot.getBoundingClientRect();
+// A thumbnail's frame where it rests, ignoring the step-back scale. Measured from
+// the thumbnail's offset in the sheet: while a thumbnail is scaled, Chrome makes
+// it the frame's offsetParent, so the frame's own offsets read 0, 0. The frame
+// sits at the thumbnail's top-left corner.
+function restRect(i) {
+  const s = sheet.getBoundingClientRect(), t = thumbs[i], f = frames[i];
+  return { left: s.left + t.offsetLeft, top: s.top + t.offsetTop, width: f.offsetWidth, height: f.offsetHeight };
+}
+function box(r) {
+  const h = homeRect();
+  return { left: `${r.left - h.left}px`, top: `${r.top - h.top}px`, width: `${r.width}px`, height: `${r.height}px` };
+}
+function flyTo(target, options, done, fromRect) {
+  const from = box(fromRect || pf.getBoundingClientRect()); // read before cancelling the flight in progress
+  anim?.cancel();
+  const a = pf.animate([from, box(target)], { ...options, fill: 'forwards' });
+  anim = a;
+  a.finished.then(() => { if (anim === a) { done?.(); a.cancel(); anim = null; } }, () => {});
+}
+function lift(i) { frames.forEach((f, k) => f.classList.toggle('lifted', k === i)); }
+function point(i) {
+  clearTimeout(graceT);
+  if (i === active) return;
+  active = i;
+  rows.forEach((r, k) => r.classList.toggle('on', k === i));
+  R.querySelector('[data-k]').textContent = 'Selected work';
+  caption(i);
+  const out = R.classList.contains('fly') || R.classList.contains('one');
+  if (!W4()) { picture(i, shown < 0); shown = i; R.classList.add('one'); return; }
+  if (!out) {
+    // lift: the thumbnail's own frame becomes the plate
+    picture(i, true);
+    shown = i;
+    lift(i);
+    const from = restRect(i);
+    R.classList.remove('returning');
+    R.classList.add('one', 'fly', 'back', 'cap');
+    if (RM) return;
+    dir = 'in';
+    flyTo(homeRect(), { duration: 620, easing: easeNow() }, () => { dir = null; }, from);
+    return;
+  }
+  // swap (or turn around mid-return): keep the frame, change the picture
+  picture(i, false);
+  shown = i;
+  lift(i);
+  R.classList.remove('returning');
+  R.classList.add('back', 'cap');
+  if (dir === 'out' && !RM) { dir = 'in'; flyTo(homeRect(), { duration: 480, easing: easeNow() }, () => { dir = null; }); }
+}
+function release() {
+  clearTimeout(graceT);
+  graceT = setTimeout(() => {
+    active = -1;
+    rows.forEach((r) => r.classList.remove('on'));
+    R.querySelector('[data-k]').textContent = 'Plates';
+    if (!W4() || RM || shown < 0) { land(); return; }
+    // return: caption first, then the frame goes home; the sheet comes back as it lands
+    R.classList.remove('back', 'cap');
+    R.classList.add('returning');
+    dir = 'out';
+    flyTo(restRect(shown), { duration: 460, easing: PAPER }, land);
+  }, 180);
+}
+// The frame is home: the thumbnail takes over in the same frame, nothing fades on top.
+function land() {
+  anim?.cancel(); anim = null; dir = null;
+  lift(-1);
+  R.classList.remove('one', 'fly', 'back', 'cap', 'returning');
+  shown = -1;
+}
+function resetContents() {
+  clearTimeout(graceT);
+  active = -1;
+  rows.forEach((r) => r.classList.remove('on', 'hint'));
+  R.querySelector('[data-k]').textContent = 'Plates';
+  land();
+}
+rows.forEach((r) => {
+  const i = +r.dataset.i;
+  r.addEventListener('pointerenter', () => point(i));
+  r.addEventListener('focus', () => point(i));
+  r.addEventListener('blur', release);
+});
+inside.querySelector('.wtoc').addEventListener('pointerleave', release);
+// Pointing at a thumbnail marks its title; it doesn't raise the plate over the
+// sheet the pointer is still reading.
+thumbs.forEach((t, i) => {
+  t.addEventListener('pointerenter', () => rows[i].classList.add('hint'));
+  t.addEventListener('pointerleave', () => rows[i].classList.remove('hint'));
+});
+addEventListener('resize', () => { if (anim) land(); });
+
+slot.addEventListener('click', () => book.open());
+document.querySelector('[data-open]').addEventListener('click', () => book.open());
+book.addEventListener('close-start', resetContents);
+
+/* ─── H2 · the plucked rule ─── */
+const ruleSvg = document.querySelector('.rule'), rulePath = ruleSvg.querySelector('path');
+const RULE_Y = 63.5;
+const plucks = [];
+const pluck = (x, amp) => { plucks.push({ x, amp, t0: performance.now() }); if (plucks.length > 6) plucks.shift(); };
+
+/* ─── Measurements: read once (and on resize), never inside the frame loop ───
+ * The loop used to read every letter's box right after writing the previous
+ * letter's weight, which forced ~9 layouts a frame. Now it only writes. */
+const lamp = document.querySelector('.lamp');
+let slotBox = slot.getBoundingClientRect(), ruleBox = ruleSvg.getBoundingClientRect();
+function measureLetters() {
+  const boxes = letters.map((L) => L.el.getBoundingClientRect()); // all reads first
+  letters.forEach((L, i) => { const b = boxes[i]; L.cx = b.left + b.width / 2; L.cy = b.top + b.height * 0.55; });
+}
+function measure() { slotBox = slot.getBoundingClientRect(); ruleBox = ruleSvg.getBoundingClientRect(); if (introDone) measureLetters(); }
+let resizeT = 0;
+addEventListener('resize', () => { clearTimeout(resizeT); resizeT = setTimeout(measure, 120); });
+
+/* ─── Pointer ─── */
+let mx = innerWidth / 2, my = innerHeight * 0.4, inSlot = false, lastY = my, lastT = performance.now();
+let pointerDirty = true, pointerSeen = false, introDone = false;
+const openLabel = document.querySelector('.open-label');
+const closeLabel = book.cursorLabel;
+const placeLabel = () => { labels[0].x = mx; labels[0].y = my; openLabel.style.translate = `${mx}px ${my}px`; };
+// Both cursor labels are placed by the frame loop: they follow the pointer with a 30 ms smoothing,
+// and keep following for the length of their exit, so they shrink into the arrow where it is.
+const labels = [{ el: openLabel, x: mx, y: my, wasOn: false, offT: -1e9 }, { el: closeLabel, x: mx, y: my, wasOn: false, offT: -1e9 }];
+addEventListener('pointermove', (e) => {
+  const now = performance.now();
+  if (on('h2') && !RM && book.state === 'closed') {
+    if ((lastY - RULE_Y) * (e.clientY - RULE_Y) < 0 && e.clientX > ruleBox.left && e.clientX < ruleBox.right) {
+      const v = Math.abs(e.clientY - lastY) / Math.max(1, now - lastT); // px per ms
+      pluck(e.clientX - ruleBox.left, Math.sign(e.clientY - lastY) * clamp(v * 8, 2.5, 12));
+    }
+  }
+  mx = e.clientX; my = e.clientY; lastY = e.clientY; lastT = now;
+  pointerDirty = true; pointerSeen = true;
+}, { passive: true });
+slot.addEventListener('pointerenter', (e) => {
+  inSlot = true; mx = e.clientX; my = e.clientY; pointerDirty = true;
+  if (on('h5')) { placeLabel(); openLabel.classList.add('on'); if (!RM) book.peek(0.026, { stiffness: 120, damping: 22 }); } // critically damped: the cover eases open, no bounce
+});
+slot.addEventListener('pointerleave', () => { inSlot = false; pointerDirty = true; if (book.state === 'closed') book.peek(0); openLabel.classList.remove('on'); });
+book.addEventListener('open-start', () => openLabel.classList.remove('on', 'press'));
+slot.addEventListener('pointerdown', () => openLabel.classList.add('press'));
+addEventListener('pointerup', () => openLabel.classList.remove('press'));
+document.documentElement.addEventListener('pointerleave', () => openLabel.classList.remove('on'));
+book.addEventListener('close', () => {
+  pointerDirty = true;
+  // closed under a still pointer: no pointerenter will come, so the label must reappear on its own,
+  // or the hidden cursor would leave nothing on screen
+  const r = slot.getBoundingClientRect();
+  inSlot = mx >= r.left && mx <= r.right && my >= r.top && my <= r.bottom;
+  if (inSlot && on('h5')) { placeLabel(); openLabel.classList.add('on'); }
+});
+
+/* ─── About peek ─── */
+const peek = document.querySelector('.peek');
+let px = 0, py = 0, pr = 0, peekOn = false;
+document.querySelector('[data-peek]').addEventListener('pointerenter', () => { peek.classList.add('on'); peekOn = true; px = mx + 28; py = my - 120; });
+document.querySelector('[data-peek]').addEventListener('pointerleave', () => { peek.classList.remove('on'); peekOn = false; });
+
+/* ─── One frame loop. Each part writes only when its value changes; idle frames do nothing. ─── */
+const ribbon = book.ribbon;
+const pend = { a: 3, v: 0, last: 0, shown: null };
+let lastFrame = performance.now(), nameGain = 0, ruleFlat = false, hover = 0;
+const ease = (k, dt) => 1 - Math.pow(1 - k, dt * 60); // frame-rate-independent lerp factor
+function frame(now) {
+  const dt = Math.min(0.05, Math.max(0.001, (now - lastFrame) / 1000)); lastFrame = now;
+  const closed = book.state === 'closed' && !RM;
+
+  // how much the book is "being pointed at": eases in and out (≈400 ms) instead of switching at its edge,
+  // so crossing the edge no longer snaps the tilt from 3° to 9°
+  const hoverGoal = inSlot ? 1 : 0, hoverMoving = Math.abs(hoverGoal - hover) > 0.001;
+  if (hoverMoving) hover += (hoverGoal - hover) * (1 - Math.exp(-dt / 0.13)); else hover = hoverGoal;
+
+  // the lamp, the book's tilt and shadow: when the pointer moved or the hover amount is still easing
+  if (pointerDirty) lamp.style.transform = `translate3d(${mx}px, ${my}px, 0)`;
+  if (closed && (pointerDirty || hoverMoving)) {
+    const vw = innerWidth, vh = innerHeight, h = hover;
+    const dx = (mx - (slotBox.left + slotBox.width / 2)) / vw, dy = (my - (slotBox.top + slotBox.height / 2)) / vh;
+    Object.assign(book.target, {
+      lx: clamp(-dx * 70, -40, 40), ly: clamp(18 - dy * 30, 6, 34),
+      tiltY: (3 + 6 * h) * clamp(dx * 2, -1, 1), tiltX: (-2 - 5 * h) * clamp(dy * 2, -1, 1),
+      lift: 0.025 * h, blur: 22 + 8 * h, shadow: 0.55 - 0.1 * h,
+    });
+  }
+
+  // the cursor labels: follow the pointer while shown and while leaving; snap to it when they appear
+  const kFollow = 1 - Math.exp(-dt / 0.03);
+  for (const L of labels) {
+    const isOn = L.el.classList.contains('on');
+    if (isOn && !L.wasOn) { L.x = mx; L.y = my; }
+    if (!isOn && L.wasOn) L.offT = now;
+    L.wasOn = isOn;
+    if (isOn || now - L.offT < 260) {
+      const nx = L.x + (mx - L.x) * kFollow, ny = L.y + (my - L.y) * kFollow;
+      if (pointerDirty || Math.abs(nx - L.x) > 0.05 || Math.abs(ny - L.y) > 0.05 || isOn !== L.drawnOn) {
+        L.x = nx; L.y = ny; L.drawnOn = isOn;
+        L.el.style.translate = `${L.x.toFixed(1)}px ${L.y.toFixed(1)}px`;
+      }
+    }
+  }
+
+  // the name: off until the intro has landed and the real pointer has moved, then fades in over 400 ms
+  if (closed && introDone && pointerSeen) {
+    nameGain = Math.min(1, nameGain + dt / 0.4);
+    const Rn = innerWidth * 0.2, k = ease(0.14, dt);
+    for (const L of letters) {
+      const f = Math.exp(-((Math.hypot(mx - L.cx, my - L.cy) / Rn) ** 2)) * nameGain;
+      L.w += (300 + 330 * f - L.w) * k; L.soft += (100 * f - L.soft) * k;
+      if (Math.abs(L.w - L.ww) > 0.5 || Math.abs(L.soft - L.ws) > 0.5) {
+        L.ww = L.w; L.ws = L.soft;
+        L.el.style.fontWeight = L.w.toFixed(0);
+        L.el.style.fontVariationSettings = `'opsz' 144, 'SOFT' ${L.soft.toFixed(0)}, 'WONK' 1`;
+      }
+    }
+  }
+
+  // H4 · the ribbon is a damped pendulum; the book's tilt moves its pivot
+  if (ribbon) {
+    if (on('h4') && !RM) {
+      const tilt = book.cur.tiltY;
+      const rest = 3 - tilt * 1.3;
+      const swing = -((tilt - pend.last) / dt) * 5.5; pend.last = tilt; // the pivot's motion pushes the tail the other way
+      pend.v += (-38 * (pend.a - rest) - 2.4 * pend.v + swing) * dt;
+      pend.a += pend.v * dt;
+      if (pend.shown === null || Math.abs(pend.a - pend.shown) > 0.02) { pend.shown = pend.a; ribbon.style.transform = `rotate(${pend.a.toFixed(2)}deg)`; }
+    } else if (pend.shown !== null) { ribbon.style.transform = ''; pend.shown = null; pend.a = 3 - book.cur.tiltY * 1.3; pend.v = 0; pend.last = book.cur.tiltY; }
+  }
+
+  // H2 · each pluck rings as the cover's line does, in time instead of space
+  if (on('h2')) {
+    for (let i = plucks.length - 1; i >= 0; i--) if (now - plucks[i].t0 > 1400) plucks.splice(i, 1);
+    const w = ruleBox.width;
+    if (plucks.length) {
+      let d = '';
+      for (let x = 0; x <= w; x += 4) {
+        let y = 0;
+        for (const p of plucks) {
+          const s = Math.max(0, now - p.t0) / 1000;
+          y += p.amp * Math.exp(-SPRING.decay * s) * Math.cos(2 * Math.PI * SPRING.freq * s) * Math.exp(-(((x - p.x) / 90) ** 2));
+        }
+        d += `${d ? ' L' : 'M'}${x} ${(15 + y).toFixed(2)}`;
+      }
+      rulePath.setAttribute('d', d); ruleFlat = false;
+    } else if (!ruleFlat) { rulePath.setAttribute('d', `M0 15 L${w.toFixed(1)} 15`); ruleFlat = true; }
+  }
+
+  // the About photo trails the cursor while it is shown, and stops when it has caught up
+  if (peekOn || Math.abs(px - (mx + 28)) > 0.3) {
+    const k = ease(0.16, dt);
+    const nx = px + (mx + 28 - px) * k, ny = py + (my - 120 - py) * k;
+    pr += (clamp((nx - px) * 0.8, -10, 10) - pr) * ease(0.2, dt); px = nx; py = ny;
+    peek.style.transform = `translate3d(${px}px, ${py}px, 0) rotate(${pr}deg)`;
+  }
+
+  pointerDirty = false;
+  requestAnimationFrame(frame);
+}
+
+// H7 · local time, Pacific
+const place = document.querySelector('[data-place]');
+const fmt = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Los_Angeles', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+function clock() {
+  if (on('h7')) {
+    const parts = Object.fromEntries(fmt.formatToParts(new Date()).map((x) => [x.type, x.value]));
+    place.innerHTML = `<span class="clock" aria-label="San Francisco, ${parts.hour}:${parts.minute}">San Francisco · ${parts.hour}<b>:</b>${parts.minute}</span>`;
+  } else place.textContent = 'San Francisco · 2026';
+}
+setInterval(clock, 15000);
+
+/* ─── Intro ───
+ * document.fonts.ready can resolve before the font stylesheet has even been
+ * read (it did at 26 ms here, with the CSS arriving at 137 ms), so the intro
+ * waited for nothing and the name could swap faces mid-rise. Ask for the faces. */
+applyAll();
+const FACES = ["300 100px Fraunces", "italic 300 100px Fraunces", "400 12px 'JetBrains Mono'"];
+await Promise.race([Promise.all(FACES.map((f) => document.fonts.load(f))).catch(() => {}), wait(2500)]);
+book.measure(); book.render();
+measure();
+requestAnimationFrame(frame);
+requestAnimationFrame(() => requestAnimationFrame(() => {
+  root.classList.remove('intro');
+  const h3 = on('h3') && !RM;
+  if (h3 && on('h2')) {
+    // H3 · the hairline draws itself across, then rings once from the middle
+    rulePath.setAttribute('pathLength', '1');
+    const draw = rulePath.animate([{ strokeDasharray: '1 1', strokeDashoffset: 1 }, { strokeDasharray: '1 1', strokeDashoffset: 0 }], { duration: 700, easing: 'cubic-bezier(0.4, 0, 0.2, 1)' });
+    draw.finished.then(() => { rulePath.removeAttribute('pathLength'); pluck(ruleBox.width / 2, 5); });
+  }
+  // the notebook is set down as it appears: a little lifted, no contact shadow yet, then it settles
+  setTimeout(() => { book.cur.lift = 0.05; book.cur.shadow = 0.12; }, h3 ? 520 : 250);
+  setTimeout(() => requestAnimationFrame(() => { measureLetters(); introDone = true; }), h3 ? 1900 : 1500);
+}));
+})();
+</script>
+</body>
+</html>

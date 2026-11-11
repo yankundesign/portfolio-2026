@@ -11,11 +11,17 @@ import { clamp, ease, lerp, tween, type Tween } from './motion';
  * changes so the route can step the rest of the page aside.
  *
  * Pointer-driven extras (tilt, lift, the lamp shadow) are targets the page
- * sets with `aim()`; the engine eases toward them every frame.
+ * sets with `aim()`; the engine eases toward them every frame. While closed,
+ * it also cracks the cover on request (`peek`, a critically damped spring) and
+ * lets the ribbon tail swing as a damped pendulum when the book tilts.
+ *
+ * Lighting variables are written on the elements that read them (the two
+ * shadows), not on the book: a custom property set on the book restyles
+ * everything inside it, every frame.
  */
 
 export type NotebookState = 'closed' | 'opening' | 'open' | 'closing';
-export type NotebookPart = 'layer' | 'book' | 'pages' | 'cover' | 'frontShade' | 'backShade' | 'cast' | 'edge' | 'ribbon';
+export type NotebookPart = 'layer' | 'book' | 'pages' | 'cover' | 'frontShade' | 'backShade' | 'cast' | 'edge' | 'ribbon' | 'shadowL' | 'shadowR';
 
 export interface NotebookExtras {
   tiltX: number;
@@ -49,6 +55,11 @@ export class NotebookEngine {
   private raf = 0;
   private reduced = false;
   private onState: (s: NotebookState) => void = () => {};
+  /** Cover crack while closed: target and velocity of p. */
+  private peekTo = 0;
+  private peekV = 0;
+  /** The ribbon tail: angle, angular velocity, last tilt, last written angle. */
+  private rib = { a: 3, v: 0, last: 0, shown: NaN };
 
   /** A stable callback ref for one part of the book. */
   ref(part: NotebookPart): (node: HTMLElement | null) => void {
@@ -74,13 +85,19 @@ export class NotebookEngine {
   /** Start from a lifted, shadowless pose so the book settles in on load. */
   settleFrom(extras: Partial<NotebookExtras>): void { Object.assign(this.cur, extras); }
 
+  /** Lift the closed cover part-way (0 = shut). Eases there without bouncing. */
+  peek(p: number): void { if (!this.reduced) this.peekTo = p; }
+
   attach(slot: HTMLElement | null): void {
     this.slot = slot;
     this.measure();
     this.setCover(this.p);
     this.render();
     window.addEventListener('resize', this.onResize);
-    const loop = () => {
+    let last = performance.now();
+    const loop = (now: number) => {
+      const dt = Math.min(0.05, Math.max(0.001, (now - last) / 1000));
+      last = now;
       let moving = false;
       const cur = this.cur as unknown as Record<string, number>;
       const tgt = this.tgt as unknown as Record<string, number>;
@@ -89,6 +106,10 @@ export class NotebookEngine {
         if (Math.abs(d) > 0.001) { cur[key] += d * 0.12; moving = true; } else cur[key] = tgt[key];
       }
       if (moving) this.render();
+      if (this.state === 'closed' && !this.reduced) {
+        this.stepPeek(dt);
+        this.stepRibbon(dt);
+      }
       this.raf = requestAnimationFrame(loop);
     };
     this.raf = requestAnimationFrame(loop);
@@ -101,6 +122,34 @@ export class NotebookEngine {
   }
 
   private onResize = () => { this.measure(); this.render(); };
+
+  /** Critically damped spring (k 120, c 22): the cover eases open a few degrees, no bounce. */
+  private stepPeek(dt: number) {
+    const x = this.p, v = this.peekV;
+    if (Math.abs(this.peekTo - x) < 1e-4 && Math.abs(v) < 1e-4) {
+      if (x !== this.peekTo) this.setCover(this.peekTo);
+      this.peekV = 0;
+      return;
+    }
+    this.peekV = v + (-120 * (x - this.peekTo) - 22 * v) * dt;
+    this.setCover(Math.max(0, x + this.peekV * dt));
+  }
+
+  /** The ribbon hangs from the spine: a damped pendulum whose pivot the tilt moves. */
+  private stepRibbon(dt: number) {
+    const ribbon = this.el.ribbon;
+    if (!ribbon) return;
+    const r = this.rib, tilt = this.cur.tiltY;
+    const rest = 3 - tilt * 1.3;
+    const swing = -((tilt - r.last) / dt) * 5.5; // the pivot's motion pushes the tail the other way
+    r.last = tilt;
+    r.v += (-38 * (r.a - rest) - 2.4 * r.v + swing) * dt;
+    r.a += r.v * dt;
+    if (!(Math.abs(r.a - r.shown) <= 0.02)) {
+      r.shown = r.a;
+      ribbon.style.transform = `rotate(${r.a.toFixed(2)}deg)`;
+    }
+  }
 
   remeasure(): void { this.measure(); this.render(); }
 
@@ -142,11 +191,15 @@ export class NotebookEngine {
     book.style.transform =
       `translate3d(${tx}px, ${ty}px, 0) scale3d(${sx}, ${sy}, ${sz}) translate(${px}px, ${py}px) ` +
       `rotateX(${u.tiltX * k}deg) rotateY(${u.tiltY * k}deg) scale(${s}) translate(${-px}px, ${-py}px)`;
-    book.style.setProperty('--lx', `${u.lx * k}px`);
-    book.style.setProperty('--ly', `${lerp(u.ly, 18, t)}px`);
-    book.style.setProperty('--shadow-blur', `${lerp(u.blur, 30, t)}px`);
-    book.style.setProperty('--shadow-o', `${lerp(u.shadow, 0.5, t)}`);
-    book.style.setProperty('--rib', `${3 - u.tiltY * 1.3}deg`);
+    // The shadows keep one blur radius (CSS); lifting changes only their offset and opacity,
+    // so they are never re-rasterised. `blur` stays in the extras for callers but isn't drawn.
+    const lx = `${u.lx * k}px`, ly = `${lerp(u.ly, 18, t)}px`, so = `${lerp(u.shadow, 0.5, t)}`;
+    for (const sh of [this.el.shadowL, this.el.shadowR]) {
+      if (!sh) continue;
+      sh.style.setProperty('--lx', lx);
+      sh.style.setProperty('--ly', ly);
+      sh.style.setProperty('--shadow-o', so);
+    }
   }
 
   /** Cover angle and every light that depends on it. */
@@ -164,7 +217,7 @@ export class NotebookEngine {
     backShade.style.opacity = String(a >= 90 ? 0.32 * s : 0);
     cast.style.opacity = String(0.34 * s);
     cast.style.transform = `scaleX(${clamp(c + 0.35 * s)})`;
-    book.style.setProperty('--left-shadow', String(Math.max(0, -c)));
+    this.el.shadowL?.style.setProperty('--left-shadow', String(Math.max(0, -c)));
     pages.style.opacity = p > 0.0005 || this.state !== 'closed' ? '1' : '0';
   }
 
@@ -182,6 +235,7 @@ export class NotebookEngine {
   async open(): Promise<void> {
     if (this.state !== 'closed') return;
     this.measure();
+    this.peekTo = 0; this.peekV = 0;
     this.setState('opening');
     if (this.el.pages) { this.el.pages.style.opacity = '1'; this.el.pages.style.clipPath = 'inset(0 0 0 50%)'; }
     if (this.reduced) {

@@ -13,14 +13,21 @@
   color: var(--ink);
 }
 
-/* The cursor is a lamp: a soft light on the paper under it. */
+/* The cursor is a lamp: a soft light on the paper under it. A fixed-size light
+ * moved by transform (MonographPointer): the GPU moves it, nothing repaints. */
 .lamp {
   position: fixed;
-  inset: 0;
+  left: 0;
+  top: 0;
   z-index: 2;
+  width: 48vmax;
+  height: 48vmax;
+  margin: -24vmax 0 0 -24vmax;
   pointer-events: none;
-  background: radial-gradient(circle at var(--mx, 50%) var(--my, 40%), rgba(255, 252, 243, 0.75), rgba(255, 252, 243, 0) 38%);
+  background: radial-gradient(circle closest-side, rgba(255, 252, 243, 0.75), rgba(255, 252, 243, 0));
   mix-blend-mode: soft-light;
+  transform: translate3d(50vw, 40vh, 0);
+  will-change: transform;
   transition: opacity 600ms var(--ease-page);
 }
 
@@ -41,7 +48,34 @@
   column-gap: var(--grid-gutter);
   align-items: end;
   padding-bottom: 14px;
-  border-bottom: 1px solid var(--ink-muted);
+  border-bottom: 1px solid transparent; /* drawn by .rule, which can ring */
+}
+
+/* The top bar's hairline as a line: it rings where the cursor crosses it, with
+ * the cover line's spring, and draws itself in at the start of a visit. */
+.rule {
+  position: fixed;
+  left: var(--m);
+  top: 48.5px;
+  z-index: 2;
+  width: calc(100vw - 2 * var(--m));
+  height: 30px;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.rule path {
+  fill: none;
+  stroke: var(--ink-muted);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.clock { font-variant-numeric: tabular-nums; }
+.clock b { font-weight: inherit; animation: breathe 2s steps(1) infinite; }
+
+@keyframes breathe {
+  50% { opacity: 0.25; }
 }
 
 .top,
@@ -80,24 +114,24 @@
   font-variation-settings: 'opsz' 144, 'SOFT' 0, 'WONK' 1;
   clip-path: inset(-0.1em -0.2em -0.3em -0.2em);
   transition: transform 1000ms var(--ease-page), opacity 700ms var(--ease-page);
+  contain: layout style; /* a weight change re-lays out this line only */
 }
 
 .l1 { left: calc(var(--m) - 0.05em); top: calc(64px + 2.2vh); }
 .l2 { right: calc(var(--m) - 0.02em); bottom: calc(18px + 2.2vh); font-style: italic; }
 
-/* Letters rise out of their line on a homepage visit. */
+/* Letters rise out of their line on a homepage visit. They wait 140% below it:
+ * the line's clip reaches 0.3em under it (for the g), so at 110% their tops
+ * showed. Each letter keeps its own layer, so a weight change re-rasterises
+ * one letter, not the page. */
 .ch {
   display: inline-block;
-  animation: rise 1100ms cubic-bezier(0.16, 1, 0.3, 1) both;
-  animation-delay: calc(120ms + var(--i) * 55ms + var(--line) * 140ms);
+  will-change: transform;
+  transition: transform 1000ms var(--transition-ease-out-expo);
+  transition-delay: calc(200ms + var(--i) * 45ms + var(--line) * 120ms);
 }
 
-@keyframes rise {
-  from { transform: translateY(110%); }
-  to { transform: translateY(0); }
-}
-
-.home[data-start='open'] .ch { animation: none; }
+.home[data-intro='wait'] .ch { transform: translate3d(0, 140%, 0); }
 
 .slot {
   position: absolute;
@@ -142,7 +176,31 @@
   border-top: 1px solid var(--ink-muted);
 }
 
-.index li { border-bottom: 1px solid var(--ink-muted); }
+.index li {
+  position: relative;
+  border-bottom: 1px solid var(--ink-muted);
+}
+
+/* Pointing at a row draws its rule in ink, the way the contents rows do. The
+ * label never changes style. */
+.index li::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 1px;
+  background: var(--ink);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  transition: transform 520ms var(--ease-settle);
+}
+
+.index li:hover::after,
+.index li:focus-within::after { transform: scaleX(1); }
+
+.index li:hover .n,
+.index li:focus-within .n { color: var(--ink); }
 
 .index a,
 .index button {
@@ -165,8 +223,8 @@
   outline-offset: 2px;
 }
 
-.n { color: var(--ink-soft); }
-.arrow { transition: transform var(--duration-hover) var(--ease-out); }
+.n { color: var(--ink-soft); transition: color var(--duration-hover) var(--ease-out); }
+.arrow { transition: transform 520ms var(--ease-settle); }
 
 .lbl {
   font-family: var(--font-display);
@@ -176,11 +234,8 @@
   font-variation-settings: 'opsz' 24;
 }
 
-.index a:hover .arrow,
-.index button:hover .arrow { transform: translateX(4px); }
-
-.index a:hover .lbl,
-.index button:hover .lbl { font-style: italic; }
+.index li:hover .arrow,
+.index li:focus-within .arrow { transform: translateX(7px); }
 
 /* About: a photo trails the cursor while the link is hovered. */
 .peek {
@@ -217,26 +272,83 @@
 
 .peek[data-on='true'] { opacity: 1; }
 
-/* The notebook layer arrives a beat after the name. */
+/* The notebook is set down a beat after the name: opaque within ~40 ms (a slow
+ * fade of navy over paper reads as a grey ghost), coming down 28px on the settle
+ * curve. The transform goes on the book's own fixed layer: on this wrapper it
+ * would re-anchor that fixed layer to the wrapper. */
 .bookFade {
   /* its own layer, above the name and labels (frame z 1, lamp z 2) */
   position: relative;
   z-index: 10;
-  animation: fadeIn 700ms var(--ease-page) 250ms both;
+  transition: opacity 140ms cubic-bezier(0.2, 0, 0, 1) 520ms;
 }
-.home[data-start='open'] .bookFade { animation: none; }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+.bookFade > * { transition: transform 1100ms var(--ease-settle) 520ms; }
+
+.home[data-intro='wait'] .bookFade { opacity: 0; }
+.home[data-intro='wait'] .bookFade > * { transform: translate3d(0, -28px, 0); }
+
+/* The rest of the page: the top bar with the rule, the index and aside last. */
+.home[data-intro='wait'] .top,
+.home[data-intro='wait'] .aside,
+.home[data-intro='wait'] .index { opacity: 0; }
+.home[data-intro='run'] .aside,
+.home[data-intro='run'] .index { transition: opacity 500ms var(--ease-page) 950ms; }
+
+/* Over the closed notebook, “Open →” is the cursor (CursorLabel): it grows out
+ * of the pointer and shrinks back into it, never flying in from elsewhere. */
+/* Position in `translate` (CursorLabel, inline), size in `transform: scale()` about
+ * origin 0 0 (the pointer), centring on the inner span. Kept on separate
+ * elements and properties on purpose: a minifier folds `scale` into `transform`
+ * when both sit on one rule, which broke the size change in production. */
+.openLabel {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 30;
+  pointer-events: none;
+  transform-origin: 0 0;
+  transform: scale(0.35);
+  opacity: 0;
+  will-change: transform;
+  transition: opacity 150ms cubic-bezier(0.4, 0, 1, 1), transform 190ms cubic-bezier(0.4, 0, 1, 1);
+}
+
+.openLabel > span {
+  display: block;
+  padding: 7px 10px 6px;
+  border-radius: 999px;
+  background: var(--ink-lift);
+  color: var(--paper);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  box-shadow: 0 6px 16px rgba(8, 14, 34, 0.35);
+  transform: translate(-50%, -50%);
+}
+
+.openLabel[data-on='true'] {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 120ms var(--ease-out), transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.openLabel[data-on='true'][data-press='true'] { transform: scale(0.9); transition-duration: 120ms, 120ms; }
+
+@media (hover: hover) and (pointer: fine) and (min-width: 901px) {
+  .home[data-book='closed'] .slot { cursor: none; }
 }
 
 /* ─── While the book is open (or opening/closing), the page steps aside ─── */
 .top,
+.rule,
 .aside,
 .index { transition: opacity 360ms var(--ease-page); }
 
 .home:not([data-book='closed']) .top,
+.home:not([data-book='closed']) .rule,
 .home:not([data-book='closed']) .aside,
 .home:not([data-book='closed']) .index { opacity: 0; pointer-events: none; }
 
@@ -245,10 +357,12 @@
 .home:not([data-book='closed']) .lamp { opacity: 0; }
 
 @media (prefers-reduced-motion: reduce) {
-  .ch { animation: none; }
+  .ch { transition: none; }
   .home:not([data-book='closed']) .l1,
   .home:not([data-book='closed']) .l2 { transform: none; }
   .lamp { display: none; }
+  .clock b { animation: none; }
+  .openLabel { transform: scale(1); }
 }
 
 /* ─── Narrow screens: the composition stacks; the page scrolls ─── */
@@ -260,7 +374,9 @@
   }
 
   .lamp,
-  .peek { display: none; }
+  .peek,
+  .rule,
+  .openLabel { display: none; }
 
   .frame {
     position: relative;
@@ -276,6 +392,7 @@
     left: auto;
     right: auto;
     height: auto;
+    border-bottom-color: var(--ink-muted);
     padding: 18px 0 12px;
     grid-template-columns: 1fr 1fr;
     row-gap: 4px;
