@@ -48,7 +48,20 @@ Their files are left in place for now.
 - `npm run build` passes.
 - On the dev server and the production preview: open, close (tab and Esc), a direct `/works` visit, case study and Back, reduced motion and phone all work, with no console errors or failed requests.
 
-**Shipped** on 2026-11-11 as commit 8f0c13c (Pages deploy 291be55a). The same checks passed on yankun.design. **Still to do:** delete the unwired desk and canvas files, and update CLAUDE.md, which still describes the desk homepage.
+**Shipped** on 2026-11-11 as commit 8f0c13c (Pages deploy 291be55a). The same checks passed on yankun.design. **Cleanup, the same day:**
+- Deleted everything the rebuild orphaned, found by tracing imports from `main.tsx`:
+  - `components/desk`, `components/canvas` and `components/transition`
+  - `DeskRoute`, `CanvasRoute` and `EditorialPlate`
+  - `data/cats.ts`
+  - the old interaction hooks (gsap, paper bend, plate preview, proof reveal, transition state, wave grid)
+- Deleted the public assets only those files used, about 30 MB of deploy weight:
+  - `plate/`, `desk/` and `transition/`
+  - the old spread
+  - two canvas textures
+  - five cat images (`cats/sleep` stays: it is the favicon)
+- Removed the `gsap` and `@gsap/react` dependencies.
+- Updated `CLAUDE.md`, `site/src/CLAUDE.md` and `.claude/rules/code-style.md`.
+- Left in place: `ProofHeader` and `WatercolorWash` were already unused before this work. A few case-study images are also unreferenced. Neither is desk-related.
 
 ---
 

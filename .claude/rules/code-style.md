@@ -18,12 +18,15 @@
 
 ## Component organization
 
-Four subdirectories in `src/components/`, one per layer plus shared:
+Three subdirectories in `src/components/`, one per layer, plus `shared/`. The homepage itself is `routes/HomeRoute.tsx`, which serves both `/` and `/works`.
 
-- **`desk/`** — Desk scene (homepage): `DeskScene.tsx`, `DeskSurface.tsx`, `NotebookCover.tsx`, `ResumePaper.tsx`, `AboutObject.tsx`
-- **`canvas/`** — Spatial pinboard (works): `Canvas.tsx`, `ProjectCluster.tsx`, `ClusterArtifact.tsx`, `CanvasEnvironment.tsx`
-- **`project/`** — Project detail (vertical scroll): `ProjectHeader.tsx`, `ProjectBody.tsx`, `MetricDisplay.tsx`, `PullQuote.tsx`, `Credits.tsx`
-- **`shared/`** — Reusable across all layers: `EditorialPlate.tsx`, `Marginalia.tsx`, `StickyNote.tsx`, `Grain.tsx`, `Transition.tsx`
+- **`notebook/`**: the Field Notebook (homepage object and works page).
+  - `Notebook.tsx`: the 3D book.
+  - `SettleCover.tsx`: the front board.
+  - `NotebookContents.tsx`: the works spread.
+  - `MobileContents.tsx`: the works list on phones.
+- **`project/`**: project detail (vertical scroll, plate and reading layouts).
+- **`shared/`**: reusable across layers: `Grain.tsx`, `FigCaption.tsx`, ink filters, the wash tuner.
 
 ## CSS
 
@@ -34,8 +37,13 @@ Four subdirectories in `src/components/`, one per layer plus shared:
 ## TypeScript
 
 - Strict mode enabled
-- Interaction hooks in `src/interactions/`: `useDraggable`, `usePanCanvas`, `useDeskToCanvas`, `useCanvasToProject`, `useImageOverlay`, `useReducedMotion`
-- Each hook returns state and handlers that components consume
+- Interaction code lives in `src/interactions/`:
+  - `notebookEngine.ts`: a plain class that drives the book.
+  - `useNotebook`: the thin hook around the engine.
+  - `useMonographPointer`, `useTrailingPeek`, `useContentsSelection`, `useFollowLabel`, `useInputModality`, `useMediaQuery`, `useReducedMotion`.
+  - `motion.ts`: easing and tween.
+- Each hook returns state and handlers that components consume.
+- Per-frame, imperative animation belongs in a plain class or inside effects, not in hook bodies. The project's React hooks lint rules reject refs read or written during render.
 
 ## Animation
 
@@ -46,7 +54,7 @@ Four subdirectories in `src/components/`, one per layer plus shared:
 ## Images
 
 - Screenshots: WebP with PNG fallback
-- Always use the editorial plate pattern: 1px ink rule border, mono caption below (`fig. 01 · description`)
+- Always use the editorial plate pattern: 1px ink rule border, mono caption below (`fig. 01 · description` in case studies; the works page drops "fig." and uses `01 · Title`)
 - Lazy-load below the fold
 - Hand-drawn marks: inline SVG, stroke 1.2–1.6px, ink blue, round line caps
 - Process artifact rotation via CSS `transform: rotate(±2deg)` — never bake rotation into images
@@ -63,5 +71,8 @@ Four subdirectories in `src/components/`, one per layer plus shared:
 - Hand-drawn SVGs: descriptive `aria-label` or `aria-hidden="true"` if decorative
 - Marginalia has real text for screen readers
 - Focus states: 1.5px ink rule, offset 2px
-- Keyboard navigable (arrow keys for canvas panning, Enter/Space for desk objects, Tab between clusters)
+- Keyboard navigable:
+  - Enter or Space on the notebook opens it, and focus lands on the first contents entry.
+  - Tab moves through the contents.
+  - Esc or the Close tab closes the book.
 - Typography uses `rem` units

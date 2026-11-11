@@ -4,15 +4,28 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project overview
 
-Personal portfolio for Yankun, a senior product designer. The site is built around a **desk-and-notebook** metaphor with three layers:
+Personal portfolio for Yankun, a senior product designer. The site is built around one object, the **Field Notebook**, in three layers:
 
-1. **Desk scene** (homepage) — an angled, perspective view of a workspace surface with physical objects: a notebook (→ works), a folded paper (→ resume), and a personal object (→ about). Objects are draggable. The desk *is* the navigation — no nav bar.
-2. **Canvas / works** (works) — opening the notebook reveals a 12-column editorial plate where projects sit as hand-composed plates with museum-label captions. Same plate system as the desk's 8-col grid, denser column count. Static asymmetry comes from column-span variation, aspect-ratio variation, and vertical baseline alignment within row tracks. Rotation is available as an interaction and compositional tool when it earns its place (e.g., hover enlarge, peeking artifacts). Vertically scrollable spread.
-3. **Project detail** (case study) — clicking a project cluster zooms in and opens a vertical-scroll editorial layout. Long-form, well-paced, freed from the two-page spread constraint.
+1. **Homepage** (`/`, "01 · Monograph"):
+   - The name "Yankun / *Wang*" is set at poster scale in Fraunces, and each letter's weight and softness follow the cursor.
+   - The Field Notebook, a 3D book, stands in front of the name. It tilts toward the cursor, and its shadow falls away from it, as if the cursor were a lamp.
+   - A four-line index sits beside it: Works, Résumé (PDF), About, Email.
+   - The notebook *is* the navigation: there is no nav bar.
+2. **Works** (`/works`): the same notebook, open.
+   - The left page holds the contents, one ruled row per project.
+   - The right page shows all six plates as a contact sheet until the reader points at a title, then that one plate with its subtitle.
+   - `/` and `/works` are one route, `HomeRoute`. The URL decides whether the book is open, and the book animates between the two.
+   - On phones (≤ 900px) the works page is a single-column list.
+3. **Project detail** (`/works/:slug`, the case study): a vertical-scroll editorial layout, long-form and well paced.
 
 The portfolio itself is a product demonstration.
 
-**Design evolution:** Field Notebook was selected over Liner Notes. The paginated book format was then replaced with the desk + canvas + vertical scroll model to make the experience more interactive and less like a digital magazine. See `00-brief/decisions-log.md` and `00-brief/prd-homepage-desk.md` / `00-brief/prd-notebook-canvas.md` for full rationale.
+**Design evolution:**
+- Field Notebook was selected over Liner Notes.
+- The paginated book was replaced by the desk + canvas + vertical scroll model.
+- In November 2026 the desk and canvas were replaced by the Monograph homepage and the open-notebook works page.
+
+See `00-brief/decisions-log.md` (2026-11-11 entries). The prototypes and the asset prompts are in `03-prototype-explore/homepage-awwwards/`. `prd-homepage-desk.md` and `prd-notebook-canvas.md` describe the retired desk and canvas.
 
 The Field Notebook prototype (in `03-prototype-explore/`) established the visual language. That language (colors, typography, editorial plates, grain) is locked. The display format has evolved beyond it.
 
@@ -24,8 +37,12 @@ Key constraints from the guideline:
 - Two-color palette only: ink blue (`--ink: #16265e`) on warm off-white (`--paper: #f4f1ea`)
 - Typography: Fraunces (display + body), JetBrains Mono (metadata), Caveat (marginalia placeholder)
 - No CSS frameworks, no Tailwind, no component libraries — plain CSS with design tokens is part of the craft demonstration
-- Motion is weighted and paper-like. Respect `prefers-reduced-motion`. No scroll-jacking. The canvas has shallow spatial depth (not parallax in the scroll-hijacking sense)
-- 12-column grid (1280px max, 24px gutter, 60px margin) for canvas and project detail pages. Desk uses an 8-col plate grid. The plate chrome (column rulings, plate metadata, register marks, fig captions) is shared across all surfaces — same system, different column counts.
+- Motion is weighted and paper-like. Respect `prefers-reduced-motion`: the notebook's open and close become a short cross-fade. No scroll-jacking.
+- 12-column grid (1280px max, 24px gutter, 60px margin) for the homepage and project detail pages.
+- Notebook cover ("Settle"):
+  - Paper-coloured type stamped on navy cloth: "Field Notebook", "Selected work", "2020–2026".
+  - One line, a damped spring that draws itself in.
+  - No edition number, no "Vol.", no name on the cover: the homepage already sets the name at poster scale.
 
 ## Repository structure
 
@@ -86,11 +103,13 @@ Retry the dashboard git-connect flow occasionally — the OAuth bug tends to cle
 
 Images in `site/public/` use two formats depending on usage:
 
-**WebP at q=85** for desk-scene chrome, plates, cats, transitions, and the canvas notebook spread — 90% smaller than equivalent PNGs at indistinguishable quality. These load on every page, so weight matters.
+**WebP at q=85** for the notebook (`notebook/`: cover board, open spread, ribbon) and other textures or hero objects. These load on the homepage, so weight matters.
+- The cover is 1200px wide (it is never shown wider than about 540 CSS px).
+- The full-size generated PNGs live in `03-prototype-explore/homepage-awwwards/assets/`. They are not deployed and not in git.
 
-**PNG** for `canvas/mockups/*` (project tiles on the canvas) and `images/chai/*` (CHAI case study detail screenshots) — kept lossless so text and fine UI remain crisp at zoom.
+**PNG** for `canvas/mockups/*` (the project plates on the works page) and `images/*` (case study screenshots). These are kept lossless so text and fine UI stay crisp at zoom.
 
-Original PNGs for WebP-converted images are still kept in `site/public/` alongside the WebPs for revertability. Code references the WebP. Reverting a single image is a one-line `.webp` → `.png` swap in the source — the original PNG is already there to serve.
+Where an older WebP has its original PNG beside it in `site/public/`, that PNG is kept so you can revert: swapping `.webp` for `.png` in the source is a one-line change.
 
 When adding a new image:
 - Mockup tile, case study screenshot, anything where pixel fidelity at zoom matters → PNG
@@ -98,23 +117,37 @@ When adding a new image:
 
 ## Architecture (site/src/)
 
-Per `00-brief/architecture-plan.md`:
+- `styles/`: `tokens.css` (design tokens), `reset.css`, `typography.css`, `global.css`.
+- `routes/HomeRoute.tsx`: the homepage and the works page, mounted for both `/` and `/works` (see `App.tsx`). It stays mounted across the two so the notebook can animate between them. It holds the name, the index, the About photo, and the URL-to-book sync. Esc closes the book.
+- `components/notebook/`:
+  - `Notebook.tsx`: the 3D book (pages, cover, shadows, ribbon, Close tab, click-outside-to-close).
+  - `SettleCover.tsx`: the front board.
+  - `NotebookContents.tsx`: the works spread.
+  - `MobileContents.tsx`: the works list on phones.
+- `components/project/`: project detail (vertical scroll, plate and reading layouts).
+- `components/shared/`: reusable pieces (`Grain`, `FigCaption`, ink filters, the wash tuner).
+- `interactions/`:
+  - `notebookEngine.ts`: a plain class that drives the book. It works from two numbers, camera `t` and cover `p`, and writes transforms straight to the DOM.
+  - `useNotebook.ts`: the thin hook around the engine.
+  - Pointer and selection hooks: `useMonographPointer`, `useTrailingPeek`, `useContentsSelection`, `useFollowLabel`, `useInputModality`, `useMediaQuery`.
+  - `useReducedMotion`.
+  - `motion.ts`: easing and tween.
+- `data/projects.ts`: project metadata (titles, years, subtitles, mockups, external links). `data/notebook.ts`: the notebook's geometry and asset paths.
+- CSS Modules (`*.module.css`) for component-scoped styles.
 
-- `styles/` — `tokens.css` (design tokens), `reset.css`, `typography.css`, `global.css`
-- `components/desk/` — Desk scene: `DeskScene.tsx` (3D perspective container), `NotebookCover.tsx`, `ResumePaper.tsx`, `AboutObject.tsx`, `DeskSurface.tsx`
-- `components/canvas/` — 12-col editorial plate (works): `Canvas.tsx` (grid container with intro paragraph + section captions), `ProjectCard.tsx` (column-spanned plate + museum-label caption), `MetaCard.tsx` (currently + colophon, fixed bottom-right)
-- `components/project/` — Project detail (vertical scroll): `ProjectHeader.tsx`, `ProjectBody.tsx`, `MetricDisplay.tsx`, `PullQuote.tsx`, `Credits.tsx`
-- `components/shared/` — Reusable: `EditorialPlate.tsx`, `Marginalia.tsx`, `StickyNote.tsx`, `Grain.tsx`, `Transition.tsx`
-- `interactions/` — React hooks: `useDraggable.ts`, `usePanCanvas.ts`, `useDeskToCanvas.ts`, `useCanvasToProject.ts`, `useImageOverlay.ts`, `useReducedMotion.ts`
-- `routes/` — Route components that wire together components and data
-- `data/projects.ts` — Project metadata (titles, dates, credits, cluster positions)
-- CSS Modules (`*.module.css`) for component-scoped styles
-
-Components organized by concern: `desk/` for the homepage scene, `canvas/` for the works pinboard, `project/` for case study detail, `shared/` for reusable pieces. Interactions are React hooks.
+Engine-style animation code lives in plain classes, not in hook bodies. The strict React hooks lint rules reject refs read or written during render.
 
 ## v1 scope
 
-**In:** Desk scene homepage (notebook object functional, resume + about as placeholders), canvas (12-col editorial plate) with four project plates — CHAI, Control Hub Agentic, Write-like-Webex, SAP Fieldglass — full CHAI case study (vertical scroll), stubbed case studies for the other three, two journal pages, colophon, 404 page.
+**In:**
+- Monograph homepage with the Field Notebook.
+- Works page (the open notebook) listing the six projects in `data/projects.ts`.
+- Case studies.
+- CV page.
+- About page.
+- Journal pages.
+- Colophon.
+- 404 page.
 
 Note: Smart Search was retired from the canvas in v0.7. It remains a *proof beat inside* the CHAI case study (`smartSearch` in `chaiContent.ts`); it is no longer a top-level project.
 
@@ -127,6 +160,12 @@ Note: Smart Search was retired from the canvas in v0.7. It remains a *proof beat
 - Screenshots are full-color editorial plates (1px ink border, mono caption below) — never duotoned, never full-bleed
 - Handwriting font (Caveat) is a v1 placeholder — will be replaced with real handwriting before ship
 - Marginalia is 2–6 words max, never more than 2 per screen
-- The desk-to-canvas portal transition is the signature moment — invest craft here
-- Canvas cards live on a 12-col editorial plate. Positions are hand-composed via column spans + row tracks in `data/projects.ts`, never computed by a layout algorithm. No off-grid placement at rest.
-- The canvas's static compositional asymmetry comes from column-span variation, aspect-ratio variation, and vertical baseline alignment within row tracks. Cards sit axis-aligned by default. Rotation is permitted when it earns its place — e.g., a plate tilting up on hover, an artifact peeking out — but is never the default static layout move. Scattered placement and graph paper backgrounds remain retired.
+- The notebook opening is the signature moment — invest craft here.
+- Works page:
+  - Nothing is pre-selected; a highlighted default reads as a mistake.
+  - Pointing at a row never shifts it sideways or swaps its style.
+  - No "FIG." labels.
+  - Mono labels are at least 11px.
+- Close controls attach to the thing they close (the tab on the book's fore-edge, the paper around it, Esc), never a distant button.
+- Graphic devices (lines, patterns, marks) follow one stated construction rule (geometry, physics, a grid). Random-looking gestures are out.
+- Prototypes in `03-prototype-explore/` must work when opened straight from disk (`file://`): plain `<script src>`, no ES module imports, no image masks.
