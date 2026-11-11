@@ -18,7 +18,8 @@
 /* Top nav — back link, understated. Matches the article's max-width so
    the back link sits at the same left edge as the article container
    (which is also the section rail's left edge in the grid). At ≥1920px
-   both widen to 90em together — see ChaiProject.module.css. */
+   both widen to 90em together — see ReadingLayout.module.css. Plate-layout
+   pages override this below. */
 
 .topNav {
   max-width: 80em;
@@ -44,6 +45,12 @@
   .topNav {
     max-width: 98em;
   }
+}
+
+/* Plate-layout case studies (CHAI, Agentic) run the article to rail + 120rem plate,
+   so the back link follows that width instead of the em tiers. */
+.page:has([data-layout='plates']) .topNav {
+  max-width: calc(11rem + clamp(1.5rem, 3vw, 3rem) + 120rem);
 }
 
 .back {

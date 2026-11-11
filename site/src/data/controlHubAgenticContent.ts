@@ -1,4 +1,4 @@
-import type { Figure } from './chaiContent';
+import type { Figure, PlateHead } from './chaiContent';
 import type { VideoFigure } from './ebbContent';
 
 /**
@@ -212,11 +212,32 @@ export const prototypeMap: readonly MapMove[] = [
   },
 ] as const;
 
+// Plate heads (adopted 2026-11-10). The run's own steps index its stills;
+// Explore → Turn → Bridge indexes each prototype. Status comes only from
+// the captions — Agentic is never presented as shipped.
+const RUN = ['Ask', 'Plan', 'Run', 'Result'] as const;
+const MOVES = ['Explore', 'Turn', 'Bridge'] as const;
+
+function runHead(current: number): PlateHead {
+  return { sequence: { name: 'Run step', items: RUN, current } };
+}
+
+function prototypeHead(move: number, n: string): PlateHead {
+  return {
+    sequence: { name: 'Move', items: MOVES, current: move },
+    label: `Prototype ${n}`,
+    status: 'My design',
+  };
+}
+
 export const runLoop: VideoFigure = {
   sources: [{ src: '/images/control-hub-agentic/run-full.mp4', type: 'video/mp4' }],
   poster: '/images/control-hub-agentic/run-full-poster.png',
   caption: 'Prototype 05 · my design — the full run, on Cloud Control Workflows',
   alt: 'Silent recording of the full run: the admin opens the Assistant, picks the Clone device settings workflow, chooses ATA-1 and ATA-2, reviews the four-step plan, runs it, watches each step complete, and reads the summary.',
+  width: 'plate',
+  stage: { tone: 'ink', size: [1846, 1114] },
+  head: { label: 'Prototype 05 · the full run', status: 'Never shipped' },
 };
 
 export const runSteps: readonly Figure[] = [
@@ -224,21 +245,33 @@ export const runSteps: readonly Figure[] = [
     src: '/images/control-hub-agentic/run-step-ask.png',
     caption: '01 · Ask — pick the task, name the devices',
     alt: 'The Assistant asks for the source and destination devices; the admin picks ATA-1 and is choosing ATA-2.',
+    width: 'plate',
+    stage: { sizes: [[1220, 822]] },
+    head: runHead(0),
   },
   {
     src: '/images/control-hub-agentic/run-step-plan.png',
     caption: '02 · Plan — four steps, nothing changed yet',
     alt: 'A Clone device settings preview with four steps (read, check compatibility, copy, verify), workflow details and a Run workflow button.',
+    width: 'plate',
+    stage: { sizes: [[1220, 822]] },
+    head: runHead(1),
   },
   {
     src: '/images/control-hub-agentic/run-step-run.png',
     caption: '03 · Run — each step reports as it goes',
     alt: 'The four steps running: step one complete, step two in progress, steps three and four not started, with a Stop workflow button.',
+    width: 'plate',
+    stage: { sizes: [[1220, 822]] },
+    head: runHead(2),
   },
   {
     src: '/images/control-hub-agentic/run-step-result.png',
     caption: '04 · Result — what changed, setting by setting',
     alt: 'A summary card for ATA-2: six settings applied and verified, with the fax, signaling and audio changes listed as previous and applied values.',
+    width: 'plate',
+    stage: { sizes: [[1220, 822]] },
+    head: runHead(3),
   },
 ];
 
@@ -247,21 +280,33 @@ export const figures = {
     src: '/images/control-hub-agentic/p01-run-view.png',
     caption: 'Prototype 01 · my design — the agent studio’s run view',
     alt: 'Prototype 01, the agent studio: a Calling Settings Transfer run with a control panel, a workflow pipeline, and an inspector comparing current and new settings, with Approve Transfer.',
+    width: 'plate',
+    stage: { sizes: [[2087, 1171]] },
+    head: prototypeHead(0, '01'),
   },
   p04: {
     src: '/images/control-hub-agentic/p04-skills.png',
     caption: 'Prototype 04 · my design — tasks as instructions the Assistant runs',
     alt: 'AI for Control Hub, the Assistant skills page: usage charts for skill runs, and six task cards — Inventory explorer, Dependency mapper, Configuration compare, Clone user, Clone device and Clone workspace — each tagged read-only or write, with Run.',
+    width: 'plate',
+    stage: { sizes: [[2000, 1455]] },
+    head: prototypeHead(1, '04'),
   },
   studio: {
     src: '/images/control-hub-agentic/widget-studio.png',
     caption: 'Widget studio · my review tool — 49 surfaces, one component source',
     alt: 'The widget studio’s Plan tab: one component source, reviewed across every use case and lifecycle state, showing a sample gateway-swap plan.',
+    width: 'plate',
+    stage: { sizes: [[2000, 1170]] },
+    head: { label: 'Widget studio', status: 'My review tool' },
   },
   studioGuide: {
     src: '/images/control-hub-agentic/widget-studio-guide.png',
     caption: 'The playbook · one use case, Clone & Copy, written as rules',
     alt: 'The Clone & Copy guide: a use case at a glance table, the experience promise and flow, and an experience-flow sequence from request to validation.',
+    width: 'plate',
+    stage: { sizes: [[847, 764]] },
+    head: { label: 'The playbook · Clone & Copy' },
   },
 } as const satisfies Record<string, Figure>;
 
@@ -271,12 +316,18 @@ export const videos = {
     poster: '/images/control-hub-agentic/p02-agent-studio-poster.png',
     caption: 'Prototype 02 · my design — a simpler start, and a split view to watch the agent work',
     alt: 'Silent recording of prototype 02: the agents list, a simplified agent overview, then a split view with the agent’s chat on the left and its progress on the right, ending on Approve & apply.',
+    width: 'plate',
+    stage: { tone: 'ink', size: [1858, 1118] },
+    head: prototypeHead(0, '02'),
   },
   p03: {
     sources: [{ src: '/images/control-hub-agentic/p03-plan-in-assistant.mp4', type: 'video/mp4' }],
     poster: '/images/control-hub-agentic/p03-plan-in-assistant-poster.png',
     caption: 'Prototype 03 · my design — the plan first, inside the Assistant',
     alt: 'Silent recording of prototype 03: in the Assistant, the agent prepares a six-step clone plan for a new user and asks “Do you want me to implement this plan?” before cloning, then summarizes what changed.',
+    width: 'plate',
+    stage: { tone: 'ink', size: [2400, 1470] },
+    head: prototypeHead(0, '03'),
   },
 } as const satisfies Record<string, VideoFigure>;
 
@@ -303,11 +354,17 @@ export const decisions: readonly Decision[] = [
       poster: '/images/control-hub-agentic/p02-overview-poster.png',
       caption: 'Where it started · prototype 02 · my design',
       alt: 'Silent recording of prototype 02’s AI-first overview: a greeting and three insight cards; clicking the certificate warning opens the AI assistant, which explains what will break and for whom.',
+      width: 'plate',
+      stage: { tone: 'ink', size: [1858, 1118] },
+      head: { label: 'Where it started · prototype 02', status: 'My design' },
     },
     chosen: {
       src: '/images/control-hub-agentic/overview-tasks.png',
       caption: 'Where it ended up · my design · sample data',
       alt: 'The final overview: a greeting, an Ask box, and four task groups above the usual pinned charts. Automate with Workflows is open: copy settings to a new user, set up a similar device, create a workflow for a recurring task, schedule a configuration check.',
+      width: 'plate',
+      stage: { sizes: [[1839, 1134]] },
+      head: { label: 'Where it ended up', status: 'Sample data' },
     },
   },
   {
@@ -321,12 +378,18 @@ export const decisions: readonly Decision[] = [
       src: '/images/control-hub-agentic/plan-current.png',
       caption: 'Workflow preview · current design · prototype 05',
       alt: 'The workflow preview: “I’ll copy supported settings from ATA-1 to ATA-2,” four numbered steps, the copy-from and copy-to devices, what the destination keeps, and Run workflow.',
+      width: 'plate',
+      stage: { sizes: [[921, 537]] },
+      head: { label: 'Workflow preview · prototype 05', status: 'Current design' },
     },
     weighedAgainst: {
       src: '/images/control-hub-agentic/plan-earlier.png',
       caption: 'Weighed against · the earlier agent plan · sample data',
       alt: 'An earlier plan card: replace gateway SJ-GW-01 with a new Cisco VG400, in five steps, with a line warning of a brief calling interruption.',
       variant: 'dashed',
+      // The option it lost to keeps its dashed, unstaged frame: quieter on purpose.
+      width: 'plate',
+      head: { label: 'Weighed against', status: 'Sample data' },
     },
   },
   {
@@ -340,6 +403,9 @@ export const decisions: readonly Decision[] = [
       src: '/images/control-hub-agentic/audit-log.png',
       caption: 'Audit log · prototype — AI changes beside people’s, each marked as AI activity',
       alt: 'The Control Hub audit log with AI clients (Assistant, Copilot, ChatGPT, an agent) beside admin changes, and an event opened on the right: tagged AI activity, with the AI client, the change type, the configuration and its value change.',
+      width: 'plate',
+      stage: { sizes: [[1228, 728]] },
+      head: { label: 'Audit log', status: 'Prototype' },
     },
   },
 ];

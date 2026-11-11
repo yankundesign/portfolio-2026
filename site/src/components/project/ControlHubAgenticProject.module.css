@@ -1,7 +1,7 @@
 /*
- * Control Hub Agentic — page-specific layout on top of ChaiProject.module.css
- * (article, grid, rail, beat, subBeat). Holds the plate groupings and the
- * explore · turn · bridge headings.
+ * Control Hub Agentic — page-specific layout on top of PlateLayout.module.css
+ * (the plate system: article, grid, rail, beat, block, subBeat). Holds the
+ * plate groupings, the voice fields and the explore · turn · bridge headings.
  */
 
 /* Move headings inside "How we got there": mono caps on a full rule,
@@ -42,12 +42,40 @@
   margin: clamp(1.5rem, 3vw, 2rem) 0 clamp(2rem, 4vw, 3rem);
 }
 
+/* How I worked: the rule (playbook) at 5 columns, the surfaces it governs
+   (widget studio) at 7, bottoms on one baseline (Okta: rule beside its
+   application). */
 .pair {
   display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
   gap: clamp(1rem, 2.5vw, 1.5rem);
-  align-items: start;
+  align-items: end;
   margin: clamp(1.5rem, 3vw, 2.25rem) 0 0;
+}
+
+/* Voices on ink (Jayne Design Studio: pacing). The research finding and the
+   PM's question share the ink field the bridge quote already uses, so the
+   three turns read as pauses between paper evidence. Inside, the ink
+   tokens flip to paper. */
+.voice {
+  background: var(--ink);
+  padding: clamp(1.75rem, 4.5vw, 3.75rem) clamp(1.5rem, 5vw, 4.5rem);
+  margin: clamp(1.5rem, 3vw, 2.25rem) 0;
+}
+
+.voice > * {
+  --ink: var(--paper);
+  --ink-soft: rgba(244, 241, 234, 0.78);
+  --ink-muted: rgba(244, 241, 234, 0.32);
+  --ink-faint: rgba(244, 241, 234, 0.12);
+  color: var(--paper);
+  margin: 0;
+}
+
+/* Decisions at display scale under a full ink rule (Maiskaia Alla). */
+.decisions {
+  --decision-title-size: clamp(1.75rem, 3.6vw, 2.5rem);
+  --decision-rule: var(--ink);
 }
 
 /* What I learned: two lines carry it; the prose explains. */

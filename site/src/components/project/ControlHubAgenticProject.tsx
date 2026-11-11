@@ -35,11 +35,12 @@ import {
   credits,
   sections,
 } from '../../data/controlHubAgenticContent';
-import layout from './ChaiProject.module.css';
+import layout from './PlateLayout.module.css';
 import styles from './ControlHubAgenticProject.module.css';
 
 /**
- * Control Hub Agentic — project detail page, v2.
+ * Control Hub Agentic — project detail page, v2, on the plate system
+ * (PlateLayout.module.css; adopted 2026-11-10, see 00-brief/decisions-log.md).
  *
  * Answer first, then the story: the task, where it ended up, how we got
  * there (explore · turn · bridge, five prototypes), the decisions up
@@ -49,7 +50,7 @@ import styles from './ControlHubAgenticProject.module.css';
  */
 export default function ControlHubAgenticProject() {
   return (
-    <article className={layout.article}>
+    <article className={layout.article} data-layout="plates">
       <ProjectHeader {...header} />
 
       <div className={layout.grid}>
@@ -80,7 +81,7 @@ export default function ControlHubAgenticProject() {
             />
             <ProseBlock paragraphs={prose.answer.slice(0, 1)} />
             <VideoPlate figure={runLoop} />
-            <div className={styles.quad}>
+            <div className={styles.quad} data-measure="plate">
               {runSteps.map((step) => (
                 <EditorialPlate key={step.src} figure={step} className={styles.gridPlate} />
               ))}
@@ -97,9 +98,9 @@ export default function ControlHubAgenticProject() {
               caption="Explore · turn · bridge — five prototypes, with Cloud Control underneath"
             />
 
-            <h3 className={styles.move}>Explore</h3>
+            <h3 className={styles.move} data-measure="plate">Explore</h3>
 
-            <section id="p01" aria-labelledby="p01-title" className={styles.prototype}>
+            <section id="p01" aria-labelledby="p01-title" className={`${styles.prototype} ${layout.block}`}>
               <h4 id="p01-title" className={layout.subBeatTitle}>
                 <span className={layout.subBeatNumeral}>01</span>
                 What could agentic AI do for admins?
@@ -108,7 +109,7 @@ export default function ControlHubAgenticProject() {
               <EditorialPlate figure={figures.p01} />
             </section>
 
-            <section id="p02" aria-labelledby="p02-title" className={styles.prototype}>
+            <section id="p02" aria-labelledby="p02-title" className={`${styles.prototype} ${layout.block}`}>
               <h4 id="p02-title" className={layout.subBeatTitle}>
                 <span className={layout.subBeatNumeral}>02</span>
                 Easy to start, easy to watch
@@ -117,12 +118,14 @@ export default function ControlHubAgenticProject() {
               <VideoPlate figure={videos.p02} />
             </section>
 
-            <section id="research" aria-label="Research" className={styles.anchor}>
-              <PullQuote {...quotes.research} quoted={false} />
+            <section id="research" aria-label="Research" className={`${styles.anchor} ${layout.block}`}>
+              <div className={styles.voice} data-measure="plate">
+                <PullQuote {...quotes.research} quoted={false} />
+              </div>
               <ProseBlock paragraphs={prose.research} />
             </section>
 
-            <section id="p03" aria-labelledby="p03-title" className={styles.prototype}>
+            <section id="p03" aria-labelledby="p03-title" className={`${styles.prototype} ${layout.block}`}>
               <h4 id="p03-title" className={layout.subBeatTitle}>
                 <span className={layout.subBeatNumeral}>03</span>
                 The agent shows its plan first, inside the Assistant
@@ -131,14 +134,16 @@ export default function ControlHubAgenticProject() {
               <VideoPlate figure={videos.p03} />
             </section>
 
-            <h3 className={styles.move}>Turn</h3>
+            <h3 className={styles.move} data-measure="plate">Turn</h3>
 
-            <section id="pause" aria-label="Should we pause?" className={styles.anchor}>
-              <PullQuote {...quotes.pause} />
+            <section id="pause" aria-label="Should we pause?" className={`${styles.anchor} ${layout.block}`}>
+              <div className={styles.voice} data-measure="plate">
+                <PullQuote {...quotes.pause} />
+              </div>
               <ProseBlock paragraphs={prose.pause} />
             </section>
 
-            <section id="call" aria-labelledby="call-title" className={styles.prototype}>
+            <section id="call" aria-labelledby="call-title" className={`${styles.prototype} ${layout.block}`}>
               <h4 id="call-title" className={layout.subBeatTitle}>
                 <span className={layout.subBeatNumeral}>My call</span>
                 Not an agent. Steps the admin can check.
@@ -150,7 +155,7 @@ export default function ControlHubAgenticProject() {
               <ProseBlock paragraphs={prose.call} />
             </section>
 
-            <section id="p04" aria-labelledby="p04-title" className={styles.prototype}>
+            <section id="p04" aria-labelledby="p04-title" className={`${styles.prototype} ${layout.block}`}>
               <h4 id="p04-title" className={layout.subBeatTitle}>
                 <span className={layout.subBeatNumeral}>04</span>
                 Instructions the AI follows, step by step
@@ -159,14 +164,14 @@ export default function ControlHubAgenticProject() {
               <EditorialPlate figure={figures.p04} />
             </section>
 
-            <h3 className={styles.move}>Bridge</h3>
+            <h3 className={styles.move} data-measure="plate">Bridge</h3>
 
-            <section id="bridge" aria-label="We have something similar" className={styles.anchor}>
+            <section id="bridge" aria-label="We have something similar" className={`${styles.anchor} ${layout.block}`}>
               <QuoteSpread {...bridgeSpread} />
               <ProseBlock paragraphs={prose.bridge} />
             </section>
 
-            <section id="p05" aria-labelledby="p05-title" className={styles.prototype}>
+            <section id="p05" aria-labelledby="p05-title" className={`${styles.prototype} ${layout.block}`}>
               <h4 id="p05-title" className={layout.subBeatTitle}>
                 <span className={layout.subBeatNumeral}>05</span>
                 Workflows can act on Control Hub
@@ -177,14 +182,23 @@ export default function ControlHubAgenticProject() {
           </section>
 
           {/* ---- Decisions ----------------------------------------- */}
-          <section id="decisions" aria-label="Design decisions" className={layout.proof}>
+          <section
+            id="decisions"
+            aria-label="Design decisions"
+            className={`${layout.proof} ${styles.decisions}`}
+          >
             <SectionHeader
               label="Decisions"
               title="If admins treat AI like an intern, design it like a good one."
             />
             <ProseBlock paragraphs={prose.decisions} />
             {decisions.map((decision) => (
-              <DecisionRow key={decision.id} {...decision} />
+              <DecisionRow
+                key={decision.id}
+                {...decision}
+                className={layout.block}
+                pairStarted
+              />
             ))}
           </section>
 
@@ -195,9 +209,10 @@ export default function ControlHubAgenticProject() {
               title="I designed the states and the rules, not the screens"
             />
             <ProseBlock paragraphs={prose.craft} />
-            <div className={styles.pair}>
-              <EditorialPlate figure={figures.studio} className={styles.gridPlate} />
+            <div className={styles.pair} data-measure="plate">
+              {/* Rule beside its application (Okta): the playbook first. */}
               <EditorialPlate figure={figures.studioGuide} className={styles.gridPlate} />
+              <EditorialPlate figure={figures.studio} className={styles.gridPlate} />
             </div>
           </section>
 
@@ -228,7 +243,6 @@ export default function ControlHubAgenticProject() {
             <Credits design={credits.design} partners={credits.partners} />
           </section>
         </div>
-        <div className={layout.gutter} aria-hidden="true" />
       </div>
 
       <footer className={layout.colophon}>

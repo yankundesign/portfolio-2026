@@ -1,13 +1,15 @@
 .decision {
   margin: clamp(2.75rem, 5vw, 4rem) 0 0;
   padding-top: clamp(1.5rem, 3vw, 2rem);
-  border-top: 1px solid var(--ink-faint);
+  /* A layout can strengthen the rule over each decision (--decision-rule). */
+  border-top: 1px solid var(--decision-rule, var(--ink-faint));
 }
 
 .title {
   font-family: var(--font-display);
   font-weight: 400;
-  font-size: clamp(1.25rem, 2.4vw, 1.5rem);
+  /* A layout can set decisions at display scale (--decision-title-size). */
+  font-size: var(--decision-title-size, clamp(1.25rem, 2.4vw, 1.5rem));
   line-height: 1.25;
   letter-spacing: -0.012em;
   color: var(--ink);
@@ -29,12 +31,22 @@
   align-items: start;
 }
 
+/* Where it started → where it ended up, side by side: the start at 5 of
+   12 columns, the landing at 7, bottoms on one baseline. */
+.lead {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: clamp(1rem, 2.5vw, 1.75rem);
+  align-items: end;
+}
+
 /* Two classes, so it outranks EditorialPlate's own plate margin. */
 .plates .plate {
   margin: 0;
 }
 
 @media (max-width: 720px) {
+  .lead,
   .pair {
     grid-template-columns: 1fr;
   }

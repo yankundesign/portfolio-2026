@@ -79,12 +79,51 @@
   max-width: 48ch;
 }
 
+/* Field layout — inside an ink outcome field (the parent sets the colours).
+   No outer rules: the field is the frame. The numerals take the decisive
+   scale, and label + scope sit beneath them as one ruled row. */
+.field {
+  margin: 0;
+}
+
+.field .inner {
+  border: 0;
+  padding: 0;
+  max-width: none;
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+}
+
+.field .figure {
+  font-size: clamp(5.5rem, 15vw, 15rem);
+}
+
+.field .arrow {
+  font-size: clamp(3rem, 8vw, 8rem);
+}
+
+.scopeRow {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem 2rem;
+  margin: 0;
+  padding-top: 1rem;
+  border-top: 1px solid var(--ink-muted);
+}
+
+.scopeRow .label,
+.scopeRow .context {
+  max-width: none;
+}
+
 @media (max-width: 560px) {
   .figures {
     flex-wrap: wrap;
     gap: 0.5rem;
   }
-  .figure {
+  .figure,
+  .field .figure {
     font-size: clamp(3.5rem, 18vw, 6rem);
   }
   .arrow {

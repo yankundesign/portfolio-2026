@@ -29,26 +29,32 @@ import {
   credits,
   sections,
 } from '../../data/chaiContent';
-import styles from './ChaiProject.module.css';
+import styles from './PlateLayout.module.css';
 
 /**
- * CHAI — Control Hub AI case study detail page.
+ * CHAI — Control Hub AI case study detail page, on the plate system
+ * (PlateLayout.module.css; adopted 2026-11-10, see 00-brief/decisions-log.md).
  *
  * Bespoke layout, not a template. Each section has its own placement
  * decisions: where plates sit, where sub-beats break, how the rhythm
  * shifts between narrative and proof.
+ *
+ * Plates: composed slides print flush; raw product screens are staged
+ * (paper mat for stills, ink for recordings). Consecutive plates sit in a
+ * plateStack; two states of one surface, or two secondary features, sit
+ * 2-up in a plateRow.
  *
  * Structure (top to bottom, matches the section rail order):
  *   1. Header           fig number, title, subtitle, metadata strip
  *   2. Opening          lead paragraph + CHAI v1.0 plate
  *   3. Context          tight paragraph + Control Hub plate
  *   4. Road Map         release plan paragraph + roadmap plate
- *   5. Evolution        1.0 → 2.0 → 3.0, three plates side by side
+ *   5. Evolution        1.0 → 2.0 → 3.0: stacked, full-page pair 2-up
  *   6. Smart Search     prose, inline metrics, plate
  *   7. Report Analysis  two sub-beats:
  *                         · 6.1 Report + data analysis → widgets — 4 plates + reports-entry note & video
  *                         · 6.2 Custom report generation         — 1 video plate
- *                         · 6.3 Other features (config, devices)  — 2 plates
+ *                         · 6.3 Other features (config, devices)  — 2-up
  *   8. Outcome          3% → 18% display + context paragraph
  *   9. Next             transition into the Control Hub Agentic case study
  *  10. Credits          role-only, no names
@@ -59,7 +65,7 @@ import styles from './ChaiProject.module.css';
  */
 export default function ChaiProject() {
   return (
-    <article className={styles.article}>
+    <article className={styles.article} data-layout="plates">
       {/* ---- Header -------------------------------------------- */}
       <ProjectHeader {...header} />
 
@@ -130,11 +136,16 @@ export default function ChaiProject() {
                 size="md"
               />
             )}
-            <div className={styles.evolutionRow}>
+            <div className={styles.plateStack}>
               <EditorialPlate figure={figures.evolution10} />
               <EditorialPlate figure={figures.evolution20} />
               <EditorialPlate figure={figures.evolutionFloating} />
-              <EditorialPlate figure={figures.evolution30} />
+              {/* Scale (NM Art & Design): the answer is the evidence, so it
+                  takes 7 of 12 columns; the empty home state takes 5. */}
+              <div className={`${styles.plateRow} ${styles.plateRowLead}`}>
+                <EditorialPlate figure={figures.evolution30} />
+                <EditorialPlate figure={figures.evolution30Answer} />
+              </div>
             </div>
           </section>
 
@@ -151,11 +162,13 @@ export default function ChaiProject() {
                 size="md"
               />
             )}
-            <RevealOnScroll className={styles.inlineMetrics} translate={16}>
+            {/* Sequence (Emerald24): the result sits under the state that
+                earned it, not above it. */}
+            <EditorialPlate figure={figures.smartSearch} />
+            <RevealOnScroll className={`${styles.inlineMetrics} ${styles.resultRow}`} translate={16}>
               <InlineMetric {...metrics.noResult} />
               <InlineMetric {...metrics.entryPoints} />
             </RevealOnScroll>
-            <EditorialPlate figure={figures.smartSearch} />
           </section>
 
           {/* ---- Beat 6 · Report Analysis (with 6.1 / 6.2) --------- */}
@@ -178,15 +191,19 @@ export default function ChaiProject() {
                   size="md"
                 />
               )}
-              <EditorialPlate figure={figures.reportProblem} />
-              <EditorialPlate figure={figures.reportAnalysis} />
-              <EditorialPlate figure={figures.dataAnalysis} />
+              <div className={styles.plateStack}>
+                <EditorialPlate figure={figures.reportProblem} />
+                <EditorialPlate figure={figures.reportAnalysis} />
+                <EditorialPlate figure={figures.dataAnalysis} />
+              </div>
               <ProseBlock
                 paragraphs={reportsEntryProse.paragraphs}
                 points={reportsEntryProse.points}
               />
-              <VideoPlate figure={videos.askAcrossReports} />
-              <EditorialPlate figure={figures.widgetSystem} />
+              <div className={styles.plateStack}>
+                <VideoPlate figure={videos.askAcrossReports} />
+                <EditorialPlate figure={figures.widgetSystem} />
+              </div>
             </div>
 
             {/* 6.2 · AI-generated reports (the reframe) */}
@@ -215,25 +232,34 @@ export default function ChaiProject() {
                 Other features we delivered
               </h3>
               <ProseBlock points={otherFeaturesPoints} />
-              <EditorialPlate figure={figures.configCompare} />
-              <EditorialPlate figure={figures.deviceAssistant} />
+              {/* Legibility (Upstream): whole screens at half width were
+                  unreadable, so these stack at the full plate measure. */}
+              <div className={styles.plateStack}>
+                <EditorialPlate figure={figures.configCompare} />
+                <EditorialPlate figure={figures.deviceAssistant} />
+              </div>
             </div>
           </section>
 
           {/* ---- Beat 8 · Outcome ---------------------------------- */}
           <section id="outcome" aria-label="Outcome" className={styles.beat}>
             <SectionHeader label="Outcome" />
-            <MetricDisplay {...metrics.adoption} />
-            {outcomeProse ? (
-              <ProseBlock paragraphs={outcomeProse} />
-            ) : (
-              <TodoSlot
-                beat="Beat 8 · Outcome"
-                hint="2–3 sentences. What 18% means in lived terms — what it replaced, who it freed up."
-                outlineRef="01-content/chai.md · Beat 8"
-                size="md"
-              />
-            )}
+            {/* One field, decisive scale, scope beside the claim (Off the
+                Record, Obys, Budgetly): the page's one ink ground that isn't
+                a recording. */}
+            <div className={styles.outcomeField}>
+              <MetricDisplay {...metrics.adoption} layout="field" />
+              {outcomeProse ? (
+                <ProseBlock paragraphs={outcomeProse} />
+              ) : (
+                <TodoSlot
+                  beat="Beat 8 · Outcome"
+                  hint="2–3 sentences. What 18% means in lived terms — what it replaced, who it freed up."
+                  outlineRef="01-content/chai.md · Beat 8"
+                  size="md"
+                />
+              )}
+            </div>
           </section>
 
           {/* ---- Beat 9 · Next ------------------------------------- */}
@@ -259,7 +285,6 @@ export default function ChaiProject() {
           </section>
 
         </div>
-        <div className={styles.gutter} aria-hidden="true" />
       </div>
 
       {/* ---- Colophon ------------------------------------------ */}

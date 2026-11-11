@@ -82,7 +82,7 @@
 
 /* Hidden entirely below 1024px — at narrower widths the rail can't fit
    its longest label without crowding the reading column. The grid in
-   ChaiProject.module.css uses the same breakpoint to collapse to a
+   ReadingLayout and PlateLayout use the same breakpoint to collapse to a
    single-column layout. */
 
 @media (max-width: 1023px) {

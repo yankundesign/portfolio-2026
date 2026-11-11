@@ -1,5 +1,9 @@
 /*
- * ChaiProject — bespoke layout for the CHAI case study.
+ * ReadingLayout — the one-column reading layout (rail · reading column ·
+ * gutter) used by the Ebb and SAP Fieldglass case studies. CHAI and
+ * Control Hub Agentic moved to PlateLayout.module.css on 2026-11-10.
+ *
+ * Originally ChaiProject.module.css, the bespoke layout for the CHAI case study.
  *
  * The page is structured as a 3-column grid below the header:
  *

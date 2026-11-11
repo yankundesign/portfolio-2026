@@ -23,6 +23,161 @@
   margin-right: calc(-1 * var(--content-inset, 0px));
 }
 
+/* The page's plate measure (set by the case-study layout). Falls back to
+   the full column where a page doesn't define one. */
+.width-plate {
+  width: 100%;
+  max-width: var(--plate-measure, 100%);
+}
+
+/* Stage — the mat a staged plate draws for raw product screens.
+ *
+ * One shape (16:10), one field, set here rather than baked into each
+ * image, so every product shot on a page sits on the same stage.
+ *   · paper — paper-soft field, for stills
+ *   · ink   — the ink field, for recordings: motion gets the dark stage
+ *
+ * Screens rest on the floor by default: 88% of the stage wide, flush to
+ * the bottom rule, mat above and to the sides. A 16:10 screen therefore
+ * fills 88% × 88% of the plate, the way a laptop rises out of the
+ * bottom edge of a product shot.
+ *
+ * Geometry is in container units, so the composition holds at every
+ * plate width — 2-up half plates included. */
+
+.stage {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  container-type: size;
+  background: var(--paper-soft);
+  border: 1px solid var(--ink-muted);
+}
+
+.stageInk {
+  background: var(--ink);
+  border-color: var(--ink);
+}
+
+.screens {
+  --fill-w: 88;
+  --fill-h: 88;
+  --gap: 2.4cqw;
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: var(--gap);
+}
+
+/* Rows of tall panels and wide boards float on the stage's centre line
+   instead of the floor: resting a 1:2 panel on the floor leaves a third of
+   the plate empty above it. Rows also widen slightly — the gaps between
+   panels already read as mat. */
+.screensCenter {
+  --fill-w: 92;
+  --gap: 2cqw;
+  align-items: center;
+}
+
+/* Each screen is as wide as its share of the row allows, and never taller
+   than the stage's fill height. --n is the screen count, --r a screen's
+   natural width ÷ height (both set inline). */
+.screen {
+  display: block;
+  flex: none;
+  /* Never wider than the capture itself: a screen is shown at its native
+     pixel size or smaller, never enlarged past it. --native is its natural
+     width in px (set inline). */
+  max-width: calc(var(--native, 99999) * 1px);
+  width: min(
+    calc((var(--fill-w) * 1cqw - (var(--n) - 1) * var(--gap)) / var(--n)),
+    calc(var(--fill-h) * 1cqh * var(--r))
+  );
+  height: auto;
+  box-shadow:
+    0 0 0 1px rgba(22, 38, 94, 0.08),
+    0 24px 56px -28px rgba(22, 38, 94, 0.5);
+}
+
+/* On ink, a paper hairline keeps a dark product's edge from dissolving
+   into the navy (Rooted Spices: a dark image gets a light edge). On white
+   screens it barely shows. */
+.stageInk .screen {
+  box-shadow:
+    0 0 0 1px rgba(244, 241, 234, 0.22),
+    0 32px 72px -32px rgba(6, 12, 34, 0.85);
+}
+
+/* Cutout — transparent artwork (a board of cards with no background). The
+   cards carry their own edges; a box shadow would outline the empty
+   rectangle around them, so they sit straight on the mat. */
+.screensCutout .screen,
+.stageInk .screensCutout .screen {
+  box-shadow: none;
+}
+
+.stagePlaceholder {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+
+/* Pause / Play — the one control a staged recording carries. It sits in
+   the mat above the screen, never over the product. */
+.stageToggle {
+  position: absolute;
+  top: max(0.75rem, 3cqh);
+  right: max(0.75rem, 2.5cqw);
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6em;
+  padding: 0.5em 0.8em;
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid var(--ink-muted);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-hover) var(--ease-out),
+    color var(--duration-hover) var(--ease-out),
+    border-color var(--duration-hover) var(--ease-out);
+}
+
+.stageToggle svg {
+  width: 0.7rem;
+  height: 0.7rem;
+  fill: currentColor;
+}
+
+.stageToggle:hover {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+
+.stageInk .stageToggle {
+  color: var(--paper);
+  border-color: rgba(244, 241, 234, 0.32);
+}
+
+.stageInk .stageToggle:hover {
+  background: var(--paper);
+  color: var(--ink);
+  border-color: var(--paper);
+}
+
+.stageToggle:focus-visible {
+  outline: 1.5px solid currentColor;
+  outline-offset: 2px;
+}
+
 /* Frame — 1px hairline ink rule (muted, so the screenshot leads), paper-soft fill behind. */
 
 .frame {
@@ -250,10 +405,18 @@
     height: 84%;
     max-width: 42%;
   }
+
+  /* Phones: a narrower mat so the screen keeps every pixel it can. */
+  .screens {
+    --fill-w: 92;
+    --fill-h: 92;
+  }
+
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .videoPlayButton {
+  .videoPlayButton,
+  .stageToggle {
     transition: none;
   }
 }

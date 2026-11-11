@@ -182,13 +182,69 @@ export interface Figure {
   alt: string;
   /** Optional internal route that makes the plate image and caption navigable. */
   linkTo?: string;
-  /** Plate width: 'column' (inside prose col), 'medium' (breaks out), 'wide' (page width). */
-  width?: 'column' | 'medium' | 'wide';
+  /**
+   * Plate width: 'column' (inside prose col), 'medium' (breaks out), 'wide'
+   * (page width), 'plate' (the page's --plate-measure: the full body column,
+   * capped so a 16:10 plate fits the viewport and never renders a screen
+   * above its real size).
+   */
+  width?: 'column' | 'medium' | 'wide' | 'plate';
   /**
    * 'dashed' — another team's screen, or an option weighed and dropped.
    * Dashed rule, quieter frame: size and line weight show authorship.
    */
   variant?: 'dashed';
+  /**
+   * Stage the raw screen(s) on a mat the plate draws, instead of showing a
+   * composition baked into one image. See PlateStage.
+   */
+  stage?: PlateStage;
+  /** Ruled plate head above the frame. See PlateHead. */
+  head?: PlateHead;
+}
+
+/**
+ * A ruled plate head: an ink rule, then one mono line above the frame.
+ *
+ *   stage     the road map's Find → Understand → Fix (CHAI shorthand for
+ *             a sequence)
+ *   sequence  any fixed-position index — Ask → Plan → Run → Result,
+ *             Explore → Turn → Bridge. Every item always shows, in the
+ *             same positions on every plate; `current` is marked
+ *   label     a version or surface name (CHAI 3.0 · Docked)
+ *   meta      a date or range, right-aligned
+ *   status    right-aligned, and only where a source states it (Shipped,
+ *             Beta, not my design). Leave it out rather than guess.
+ */
+export interface PlateHead {
+  stage?: 'find' | 'understand' | 'fix';
+  sequence?: { name: string; items: readonly string[]; current: number };
+  label?: string;
+  meta?: string;
+  status?: string;
+}
+
+/**
+ * A staged plate. Screens arrive cropped tight (no baked background, no
+ * padding); the plate owns the mat, the 16:10 shape and where the screens
+ * sit, so every product shot on the page shares one stage.
+ *
+ *   tone   'paper' (paper-soft mat) for stills · 'ink' for motion
+ *   sizes  natural pixel size of each screen, in `srcs` order (or `src`)
+ *   align  'floor' rests screens on the plate's bottom edge (default);
+ *          'center' floats them — for rows of tall panels or wide boards
+ *   surface 'screen' (default) — an opaque capture, lifted with a shadow;
+ *          'cutout' — transparent artwork (cards on no background) that
+ *          sits straight on the mat: a box shadow would outline empty space
+ *
+ * Screens are never cropped and never enlarged past their native pixel
+ * width (standing rule); a small capture sits smaller on the stage.
+ */
+export interface PlateStage {
+  tone?: 'paper' | 'ink';
+  sizes: readonly (readonly [number, number])[];
+  align?: 'floor' | 'center';
+  surface?: 'screen' | 'cutout';
 }
 
 export const figures = {
@@ -206,50 +262,75 @@ export const figures = {
     src: '/images/chai/context.webp',
     caption: 'Webex Control Hub — the console CHAI sits inside',
     alt: 'Two overlapping screenshots. Left: Control Hub Organization Settings, where admins set Webex app security, idle timeouts, and authenticated sign-in. Right: the Webex app, where everyone else works under those settings. Labels read "Admins set it here — Control Hub" and "Everyone else uses it here — Webex".',
-    width: 'column',
+    width: 'plate',
   },
 
   // Beat 3 · Road Map
   roadmap: {
-    src: '/images/chai/roadmap.png',
+    src: '/images/chai/roadmap-find-understand-fix.png',
     caption: 'Roadmap — three releases shaping the work',
-    alt: 'Internal roadmap showing CHAI 1.0, 2.0, and 3.0 releases plotted across quarters.',
-    width: 'column',
+    alt: 'Control Hub AI Assistant roadmap: Find, then Understand, then Fix, leading to Agentic AI, marked "(WIP) See project #2". Find branches to Help assistant and Smart search; Understand to Data analysis and Workspace & device; Fix to Troubleshooting and Configuration.',
+    width: 'plate',
   },
 
-  // Beat 4 · Evolution (4 images, stacked in reading order)
+  // Beat 4 · Evolution (stacked in reading order; the full-page pair sits 2-up)
   evolution10: {
-    src: '/images/chai/chai-1.0-2.0.png',
+    src: '/images/chai/chai-1.0-2.0-panels.png',
     caption: 'CHAI 1.0 -> CHAI 2.0',
-    alt: 'Side-by-side comparison of CHAI 1.0 and CHAI 2.0, showing the redesigned home, recent threads, and contextual answer states.',
-    width: 'column',
+    alt: 'CHAI 1.0 (2024.07) beside CHAI 2.0 (2025.05). CHAI 1.0: a welcome screen with three suggested questions, and a numbered answer to "How do I configure SSO?". CHAI 2.0: a personalized home with Explore prompts and recent threads, a threads drawer, and an answer to "How do I add new users using CSV?" with a linked setting and suggested prompts.',
+    head: { label: 'CHAI 1.0 → 2.0', meta: '2024.07 → 2025.05', status: '1.0 not my design' },
+    width: 'plate',
   },
   evolution20: {
-    src: '/images/chai/chai-3-0-docked.png',
+    src: '/images/chai/staged/docked-home.png',
+    srcs: [
+      '/images/chai/staged/docked-home.png',
+      '/images/chai/staged/docked-troubleshoot.png',
+      '/images/chai/staged/docked-add-menu.png',
+      '/images/chai/staged/docked-answer.png',
+    ],
     caption: 'Control Hub AI Assistant - Docked view',
     alt: 'Four docked Control Hub AI Assistant states: the home screen, the Troubleshoot issues suggestions expanded, the add menu with files, agents, workflows, and prompts, and a response listing devices to refresh with a CSV download.',
-    width: 'column',
+    head: { label: 'CHAI 3.0 · Docked' },
+    width: 'plate',
+    stage: {
+      sizes: [[962, 1960], [962, 1960], [962, 1960], [490, 983]],
+      align: 'center',
+    },
   },
   evolutionFloating: {
-    src: '/images/chai/chai-3-0-floating.png',
+    src: '/images/chai/staged/floating.png',
     caption: 'Control Hub AI Assistant - Floating Window view',
     alt: 'Control Hub in dark mode with the AI Assistant open as a floating window over the Overview page, showing its home screen and four suggestion categories.',
-    width: 'column',
+    head: { label: 'CHAI 3.0 · Floating window' },
+    width: 'plate',
+    stage: { sizes: [[3456, 2156]] },
   },
   evolution30: {
-    src: '/images/chai/chai-3.0-full.webp',
+    src: '/images/chai/staged/full-home.png',
     caption: 'Control Hub AI Assistant - Full-page view',
-    alt: 'Two full-page Control Hub AI Assistant states, stacked: the home screen with a threads sidebar, and a conversation where the assistant answers a calling question with key insights and a calling and meeting engagement chart.',
-    width: 'column',
+    alt: 'Full-page Control Hub AI Assistant home screen: a threads sidebar beside the "How can I help today?" prompt and four suggestion categories.',
+    head: { label: 'CHAI 3.0 · Full page · home' },
+    width: 'plate',
+    stage: { sizes: [[3456, 2160]] },
+  },
+  evolution30Answer: {
+    src: '/images/chai/staged/full-conversation.png',
+    caption: 'Full-page view - an answer with key insights and a chart',
+    alt: 'Full-page Control Hub AI Assistant conversation: the assistant answers a question about calling duration and frequency with key insights and a calling and meeting engagement line chart.',
+    head: { label: 'CHAI 3.0 · Full page · answer' },
+    width: 'plate',
+    stage: { sizes: [[3456, 2160]] },
   },
 
   // Beat 5 · Smart Search
   smartSearch: {
-    src: '/images/chai/smart-search.png',
+    src: '/images/chai/smart-search-flow.png',
     caption: 'Smart Search with contextual tunnel',
     alt:
-      'Smart Search results showing the contextual tunnel affordance — follow-up questions surfacing beneath the primary results.',
-    width: 'column',
+      'Control Hub Overview with Smart Search open on the query "configure background for users during meeting." The dropdown lists matching settings, such as Enable virtual backgrounds, above recommended questions. Dashed lines lead from a setting result to the Organization settings page with its Virtual Background controls, and from a recommended question to the Cisco AI Assistant panel.',
+    head: { stage: 'find' },
+    width: 'plate',
   },
 
   // Beat 6.1 · Report analysis → data analysis → widget system
@@ -257,25 +338,32 @@ export const figures = {
     src: '/images/chai/report-problem.webp',
     caption: 'Before — every report ended in a .csv download',
     alt: 'Slide titled "Reports delivered data, not understanding." Left: the Control Hub Reports list, with every row\'s status circled as "Ready to download" and a handwritten note reading "every report ends in a download." Right: the downloaded Device Power Consumption report open in Excel as a dense grid of raw numbers.',
-    width: 'column',
+    head: { stage: 'understand', label: 'Before' },
+    width: 'plate',
   },
   reportAnalysis: {
-    src: '/images/chai/report-analysis.png',
+    src: '/images/chai/staged/report-answer.png',
     caption: 'Report analysis — insight alongside the report',
-    alt: 'Control Hub Reports list with an AI entry point on each row. The Cisco AI Assistant opens on the Device Power Consumption report with suggested questions, then answers one with a bar chart of the five most power-hungry devices.',
-    width: 'column',
+    alt: 'Control Hub Reports list with an AI entry point on each row. The Cisco AI Assistant, opened on the Device Power Consumption report, answers a question with a weekly bar chart.',
+    head: { stage: 'understand', status: 'Shipped' },
+    width: 'plate',
+    stage: { sizes: [[3456, 2048]] },
   },
   dataAnalysis: {
-    src: '/images/chai/data-analysis-calling.png',
+    src: '/images/chai/staged/data-analysis.png',
     caption: 'Data analysis — querying the data lake directly',
     alt: 'Control Hub Calling Analytics for media quality, with an Ask AI entry point above the charts. The AI Assistant panel is scoped to Calling Analytics - Media Quality and offers recommended questions about packet loss, device CPU usage, and meeting duration.',
-    width: 'column',
+    head: { stage: 'understand' },
+    width: 'plate',
+    stage: { sizes: [[1876, 1076]] },
   },
   widgetSystem: {
-    src: '/images/chai/widget-system.png',
+    src: '/images/chai/staged/widget-system.webp',
     caption: 'Widget system — data, evidence, and action',
     alt: 'A reusable Control Hub AI Assistant widget system showing data visualizations, source cards, troubleshooting evidence, action plans, suggested actions, and configuration updates.',
-    width: 'column',
+    head: { label: 'Shared widgets' },
+    width: 'plate',
+    stage: { sizes: [[2000, 876]], align: 'center', surface: 'cutout' },
   },
 
   // Beat 7 · Active troubleshooting
@@ -289,16 +377,20 @@ export const figures = {
   // Beat 9 · Next
   // Beat 6.3 · Other features (2 images)
   configCompare: {
-    src: '/images/chai/config-compare.webp',
+    src: '/images/chai/staged/config-compare.png',
     caption: 'Configuration — comparing calling settings across two locations',
     alt: 'Full-page Cisco AI Assistant answering "Compare the calling settings between SJC-21 and SEA-2" with a table of key differences, including PSTN connection type, caller ID, address, time zone, and ECBN, followed by a list of settings that are the same at both locations.',
-    width: 'column',
+    head: { stage: 'fix' },
+    width: 'plate',
+    stage: { sizes: [[3456, 2160]] },
   },
   deviceAssistant: {
-    src: '/images/chai/device-assistant.webp',
+    src: '/images/chai/staged/device-assistant.png',
     caption: 'Devices — understand a device, find the issue, fix it',
     alt: 'Control Hub device page for a Cisco Room Kit EQX with an issues list and an Ask AI assistant button. The AI Assistant panel, scoped to the device, explains an ultrasound pairing issue with a description, impact, and a suggested calibration step, plus a View configuration button.',
-    width: 'column',
+    head: { stage: 'understand' },
+    width: 'plate',
+    stage: { sizes: [[3456, 2160]] },
   },
 
   nextPreview: {
@@ -315,6 +407,9 @@ export const videos = {
   askAcrossReports: {
     sources: [{ src: '/images/chai/ask-across-reports.mp4', type: 'video/mp4' }],
     poster: '/images/chai/ask-across-reports-poster.png',
+    head: { stage: 'understand' },
+    width: 'plate',
+    stage: { tone: 'ink', size: [1722, 1020] },
     caption: 'Reports page — ask across your recent reports',
     alt: 'Silent recording: on the Control Hub Reports page, an "Analyze reports with AI Assistant" banner sits above the report list. Clicking Ask AI Assistant opens the assistant scoped to Reports, with suggested questions that span reports, such as which device spent the most hours in call mode and average meeting duration by site.',
   },
@@ -323,6 +418,9 @@ export const videos = {
   customReport: {
     sources: [{ src: '/images/chai/ai-generated-report.mp4', type: 'video/mp4' }],
     poster: '/images/chai/ai-generated-report-poster.png',
+    head: { label: 'AI-generated reports', status: 'Beta' },
+    width: 'plate',
+    stage: { tone: 'ink', size: [1818, 1120] },
     caption: 'Custom report — prompt, generated report, refined in chat',
     alt: 'Silent recording: on the Control Hub Reports page, an admin asks the AI Assistant for a report of all End-of-Life assets in the next 6 months with refresh recommendations and cost. The assistant lists what the report will include and opens it beside the chat: key insights, affected assets by product family as a donut chart, an end-of-life timeline, and a map of impacted locations. The admin selects the donut chart, asks to turn it into a bar chart, and the report updates to version 2.',
   },

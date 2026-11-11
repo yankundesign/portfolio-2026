@@ -11,7 +11,7 @@ import {
   credits,
   sections,
 } from '../../data/sapFieldglassContent';
-import styles from './ChaiProject.module.css';
+import styles from './ReadingLayout.module.css';
 
 /**
  * SAP Fieldglass - concise project detail page.

@@ -1,0 +1,337 @@
+/*
+ * PlateLayout — the plate-system case-study layout, used by CHAI and
+ * Control Hub Agentic. (Ebb and SAP Fieldglass keep ReadingLayout.module.css.)
+ *
+ * Two measures on one page. Prose holds a reading measure; plates take the
+ * whole body column. The width contrast between them is what makes the
+ * product read large — not the plates' absolute size.
+ *
+ *   ┌──────────┬───────────────────────────────────────────┐
+ *   │  rail    │  prose ── --prose-measure (~75 chars)      │
+ *   │  sticky  │  ┌─────────────────────────────────────┐   │
+ *   │          │  │  plate ── --plate-measure            │   │
+ *   │          │  └─────────────────────────────────────┘   │
+ *   └──────────┴───────────────────────────────────────────┘
+ *
+ * Title, hero, prose and plates share one left edge: the body column's.
+ * Below 1024px the rail disappears and everything runs one column.
+ *
+ * --plate-measure is the body column, capped twice:
+ *   · by the viewport's height — a 16:10 plate and its caption always fit
+ *     on screen, so a plate is never taller than the window showing it
+ *   · at 120rem (1920px) — the product screens are 1728px captures, and a
+ *     screen at 88% of a 1920px plate sits at its real size. Past that the
+ *     product would render larger than an admin ever sees it.
+ *
+ *   viewport     body column   plate      bound by
+ *   1440 × 900   ~1100         ~1100      column
+ *   1728 × 1080  ~1385         ~1385      column
+ *   1920 × 1080  ~1570         ~1500      height
+ *   2560 × 1440   1920          1920      120rem cap
+ */
+
+.article {
+  --rail: 11rem;
+  --rail-gap: clamp(1.5rem, 3vw, 3rem);
+  --prose-measure: 38rem;
+  --plate-max: 120rem;
+  --plate-fit-h: calc((100svh - 9rem) * 1.6);
+  --plate-measure: min(100%, var(--plate-fit-h), var(--plate-max));
+  /* Plates inside the body that still use the 'column' width (the Next
+     preview) hold the prose measure. */
+  --reading-measure: var(--prose-measure);
+  max-width: calc(var(--rail) + var(--rail-gap) + var(--plate-max));
+  margin: 0 auto;
+  padding: 0 1px; /* avoid horizontal collapse of plate shadows */
+}
+
+/* The header (title, subtitle, hero) starts at the body column's left edge
+   and its hero takes the plate measure, like every plate below it. */
+.article > header {
+  max-width: min(
+    100% - var(--rail) - var(--rail-gap),
+    var(--plate-fit-h),
+    var(--plate-max)
+  );
+  margin-left: calc(var(--rail) + var(--rail-gap));
+  margin-right: 0;
+}
+
+.article > header > :not(figure) {
+  max-width: var(--prose-measure);
+}
+
+/* Body grid -------------------------------------------------- */
+
+.grid {
+  display: grid;
+  grid-template-columns: var(--rail) minmax(0, 1fr);
+  column-gap: var(--rail-gap);
+  align-items: start;
+}
+
+.rail {
+  grid-column: 1;
+}
+
+.body {
+  grid-column: 2;
+  min-width: 0;
+  container: body / inline-size;
+}
+
+/* Below 1024px the rail can't fit its longest label without crowding
+   the column. Hide it and run a single column — case studies read top to
+   bottom on tablet and below. */
+
+@media (max-width: 1023px) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .body {
+    grid-column: 1;
+    width: 100%;
+  }
+
+  .rail {
+    display: none;
+  }
+
+  .article > header {
+    max-width: min(100%, var(--plate-fit-h), var(--plate-max));
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 720px) {
+  .article,
+  .grid,
+  .body,
+  .beat,
+  .proof,
+  .colophon {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .article > header {
+    max-width: 100%;
+  }
+}
+
+/* Beats span the body column; what's inside them picks a measure.
+   Plates (and rows / stacks of plates) take the plate measure; everything
+   else — headers, prose, metrics, credits — holds the prose measure. */
+
+.beat,
+.proof {
+  margin: clamp(2.5rem, 5vw, 4rem) 0;
+}
+
+.proof {
+  /* Smart Search · Report Analysis · Active Troubleshooting sit a little further apart
+     than regular beats — they're the load-bearing sections. */
+  margin-top: clamp(4rem, 8vw, 7rem);
+}
+
+.beat > :not(figure, .plateStack, .plateRow, .subBeat, .outcomeField, .block, [data-measure='plate']),
+.proof > :not(figure, .plateStack, .plateRow, .subBeat, .block, [data-measure='plate']),
+.subBeat > :not(figure, .plateStack, .plateRow, .block, [data-measure='plate']),
+.block > :not(figure, .plateStack, .plateRow, .block, [data-measure='plate']) {
+  max-width: var(--prose-measure);
+}
+
+/* A block passes the two-measure rule one level down: a nested section
+   (a prototype, a decision) spans the column, and its own children pick
+   prose or plate measure the same way a beat's do. */
+.block {
+  max-width: var(--plate-measure);
+}
+
+/* Anything marked data-measure="plate" — a grid of plates, a full-width
+   section rule — takes the plate measure instead of the prose one. */
+[data-measure='plate'] {
+  max-width: var(--plate-measure);
+}
+
+/* Plate stack — consecutive plates with no prose between them read as one
+   sequence: 2rem apart (caption sits 0.75rem under its own plate, so it
+   never reads as the next plate's title), instead of a full beat apart. */
+
+.plateStack {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  margin: clamp(2.5rem, 5vw, 4rem) 0;
+}
+
+.plateStack > figure,
+.plateStack > .plateRow,
+.plateRow > figure {
+  margin: 0;
+}
+
+/* Plate row — a 2-up pair: two states of one surface, or two secondary
+   features. Each half is a full staged plate (same 16:10 stage, same mat).
+   Pairs only form once the column can give each half ~28rem; narrower,
+   they stack. */
+
+.plateRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem 1.5rem;
+  max-width: var(--plate-measure);
+  margin: clamp(2.5rem, 5vw, 4rem) 0;
+}
+
+@container body (min-width: 58rem) {
+  .plateRow {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Lead row — two states of one surface at different weights (NM Art &
+   Design: scale changes carry the sequence). The evidence takes 7 of 12
+   columns, the context 5; both stay whole 16:10 screens, bottoms on one
+   baseline, so the smaller plate steps up rather than floating. */
+@container body (min-width: 58rem) {
+  .plateRowLead {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    align-items: end;
+  }
+}
+
+/* Result row — Smart Search's metrics directly under the plate they
+   describe (Emerald24: the claim beside the state that demonstrates it). */
+.resultRow {
+  /* Each metric carries its own rule; the row only closes the gap to the
+     plate above it. */
+  margin-top: clamp(1.25rem, 2.5vw, 2rem);
+}
+
+/* Outcome field — the page's one ink ground that isn't a recording (Off the
+   Record: one field, type contrast). Inside it the ink tokens flip to
+   paper, so the metric and prose components need no dark-mode variants. */
+.outcomeField {
+  max-width: var(--plate-measure);
+  background: var(--ink);
+  padding: clamp(2rem, 5vw, 4.5rem);
+}
+
+.outcomeField > * {
+  --ink: var(--paper);
+  --ink-soft: rgba(244, 241, 234, 0.78);
+  --ink-muted: rgba(244, 241, 234, 0.32);
+  --ink-faint: rgba(244, 241, 234, 0.12);
+  color: var(--paper);
+}
+
+.outcomeField > div {
+  max-width: var(--prose-measure);
+  margin-top: clamp(2rem, 4vw, 3rem);
+}
+
+/* Inline metrics row (Smart Search 86% / 14%). */
+
+.inlineMetrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(1.5rem, 4vw, 3rem);
+  margin: clamp(2rem, 4vw, 3rem) 0;
+}
+
+/* Report Analysis sub-beats (6.1, 6.2).
+   Sub-headers are smaller than SectionHeader and sit above their prose
+   + plates. A faint horizontal rule above each marks the break without
+   competing with the parent SectionHeader's vertical rule. */
+
+.subBeat {
+  /* The rule above a sub-beat runs the plate measure, so it ends where
+     the plates below it end. */
+  max-width: var(--plate-measure);
+  margin: clamp(2.75rem, 5vw, 4rem) 0 0;
+  padding-top: clamp(1.5rem, 3vw, 2rem);
+  border-top: 1px solid var(--ink-faint);
+}
+
+.subBeat:first-of-type {
+  /* The first sub-beat sits directly under the section intro — leave the
+     rule but tighten the top margin so it doesn't double-space. */
+  margin-top: clamp(2rem, 4vw, 3rem);
+}
+
+.subBeatTitle {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(1.25rem, 2.4vw, 1.5rem);
+  line-height: 1.25;
+  letter-spacing: -0.012em;
+  color: var(--ink);
+  margin: 0 0 1rem;
+  font-variation-settings: 'opsz' 96;
+  display: flex;
+  align-items: baseline;
+  gap: 0.85em;
+  flex-wrap: wrap;
+}
+
+.subBeatNumeral {
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  font-weight: 400;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  /* Visual alignment — mono caps sit a hair below the serif baseline. */
+  position: relative;
+  top: -0.05em;
+}
+
+/* Colophon ---------------------------------------------------- */
+
+.colophon {
+  max-width: min(100% - var(--rail) - var(--rail-gap), var(--plate-fit-h), var(--plate-max));
+  margin: clamp(3rem, 6vw, 5rem) 0 clamp(4rem, 8vw, 6rem) calc(var(--rail) + var(--rail-gap));
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--ink-muted);
+}
+
+@media (max-width: 1023px) {
+  .colophon {
+    max-width: 100%;
+    margin-left: 0;
+  }
+}
+
+.colophonLine {
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 0.5rem;
+}
+
+.sep {
+  color: var(--ink-muted);
+}
+
+/* Screen-reader only (section headings are set invisibly for
+   accessibility without disrupting the visual layout). */
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

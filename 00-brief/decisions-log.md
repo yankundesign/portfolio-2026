@@ -4,6 +4,67 @@ Track design and build decisions as they're made.
 
 ---
 
+## 2026-11-10 · Plate layout adopted for CHAI and Agentic
+
+Yankun approved both prototypes. They replace the live pages at `/works/chai` and `/works/control-hub-agentic`. The prototype routes and the Original / Prototype switch are removed.
+
+**Layout files:**
+- The plate layout is now `PlateLayout.module.css`, used by CHAI and Agentic.
+- The previous layout is renamed `ReadingLayout.module.css`; Ebb and SAP Fieldglass keep using it, unchanged.
+- CHAI's and Agentic's figures carry their stage and plate-head data in `chaiContent.ts` and `controlHubAgenticContent.ts`.
+
+**Checks:**
+- Layout fingerprints (every element's position and size at 1440 and 390) show Ebb, SAP Fieldglass and Build with AI byte-identical before and after.
+- The new CHAI and Agentic pages match their approved prototypes exactly, except 1px from the removed switch.
+
+The replaced images stay in `public/` for reverting.
+
+---
+
+## 2026-11-10 · Agentic plate prototype, on its own page
+
+The Control Hub Agentic case study has a prototype at `/works/control-hub-agentic-prototype`, beside the unchanged live page. The top bar has the same Original / Prototype switch as CHAI, now driven by one table of live/prototype pairs; on the live route it shows only in dev.
+
+**Plate system carried over from CHAI, with three changes:**
+- A screen never renders wider than its native pixel width. Agentic has several small captures, which now sit smaller on the stage rather than being enlarged.
+- The crop and portrait stage options are gone: they only existed to break the no-crop rule.
+- A `.block` wrapper and `data-measure="plate"` let nested sections (the prototypes, the decisions) keep the prose-or-plate rule.
+
+**Reference-led pass** (behance and ui-brand round 2, Oct 24), three references per job, one move each:
+- Recordings stay on the ink stage, matching CHAI (Yankun's call). An earlier pass had moved them to paper because the product is dark. Instead, screens on the ink stage get a stronger paper hairline (8% → 22%) so a dark product keeps its edge (Rooted Spices, adapted). The hairline also applies to CHAI's ink recordings, where it barely shows on white screens.
+- Ask → Plan → Run → Result indexes the run's stills (Ponder AI); a ruled head shows "Never shipped" (Stameska).
+- Explore → Turn → Bridge, plus the prototype number, heads each prototype (Firefox).
+- The two turning-point quotes move onto ink as pauses (Jayne).
+- Status comes only from the captions (Rauno).
+- Decision titles are at display scale (Maiskaia). Where it started and where it ended up form one 5 : 7 row (Emerald24). The playbook comes before the widget studio (Okta).
+
+Both live pages were rechecked and are unchanged outside video timing. **Source:** `Claude outputs/agentic-reference-study-2026-11-10/`.
+
+---
+
+## 2026-11-10 · CHAI plate prototype, on its own page
+
+The CHAI case study has a prototype at `/works/chai-prototype`, separate from the live `/works/chai`, so the two can be compared directly. An Original / Prototype switch in the top bar flips between them; on the live route it shows only in dev. The live page, its figures and its layout are unchanged. The shared plate components gained opt-in features that the live page doesn't use.
+
+**Plate system (studied from yanwanguiux.com/projects/mavrik, at 1440–3440px):**
+- Prose holds a 38rem measure (~75 characters); plates take the full column.
+- The plate measure is capped by viewport height (a 16:10 plate and its caption always fit on screen) and at 120rem, so a 1728px product capture never renders above its real size.
+- Raw screens from the Work-record Figma file sit on a CSS-drawn stage: paper-soft for stills, ink for recordings.
+- Recordings drop the browser's control bar for a single Pause / Play toggle, and a visitor's pause holds.
+- Yankun supplied a new road map, CHAI 1.0 → 2.0 slide, smart search flow and widget board (transparent).
+
+**Reference-led pass** (behance and ui-brand round 2, Oct 24): three references per job, one move each.
+- Ruled plate heads (Stameska), with status only where sourced (Rauno).
+- The road map's Find → Understand → Fix in fixed positions on proof plates (Form Bureau).
+- A 5 : 7 full-page pair (NM Art & Design).
+- Metrics under the state that earned them (Emerald24).
+- Whole screens stacked instead of a 2-up (Upstream).
+- The outcome on an ink field with 15rem numerals and its scope in one ruled row (Off the Record, Obys, Budgetly).
+
+**Mockups are never cropped** (standing rule). The earlier 2-up focus crops were removed. **Source:** `Claude outputs/chai-reference-study-2026-11-10/`.
+
+---
+
 ## 2026-10-31 · Agentic case study follows the October 31 deck
 
 Four changes from Yankun, matched to the deck (outline rev. October 31; Figma slides 34, 41–42, 45):

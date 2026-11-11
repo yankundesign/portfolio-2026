@@ -23,7 +23,7 @@ export interface SectionRailProps {
  *
  * Hidden below 960px — mobile case studies are read top to bottom; the
  * rail only earns its space on desktop. The hide is enforced by the
- * parent grid (see ChaiProject.module.css) collapsing this column.
+ * parent grid (see PlateLayout / ReadingLayout .module.css) collapsing this column.
  *
  * Active-section detection uses IntersectionObserver with a band that
  * sits ~25% from the top of the viewport — a section becomes "active"

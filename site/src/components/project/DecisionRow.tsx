@@ -16,6 +16,13 @@ export interface DecisionRowProps {
   chosen: Figure;
   /** The option it was weighed against — small and dashed beside it. */
   weighedAgainst?: Figure;
+  /** Extra class for the section (a layout's nesting wrapper). */
+  className?: string;
+  /**
+   * Set where it started and where it ended up side by side, 5 : 7, the
+   * start smaller (instead of stacked). Only applies when `started` is set.
+   */
+  pairStarted?: boolean;
 }
 
 /**
@@ -24,19 +31,38 @@ export interface DecisionRowProps {
  * that won sits large. When the deck shows where the idea started, that
  * comes first; when it shows an option that lost, that sits small beside.
  */
-export default function DecisionRow({ id, title, paragraphs, started, chosen, weighedAgainst }: DecisionRowProps) {
+export default function DecisionRow({
+  id,
+  title,
+  paragraphs,
+  started,
+  chosen,
+  weighedAgainst,
+  className,
+  pairStarted = false,
+}: DecisionRowProps) {
+  const lead = Boolean(started) && pairStarted;
   return (
-    <section id={id} aria-labelledby={`${id}-title`} className={styles.decision}>
+    <section id={id} aria-labelledby={`${id}-title`} className={[styles.decision, className ?? ''].join(' ').trim()}>
       <h3 id={`${id}-title`} className={styles.title}>
         {title}
       </h3>
       <ProseBlock paragraphs={paragraphs} />
-      {started && (
-        <div className={styles.plates}>
+      {started && !lead && (
+        <div className={styles.plates} data-measure="plate">
           <VideoPlate figure={started} className={styles.plate} />
         </div>
       )}
-      <div className={[styles.plates, weighedAgainst ? styles.pair : ''].join(' ').trim()}>
+      <div
+        className={[
+          styles.plates,
+          lead ? styles.lead : weighedAgainst ? styles.pair : '',
+        ]
+          .join(' ')
+          .trim()}
+        data-measure="plate"
+      >
+        {lead && started && <VideoPlate figure={started} className={styles.plate} />}
         <EditorialPlate figure={chosen} className={styles.plate} />
         {weighedAgainst && <EditorialPlate figure={weighedAgainst} className={styles.plate} />}
       </div>

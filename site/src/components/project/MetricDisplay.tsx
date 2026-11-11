@@ -9,6 +9,12 @@ export interface MetricDisplayProps {
   suffix?: string;
   label: string;
   context?: string;
+  /**
+   * 'field' — for an ink outcome field: the figures lead, and the label and
+   * scope follow as one ruled row beneath them, so the claim and its scope
+   * read together before any prose. Default keeps the label above.
+   */
+  layout?: 'default' | 'field';
 }
 
 /**
@@ -27,15 +33,21 @@ export default function MetricDisplay({
   suffix = '%',
   label,
   context,
+  layout = 'default',
 }: MetricDisplayProps) {
   const [ref, inView] = useInView<HTMLElement>({ threshold: 0.35 });
   const beforeVal = useCountUp({ to: before, active: inView, duration: 900 });
   const afterVal = useCountUp({ to: after, active: inView, duration: 1400 });
+  const isField = layout === 'field';
 
   return (
-    <RevealOnScroll as="section" className={styles.wrap} translate={32}>
+    <RevealOnScroll
+      as="section"
+      className={[styles.wrap, isField ? styles.field : ''].join(' ').trim()}
+      translate={32}
+    >
       <div ref={ref as React.Ref<HTMLDivElement>} className={styles.inner}>
-        <p className={styles.label}>{label}</p>
+        {!isField && <p className={styles.label}>{label}</p>}
         <div className={styles.figures} aria-label={`from ${before}${suffix} to ${after}${suffix}`}>
           <span className={styles.figure}>
             <span className={styles.value}>{beforeVal}</span>
@@ -47,7 +59,14 @@ export default function MetricDisplay({
             <span className={styles.suffix}>{suffix}</span>
           </span>
         </div>
-        {context && <p className={styles.context}>{context}</p>}
+        {isField ? (
+          <p className={styles.scopeRow}>
+            <span className={styles.label}>{label}</span>
+            {context && <span className={styles.context}>{context}</span>}
+          </p>
+        ) : (
+          context && <p className={styles.context}>{context}</p>
+        )}
       </div>
     </RevealOnScroll>
   );

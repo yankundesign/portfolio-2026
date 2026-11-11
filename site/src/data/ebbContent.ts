@@ -1,4 +1,4 @@
-import type { Figure, ProseSlot } from './chaiContent';
+import type { Figure, PlateHead, ProseSlot } from './chaiContent';
 
 /**
  * Ebb case study content.
@@ -132,7 +132,16 @@ export interface VideoFigure {
   /** Still shown before playback and to reduced-motion visitors. */
   poster?: string;
   backgroundSrc?: string;
-  width?: 'column' | 'medium' | 'wide';
+  width?: 'column' | 'medium' | 'wide' | 'plate';
+  /**
+   * Stage the recording on a plate-drawn mat, the same stage as a staged
+   * still (see PlateStage in chaiContent). `size` is the recording's natural
+   * pixel size. Staged videos drop the browser's controls for a single
+   * Pause / Play toggle in the mat.
+   */
+  stage?: { tone?: 'paper' | 'ink'; size: readonly [number, number] };
+  /** Ruled plate head above the frame (see PlateHead in chaiContent). */
+  head?: PlateHead;
 }
 
 export const interceptLoop: VideoFigure = {

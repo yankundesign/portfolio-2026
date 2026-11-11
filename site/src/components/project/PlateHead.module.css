@@ -1,0 +1,58 @@
+/* Ruled plate head. An ink rule, then one mono line: the plate's index
+   (road-map stage or version) at left, date / status at right. The rule
+   gives every plate in a sequence the same top edge; the stage words keep
+   fixed positions so the road map reads across the whole page. */
+
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.35rem 1.5rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid var(--ink);
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+
+.lead,
+.trail {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 1.25rem;
+}
+
+.stages {
+  display: flex;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stages li + li::before {
+  content: '→';
+  /* inline-block keeps the current stage's underline off the arrow */
+  display: inline-block;
+  margin-right: 0.6rem;
+  color: var(--ink-soft);
+}
+
+/* This plate's stage: ink, underlined. The other two stay ink-soft so they
+   remain readable (AA) — the mark is the underline, not a fade. */
+.current {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.4em;
+}
+
+.label,
+.status {
+  color: var(--ink);
+}

@@ -13,7 +13,7 @@ import {
   sections,
   setupFlow,
 } from '../../data/ebbContent';
-import layout from './ChaiProject.module.css';
+import layout from './ReadingLayout.module.css';
 
 /**
  * Ebb — source-locked iOS case study.
