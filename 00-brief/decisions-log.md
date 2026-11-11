@@ -4,6 +4,85 @@ Track design and build decisions as they're made.
 
 ---
 
+## 2026-11-11 · Homepage rebuilt as 01 Monograph; notebook cover is “Settle”
+
+Yankun chose cover **M · Settle** and approved rebuilding the site on prototype 01, with the prototype's opened notebook as the new works page and no “FIG.” labels.
+
+**Cover**
+- The generated cloth board with live paper-coloured type: “Field Notebook”, “Selected work”, “2020–2026”.
+- One line: a damped spring, y = e^(−4.4u)·cos(2π·3.2u), plotted until it lies flat under the title. The title sits right, on the calm part. The line draws itself in.
+- There is no edition number and no “Vol.” on the cover.
+
+**Routing**
+- `/` and `/works` are one route, `HomeRoute`. The URL decides whether the notebook is closed or open, and the notebook animates between the two.
+- Direct visits to `/works`, back and forward, and returning from a case study all land on the open spread without replaying the opening.
+- Closing works three ways: the tab on the fore-edge, the paper around the book, or Esc.
+
+**Works page (the open spread)**
+- The left page holds the contents. The right page shows all six plates until the reader points at a title, then that one plate with its subtitle.
+- Nothing is pre-selected.
+- There are no “FIG.” labels.
+- Mono labels never go below 11px.
+
+**Phone (≤ 900px)**
+- The homepage stacks and scrolls.
+- `/works` is a single-column contents page, because a 3D spread is unreadable at phone width.
+
+**Build**
+- The engine is a plain class, `interactions/notebookEngine.ts`, behind a thin `useNotebook` hook.
+- Components live in `components/notebook/`.
+- Assets are in `public/notebook/`:
+  - the cover (1200px, 441 KB)
+  - the spread (294 KB)
+  - the ribbon
+- The Fraunces link now loads the full variable axes, including opsz, wght, SOFT and WONK.
+
+**Retired from the route tree**
+- `DeskRoute` and the desk components.
+- `CanvasRoute` and the canvas components.
+- `NotebookTransition`.
+
+Their files are left in place for now.
+
+**Checks**
+- `npm run build` passes.
+- On the dev server and the production preview: open, close (tab and Esc), a direct `/works` visit, case study and Back, reduced motion and phone all work, with no console errors or failed requests.
+
+**Not yet done:** committed, deployed, and the desk and canvas file cleanup.
+
+---
+
+## 2026-11-11 · Homepage direction: 01 Monograph with the Archive notebook
+
+Yankun chose **01 Monograph** from five reference-led homepage prototypes in `03-prototype-explore/homepage-awwwards/`. They also rejected **1.1**, the same layout on the live 12-column plate with the wave grid. Nothing in `site/` has changed yet.
+
+**What 01 is:**
+- "Yankun" and "Wang." are set at poster size in Fraunces (opsz 144, WONK on). Letter weight and softness swell under the cursor.
+- The notebook stands in front of the name. It tilts toward the cursor, and its shadow falls away from it.
+- A four-line index covers Works, Résumé, About and Email; About shows a photo that trails the cursor.
+- Gone: the cat roulette, the desk ephemera, the column readouts, and the "Currently…" and "Designed and built with Claude and Codex" lines.
+
+**References, one move each:**
+- Way of Living: one object at real scale.
+- Maiskaia Alla: an expressive title in a quiet frame.
+- Obys: decisive proportion.
+
+**Archive notebook:**
+- **Cover.** A generated board photo (`assets/cover-archive.webp`) with the title set live on top: a recessed panel filled with paper-coloured type. Contrast is about 12.4:1 for the title and 8.7:1 for the small lines.
+- **Ribbon.** A ribbon tail hangs from the closed book.
+- **Spread.** The new spread (`assets/open-notebook-v2.webp`) keeps the live geometry, so the cover no longer stretches about 14% as it opens. Its left half is the inside of the cover (lining paper), not a page with a binder clip.
+
+**Inside the book:**
+- **No default selection.** Nothing is selected by default; the right page shows all six plates.
+- **Pointing at a title** draws its rule in ink, swaps the year for "Read →", and shows that one plate. A pre-selected first project read as a mistake.
+- **Closing.** A Close tab sits on the book's fore-edge, clicking the paper around the book closes it, and Esc still works.
+
+**Also fixed:** the stray hairline beside the closed book. It was the board-thickness strip, which showed edge-on at rest.
+
+**Known limit:** the generated cloth tile (`cloth-navy.webp`) still has faint vertical joins when repeated. It is only used for the board's edge while the cover turns, where they don't show.
+
+---
+
 ## 2026-11-10 · Plate layout adopted for CHAI and Agentic
 
 Yankun approved both prototypes. They replace the live pages at `/works/chai` and `/works/control-hub-agentic`. The prototype routes and the Original / Prototype switch are removed.

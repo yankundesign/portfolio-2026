@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" href="data:," />
+<title>02 · Index — homepage prototype</title>
+<!-- Prototype only. Not part of the deployed site. -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..600&family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,100..900,0..100,0..1;1,9..144,100..900,0..100,0..1&family=JetBrains+Mono:wght@300..500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="shared/base.css" />
+<style>
+  /* The contents page comes out of the book. Hovering a title lifts the
+   * cover just far enough to show that project's plate inside. */
+  :root { --m: clamp(24px, 4.2vw, 60px); --g: 24px; }
+
+  .sheet {
+    position: fixed; inset: 0; padding: 0 var(--m);
+    display: grid; grid-template-columns: repeat(12, 1fr); column-gap: var(--g);
+    grid-template-rows: 88px 1fr 76px;
+  }
+  .rulings { position: absolute; inset: 0 var(--m); display: grid; grid-template-columns: repeat(12, 1fr); column-gap: var(--g); pointer-events: none; }
+  .rulings span { border-left: 1px solid var(--ink-faint); border-right: 1px solid var(--ink-faint); }
+
+  header { grid-column: 1 / -1; display: grid; grid-template-columns: subgrid; align-items: end; padding-bottom: 16px; border-bottom: 1px solid var(--ink); position: relative; }
+  .who { grid-column: 1 / 5; display: grid; gap: 6px; }
+  .who b { font-weight: 400; font-size: 26px; line-height: 1; letter-spacing: -0.01em; font-variation-settings: 'opsz' 36; }
+  .who .mono { color: var(--ink-soft); }
+  header .mid { grid-column: 6 / 8; }
+  header .right { grid-column: 9 / 13; text-align: right; display: grid; gap: 4px; }
+
+  /* The index: number, title, year. One rule per row. */
+  .list { grid-column: 1 / 8; grid-row: 2; align-self: center; position: relative; }
+  .list-head { display: flex; justify-content: space-between; padding-bottom: 12px; color: var(--ink-soft); }
+  .rows { list-style: none; }
+  .rows li { position: relative; }
+  .rows li::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: var(--ink-muted); transform-origin: 0 50%; }
+  .rows li:first-child::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 1px; background: var(--ink-muted); transform-origin: 0 50%; }
+  .row {
+    display: grid; grid-template-columns: 64px 1fr auto; align-items: baseline; width: 100%;
+    padding: clamp(10px, 1.55vh, 18px) 0 clamp(9px, 1.4vh, 16px); text-align: left; position: relative; overflow: hidden;
+  }
+  .row .n { font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; color: var(--ink-soft); transition: color var(--hover); }
+  .row .t {
+    font-size: clamp(34px, min(4.1vw, 6.6vh), 70px); font-weight: 300; line-height: 1.02; letter-spacing: -0.03em;
+    font-variation-settings: 'opsz' 144, 'SOFT' 0, 'WONK' 0;
+    transition: transform 420ms var(--ease-out), opacity 240ms var(--ease-out);
+  }
+  .row .t i { font-style: inherit; display: inline-block; }
+  .row .y { font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; color: var(--ink-soft); }
+  .row .bar { position: absolute; left: 0; top: 50%; width: 40px; height: 1px; background: var(--ink); transform: scaleX(0); transform-origin: 0 50%; transition: transform 320ms var(--ease-out); }
+  .row:hover .t, .row:focus-visible .t, .row.is-on .t { transform: translateX(14px); font-style: italic; font-variation-settings: 'opsz' 144, 'SOFT' 100, 'WONK' 1; }
+  .row:hover .bar, .row.is-on .bar { transform: scaleX(1); }
+  .row:hover .n, .row.is-on .n { color: transparent; }
+  .rows.has-on .row:not(.is-on) .t { opacity: 0.32; }
+
+  .also { grid-column: 1 / 8; grid-row: 3; display: flex; gap: 28px; align-items: center; border-top: 1px solid var(--ink); padding-top: 14px; align-self: start; }
+  .also a { display: inline-flex; gap: 6px; }
+  .also a:hover { text-decoration: underline; text-underline-offset: 3px; }
+  .also .cur { margin-left: auto; color: var(--ink-soft); }
+  .colophon { grid-column: 8 / 13; grid-row: 3; align-self: start; padding-top: 15px; text-align: right; color: var(--ink-soft); }
+
+  /* The notebook, drawn as a plate: register ticks + a fig. line */
+  .stage { grid-column: 8 / 13; grid-row: 2; position: relative; display: grid; place-items: center; }
+  .slot { height: min(60vh, 33vw); aspect-ratio: 947 / 1380; cursor: pointer; border-radius: 6px; position: relative; }
+  .ticks { position: absolute; inset: -18px; pointer-events: none; }
+  .ticks i { position: absolute; width: 12px; height: 12px; border-color: var(--ink); border-style: solid; border-width: 0; opacity: 0.7; }
+  .ticks i:nth-child(1) { left: 0; top: 0; border-left-width: 1px; border-top-width: 1px; }
+  .ticks i:nth-child(2) { right: 0; top: 0; border-right-width: 1px; border-top-width: 1px; }
+  .ticks i:nth-child(3) { left: 0; bottom: 0; border-left-width: 1px; border-bottom-width: 1px; }
+  .ticks i:nth-child(4) { right: 0; bottom: 0; border-right-width: 1px; border-bottom-width: 1px; }
+  .plate-wrap { position: relative; }
+  .fig { position: absolute; left: -18px; right: -18px; top: calc(100% + 30px); display: flex; justify-content: space-between; color: var(--ink-soft); }
+
+  /* Open/close choreography */
+  .rows li, .list-head, .also, .colophon, header, .ticks, .fig { transition: opacity 360ms var(--ease-paper), transform 600ms var(--ease-paper); }
+  html.nb-open .rows li { opacity: 0; transform: translateX(-40px); }
+  html.nb-open .rows li:nth-child(2) { transition-delay: 30ms; } html.nb-open .rows li:nth-child(3) { transition-delay: 60ms; }
+  html.nb-open .rows li:nth-child(4) { transition-delay: 90ms; } html.nb-open .rows li:nth-child(5) { transition-delay: 120ms; }
+  html.nb-open .rows li:nth-child(6) { transition-delay: 150ms; }
+  html.nb-open .list-head, html.nb-open .also, html.nb-open .colophon, html.nb-open header, html.nb-open .ticks, html.nb-open .fig { opacity: 0; }
+  html.nb-open .sheet { pointer-events: none; }
+  html.rm.nb-open .rows li { transform: none; }
+
+  /* Intro: rules draw, titles rise */
+  .intro .rows li::after, .intro .rows li:first-child::before { transform: scaleX(0); }
+  .intro .row .t i { transform: translateY(110%); }
+  .intro .book-layer, .intro .ticks, .intro .fig { opacity: 0; }
+  .book-layer { transition: opacity 800ms var(--ease-paper); }
+  .rows li::after, .rows li:first-child::before { transition: transform 900ms var(--ease-out) var(--d, 0ms); }
+  .row .t i { transition: transform 1000ms var(--ease-out) calc(var(--d, 0ms) + 200ms); }
+</style>
+</head>
+<body class="intro">
+<div class="sheet">
+  <div class="rulings" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+
+  <header>
+    <div class="who"><b>Yankun Wang</b><span class="mono">Senior product designer</span></div>
+    <span class="mid mono">Index</span>
+    <div class="right mono"><span>San Francisco</span><span>2020–2026</span></div>
+  </header>
+
+  <section class="list" aria-label="Selected work">
+    <div class="list-head mono"><span>Selected work</span><span>06</span></div>
+    <ol class="rows"></ol>
+  </section>
+
+  <div class="stage">
+    <div class="plate-wrap">
+      <button class="slot" type="button" aria-expanded="false" aria-label="Open the notebook: selected work">
+        <span class="ticks" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+      </button>
+      <div class="fig mono" aria-hidden="true"><span>Fig. 01</span><span>Field notebook, vol. V</span></div>
+    </div>
+  </div>
+
+  <nav class="also mono" aria-label="More">
+    <a href="../../site/public/Yankun-Wang-CV-2026.pdf" target="_blank" rel="noopener">Résumé <span>PDF ↗</span></a>
+    <a href="https://yankun.design/about" target="_blank" rel="noopener">About <span>→</span></a>
+    <a href="mailto:yankunux@gmail.com">Email <span>↗</span></a>
+    <span class="cur">Currently — building something fun</span>
+  </nav>
+  <div class="colophon mono">Designed and built with Claude and Codex</div>
+</div>
+<div class="grain" aria-hidden="true"></div>
+
+<script src="shared/book.js"></script>
+<script src="shared/proto.js"></script>
+<script>
+(async () => {
+const { Book, PROJECTS, reduced } = window.NB;
+const { protoChrome } = window.NBProto;
+
+protoChrome({
+  n: 2,
+  job: 'Show the range of work in one glance, then let the notebook confirm it.',
+  refs: [
+    ['Stameska', 'visible structure: 12 column rulings, a ruled header, register ticks around the object as if it were a plate.'],
+    ['Lens', 'an index with three clear type levels (mono number, display title, mono year); each row previews its story.'],
+    ['Upstream', 'the project screen is the hero: the preview appears on the notebook’s own page, not a hover card.'],
+  ],
+  look: [
+    'Hover a title: the cover lifts on a spring and that project’s plate is on the page inside.',
+    'Move between titles: the cover stays ajar and the plate swaps.',
+    'Click a title or the notebook to open it fully. Esc closes.',
+  ],
+  changed: 'CV, About and Email become one mono line under the index. Cat roulette and desk ephemera are gone.',
+});
+
+const rows = document.querySelector('.rows');
+rows.innerHTML = PROJECTS.map((p, i) => `
+  <li><button class="row" type="button" data-i="${i}">
+    <span class="bar" aria-hidden="true"></span>
+    <span class="n">${String(i + 1).padStart(2, '0')}</span>
+    <span class="t"><i>${p.title}</i></span>
+    <span class="y">${p.year}</span>
+  </button></li>`).join('');
+
+const slot = document.querySelector('.slot');
+const book = new Book({ slot });
+
+let on = -1;
+const setOn = (i) => {
+  on = i;
+  rows.classList.toggle('has-on', i >= 0);
+  rows.querySelectorAll('.row').forEach((r) => r.classList.toggle('is-on', +r.dataset.i === i));
+};
+
+rows.querySelectorAll('.row').forEach((row) => {
+  const i = +row.dataset.i;
+  const enter = () => {
+    if (book.state !== 'closed') return;
+    const changed = on !== i && on >= 0;
+    setOn(i);
+    book.setActive(i);
+    if (reduced()) return;
+    // a small flick when switching titles, like a thumb riffling the edge
+    if (changed) book.peek(0.33).then(() => on === i && book.peek(0.4)); else book.peek(0.4);
+  };
+  row.addEventListener('pointerenter', enter);
+  row.addEventListener('focus', enter);
+  row.addEventListener('click', () => { book.setActive(i, true); book.open(); });
+});
+document.querySelector('.list').addEventListener('pointerleave', () => { if (book.state === 'closed') { setOn(-1); book.peek(0).then(() => book.state === 'closed' && on < 0 && book.clearActive()); } });
+slot.addEventListener('pointerenter', () => { if (book.state === 'closed' && !reduced()) book.peek(0.04); });
+slot.addEventListener('pointerleave', () => { if (book.state === 'closed' && on < 0) book.peek(0); });
+slot.addEventListener('click', () => book.open());
+book.addEventListener('close', () => setOn(-1));
+
+await document.fonts.ready;
+book.measure(); book.render();
+requestAnimationFrame(() => {
+  rows.querySelectorAll('li').forEach((li, k) => li.style.setProperty('--d', `${k * 70}ms`));
+  document.body.classList.remove('intro');
+  setTimeout(() => rows.querySelectorAll('li').forEach((li) => li.style.removeProperty('--d')), 1800);
+});
+})();
+</script>
+</body>
+</html>

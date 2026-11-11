@@ -1,0 +1,148 @@
+{
+  "inside-cover": {
+    "png": {
+      "size": [
+        1604,
+        2170
+      ],
+      "bytes": 3592911,
+      "alpha_extrema": [
+        0,
+        255
+      ]
+    },
+    "webp": {
+      "size": [
+        1604,
+        2170
+      ],
+      "bytes": 166172,
+      "alpha_extrema": [
+        0,
+        255
+      ]
+    }
+  },
+  "open-notebook-v2": {
+    "png": {
+      "size": [
+        3234,
+        2255
+      ],
+      "bytes": 6773780,
+      "alpha_extrema": [
+        0,
+        255
+      ]
+    },
+    "webp": {
+      "size": [
+        3234,
+        2255
+      ],
+      "bytes": 293836,
+      "alpha_extrema": [
+        0,
+        255
+      ]
+    }
+  },
+  "cover-archive": {
+    "png": {
+      "size": [
+        1604,
+        2170
+      ],
+      "bytes": 6205700,
+      "alpha_extrema": [
+        0,
+        255
+      ]
+    },
+    "webp": {
+      "size": [
+        1604,
+        2170
+      ],
+      "bytes": 619646,
+      "alpha_extrema": [
+        0,
+        255
+      ]
+    }
+  },
+  "ribbon": {
+    "png": {
+      "size": [
+        40,
+        280
+      ],
+      "bytes": 20845,
+      "alpha_extrema": [
+        0,
+        255
+      ]
+    },
+    "webp": {
+      "size": [
+        40,
+        280
+      ],
+      "bytes": 2652,
+      "alpha_extrema": [
+        0,
+        255
+      ]
+    }
+  },
+  "checks": {
+    "inside_cover_matches_spread_left_board_exactly": true,
+    "production_source_changed": false
+  },
+  "cloth-navy": {
+    "png": {
+      "size": [
+        1024,
+        1024
+      ],
+      "bytes": 1998165,
+      "alpha": false
+    },
+    "webp": {
+      "size": [
+        1024,
+        1024
+      ],
+      "bytes": 276326,
+      "alpha": false
+    },
+    "repeat_check": {
+      "seamless": false,
+      "visual_result": "Faint vertical joins remain; horizontal joins substantially improved.",
+      "edge_mean_absolute_difference_lr": 10.6962890625,
+      "edge_mean_absolute_difference_tb": 4.982096354166667
+    }
+  },
+  "native_sizes": {
+    "cloth": [
+      1254,
+      1254
+    ],
+    "spread": [
+      1501,
+      1047
+    ],
+    "cover": [
+      1078,
+      1459
+    ],
+    "ribbon": [
+      758,
+      2073
+    ],
+    "cloth_revision": [
+      1254,
+      1254
+    ]
+  }
+}

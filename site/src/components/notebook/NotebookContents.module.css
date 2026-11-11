@@ -1,0 +1,262 @@
+/*
+ * NotebookContents — sized in container units of the spread (cqh = 1% of
+ * the spread's height), so the page scales with the book. Mono labels never
+ * drop below 11px.
+ */
+
+.pageLeft,
+.pageRight {
+  position: absolute;
+  top: 11.5%;
+  bottom: 7%;
+}
+
+.pageLeft { left: 7.5%; width: 37%; }
+.pageRight { left: 55.5%; width: 37.5%; }
+
+/* Entrance: the page's type settles in once the cover lands. */
+.reveal {
+  opacity: 0;
+  transform: translateY(1.2cqh);
+  transition: opacity 420ms var(--ease-out), transform 520ms var(--transition-ease-out-expo);
+}
+
+[data-shown='true'] .reveal {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal { transform: none; }
+}
+
+.kicker,
+.foot,
+.n,
+.y,
+.go,
+.thumbCaption,
+.cap {
+  font-family: var(--font-mono);
+  font-size: clamp(11px, 1.4cqh, 13px);
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.kicker { margin: 0; }
+
+.title {
+  margin: 2.4cqh 0 4.2cqh;
+  font-family: var(--font-display);
+  font-size: 7.2cqh;
+  font-weight: 300;
+  font-style: italic;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  font-variation-settings: 'opsz' 144, 'SOFT' 50, 'WONK' 1;
+}
+
+/* ─── Contents rows ─── */
+
+.toc {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--ink-muted);
+}
+
+.toc li { border-bottom: 1px solid var(--ink-muted); }
+
+.row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 4.2cqh 1fr auto;
+  align-items: baseline;
+  gap: 1.2cqh;
+  padding: 1.55cqh 0 1.45cqh;
+  color: var(--ink);
+  text-decoration: none;
+  transition: opacity var(--duration-hover) var(--ease-out);
+}
+
+.row::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 1px;
+  background: var(--ink);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  transition: transform 420ms var(--transition-ease-out-expo);
+}
+
+.t {
+  font-family: var(--font-display);
+  font-size: 2.85cqh;
+  font-weight: 350;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+
+.y,
+.go {
+  grid-column: 3;
+  grid-row: 1;
+  justify-self: end;
+  white-space: nowrap;
+  transition: opacity 200ms var(--ease-out), transform 320ms var(--transition-ease-out-expo);
+}
+
+.go {
+  color: var(--ink);
+  opacity: 0;
+  transform: translateX(-0.8cqh);
+}
+
+.row:hover::after,
+.row:focus-visible::after,
+.on::after { transform: scaleX(1); }
+
+.row:hover .n,
+.row:focus-visible .n,
+.on .n { color: var(--ink); }
+
+.row:hover .y,
+.row:focus-visible .y,
+.on .y { opacity: 0; transform: translateX(0.8cqh); }
+
+.row:hover .go,
+.row:focus-visible .go,
+.on .go { opacity: 1; transform: none; }
+
+.row:focus-visible { outline: none; }
+
+.toc:hover .row:not(:hover):not(.on) { opacity: 0.45; }
+
+.foot {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: space-between;
+}
+
+/* ─── Right page: sheet of six, or one plate ─── */
+
+.sheetWrap,
+.soloWrap {
+  position: absolute;
+  inset: 0;
+}
+
+.soloWrap { pointer-events: none; }
+
+.sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 7.5cqh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3.4cqh 2.4cqh;
+  transition: opacity 260ms var(--ease-out);
+}
+
+.sheet[data-hidden='true'] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.thumb {
+  display: grid;
+  gap: 1.1cqh;
+  min-width: 0;
+  color: var(--ink);
+  text-decoration: none;
+  transition: opacity var(--duration-hover) var(--ease-out);
+}
+
+.thumbFrame {
+  display: block;
+  aspect-ratio: 1920 / 1200;
+  overflow: hidden;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+}
+
+.thumbFrame img,
+.plateFrame img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.thumbFrame img { transition: transform 600ms var(--transition-ease-out-expo); }
+.thumb:hover .thumbFrame img { transform: scale(1.035); }
+.sheet:hover .thumb:not(:hover) { opacity: 0.45; }
+
+/* Long titles wrap to a second line rather than being cut off. */
+.thumbCaption {
+  font-size: clamp(10.5px, 1.3cqh, 12px);
+  letter-spacing: 0.06em;
+  line-height: 1.35;
+}
+
+.thumbCaption b {
+  margin-right: 0.9em;
+  font-weight: 400;
+  color: var(--ink);
+}
+
+.solo {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 22%;
+  margin: 0;
+  opacity: 0;
+  transition: opacity 260ms var(--ease-out);
+}
+
+.solo[data-shown='true'] { opacity: 1; }
+
+.plateFrame {
+  display: block;
+  aspect-ratio: 1920 / 1200;
+  overflow: hidden;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+}
+
+.plateFrame img { animation: plateIn 220ms var(--ease-out) both; }
+
+@keyframes plateIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.cap {
+  display: flex;
+  justify-content: space-between;
+  gap: 2cqh;
+  margin-top: 1.4cqh;
+}
+
+.sub {
+  display: block;
+  max-width: 92%;
+  margin-top: 3cqh;
+  font-family: var(--font-display);
+  font-size: 2.3cqh;
+  font-weight: 300;
+  font-style: italic;
+  line-height: 1.3;
+  color: var(--ink);
+}

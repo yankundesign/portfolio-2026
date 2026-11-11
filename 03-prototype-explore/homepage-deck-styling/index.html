@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Homepage · restyle in place</title>
+<!--
+  Prototype only. Not part of the deployed site.
+  Direction C from the deck-styling exploration: the live desk composition,
+  restyled with a few moves from the Nov 2026 portfolio deck
+  (Figma Slides AqYuIbxbN3x2LZCaGiQ80u). Fraunces stays the display face.
+  The earlier three-direction version is kept in explorations-abc.html.
+  Images are read from ../../site/public — nothing in site/ is modified.
+  Serve from the repo root (launch config "prototypes", port 5199):
+  http://127.0.0.1:5199/03-prototype-explore/homepage-deck-styling/
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300;1,9..144,400&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --ink: #16265e;
+    --ink-85: rgba(22, 38, 94, 0.85);
+    --rule: rgba(22, 38, 94, 0.16);
+    --rule-col: rgba(22, 38, 94, 0.05);
+    --paper: #f4f1ea;
+    --paper-lift: #fbf9f4;
+    --cobalt: #2858d7;             /* deck: the one accent, used once (the cube) */
+    --cobalt-top: #5d85ee;
+    --cobalt-side: #1a3ea3;
+
+    --display: 'Fraunces', serif;
+    --mono: 'JetBrains Mono', ui-monospace, monospace;
+    --hover: 160ms cubic-bezier(0, 0, 0.2, 1);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: var(--paper); color: var(--ink); overflow: hidden; }
+  body { font-family: var(--display); -webkit-font-smoothing: antialiased; }
+  button { font: inherit; color: inherit; }
+
+  /* ─── Stage: a 1440×900 artboard scaled to fit ─── */
+  .stage {
+    position: absolute; left: 0; top: 0;
+    width: 1440px; height: 900px;
+    transform-origin: 0 0;
+    background: var(--paper);
+    overflow: hidden;
+    --line: 690px;                 /* the object row's resting line (no drawn rule) */
+  }
+  .stage::after {
+    content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 40;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.09  0 0 0 0 0.15  0 0 0 0 0.37  0 0 0 .7 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    opacity: 0.06; mix-blend-mode: multiply;
+  }
+
+  .abs { position: absolute; }
+
+  /* ─── Type ─── */
+  .mono {
+    font-family: var(--mono); font-size: 11px; line-height: 1.3;
+    letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-85);
+    white-space: nowrap;
+  }
+  .display { font-family: var(--display); font-weight: 300; font-variation-settings: 'opsz' 144; }
+
+  /* Signature mark from the deck: the cobalt cube that sits on the baseline. */
+  .cube { display: inline-block; vertical-align: baseline; height: 0.15em; width: 0.15em; margin-left: 0.06em; overflow: visible; }
+
+  /* Object labels: a short rule over one mono word, as on the live desk */
+  .label { position: absolute; display: grid; gap: 7px; z-index: 6; }
+  .label .mono { font-size: 10.5px; }
+  .label::before { content: ''; display: block; width: 24px; height: 1px; background: var(--ink); opacity: 0.5; }
+  .label.center { justify-items: center; text-align: center; }
+
+  /* ─── Plate chrome ─── */
+  .masthead { left: 60px; top: 40px; font-size: 46px; line-height: 1; letter-spacing: -0.025em; white-space: nowrap; }
+  .plate-frame { position: absolute; left: 24px; top: 24px; right: 24px; bottom: 24px; border: 1px solid var(--rule); pointer-events: none; }
+  .reg { position: absolute; width: 16px; height: 16px; pointer-events: none; }
+  .reg::before, .reg::after { content: ''; position: absolute; background: rgba(22, 38, 94, 0.32); }
+  .reg::before { left: 0; right: 0; top: 50%; height: 1px; }
+  .reg::after { top: 0; bottom: 0; left: 50%; width: 1px; }
+  .cols { position: absolute; left: 60px; right: 60px; top: 140px; height: 610px; display: grid; grid-template-columns: repeat(12, 1fr); column-gap: 24px; pointer-events: none; }
+  .cols span { border-left: 1px solid var(--rule-col); border-right: 1px solid var(--rule-col); }
+
+  /* ─── Desk objects ─── */
+  .obj { position: absolute; display: block; background: none; border: 0; padding: 0; cursor: pointer; z-index: 3;
+    transition: transform var(--hover); }
+  .obj img { display: block; width: 100%; height: auto; user-select: none; -webkit-user-drag: none; pointer-events: none; }
+  .obj:hover { transform: translateY(-4px); }
+  .obj:focus-visible { outline: 1.5px solid var(--ink); outline-offset: 2px; }
+  .notebook { z-index: 5; }
+  .notebook img { filter: drop-shadow(0 24px 22px rgba(22, 38, 94, 0.2)) drop-shadow(0 2px 2px rgba(22, 38, 94, 0.28)); }
+  .notebook:hover { transform: translateY(-6px) rotate(-0.6deg); }
+  .cv img, .about img, .eph img { filter: drop-shadow(0 10px 12px rgba(22, 38, 94, 0.12)) drop-shadow(0 1px 1.5px rgba(22, 38, 94, 0.2)); }
+  .pen img { filter: drop-shadow(0 8px 7px rgba(22, 38, 94, 0.22)); }
+  .eph { position: absolute; z-index: 2; pointer-events: none; }
+  .eph img { display: block; width: 100%; height: auto; }
+
+  .open-cue { position: absolute; display: flex; align-items: center; gap: 6px; z-index: 6; }
+  .open-cue svg path { fill: none; stroke: var(--ink); stroke-width: 1.3; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* Cat roulette (simplified rebuild of CatRoulette.tsx) */
+  .roulette { position: absolute; border: 0; background: none; padding: 0; cursor: pointer; z-index: 4; border-radius: 50%; }
+  .roulette:focus-visible { outline: 1.5px solid var(--ink); outline-offset: 4px; }
+  .disc { position: absolute; inset: 0; border-radius: 50%; background: var(--paper-lift); border: 1.6px solid var(--ink);
+    box-shadow: 0 12px 18px rgba(22, 38, 94, 0.12), 0 1px 2px rgba(22, 38, 94, 0.18); overflow: hidden; }
+  .disc::before { content: ''; position: absolute; inset: 7px; border-radius: 50%; border: 1px solid var(--rule); }
+  .wheel { position: absolute; inset: 0; border-radius: 50%; transition: transform 1.8s cubic-bezier(0.15, 0.75, 0.2, 1); }
+  .wheel .div { position: absolute; left: 50%; top: 0; width: 1px; height: 50%; background: var(--rule); transform-origin: 50% 100%; }
+  .wheel img { position: absolute; left: 50%; top: 50%; width: 27%; height: auto; margin: -13.5% 0 0 -13.5%; }
+  .hub { position: absolute; left: 50%; top: 50%; width: 34%; height: 34%; transform: translate(-50%, -50%); border-radius: 50%;
+    background: var(--paper-lift); border: 1.4px solid var(--ink); display: grid; place-items: center; }
+  .hub span { font-family: var(--mono); font-size: 8.5px; white-space: nowrap; letter-spacing: 0.12em; background: var(--ink); color: var(--paper); padding: 3px 6px 2px; border-radius: 2px; }
+  .pointer { position: absolute; left: 50%; top: -9px; width: 0; height: 0; transform: translateX(-50%);
+    border-left: 7px solid transparent; border-right: 7px solid transparent; border-bottom: 11px solid var(--ink); z-index: 2; }
+
+  /* ─── Tool chrome (not part of the design) ─── */
+  .toolbar {
+    position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%); z-index: 100;
+    display: flex; gap: 6px; align-items: center; padding: 6px;
+    background: rgba(255, 255, 255, 0.92); border: 1px solid rgba(0, 0, 0, 0.12); border-radius: 10px;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+    font: 12px/1 -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #222;
+    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  }
+  .toolbar .title { padding: 0 8px; color: #666; }
+  .toolbar button { border: 0; background: #f1f1f1; padding: 7px 10px; border-radius: 6px; cursor: pointer; font: inherit; color: #444; white-space: nowrap; }
+  .toolbar button[aria-pressed="true"] { background: #fff; color: #111; box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.15); }
+
+  .notes {
+    position: fixed; top: 14px; right: 14px; z-index: 100; width: 340px; max-height: calc(100vh - 90px); overflow: auto;
+    background: rgba(255, 255, 255, 0.96); border: 1px solid rgba(0, 0, 0, 0.12); border-radius: 10px; padding: 16px 18px;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+    font: 13px/1.5 -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #222; display: none;
+  }
+  html.show-notes .notes { display: block; }
+  .notes h2 { font-size: 14px; margin-bottom: 2px; }
+  .notes p.sub { color: #666; margin-bottom: 10px; }
+  .notes h3 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: #888; margin: 12px 0 6px; }
+  .notes ol, .notes ul { padding-left: 18px; display: grid; gap: 6px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .obj, .wheel { transition: none; }
+    .obj:hover, .notebook:hover { transform: none; }
+  }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="cube" viewBox="0 0 22 22">
+      <path d="M0 5 L5 0 L22 0 L17 5 Z" fill="var(--cobalt-top)"/>
+      <path d="M17 5 L22 0 L22 17 L17 22 Z" fill="var(--cobalt-side)"/>
+      <rect x="0" y="5" width="17" height="17" fill="var(--cobalt)"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="stage" id="stage">
+  <div class="plate-frame"></div>
+  <span class="reg" style="left:16px; top:16px"></span>
+  <span class="reg" style="right:16px; top:16px"></span>
+  <span class="reg" style="left:16px; bottom:16px"></span>
+  <span class="reg" style="right:16px; bottom:16px"></span>
+  <div class="cols"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+
+  <h1 class="masthead abs display">Yankun Wang<svg class="cube" viewBox="0 0 22 22" aria-hidden="true"><use href="#cube"/></svg></h1>
+  <div class="mono abs" style="left:62px; top:98px">Selected work · 2024–2026</div>
+  <div class="mono abs" style="right:60px; top:56px; text-align:right">Senior product designer<br>San Francisco</div>
+
+  <div class="eph" style="left:352px; top:176px; width:330px"><img src="../../site/public/desk/architectural-sketch.webp" alt="" /></div>
+  <div class="eph" style="left:926px; top:208px; width:86px"><img src="../../site/public/desk/postage-stamp.webp" alt="" /></div>
+  <div class="eph" style="left:866px; top:370px; width:94px"><img src="../../site/public/desk/blueprint-fragment.webp" alt="" /></div>
+
+  <button class="roulette" style="left:196px; width:232px; height:232px; top:calc(var(--line) - 240px)" aria-label="Spin the cat roulette" data-roulette>
+    <span class="pointer"></span>
+    <span class="disc"><span class="wheel"></span><span class="hub"><span>SPIN IT</span></span></span>
+  </button>
+  <button class="obj notebook" style="left:572px; width:300px; top:calc(var(--line) - 448px)" aria-label="Open notebook to view projects">
+    <img src="../../site/public/plate/notebook.webp" alt="" />
+  </button>
+  <button class="obj cv" style="left:1056px; width:294px; top:252px" aria-label="View CV">
+    <img src="../../site/public/plate/cv.webp" alt="" />
+  </button>
+  <button class="obj about" style="left:1056px; width:128px; top:calc(var(--line) - 176px)" aria-label="About">
+    <img src="../../site/public/plate/about.webp" alt="" />
+  </button>
+  <div class="obj pen" style="left:1226px; width:120px; top:528px; cursor:default" aria-hidden="true">
+    <img src="../../site/public/plate/pen.webp" alt="" />
+  </div>
+
+  <div class="open-cue" style="left:446px; top:620px">
+    <span class="mono">Open it</span>
+    <svg width="64" height="24" viewBox="0 0 64 24" aria-hidden="true"><path d="M2 14 C 18 20, 40 20, 58 8"/><path d="M50 7 L58 8 L55 15"/></svg>
+  </div>
+
+  <div class="label center" style="left:312px; top:calc(var(--line) + 22px); transform:translateX(-50%)">
+    <span class="mono" data-roulette-caption>Cat roulette</span>
+  </div>
+  <div class="label center" style="left:722px; top:calc(var(--line) + 22px); transform:translateX(-50%)">
+    <span class="mono">Works</span>
+  </div>
+  <div class="label" style="left:1056px; top:calc(var(--line) + 22px)">
+    <span class="mono">About</span>
+  </div>
+  <div class="label" style="left:1056px; top:446px">
+    <span class="mono">Resume</span>
+  </div>
+
+  <div class="mono abs" style="right:60px; bottom:56px; text-align:right">Currently — building something fun<br>Designed and built with Claude and Codex</div>
+</div>
+
+<!-- ─── Prototype controls ─── -->
+<div class="toolbar" role="toolbar" aria-label="Prototype controls">
+  <span class="title">C · Restyle in place</span>
+  <button data-toggle-notes title="N">Notes</button>
+</div>
+
+<aside class="notes" aria-label="What changed">
+  <h2>C · Restyle in place</h2>
+  <p class="sub">The live composition, with a few moves from the deck. Fraunces stays.</p>
+  <h3>Changed from the live desk</h3>
+  <ol>
+    <li>The masthead grows from a corner label to a display line, about twice its live size, with the deck’s cube after it.</li>
+    <li>The cube is the only cobalt on the page.</li>
+    <li>Chrome is cut to two mono labels at the top and the two-line sign-off at the bottom right. Column numbers and the format, date, gutter and margin readouts go; faint column rulings stay.</li>
+    <li>Flat warm paper. The cool desk-light vignette goes.</li>
+  </ol>
+  <h3>Unchanged</h3>
+  <ul>
+    <li>Objects, positions, plate frame, register marks and ephemera.</li>
+    <li>One-word object labels and the “open it” cue.</li>
+    <li>The desk-to-notebook transition.</li>
+  </ul>
+  <h3>Removed since the first round</h3>
+  <ul>
+    <li>Hand-drawn baseline under the objects.</li>
+    <li>The thesis line.</li>
+    <li>Italic subtitles under the labels.</li>
+    <li>PP Editorial New.</li>
+  </ul>
+</aside>
+
+<script>
+(() => {
+  const root = document.documentElement;
+  const stage = document.getElementById('stage');
+
+  /* ── Fit the 1440×900 artboard to the window ── */
+  function fit() {
+    const w = window.innerWidth, h = window.innerHeight - 64;
+    const scale = Math.min(w / 1440, h / 900);
+    const x = (w - 1440 * scale) / 2, y = Math.max(0, (h - 900 * scale) / 2);
+    stage.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
+  }
+
+  /* ── Cat roulette ── */
+  const cats = ['lounge', 'feed', 'caught', 'belly', 'yarn', 'sleep'];
+  document.querySelectorAll('[data-roulette]').forEach((btn) => {
+    const wheel = btn.querySelector('.wheel');
+    cats.forEach((id, i) => {
+      const d = document.createElement('span');
+      d.className = 'div';
+      d.style.transform = `rotate(${i * 60 + 30}deg)`;
+      wheel.appendChild(d);
+      const img = document.createElement('img');
+      img.src = `../../site/public/cats/${id}.webp`;
+      img.alt = '';
+      img.style.transform = `rotate(${i * 60}deg) translateY(-118%)`;
+      wheel.appendChild(img);
+    });
+    let rot = 0, spinning = false;
+    const caption = document.querySelector('[data-roulette-caption]');
+    btn.addEventListener('click', () => {
+      if (spinning) return;
+      spinning = true;
+      const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      rot += (reduce ? 0 : 360 * 3) + 60 * (1 + Math.floor(Math.random() * 5));
+      wheel.style.transform = `rotate(${rot}deg)`;
+      if (!reduce) caption.textContent = 'Cat roulette — spinning';
+      const done = () => {
+        spinning = false;
+        const idx = ((6 - Math.round((rot % 360) / 60)) % 6 + 6) % 6;
+        caption.textContent = `Cat roulette — ${cats[idx]}`;
+      };
+      reduce ? done() : wheel.addEventListener('transitionend', done, { once: true });
+    });
+  });
+
+  /* ── Notes ── */
+  const notesBtn = document.querySelector('[data-toggle-notes]');
+  function sync() {
+    notesBtn.setAttribute('aria-pressed', root.classList.contains('show-notes'));
+    history.replaceState(null, '', root.classList.contains('show-notes') ? '?notes=1' : location.pathname);
+  }
+  if (new URLSearchParams(location.search).get('notes')) root.classList.add('show-notes');
+  notesBtn.addEventListener('click', () => { root.classList.toggle('show-notes'); sync(); });
+  window.addEventListener('keydown', (e) => {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.key === 'n' || e.key === 'N') { root.classList.toggle('show-notes'); sync(); }
+  });
+
+  window.addEventListener('resize', fit);
+  fit();
+  sync();
+})();
+</script>
+</body>
+</html>

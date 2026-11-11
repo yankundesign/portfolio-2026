@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" href="data:," />
+<title>03 · Drawing — homepage prototype</title>
+<!-- Prototype only. Not part of the deployed site. -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..600&family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,100..900,0..100,0..1;1,9..144,100..900,0..100,0..1&family=JetBrains+Mono:wght@300..500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="shared/base.css" />
+<style>
+  /* An architect's sheet. The notebook is drawn before it is shown;
+   * the title block carries the rest of the site. */
+  :root { --m: clamp(24px, 4.2vw, 60px); --f: 20px; }
+
+  .sheet { position: fixed; inset: var(--f); border: 1px solid var(--ink); }
+  .sheet::before { content: ''; position: absolute; inset: 5px; border: 1px solid var(--ink-muted); pointer-events: none; }
+  .paper-grid {
+    position: absolute; inset: 6px; pointer-events: none;
+    background-image:
+      linear-gradient(to right, rgba(22, 38, 94, 0.07) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(22, 38, 94, 0.07) 1px, transparent 1px),
+      linear-gradient(to right, rgba(22, 38, 94, 0.03) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(22, 38, 94, 0.03) 1px, transparent 1px);
+    background-size: 48px 48px, 48px 48px, 8px 8px, 8px 8px;
+  }
+
+  .title { position: absolute; left: calc(var(--m) - 4px); top: calc(var(--m) - 14px); z-index: 3; }
+  .title h1 {
+    font-size: min(8.4vw, 15vh); line-height: 0.86; font-weight: 200; letter-spacing: -0.04em;
+    font-variation-settings: 'opsz' 144, 'SOFT' 0, 'WONK' 0;
+  }
+  .title h1 span { display: block; }
+  .title h1 .it { padding-left: 0.62em; }
+  .title .sub { margin-top: 18px; padding-left: 6px; display: grid; gap: 5px; color: var(--ink-soft); }
+
+  .rev { position: absolute; right: var(--m); top: calc(var(--m) - 8px); text-align: right; display: grid; gap: 5px; color: var(--ink-soft); }
+
+  .slot { position: absolute; left: 41%; top: 48%; transform: translate(-50%, -50%); height: min(52vh, 28vw); aspect-ratio: 947 / 1380; cursor: pointer; z-index: 4; }
+
+  /* Dimension layer (drawn from the slot's box in JS) */
+  .dims { position: fixed; inset: 0; z-index: 5; pointer-events: none; overflow: visible; }
+  .dims * { vector-effect: non-scaling-stroke; }
+  .dims .ln { stroke: var(--ink); stroke-width: 1; fill: none; stroke-linecap: round; }
+  .dims .ext { stroke: var(--ink); stroke-width: 0.75; opacity: 0.55; fill: none; }
+  .dims .thin { stroke: var(--ink); stroke-width: 0.75; fill: none; opacity: 0.8; }
+  .dims text { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; fill: var(--ink); text-transform: uppercase; }
+  .dims .lbl { font-size: 10px; fill: var(--ink-soft); }
+  .dims .draw { stroke-dasharray: 1; stroke-dashoffset: 0; transition: stroke-dashoffset 1100ms var(--ease-paper), opacity 400ms var(--ease-paper); }
+  .dims g.measure { transition: opacity 400ms var(--ease-paper); opacity: 0.62; }
+  html.hot .dims g.measure { opacity: 1; }
+
+  /* Detail 1: the cover drawn like a door swing in plan */
+  .detail { position: absolute; left: var(--m); bottom: 6px; width: 300px; z-index: 3; }
+  .detail svg { display: block; width: 300px; height: 186px; overflow: visible; }
+  .detail .ln { stroke: var(--ink); stroke-width: 1.2; fill: none; stroke-linecap: round; }
+  .detail .arc { stroke: var(--ink); stroke-width: 0.8; fill: none; stroke-dasharray: 3 4; opacity: 0.7; }
+  .detail .cov { stroke: var(--ink); stroke-width: 2; stroke-linecap: round; }
+  .detail .sweep { fill: rgba(22, 38, 94, 0.07); }
+  .detail .hd { display: flex; justify-content: space-between; border-bottom: 1px solid var(--ink); padding-bottom: 6px; margin-bottom: 8px; }
+  .detail .deg { font-variant-numeric: tabular-nums; }
+
+  /* Title block: the rest of the site lives here */
+  .tblock {
+    position: absolute; right: var(--m); bottom: calc(var(--m) - 6px); z-index: 3; width: min(460px, 31vw);
+    display: grid; grid-template-columns: 1fr 1fr 1fr; border: 1px solid var(--ink); background: var(--paper);
+  }
+  .tblock > * { padding: 9px 11px 8px; border-right: 1px solid var(--ink-muted); border-bottom: 1px solid var(--ink-muted); min-height: 52px; display: grid; align-content: space-between; gap: 6px; }
+  .tblock > *:nth-child(3n) { border-right: 0; }
+  .tblock .k { font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); }
+  .tblock .v { font-size: 17px; font-weight: 350; line-height: 1.1; font-variation-settings: 'opsz' 24; }
+  .tblock .wide { grid-column: span 2; }
+  .tblock .full { grid-column: 1 / -1; border-right: 0; }
+  .tblock a { transition: background var(--hover); }
+  .tblock a:hover { background: var(--ink); color: var(--paper); }
+  .tblock a:hover .k { color: var(--paper); }
+  .tblock .last > * { border-bottom: 0; }
+  .tblock .notes { font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.08em; line-height: 1.6; text-transform: uppercase; color: var(--ink-soft); }
+
+  /* Cursor construction lines */
+  .cross { position: fixed; inset: 0; pointer-events: none; z-index: 6; opacity: 0; transition: opacity 200ms; }
+  .cross.on { opacity: 1; }
+  .cross .h, .cross .v { position: absolute; background-size: 6px 1px; }
+  .cross .h { left: 0; right: 0; height: 1px; background-image: linear-gradient(to right, rgba(22, 38, 94, 0.35) 50%, transparent 0); }
+  .cross .v { top: 0; bottom: 0; width: 1px; background-size: 1px 6px; background-image: linear-gradient(to bottom, rgba(22, 38, 94, 0.35) 50%, transparent 0); }
+  .cross .read { position: absolute; padding: 3px 5px 2px; background: var(--paper); color: var(--ink); font-variant-numeric: tabular-nums; }
+
+  /* Choreography */
+  .title, .rev, .tblock, .detail, .dims, .cross { transition: opacity 420ms var(--ease-paper); }
+  html.nb-open .title, html.nb-open .rev, html.nb-open .tblock { opacity: 0; pointer-events: none; }
+  html.nb-open .cross { opacity: 0 !important; }
+  html.cam .dims, html.cam .detail { opacity: 0; }
+  .intro .title h1 span { clip-path: inset(0 100% 0 0); }
+  .title h1 span { clip-path: inset(0 0 0 0); transition: clip-path 1400ms var(--ease-paper); }
+  .title h1 .it { transition-delay: 250ms; }
+  .intro .title .sub, .intro .rev, .intro .tblock, .intro .detail { opacity: 0; }
+  .intro .book-layer { clip-path: inset(0 0 100% 0); }
+  .book-layer { clip-path: inset(0 0 0 0); transition: clip-path 1400ms var(--ease-paper) 900ms; }
+</style>
+</head>
+<body class="intro">
+<main class="sheet">
+  <div class="paper-grid" aria-hidden="true"></div>
+
+  <div class="title">
+    <h1 aria-label="Yankun Wang"><span>Yankun</span><span class="it">Wang</span></h1>
+    <div class="sub mono"><span>Senior product designer</span><span>Trained in architecture</span></div>
+  </div>
+  <div class="rev mono"><span>Sheet A-01 · Desk</span><span>Rev. 11 · 2026</span></div>
+
+  <button class="slot" type="button" aria-expanded="false" aria-label="Open the notebook: selected work"></button>
+
+  <figure class="detail" aria-hidden="true">
+    <div class="hd mono"><span>Detail 1 · Cover swing, plan</span><span class="deg">θ 000°</span></div>
+    <svg viewBox="0 0 300 186">
+      <path class="sweep" d=""/>
+      <path class="arc" d="M 270 34 A 120 120 0 0 1 30 34"/>
+      <rect class="ln" x="150" y="16" width="120" height="18"/>
+      <line class="ln" x1="150" y1="16" x2="150" y2="34"/>
+      <line x1="153" y1="20" x2="267" y2="20" class="ln" style="stroke-width:.6;opacity:.6"/>
+      <line x1="153" y1="25" x2="267" y2="25" class="ln" style="stroke-width:.6;opacity:.6"/>
+      <line class="cov" x1="150" y1="34" x2="270" y2="34"/>
+      <circle cx="150" cy="34" r="3" fill="var(--paper)" stroke="var(--ink)" stroke-width="1.2"/>
+      <text x="158" y="182" font-family="JetBrains Mono" font-size="9.5" letter-spacing="1" fill="#2a3a7a">HINGE AT SPINE · R 148</text>
+    </svg>
+  </figure>
+
+  <div class="tblock">
+    <div class="wide"><span class="k">Project</span><span class="v">Field notebook, vol. V</span></div>
+    <div><span class="k">Contents</span><span class="v">6 projects</span></div>
+    <div class="wide"><span class="k">Drawn by</span><span class="v">Yankun Wang</span></div>
+    <div><span class="k">Dates</span><span class="v">2020–2026</span></div>
+    <a href="../../site/public/Yankun-Wang-CV-2026.pdf" target="_blank" rel="noopener"><span class="k">Résumé</span><span class="v">PDF ↗</span></a>
+    <a href="https://yankun.design/about" target="_blank" rel="noopener"><span class="k">About</span><span class="v">Read →</span></a>
+    <a href="mailto:yankunux@gmail.com"><span class="k">Email</span><span class="v">Write ↗</span></a>
+    <div class="full notes" style="border-bottom:0">General notes — 1. Currently building something fun. 2. Designed and built with Claude and Codex.</div>
+  </div>
+</main>
+
+<svg class="dims" aria-hidden="true"></svg>
+<div class="cross" aria-hidden="true"><div class="h"></div><div class="v"></div><span class="read mono"></span></div>
+<div class="grain" aria-hidden="true"></div>
+
+<script src="shared/book.js"></script>
+<script src="shared/proto.js"></script>
+<script>
+(async () => {
+const { Book, ease, clamp, reduced } = window.NB;
+const { protoChrome } = window.NBProto;
+
+protoChrome({
+  n: 3,
+  job: 'Show the architect’s eye: measure the object before you open it.',
+  refs: [
+    ['Okta iconography', 'the rule beside the form: dimension lines, extension lines and a scale sit next to the notebook they describe.'],
+    ['Modern (album packaging)', 'line drawing and finished object together; the photo develops inside its own construction.'],
+    ['Cohere', 'one governing idea generates the system: the drawing sheet’s title block becomes the navigation.'],
+  ],
+  look: [
+    'Watch the load: the sheet is drawn, then the notebook develops top to bottom like a print.',
+    'Move the cursor: construction lines and a live coordinate follow it.',
+    'Hover the notebook: its dimensions darken.',
+    'Click it: Detail 1 tracks the real cover angle as it swings, then the camera moves in.',
+  ],
+  changed: 'Résumé, About and Email are cells in the drawing’s title block. Cat roulette and ephemera are gone.',
+});
+
+const root = document.documentElement;
+const slot = document.querySelector('.slot');
+const book = new Book({ slot });
+const dims = document.querySelector('.dims');
+const NS = 'http://www.w3.org/2000/svg';
+
+function el(tag, attrs, parent = dims) {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  parent.appendChild(e);
+  return e;
+}
+// An architectural dimension: line, 45° ticks, extension lines, value.
+function dim(g, x1, y1, x2, y2, label, side = -1) {
+  const vertical = x1 === x2;
+  el('line', { x1, y1, x2, y2, class: 'ln draw', pathLength: 1 }, g);
+  for (const [x, y] of [[x1, y1], [x2, y2]]) el('line', { x1: x - 4, y1: y + 4, x2: x + 4, y2: y - 4, class: 'ln draw', pathLength: 1 }, g);
+  if (vertical) {
+    const t = el('text', { x: x1 + side * 10, y: (y1 + y2) / 2, 'text-anchor': 'middle', transform: `rotate(-90 ${x1 + side * 10} ${(y1 + y2) / 2})` }, g);
+    t.textContent = label;
+  } else {
+    const t = el('text', { x: (x1 + x2) / 2, y: y1 + side * 8, 'text-anchor': 'middle' }, g);
+    t.textContent = label;
+  }
+}
+
+function draw() {
+  dims.innerHTML = '';
+  const r = slot.getBoundingClientRect();
+  // the board sits slightly inside the image's transparent margin
+  const L = r.left + r.width * 0.035, R = r.right - r.width * 0.02, T = r.top + r.height * 0.012, B = r.bottom - r.height * 0.012;
+  const g = el('g', { class: 'measure' });
+  // width
+  const wy = T - 34;
+  el('line', { x1: L, y1: T - 6, x2: L, y2: wy - 6, class: 'ext draw', pathLength: 1 }, g);
+  el('line', { x1: R, y1: T - 6, x2: R, y2: wy - 6, class: 'ext draw', pathLength: 1 }, g);
+  dim(g, L, wy, R, wy, '148', -1);
+  // height
+  const hx = L - 34;
+  el('line', { x1: L - 6, y1: T, x2: hx - 6, y2: T, class: 'ext draw', pathLength: 1 }, g);
+  el('line', { x1: L - 6, y1: B, x2: hx - 6, y2: B, class: 'ext draw', pathLength: 1 }, g);
+  dim(g, hx, T, hx, B, '210', -1);
+  // side elevation
+  const th = (R - L) * (16 / 148), sx = R + 56;
+  el('rect', { x: sx, y: T, width: th, height: B - T, rx: 2, class: 'ln draw', pathLength: 1 }, g);
+  el('line', { x1: sx + th * 0.22, y1: T + 4, x2: sx + th * 0.22, y2: B - 4, class: 'thin draw', pathLength: 1 }, g);
+  el('line', { x1: sx + th * 0.78, y1: T + 4, x2: sx + th * 0.78, y2: B - 4, class: 'thin draw', pathLength: 1 }, g);
+  el('line', { x1: sx - 3, y1: T + (B - T) * 0.08, x2: sx + th + 3, y2: T + (B - T) * 0.08, class: 'thin draw', pathLength: 1 }, g);
+  el('line', { x1: sx, y1: B + 6, x2: sx, y2: B + 30, class: 'ext draw', pathLength: 1 }, g);
+  el('line', { x1: sx + th, y1: B + 6, x2: sx + th, y2: B + 30, class: 'ext draw', pathLength: 1 }, g);
+  dim(g, sx, B + 24, sx + th, B + 24, '16', 1.9);
+  // centre line through the elevation
+  el('line', { x1: (L + R) / 2, y1: T - 64, x2: (L + R) / 2, y2: B + 64, class: 'ext', 'stroke-dasharray': '10 4 2 4', style: 'opacity:.35' }, g);
+  // view labels
+  const lab = (x, y, a, b) => {
+    const t = el('text', { x, y, class: 'lbl' }, g); t.textContent = a;
+    el('line', { x1: x, y1: y + 6, x2: x + 150, y2: y + 6, class: 'ln draw', pathLength: 1 }, g);
+    const u = el('text', { x, y: y + 20, class: 'lbl', style: 'opacity:.7' }, g); u.textContent = b;
+  };
+  lab(L, B + 40, 'Elevation A — Front', 'Scale 1:2 · mm');
+  lab(sx - 8, B + 64, 'Elev. B — Side', '');
+}
+
+/* Detail 1: the cover in plan, swinging like a door */
+const deg = document.querySelector('.detail .deg');
+const cov = document.querySelector('.detail .cov');
+const sweep = document.querySelector('.detail .sweep');
+function swing(p) {
+  const a = Math.PI * p, x = 150 + 120 * Math.cos(a), y = 34 + 120 * Math.sin(a);
+  cov.setAttribute('x2', x.toFixed(2));
+  cov.setAttribute('y2', y.toFixed(2));
+  sweep.setAttribute('d', p > 0.001 ? `M 150 34 L 270 34 A 120 120 0 0 1 ${x.toFixed(2)} ${y.toFixed(2)} Z` : '');
+  deg.textContent = `θ ${String(Math.round(180 * p)).padStart(3, '0')}°`;
+}
+
+/* Open: the cover swings first while the sheet watches; then the camera moves in. */
+slot.addEventListener('click', () => book.open({
+  duration: 2100,
+  cover: (k) => ease.swing(clamp(k / 0.58)),
+  camera: (k) => 0.1 * ease.paper(clamp(k / 0.55)) + 0.9 * ease.push(clamp((k - 0.5) / 0.5)),
+}));
+book.addEventListener('progress', (e) => {
+  swing(e.detail.p);
+  root.classList.toggle('cam', e.detail.t > 0.16);
+});
+book.addEventListener('close', () => { swing(0); root.classList.remove('cam'); });
+book.addEventListener('open-start', () => cross.classList.remove('on'));
+slot.addEventListener('pointerenter', () => { root.classList.add('hot'); book.target.lift = 0.012; });
+slot.addEventListener('pointerleave', () => { root.classList.remove('hot'); book.target.lift = 0; });
+
+/* Construction lines follow the cursor, with a coordinate in mm (1px = 0.5mm at 1:2) */
+const cross = document.querySelector('.cross'), H = cross.querySelector('.h'), V = cross.querySelector('.v'), read = cross.querySelector('.read');
+addEventListener('pointermove', (e) => {
+  if (book.state !== 'closed' || reduced()) return;
+  cross.classList.add('on');
+  H.style.transform = `translateY(${e.clientY}px)`;
+  V.style.transform = `translateX(${e.clientX}px)`;
+  const s = document.querySelector('.sheet').getBoundingClientRect();
+  read.textContent = `x ${String(Math.round((e.clientX - s.left) / 2)).padStart(3, '0')} · y ${String(Math.round((e.clientY - s.top) / 2)).padStart(3, '0')}`;
+  read.style.transform = `translate(${e.clientX + 10}px, ${e.clientY + 10}px)`;
+});
+document.addEventListener('pointerleave', () => cross.classList.remove('on'));
+
+addEventListener('resize', draw);
+await document.fonts.ready;
+book.measure(); book.render(); draw(); swing(0);
+// Intro: lines draw on, then the photo develops inside them
+dims.querySelectorAll('.draw').forEach((p) => { p.style.transition = 'none'; p.style.strokeDashoffset = 1; });
+requestAnimationFrame(() => requestAnimationFrame(() => {
+  document.body.classList.remove('intro');
+  dims.querySelectorAll('.draw').forEach((p, i) => { p.style.transition = ''; p.style.transitionDelay = `${150 + (i % 14) * 45}ms`; p.style.strokeDashoffset = 0; });
+}));
+})();
+</script>
+</body>
+</html>

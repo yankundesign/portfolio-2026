@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" href="data:," />
+<title>05 · Sentence — homepage prototype</title>
+<!-- Prototype only. Not part of the deployed site. Copy is placeholder for Yankun to rewrite. -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..600&family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,100..900,0..100,0..1;1,9..144,100..900,0..100,0..1&family=JetBrains+Mono:wght@300..500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="shared/base.css" />
+<style>
+  /* The homepage is one sentence. Its objects sit in the line like words;
+   * the notebook in it is the real book, and it opens from there. */
+  :root { --m: clamp(24px, 4.2vw, 60px); }
+
+  .bar { position: fixed; left: var(--m); right: var(--m); top: 0; height: 72px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--ink-muted); z-index: 3; }
+  .bar .r { display: flex; gap: 28px; }
+  .bar a:hover { text-decoration: underline; text-underline-offset: 3px; }
+  .clock b { font-weight: 400; animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .sentence {
+    position: fixed; left: var(--m); right: calc(var(--m) + 4vw); top: 50%; translate: 0 -54%; z-index: 3;
+    font-size: clamp(40px, min(5.5vw, 9.4vh), 100px); font-weight: 300; line-height: 1.12; letter-spacing: -0.028em;
+    font-variation-settings: 'opsz' 144, 'SOFT' 0, 'WONK' 0;
+    transition: color 260ms var(--ease-out);
+    text-wrap: pretty;
+  }
+  .sentence .w { display: inline-block; white-space: pre; }
+  .sentence a, .sentence button.lk { font-style: italic; font-variation-settings: 'opsz' 144, 'SOFT' 100, 'WONK' 1; transition: color 260ms var(--ease-out); white-space: nowrap; }
+  .sentence.dim { color: rgba(22, 38, 94, 0.22); }
+  .sentence.dim .hot, .sentence.dim .hot .w { color: var(--ink); }
+  .sentence.dim .obj:not(.hot *) { opacity: 0.35; }
+
+  .obj { display: inline-block; vertical-align: -0.16em; margin: 0 0.1em 0 0.04em; transition: transform 380ms var(--ease-out), opacity 260ms; }
+  /* the notebook: an empty box the real book renders into */
+  .nb { height: 1.02em; aspect-ratio: 947 / 1380; cursor: pointer; }
+  .cvi { height: 0.74em; rotate: 5deg; filter: drop-shadow(0 4px 5px rgba(22, 38, 94, 0.16)); }
+  .cvi img { height: 100%; width: auto; }
+  .lk:hover .cvi, .lk:focus-visible .cvi { transform: translateY(-0.08em) rotate(-5deg) scale(1.18); }
+  .ph { position: relative; width: 1.5em; height: 0.92em; }
+  .ph img {
+    position: absolute; top: 0; width: 0.82em; height: 0.82em; object-fit: cover; border-radius: 0.08em;
+    border: 0.045em solid #fbf9f4; box-shadow: 0 3px 6px rgba(22, 38, 94, 0.18);
+    transition: transform 420ms var(--ease-out);
+  }
+  .ph img:nth-child(1) { left: 0; transform: rotate(-8deg); }
+  .ph img:nth-child(2) { left: 0.32em; transform: rotate(3deg); z-index: 1; }
+  .ph img:nth-child(3) { left: 0.64em; transform: rotate(9deg); z-index: 2; }
+  .lk:hover .ph img:nth-child(1), .lk:focus-visible .ph img:nth-child(1) { transform: translate(-0.34em, -0.06em) rotate(-14deg); }
+  .lk:hover .ph img:nth-child(2), .lk:focus-visible .ph img:nth-child(2) { transform: translate(0, -0.16em) rotate(0deg) scale(1.08); }
+  .lk:hover .ph img:nth-child(3), .lk:focus-visible .ph img:nth-child(3) { transform: translate(0.34em, -0.04em) rotate(14deg); }
+
+  .foot { position: fixed; left: var(--m); right: var(--m); bottom: 28px; display: flex; justify-content: space-between; color: var(--ink-soft); z-index: 3; }
+
+  /* Choreography */
+  .bar, .foot { transition: opacity 360ms var(--ease-paper); }
+  html.nb-open .bar, html.nb-open .foot { opacity: 0; pointer-events: none; }
+  html.nb-open .sentence { pointer-events: none; }
+  .sentence .w, .sentence .cvi, .sentence .ph { transition: transform 700ms var(--ease-out), opacity 420ms var(--ease-paper); transition-delay: var(--d, 0ms); }
+  html.nb-open .sentence .w { opacity: 0; transform: translateY(var(--fy, -0.3em)) rotate(var(--fr, 0deg)); }
+  html.nb-open .sentence .cvi, html.nb-open .sentence .ph { opacity: 0; }
+  html.rm.nb-open .sentence .w { transform: none; }
+  .intro .sentence .w { opacity: 0; transform: translateY(0.45em); }
+  .intro .sentence .cvi, .intro .sentence .ph { opacity: 0; transform: scale(0.6); }
+  .intro .bar, .intro .foot, .intro .book-layer { opacity: 0; }
+  .book-layer { transition: opacity 500ms var(--ease-paper) 500ms; }
+</style>
+</head>
+<body class="intro">
+<header class="bar mono">
+  <span>Yankun Wang</span>
+  <span class="r"><span class="clock" aria-label="Local time in San Francisco">San Francisco <span data-time>--<b>:</b>--</span></span><a href="mailto:yankunux@gmail.com">Email ↗</a></span>
+</header>
+
+<p class="sentence">
+  I’m Yankun Wang, a product designer in San Francisco. Six projects live in this
+  <span class="lk-nb" data-hot="nb"><button class="obj nb" type="button" aria-expanded="false" aria-label="Open the notebook: selected work"></button><button class="lk" type="button" data-open>notebook.</button></span>
+  The short version fits on one
+  <a class="lk" href="../../site/public/Yankun-Wang-CV-2026.pdf" target="_blank" rel="noopener" data-hot="cv"><span class="obj cvi" aria-hidden="true"><img src="../../site/public/plate/cv.webp" alt=""></span>page,</a>
+  and
+  <a class="lk" href="https://yankun.design/about" target="_blank" rel="noopener" data-hot="ph"><span class="obj ph" aria-hidden="true"><img src="../../site/public/images/about/me.png" alt=""><img src="../../site/public/images/about/outdoor.png" alt=""><img src="../../site/public/images/about/yogurt.png" alt=""></span>the rest</a>
+  is about life outside it.
+</p>
+
+<footer class="foot mono">
+  <span>Currently — building something fun</span>
+  <span>Designed and built with Claude and Codex</span>
+</footer>
+<div class="grain" aria-hidden="true"></div>
+
+<script src="shared/book.js"></script>
+<script src="shared/proto.js"></script>
+<script>
+(async () => {
+const { Book, reduced } = window.NB;
+const { protoChrome } = window.NBProto;
+
+protoChrome({
+  n: 5,
+  job: 'Introduce Yankun in one sentence whose nouns are the navigation.',
+  refs: [
+    ['Off the Record', 'an oversized serif carries the identity; hierarchy comes from roman vs. italic, not more colours or sizes.'],
+    ['Perplexity (Smith & Diction)', 'identity inside the interaction: the sentence is the nav, and the notebook in it is the real object.'],
+    ['Rauno Freiberg · Craft', 'small details worth inspecting: the résumé tilts up, the photos fan, the clock’s colon ticks.'],
+  ],
+  look: [
+    'Hover “notebook”, “page” or “the rest”: the sentence dims around it and the object answers.',
+    'Click the notebook: the words scatter away from it and the book grows out of the line.',
+    'Copy is placeholder — rewrite in your own voice.',
+  ],
+  changed: 'CV is the “page” in the sentence (opens the PDF); About is “the rest”. Cat roulette is gone; Yogurt is one of the three photos.',
+});
+
+const root = document.documentElement;
+const sentence = document.querySelector('.sentence');
+const slot = document.querySelector('.nb');
+
+// Wrap words so they can leave one by one (links keep their structure).
+const walker = document.createTreeWalker(sentence, NodeFilter.SHOW_TEXT);
+const texts = [];
+while (walker.nextNode()) if (walker.currentNode.textContent.trim()) texts.push(walker.currentNode);
+texts.forEach((node) => {
+  const frag = document.createDocumentFragment();
+  node.textContent.replace(/\s+/g, ' ').split(/(\s)/).forEach((part) => {
+    if (part === ' ') frag.appendChild(document.createTextNode(' '));
+    else if (part) { const s = document.createElement('span'); s.className = 'w'; s.textContent = part; frag.appendChild(s); }
+  });
+  node.replaceWith(frag);
+});
+const words = [...sentence.querySelectorAll('.w, .cvi, .ph')];
+
+const book = new Book({ slot, restRotate: -6 });
+const open = () => {
+  // words leave away from the notebook, nearest first
+  const b = slot.getBoundingClientRect(), cx = b.left + b.width / 2, cy = b.top + b.height / 2;
+  words.forEach((w) => {
+    const r = w.getBoundingClientRect(), dx = r.left + r.width / 2 - cx, dy = r.top + r.height / 2 - cy, d = Math.hypot(dx, dy);
+    w.style.setProperty('--d', `${Math.round(d * 0.35)}ms`);
+    w.style.setProperty('--fy', `${(dy / (d || 1)) * 0.5 - 0.2}em`);
+    w.style.setProperty('--fr', `${(dx > 0 ? 1 : -1) * Math.min(6, d / 120)}deg`);
+  });
+  sentence.classList.remove('dim');
+  book.open({ duration: 1750 });
+};
+slot.addEventListener('click', open);
+document.querySelector('[data-open]').addEventListener('click', open);
+book.addEventListener('close-start', () => words.forEach((w) => w.style.setProperty('--d', `${Math.round(Math.random() * 220)}ms`)));
+
+/* Focus: the sentence dims around what you point at */
+sentence.querySelectorAll('[data-hot]').forEach((h) => {
+  const on = () => {
+    if (book.state !== 'closed') return;
+    sentence.classList.add('dim'); h.classList.add('hot');
+    if (h.dataset.hot === 'nb' && !reduced()) { book.target.lift = 0.22; book.target.rz = 6; book.target.ly = 70; book.target.blur = 60; }
+  };
+  const off = () => { sentence.classList.remove('dim'); h.classList.remove('hot'); book.target.lift = 0; book.target.rz = 0; book.target.ly = 36; book.target.blur = 40; };
+  h.addEventListener('pointerenter', on); h.addEventListener('pointerleave', off);
+  h.addEventListener('focusin', on); h.addEventListener('focusout', off);
+});
+// Shadow values are in book-local px; at word size the book is ~1/8 scale,
+// so these read as a ~5px contact shadow on screen.
+book.target.blur = 40; book.target.ly = 36; book.target.shadow = 0.5;
+Object.assign(book.cur, { blur: 40, ly: 36 });
+
+/* The clock: San Francisco time, colon ticking */
+const t = document.querySelector('[data-time]');
+const fmt = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Los_Angeles', hour: '2-digit', minute: '2-digit', hour12: false });
+const tick = () => { const [h, m] = fmt.format(new Date()).split(':'); t.innerHTML = `${h}<b>:</b>${m}`; };
+tick(); setInterval(tick, 10000);
+
+addEventListener('resize', () => { book.measure(); book.render(); });
+await document.fonts.ready;
+book.measure(); book.render();
+words.forEach((w, i) => w.style.setProperty('--d', `${120 + i * 28}ms`));
+requestAnimationFrame(() => {
+  document.body.classList.remove('intro');
+  setTimeout(() => words.forEach((w) => w.style.removeProperty('--d')), 120 + words.length * 28 + 800);
+});
+})();
+</script>
+</body>
+</html>

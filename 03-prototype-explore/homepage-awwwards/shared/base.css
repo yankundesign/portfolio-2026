@@ -1,0 +1,416 @@
+/* Shared base for the five homepage prototypes.
+ * Prototype only — not part of the deployed site. Tokens mirror site/src/styles/tokens.css. */
+
+:root {
+  --ink: #16265e;
+  --ink-soft: #2a3a7a;
+  --ink-muted: rgba(22, 38, 94, 0.2);
+  --ink-faint: rgba(22, 38, 94, 0.08);
+  --paper: #f4f1ea;
+  --paper-soft: #ebe6d9;
+  --paper-shadow: #ddd6c2;
+
+  --serif: 'Fraunces', Georgia, serif;
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+  --hand: 'Caveat', cursive;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-paper: cubic-bezier(0.4, 0, 0.2, 1);
+  --hover: 160ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--serif);
+  font-optical-sizing: auto;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow: hidden;
+}
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+img { display: block; user-select: none; -webkit-user-drag: none; }
+:focus-visible { outline: 1.5px solid var(--ink); outline-offset: 2px; }
+
+.mono {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.35;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* Paper grain: SVG noise, ~6%, multiply, fixed to the viewport. */
+.grain {
+  position: fixed; inset: 0; pointer-events: none; z-index: 90;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.09  0 0 0 0 0.15  0 0 0 0 0.37  0 0 0 .7 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  opacity: 0.06;
+  mix-blend-mode: multiply;
+}
+
+/* ═══════════ The notebook (shared by all five) ═══════════
+ * Geometry follows site/src/components/transition/NotebookTransition:
+ * the book box is the open spread; the cover is its right half, hinged
+ * at the spine; the back of the cover is the spread's left half. */
+
+.book-layer {
+  position: fixed; inset: 0; z-index: 10; pointer-events: none;
+  perspective: 2200px;
+}
+.bk {
+  position: absolute; left: 0; top: 0;
+  transform-origin: 0 0;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+.bk-shadow {
+  position: absolute; top: 3.4%; height: 95.5%; width: 48%;
+  border-radius: 2% / 1.4%;
+  background: rgba(22, 38, 94, 0.34);
+  filter: blur(var(--shadow-blur, 22px));
+  opacity: var(--shadow-o, 0.55);
+  transform: translate(var(--lx, 0px), var(--ly, 14px));
+}
+.bk-shadow.r { left: 50.6%; }
+.bk-shadow.l { left: 1.4%; transform-origin: 100% 50%; transform: translate(var(--lx, 0px), var(--ly, 14px)) scaleX(var(--left-shadow, 0)); }
+
+.bk-pages { position: absolute; inset: 0; clip-path: inset(0 0 0 50%); opacity: 0; }
+.bk-pages > img { width: 100%; height: 100%; object-fit: fill; }
+.bk-cast {
+  position: absolute; left: 50%; top: 2.5%; width: 48%; height: 95%;
+  background: linear-gradient(90deg, rgba(22, 38, 94, 0.55), rgba(22, 38, 94, 0) 70%);
+  opacity: 0; pointer-events: none; transform-origin: 0 50%;
+}
+.bk-cover {
+  position: absolute; left: 50%; top: 0; width: 50%; height: 100%;
+  transform-origin: 0 50%;
+  transform-style: preserve-3d;
+}
+.bk-front, .bk-back {
+  position: absolute; backface-visibility: hidden; -webkit-backface-visibility: hidden;
+}
+.bk-front { left: -8.2%; top: -1.23%; width: 114.2%; height: 104.75%; }
+.bk-front img { width: 100%; height: 100%; object-fit: fill; }
+.bk-fshade {
+  position: absolute; inset: 0; background: var(--ink); mix-blend-mode: multiply; opacity: 0;
+  -webkit-mask-size: 100% 100%; mask-size: 100% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+}
+/* Image URLs for these two are set from book.js (absolute), so they
+ * resolve the same from every page. */
+.bk-back {
+  inset: 0; transform: rotateY(180deg); overflow: hidden;
+  background-color: var(--paper); background-position: 0 0; background-size: 200% 100%; background-repeat: no-repeat;
+}
+.bk-bshade { position: absolute; inset: 0; background: linear-gradient(90deg, var(--ink), transparent 70%); mix-blend-mode: multiply; opacity: 0; }
+/* The board's thickness, seen only while the cover turns. Placed on the
+ * board's measured fore-edge in plate/notebook.webp (x 878 / 947, y 63–1311),
+ * not the page block. At rest it is edge-on, so book.js hides it — otherwise
+ * it renders as a hairline beside the book. */
+.bk-edge {
+  position: absolute; left: 97.7%; top: 3.55%; width: 1.4%; height: 94.7%; margin-left: -0.7%;
+  background: linear-gradient(90deg, #0f1c46, #1f2f66 60%, #0f1c46);
+  transform: rotateY(90deg); opacity: 0;
+}
+
+/* What the open notebook shows: a contents page and a plate.
+ * Sized in container units so it scales with the book. */
+.bk-inside { position: absolute; inset: 0; container-type: size; pointer-events: none; }
+.bk-page { position: absolute; top: 11.5%; bottom: 7%; }
+.bk-page.l { left: 7.5%; width: 37%; }
+.bk-page.r { left: 55.5%; width: 37.5%; }
+.bk.is-open .bk-inside { pointer-events: auto; }
+
+.toc-kicker { font-family: var(--mono); font-size: 1.15cqh; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-soft); }
+.toc-title { font-size: 7.2cqh; font-weight: 300; font-style: italic; line-height: 1; letter-spacing: -0.02em; margin: 2.4cqh 0 4.2cqh; font-variation-settings: 'opsz' 144, 'SOFT' 50, 'WONK' 1; }
+.toc { list-style: none; border-top: 1px solid var(--ink-muted); }
+.toc li { border-bottom: 1px solid var(--ink-muted); }
+.bk-inside:focus { outline: none; }
+
+/* Rows: nothing moves sideways and nothing changes style, so no row ever
+ * looks misaligned. Pointing draws the row's rule in ink and swaps the
+ * year for "Read →". */
+.toc a {
+  position: relative;
+  display: grid; grid-template-columns: 3.4cqh 1fr auto; align-items: baseline; gap: 1.2cqh;
+  padding: 1.55cqh 0 1.45cqh;
+  transition: opacity var(--hover);
+}
+.toc a::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px; background: var(--ink);
+  transform: scaleX(0); transform-origin: 0 50%; transition: transform 420ms var(--ease-out);
+}
+.toc .n, .toc .y, .toc .go { font-family: var(--mono); font-size: 1.1cqh; letter-spacing: 0.1em; color: var(--ink-soft); transition: color var(--hover), opacity 200ms var(--ease-out), transform 320ms var(--ease-out); }
+.toc .y, .toc .go { grid-column: 3; grid-row: 1; justify-self: end; white-space: nowrap; }
+.toc .go { color: var(--ink); opacity: 0; transform: translateX(-0.8cqh); }
+.toc .t { font-size: 2.85cqh; font-weight: 350; line-height: 1.1; letter-spacing: -0.01em; }
+.toc a:is(:hover, :focus-visible, .is-active, .is-hint)::after { transform: scaleX(1); }
+.toc a:is(:hover, :focus-visible, .is-active, .is-hint) .n { color: var(--ink); }
+.toc a:is(:hover, :focus-visible, .is-active, .is-hint) .y { opacity: 0; transform: translateX(0.8cqh); }
+.toc a:is(:hover, :focus-visible, .is-active, .is-hint) .go { opacity: 1; transform: none; }
+.toc a:focus-visible { outline: none; }
+.toc:is(:hover, :has(.is-hint)) a:not(:hover, .is-active, .is-hint) { opacity: 0.45; }
+.toc-foot { position: absolute; left: 0; right: 0; bottom: 0; display: flex; justify-content: space-between; font-family: var(--mono); font-size: 1cqh; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); }
+
+/* Right page, by default: all six plates as a contact sheet, so the spread
+ * reads as an overview. Pointing at a title swaps it for that one plate. */
+.plate-kicker { position: absolute; top: 0; left: 0; font-family: var(--mono); font-size: 1.1cqh; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-soft); }
+.sheet-wrap, .solo-wrap { position: absolute; inset: 0; }
+.solo-wrap { pointer-events: none; }
+.sheet { position: absolute; left: 0; right: 0; top: 7.5cqh; display: grid; grid-template-columns: 1fr 1fr; gap: 3.4cqh 2.4cqh; transition: opacity 260ms var(--ease-out); }
+.thumb { display: grid; gap: 1.1cqh; min-width: 0; transition: opacity var(--hover); }
+.thumb-f { display: block; border: 1px solid var(--ink); background: var(--paper); aspect-ratio: 1920 / 1200; overflow: hidden; }
+.thumb-f img { width: 100%; height: 100%; object-fit: cover; transition: transform 600ms var(--ease-out); }
+.thumb-c { font-family: var(--mono); font-size: 0.95cqh; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.thumb-c b { font-weight: 400; color: var(--ink); margin-right: 0.9em; }
+.thumb:hover .thumb-f img { transform: scale(1.035); }
+.sheet:hover .thumb:not(:hover) { opacity: 0.45; }
+.bk-inside.is-solo .sheet { opacity: 0; pointer-events: none; }
+
+.plate { position: absolute; left: 0; right: 0; top: 22%; }
+.solo { opacity: 0; transition: opacity 260ms var(--ease-out); }
+.bk-inside.is-solo .solo { opacity: 1; }
+.plate-frame { border: 1px solid var(--ink); background: var(--paper); aspect-ratio: 1920 / 1200; overflow: hidden; }
+.plate-frame img { width: 100%; height: 100%; object-fit: cover; transition: opacity 220ms var(--ease-out); }
+.plate-cap { display: flex; justify-content: space-between; gap: 2cqh; margin-top: 1.4cqh; font-family: var(--mono); font-size: 1.05cqh; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-soft); }
+.plate-sub { margin-top: 3cqh; font-size: 2.3cqh; font-weight: 300; line-height: 1.3; font-style: italic; max-width: 92%; }
+
+.bk-inside .reveal { opacity: 0; transform: translateY(1.2cqh); transition: opacity 420ms var(--ease-out), transform 520ms var(--ease-out); }
+.bk.show-inside .bk-inside .reveal { opacity: 1; transform: none; }
+.bk.peek-inside .bk-page.r .reveal { opacity: 1; transform: none; }
+
+/* ─── Closing lives on the book ───
+ * A tab slides out from under the fore-edge, the paper around the book
+ * closes it (the cursor says "Close ×" there), and Esc. */
+.bk-tab {
+  position: absolute; left: 99.1%; top: 9%; height: 15%; width: 30px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+  background: var(--ink); color: var(--paper); border-radius: 0 7px 7px 0;
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase;
+  box-shadow: 2px 3px 8px rgba(22, 38, 94, 0.18);
+  opacity: 0; transform: translateX(-26px); pointer-events: none;
+  transition: opacity 260ms var(--ease-out), transform 460ms var(--ease-out), background var(--hover);
+}
+.bk-tab span { writing-mode: vertical-rl; }
+.bk-tab i { font-style: normal; font-size: 14px; letter-spacing: 0; line-height: 1; }
+.bk.is-open .bk-tab { opacity: 1; transform: none; pointer-events: auto; transition-delay: 220ms, 220ms, 0s; }
+.bk.is-open .bk-tab:hover, .bk.is-open .bk-tab:focus-visible { transform: translateX(5px); background: var(--ink-soft); transition-delay: 0s; }
+.bk-tab:focus-visible { outline: 1.5px solid var(--ink); outline-offset: 2px; }
+.bk-backdrop { position: fixed; inset: 0; pointer-events: none; cursor: pointer; }
+.book-layer.is-open .bk-backdrop { pointer-events: auto; }
+.bk-cursor {
+  position: fixed; left: 0; top: 0; z-index: 2; pointer-events: none;
+  padding: 7px 10px 6px; border-radius: 999px; background: var(--ink); color: var(--paper);
+  opacity: 0; transition: opacity 160ms var(--ease-out);
+}
+.bk-cursor.on { opacity: 1; }
+
+/* ═══════════ Archive cover ═══════════
+ * Generated board photo (assets/cover-archive.webp) with the title set live
+ * on top, a ribbon tail, and the cloth as the board's edge. Geometry = the
+ * spread's right-hand board, so nothing stretches as it opens. */
+.bk.archive .bk-front { left: 0; top: 3.15%; width: 99.2%; height: 96.25%; }
+.bk.archive .bk-edge { left: 99.2%; top: 3.15%; height: 96.25%; }
+.ar-board { position: absolute; inset: 0; container-type: size; }
+.bk.archive .bk-fshade { border-radius: 0 2.6% 2.6% 0 / 0 1.9% 1.9% 0; }
+.bk.no-mask .bk-fshade { display: none; }
+/* the generated board photo: cloth, hinge groove, rounded fore-edge corners */
+.ar-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill; }
+/* board thickness while turning: the same cloth, seen edge-on */
+.bk.archive .bk-edge { background: #142350 url('../assets/cloth-navy.webp') 0 0 / 64px auto; }
+/* ─── Cover type ───
+ * Words are stamped in paper-coloured pigment (title #ebe6d9 ≈ 12.4:1 on
+ * #142350; small lines at 82% ≈ 8.7:1), with a dark upper lip where the die
+ * pressed in. Lines and frames are blind (pressed, no pigment): decoration
+ * only. Small type is ≥ 3cqw, about 11px or more at the resting size. */
+.ar-board {
+  --foil: #ebe6d9; --foil-2: rgba(235, 230, 217, 0.82);
+  --press: 0 -0.16cqw 0 rgba(3, 8, 26, 0.55);
+  --tool: rgba(3, 8, 26, 0.48); --tool-hi: rgba(255, 255, 255, 0.07);
+}
+.cv { position: absolute; inset: 0; z-index: 1; color: var(--foil); text-shadow: var(--press); }
+.cv .m, .cv .hd span, .cv .tags, .cv .n, .cv .nums { font-family: var(--mono); font-weight: 400; text-transform: uppercase; color: var(--foil-2); }
+
+/* A · Stamp — the recessed panel, retitled */
+.cv-a .panel {
+  position: absolute; left: 14cqw; right: 8.6cqw; top: 21cqh;
+  display: grid; justify-items: center; gap: 2.6cqh; padding: 4.8cqh 0 4.4cqh; border-radius: 0.8cqw;
+  box-shadow: inset 0 0.35cqw 0.7cqw rgba(3, 8, 26, 0.5), inset 0 -0.2cqw 0 var(--tool-hi), 0 0.2cqw 0 rgba(255, 255, 255, 0.05);
+  background: rgba(3, 8, 26, 0.12);
+}
+.cv-a .t { font-family: var(--serif); font-style: italic; font-weight: 350; font-size: 10cqw; line-height: 1; letter-spacing: -0.015em; font-variation-settings: 'opsz' 72, 'SOFT' 50, 'WONK' 1; }
+.cv-a .r { width: 24cqw; height: 0.35cqw; background: var(--foil-2); box-shadow: 0 -0.12cqw 0 rgba(3, 8, 26, 0.5); }
+.cv-a .m { font-size: 3.3cqw; letter-spacing: 0.2em; }
+
+/* B · Index — the contents, ruled like the page inside */
+.cv-b { left: 14cqw; right: 9cqw; top: 11cqh; bottom: auto; }
+.cv-b .hd { display: flex; justify-content: space-between; padding-bottom: 2.2cqh; font-size: 3.1cqw; letter-spacing: 0.18em; border-bottom: 0.3cqw solid var(--tool); box-shadow: 0 0.16cqw 0 var(--tool-hi); }
+.cv-b .hd span { font-size: 3.3cqw; }
+.cv-b ol { list-style: none; }
+.cv-b li { display: grid; grid-template-columns: 9cqw 1fr; align-items: baseline; padding: 2.3cqh 0 2.1cqh; border-bottom: 0.25cqw solid var(--tool); box-shadow: 0 0.14cqw 0 var(--tool-hi); }
+.cv-b .n { font-size: 3.3cqw; letter-spacing: 0.1em; }
+.cv-b .t { font-family: var(--serif); font-weight: 330; font-size: 5.4cqw; line-height: 1.15; letter-spacing: -0.005em; font-variation-settings: 'opsz' 36; }
+
+/* C · Numeral — one mark, the disciplines as tags */
+.cv-c { overflow: hidden; border-radius: 0 2.6% 2.6% 0 / 0 1.9% 1.9% 0; }
+.cv-c .hd { position: absolute; left: 14cqw; top: 10cqh; display: grid; gap: 1.8cqh; }
+.cv-c .hd .t { font-family: var(--serif); font-style: italic; font-weight: 350; font-size: 8.4cqw; line-height: 1; letter-spacing: -0.015em; text-transform: none; color: var(--foil); font-variation-settings: 'opsz' 72, 'SOFT' 50, 'WONK' 1; }
+.cv-c .hd .m { font-size: 3.3cqw; letter-spacing: 0.2em; }
+.cv-c .tags { position: absolute; left: 14cqw; top: 31cqh; list-style: none; display: grid; gap: 1.2cqh; font-size: 3.3cqw; letter-spacing: 0.16em; }
+.cv-c .tags li::before { content: '— '; }
+.cv-c .big {
+  position: absolute; right: 3cqw; bottom: -4.5cqh;
+  font-family: var(--serif); font-style: italic; font-weight: 300; font-size: 66cqw; line-height: 0.8; letter-spacing: -0.05em;
+  font-variation-settings: 'opsz' 144, 'SOFT' 50, 'WONK' 1;
+  color: rgba(3, 8, 26, 0.22); -webkit-text-stroke: 0.34cqw rgba(235, 230, 217, 0.74); text-shadow: none;
+}
+
+/* D · Tooled — a bookbinder's double frame, letterspaced capitals */
+.cv-d .fr { position: absolute; top: 6.5cqh; bottom: 6.5cqh; left: 13cqw; right: 7cqw; border: 0.34cqw solid var(--tool); border-radius: 0.6cqw;
+  box-shadow: 0 0.16cqw 0 var(--tool-hi), inset 0 0.16cqw 0 var(--tool-hi); }
+.cv-d .fr.in { top: 8.3cqh; bottom: 8.3cqh; left: 15.6cqw; right: 9.6cqw; border-width: 0.18cqw; }
+.cv-d .mid { position: absolute; left: 13cqw; right: 7cqw; top: 33cqh; display: grid; justify-items: center; gap: 3.2cqh; }
+.cv-d .t { font-family: var(--serif); font-weight: 400; font-size: 5.6cqw; line-height: 1; letter-spacing: 0.26em; text-transform: uppercase; margin-right: -0.26em; font-variation-settings: 'opsz' 24; }
+.cv-d .orn { width: 2.2cqw; height: 2.2cqw; rotate: 45deg; border: 0.3cqw solid var(--foil-2); box-shadow: var(--press); }
+.cv-d .m { font-family: var(--serif); font-style: italic; font-weight: 350; font-size: 4.6cqw; letter-spacing: 0.04em; text-transform: none; font-variant-numeric: oldstyle-nums; font-variation-settings: 'opsz' 24; }
+
+/* E · Ruled — six pressed columns, one per project */
+.cv-e .cols { position: absolute; top: 0; bottom: 0; left: 8cqw; right: 0; display: grid; grid-template-columns: repeat(6, 1fr); }
+.cv-e .cols span { border-right: 0.24cqw solid var(--tool); box-shadow: 0.14cqw 0 0 var(--tool-hi); }
+.cv-e .cols span:last-child { border-right: 0; box-shadow: none; }
+.cv-e .nums { position: absolute; top: 5.5cqh; left: 8cqw; right: 0; display: grid; grid-template-columns: repeat(6, 1fr); font-size: 3.3cqw; letter-spacing: 0.08em; }
+.cv-e .nums span { padding-left: 2.2cqw; }
+.cv-e .base { position: absolute; left: 8cqw; right: 0; bottom: 13.4cqh; height: 0.32cqw; background: var(--tool); box-shadow: 0 0.16cqw 0 var(--tool-hi); }
+.cv-e .t { position: absolute; left: 9.6cqw; bottom: 12.4cqh; font-family: var(--serif); font-style: italic; font-weight: 300; font-size: 40cqw; line-height: 0.74; letter-spacing: -0.045em; font-variation-settings: 'opsz' 144, 'SOFT' 50, 'WONK' 1; }
+.cv-e .m { position: absolute; left: 10.4cqw; bottom: 6.4cqh; font-size: 3.2cqw; letter-spacing: 0.2em; }
+
+/* ═══ Round 2 · brand-led covers ═══
+ * Drawn devices use one paper ink at varying strength; words stay ≥ 3.3cqw. */
+.cv-svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; text-shadow: none; }
+.cv .cv-svg * { vector-effect: non-scaling-stroke; }
+
+/* F · Plate — ruler, measured grid, exploded figure, title block */
+.cv-f .ruler {
+  position: absolute; left: 6cqw; top: 0; bottom: 0; width: 5.2cqw;
+  background-image:
+    repeating-linear-gradient(to bottom, rgba(235, 230, 217, 0.75) 0 0.3cqw, transparent 0.3cqw 4.76cqh),
+    repeating-linear-gradient(to bottom, rgba(235, 230, 217, 0.45) 0 0.22cqw, transparent 0.22cqw 0.952cqh);
+  background-size: 3.2cqw 100%, 1.6cqw 100%; background-repeat: no-repeat; background-position: 0 0, 0 0;
+}
+.cv-f .ruler span { position: absolute; left: 3.6cqw; font-family: var(--mono); font-size: 3.3cqw; line-height: 1; color: var(--foil-2); rotate: 90deg; translate: 0 -50%; }
+.cv-f .grid {
+  position: absolute; left: 12.5cqw; right: 6cqw; top: 3cqh; bottom: 3cqh;
+  border: 0.3cqw solid rgba(235, 230, 217, 0.5);
+  background-image:
+    linear-gradient(90deg, rgba(235, 230, 217, 0.2) 0.22cqw, transparent 0.22cqw),
+    linear-gradient(0deg, rgba(235, 230, 217, 0.2) 0.22cqw, transparent 0.22cqw),
+    linear-gradient(90deg, rgba(235, 230, 217, 0.09) 0.16cqw, transparent 0.16cqw),
+    linear-gradient(0deg, rgba(235, 230, 217, 0.09) 0.16cqw, transparent 0.16cqw);
+  background-size: 20.4cqw 20.4cqw, 20.4cqw 20.4cqw, 4.08cqw 4.08cqw, 4.08cqw 4.08cqw;
+}
+.cv-f .pf .pl { fill: #101d42; stroke: rgba(235, 230, 217, 0.92); stroke-width: 1.5; stroke-linejoin: round; }
+.cv-f .pf .pi { fill: none; stroke: rgba(235, 230, 217, 0.5); stroke-width: 1; }
+.cv-f .pf .dash { stroke: rgba(235, 230, 217, 0.55); stroke-width: 1; stroke-dasharray: 3 3; }
+.cv-f .pf .lead { stroke: rgba(235, 230, 217, 0.6); stroke-width: 1; }
+.cv-f .pf .key { font-family: var(--serif); font-style: italic; font-size: 3.6px; fill: var(--foil); }
+.cv-f .pf .fig { font-family: var(--serif); font-style: italic; font-size: 5.4px; fill: var(--foil); }
+.cv-f .tb {
+  position: absolute; left: 12.5cqw; top: 3cqh; width: 52cqw; display: grid; gap: 2.2cqh; padding: 4.4cqw 4.6cqw 4.2cqw;
+  background: #0f1c40; border-right: 0.3cqw solid rgba(235, 230, 217, 0.5); border-bottom: 0.3cqw solid rgba(235, 230, 217, 0.5);
+}
+.cv-f .tb .t { font-family: var(--serif); font-weight: 500; font-size: 8.6cqw; line-height: 0.95; letter-spacing: 0.01em; text-transform: uppercase; font-variation-settings: 'opsz' 72; }
+.cv-f .tb .r { height: 0.3cqw; width: 70%; background: var(--foil-2); }
+.cv-f .tb .s { font-family: var(--serif); font-style: italic; font-weight: 300; font-size: 4.8cqw; line-height: 1.12; font-variation-settings: 'opsz' 36; }
+.cv-f .tw { position: absolute; left: 16cqw; top: 55cqh; font-family: var(--mono); font-size: 3.4cqw; line-height: 1.45; letter-spacing: 0.04em; color: var(--foil-2); }
+
+/* G · Library — monogram, section index, giant cropped serif */
+.cv-g { overflow: hidden; border-radius: 0 2.6% 2.6% 0 / 0 1.9% 1.9% 0; }
+.cv-g .mk { position: absolute; left: 13cqw; top: 6cqh; font-family: var(--serif); font-weight: 500; font-size: 12cqw; line-height: 1; letter-spacing: 0.01em; font-variation-settings: 'opsz' 72; }
+.cv-g .sec { position: absolute; right: 7cqw; top: 6.6cqh; list-style: none; text-align: right; display: grid; gap: 1cqh; font-family: var(--mono); font-size: 3.3cqw; letter-spacing: 0.1em; text-transform: uppercase; color: var(--foil-2); }
+.cv-g .big { position: absolute; left: 12cqw; top: 36cqh; white-space: nowrap; font-family: var(--serif); font-weight: 300; font-size: 22cqw; line-height: 0.86; letter-spacing: -0.04em; font-variation-settings: 'opsz' 144, 'SOFT' 0, 'WONK' 1; }
+.cv-g .big i { font-style: italic; font-variation-settings: 'opsz' 144, 'SOFT' 100, 'WONK' 1; }
+.cv-g .ft { position: absolute; left: 13cqw; right: 7cqw; bottom: 6cqh; display: flex; justify-content: space-between; padding-top: 1.6cqh; border-top: 0.3cqw solid rgba(235, 230, 217, 0.5); font-family: var(--mono); font-size: 3.3cqw; letter-spacing: 0.12em; text-transform: uppercase; color: var(--foil-2); }
+
+/* H · Line — tangle to straight; it draws itself in */
+.cv-h .ph .ln { vector-effect: none; fill: none; stroke: rgba(235, 230, 217, 0.88); stroke-width: 0.42; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 0; animation: cv-draw 3.4s 0.5s cubic-bezier(0.4, 0, 0.2, 1) both; }
+@keyframes cv-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+html.rm .cv-h .ph .ln { animation: none; }
+.cv-h .tl { position: absolute; left: 14cqw; top: 6.5cqh; font-family: var(--mono); font-size: 3.3cqw; letter-spacing: 0.18em; text-transform: uppercase; color: var(--foil-2); }
+.cv-h .t { position: absolute; left: 15.5cqw; bottom: 18.4cqh; font-family: var(--serif); font-style: italic; font-weight: 350; font-size: 8.6cqw; line-height: 1; letter-spacing: -0.015em; font-variation-settings: 'opsz' 72, 'SOFT' 50, 'WONK' 1; }
+.cv-h .ft { position: absolute; left: 15.5cqw; right: 9cqw; top: 86cqh; display: flex; justify-content: space-between; font-family: var(--mono); font-size: 3.3cqw; letter-spacing: 0.16em; text-transform: uppercase; color: var(--foil-2); }
+
+/* I · Monolith — one word at full height, metadata at the corners */
+.cv-i { overflow: hidden; border-radius: 0 2.6% 2.6% 0 / 0 1.9% 1.9% 0; }
+.cv-i .w { position: absolute; right: 2.5cqw; top: 3cqh; bottom: 3cqh; writing-mode: vertical-rl; rotate: 180deg; text-align: end;
+  font-family: var(--serif); font-weight: 500; font-size: 57cqw; line-height: 0.76; letter-spacing: -0.035em; font-variation-settings: 'opsz' 144, 'SOFT' 0, 'WONK' 1; }
+.cv-i .c { position: absolute; left: 14cqw; font-family: var(--mono); font-size: 3.4cqw; line-height: 1.45; letter-spacing: 0.16em; text-transform: uppercase; color: var(--foil-2); }
+.cv-i .tl { top: 6.5cqh; } .cv-i .ml { top: 48cqh; } .cv-i .bl { bottom: 6.5cqh; }
+
+/* ═══ Round 3 · line covers ═══
+ * One frame for all five (label top-left, title on the baseline at y 112,
+ * years under it), so the line is the only variable. One weight, one ink. */
+.cv-line .tl { position: absolute; left: 15.5cqw; top: 6.5cqh; font-family: var(--mono); font-size: 3.3cqw; letter-spacing: 0.18em; text-transform: uppercase; color: var(--foil-2); }
+.cv-line .t { position: absolute; left: 15.5cqw; bottom: 18.4cqh; font-family: var(--serif); font-style: italic; font-weight: 350; font-size: 8.6cqw; line-height: 1; letter-spacing: -0.015em; font-variation-settings: 'opsz' 72, 'SOFT' 50, 'WONK' 1; }
+.cv-line .dt { position: absolute; left: 15.5cqw; top: 86cqh; font-family: var(--mono); font-size: 3.3cqw; letter-spacing: 0.16em; text-transform: uppercase; color: var(--foil-2); }
+.cv-line.ln-o .t, .cv-line.ln-o .dt { left: 21cqw; }
+/* Settle: the spring lives on the left, so the title sits right, on the calm part */
+.cv-line.ln-m .t { left: auto; right: 8cqw; }
+.cv-line.ln-m .dt { left: auto; right: 8cqw; }
+.cv .pl3 .ln { vector-effect: none; fill: none; stroke: rgba(235, 230, 217, 0.9); stroke-width: 0.45; stroke-linecap: round; stroke-linejoin: round;
+  stroke-dasharray: 1; stroke-dashoffset: 0; animation: cv-draw 3s 0.5s cubic-bezier(0.4, 0, 0.2, 1) both; }
+.cv .pl3 .st { vector-effect: none; fill: #101d42; stroke: rgba(235, 230, 217, 0.9); stroke-width: 0.45; animation: cv-in 400ms 2.9s ease-out both; }
+@keyframes cv-in { from { opacity: 0; } to { opacity: 1; } }
+html.rm .cv .pl3 .ln, html.rm .cv .pl3 .st { animation: none; }
+
+/* J · Module — one tile, the mark; many tiles, the pattern */
+.cv-j .pj path { vector-effect: none; fill: none; stroke: rgba(235, 230, 217, 0.86); stroke-width: 2.4; stroke-linecap: butt; }
+.cv-j .pj { clip-path: inset(0 0 0 0 round 0 2.6% 2.6% 0); }
+.cv-j .mark { position: absolute; right: 8cqw; top: 7.5cqh; width: 11cqw; height: 11cqw; overflow: visible; }
+.cv-j .mark rect { fill: none; stroke: rgba(235, 230, 217, 0.7); stroke-width: 0.7; }
+.cv-j .mark path { fill: none; stroke: var(--foil); stroke-width: 1.6; }
+.cv-j .t { position: absolute; left: 14cqw; top: 7.5cqh; font-family: var(--serif); font-style: italic; font-weight: 350; font-size: 10cqw; line-height: 1; letter-spacing: -0.015em; font-variation-settings: 'opsz' 72, 'SOFT' 50, 'WONK' 1; }
+.cv-j .m { position: absolute; left: 14cqw; top: 19cqh; font-size: 3.3cqw; letter-spacing: 0.2em; }
+.cv-j .tags { position: absolute; left: 14cqw; top: 24cqh; font-size: 3.3cqw; letter-spacing: 0.12em; }
+
+/* the ribbon tail, hanging from between the pages */
+.bk-ribbon {
+  position: absolute; left: 53.4%; top: 97.2%; width: 1.25%; height: auto;
+  transform-origin: 50% 0; transform: rotate(var(--rib, 3deg));
+}
+
+/* ═══════════ Prototype chrome (not part of any design) ═══════════ */
+.proto-bar {
+  position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%); z-index: 200;
+  display: flex; align-items: center; gap: 4px; padding: 5px;
+  background: rgba(255, 255, 255, 0.92); border: 1px solid rgba(0, 0, 0, 0.12); border-radius: 10px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+  font: 12px/1 -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #333;
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+}
+.proto-bar a, .proto-bar button { padding: 7px 9px; border-radius: 6px; color: #444; font: inherit; }
+.proto-bar a:hover, .proto-bar button:hover { background: #f1f1f1; }
+.proto-bar a[aria-current="page"] { background: #111; color: #fff; }
+.proto-bar .sep { width: 1px; height: 20px; background: #ddd; margin: 0 3px; }
+.proto-bar .pname { padding: 0 8px; color: #666; white-space: nowrap; }
+.proto-bar button[aria-pressed="true"] { background: #111; color: #fff; }
+.proto-notes {
+  position: fixed; top: 14px; right: 14px; z-index: 200; width: 360px; max-height: calc(100vh - 90px); overflow: auto;
+  background: rgba(255, 255, 255, 0.97); border: 1px solid rgba(0, 0, 0, 0.12); border-radius: 10px; padding: 16px 18px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+  font: 13px/1.5 -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #222; display: none;
+}
+html.show-notes .proto-notes { display: block; }
+.proto-notes h2 { font-size: 15px; margin-bottom: 2px; }
+.proto-notes .job { color: #666; margin-bottom: 10px; }
+.proto-notes h3 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: #888; margin: 12px 0 6px; }
+.proto-notes ul { padding-left: 18px; display: grid; gap: 5px; }
+.proto-notes b { font-weight: 600; }
+
+/* Reduced motion: each page swaps travel for a short cross-fade in JS/CSS
+ * (html.rm is set by book.js). Opacity transitions stay; movement goes. */
+html.rm .bk-inside .reveal { transform: none; }

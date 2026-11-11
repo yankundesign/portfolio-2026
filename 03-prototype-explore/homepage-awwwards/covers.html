@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" href="data:," />
+<title>Field Notebook · line covers</title>
+<!-- Prototype comparison. Not part of the deployed site. Works from disk (file://) and localhost. -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,100..900,0..100,0..1;1,9..144,100..900,0..100,0..1&family=JetBrains+Mono:wght@300..500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="shared/base.css" />
+<style>
+  body { overflow: auto; }
+  :root { --m: clamp(20px, 4.2vw, 60px); }
+  .wrap { max-width: 1640px; margin: 0 auto; padding: 52px var(--m) 110px; }
+  header { display: grid; grid-template-columns: repeat(12, 1fr); column-gap: 24px; align-items: end; padding-bottom: 26px; border-bottom: 1px solid var(--ink); }
+  h1 { grid-column: 1 / 8; font-size: clamp(44px, 5.6vw, 88px); font-weight: 300; line-height: 0.92; letter-spacing: -0.04em; font-variation-settings: 'opsz' 144, 'SOFT' 0, 'WONK' 1; }
+  h1 em { font-variation-settings: 'opsz' 144, 'SOFT' 100, 'WONK' 1; }
+  header p { grid-column: 8 / 13; font-size: 16.5px; line-height: 1.5; font-weight: 350; font-variation-settings: 'opsz' 16; }
+  .k { grid-column: 1 / -1; margin-top: 18px; display: flex; gap: 28px; flex-wrap: wrap; color: var(--ink-soft); }
+
+  /* the brand platform, set like a plate's metadata */
+  .platform { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0 28px; margin-top: 28px; border-bottom: 1px solid var(--ink-muted); padding-bottom: 22px; }
+  .platform div { display: grid; gap: 8px; align-content: start; }
+  .platform dt { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); }
+  .platform dd { font-size: 16px; line-height: 1.42; font-weight: 350; font-variation-settings: 'opsz' 16; }
+
+  h2.round { margin: 44px 0 0; display: flex; justify-content: space-between; align-items: baseline; font-size: 26px; font-weight: 350; letter-spacing: -0.015em; font-variation-settings: 'opsz' 48; }
+  h2.round span { font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); }
+  .row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 28px; margin-top: 22px; }
+  .card { display: grid; gap: 16px; align-content: start; }
+  .card .id { display: flex; justify-content: space-between; align-items: baseline; }
+  .card .id b { font-size: 26px; font-weight: 350; letter-spacing: -0.015em; font-variation-settings: 'opsz' 48; }
+  .card .id b span { font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; color: var(--ink-soft); margin-right: 10px; vertical-align: 0.35em; }
+  .card .id a:hover { text-decoration: underline; text-underline-offset: 3px; }
+  .demo { position: relative; display: block; width: 100%; aspect-ratio: 0.7395;
+    filter: drop-shadow(0 18px 18px rgba(22, 38, 94, 0.18)) drop-shadow(0 2px 2px rgba(22, 38, 94, 0.25)); }
+  .device { font-size: 19px; line-height: 1.25; font-style: italic; font-weight: 330; font-variation-settings: 'opsz' 36, 'SOFT' 50; }
+  dl.spec { display: grid; grid-template-columns: 74px 1fr; border-top: 1px solid var(--ink-muted); }
+  dl.spec dt, dl.spec dd { padding: 8px 0 7px; border-bottom: 1px solid var(--ink-muted); font-size: 14.5px; line-height: 1.42; }
+  dl.spec dt { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); padding-top: 10px; }
+  dl.spec dd { font-weight: 350; font-variation-settings: 'opsz' 14; }
+  .row.small { grid-template-columns: repeat(5, 1fr); gap: 20px; }
+  .row.small .card { gap: 10px; }
+  .row.small .demo { width: 62%; }
+  .rec { margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--ink); display: grid; grid-template-columns: repeat(12, 1fr); column-gap: 24px; }
+  .rec h2 { grid-column: 1 / 4; font-size: 22px; font-weight: 350; font-variation-settings: 'opsz' 36; }
+  .rec p { grid-column: 4 / 11; font-size: 16.5px; line-height: 1.55; font-weight: 350; font-variation-settings: 'opsz' 16; }
+  @media (max-width: 1150px) { .row, .platform { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 720px) { .row, .platform { grid-template-columns: 1fr 1fr; } header p, h1, .rec h2, .rec p { grid-column: 1 / -1; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Field Notebook, <em>one line</em></h1>
+    <p>The line from round 2, rebuilt so nothing is random. Each cover follows one rule (geometry, physics, iteration or routing), and the line resolves into the baseline the title sits on. Type and placement are identical across the five, so only the line changes. Each one draws itself in when the cover appears.</p>
+    <div class="k mono"><span>Prototype · not deployed</span><span>All words paper on cloth, ≥ 8:1, ≥ 11.5px at resting size</span><span>Click a cover to try it in 01</span></div>
+  </header>
+
+  <dl class="platform">
+    <div><dt>Name</dt><dd>Field Notebook. The site’s own metaphor, made a proper noun.</dd></div>
+    <div><dt>Rule</dt><dd>Every line is constructed, never scribbled: one rule per cover, written on its card.</dd></div>
+    <div><dt>Idea</dt><dd>Complex systems, made handleable. Shown, not written: the thesis line stays off the homepage.</dd></div>
+    <div><dt>Material</dt><dd>Navy book cloth, paper-coloured pigment, blind pressing. Two colours.</dd></div>
+    <div><dt>Voice</dt><dd>Quiet type, one device. The homepage name is the loud part.</dd></div>
+  </dl>
+
+  <h2 class="round">Round 3 · one line, one rule<span>K–O</span></h2>
+  <section class="row" id="r3"></section>
+
+  <section class="rec">
+    <h2>Which one</h2>
+    <p><b>L · Knot</b> keeps what you liked about the line (a tangle that becomes the baseline) and replaces the scribble with an exact figure, so it reads as order rather than accident. <b>K · Loop</b> is the most elegant and the quietest next to the giant name. <b>O · Route</b> is the most “systems designer”, and its stations could become the site’s wayfinding. <b>N</b> shows the process, and <b>M</b> is the motion designer’s curve.</p>
+  </section>
+
+  <h2 class="round">Earlier rounds<span>H was the hand-drawn line · F–J brand-led · A–E typographic</span></h2>
+  <section class="row small" id="r2"></section>
+  <section class="row small" id="r1" style="margin-top:28px"></section>
+</div>
+<div class="grain" aria-hidden="true"></div>
+
+<script src="shared/book.js"></script>
+<script>
+(() => {
+  const { COVER_VARIANTS, archiveFrontHTML } = window.NB;
+  const card = (v, full) => `
+    <article class="card">
+      <div class="id"><b><span>${v.id.toUpperCase()}</span>${v.name}</b><a class="mono" href="01-monograph.html?cover=${v.id}">Try in 01 →</a></div>
+      <a class="demo" href="01-monograph.html?cover=${v.id}" aria-label="Try cover ${v.id.toUpperCase()}, ${v.name}, in 01"><div class="ar-board">${archiveFrontHTML(v.id)}</div></a>
+      ${full ? `<p class="device">${v.device}</p>
+      <dl class="spec">${[['Rule', v.rule], ['Idea', v.idea], ['Reference', v.ref], ['Title', v.title], ['Content', v.content], ['Tags', v.tags], ['Risk', v.risk]]
+        .filter(([, x]) => x).map(([k, x]) => `<dt>${k}</dt><dd>${x}</dd>`).join('')}</dl>` : ''}
+    </article>`;
+  document.getElementById('r3').innerHTML = COVER_VARIANTS.filter((v) => v.round === 3).map((v) => card(v, true)).join('');
+  document.getElementById('r2').innerHTML = COVER_VARIANTS.filter((v) => v.round === 2).map((v) => card(v, false)).join('');
+  document.getElementById('r1').innerHTML = COVER_VARIANTS.filter((v) => v.round === 1).map((v) => card(v, false)).join('');
+})();
+</script>
+</body>
+</html>

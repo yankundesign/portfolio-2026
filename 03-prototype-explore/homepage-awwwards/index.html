@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" href="data:," />
+<title>Homepage, five ways</title>
+<!-- Prototype index. Not part of the deployed site. -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,100..900,0..100,0..1;1,9..144,100..900,0..100,0..1&family=JetBrains+Mono:wght@300..500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="shared/base.css" />
+<style>
+  body { overflow: auto; }
+  :root { --m: clamp(20px, 4.2vw, 60px); }
+  .wrap { max-width: 1440px; margin: 0 auto; padding: 56px var(--m) 96px; }
+  header { display: grid; grid-template-columns: repeat(12, 1fr); column-gap: 24px; align-items: end; padding-bottom: 28px; border-bottom: 1px solid var(--ink); }
+  h1 { grid-column: 1 / 8; font-size: clamp(48px, 6.4vw, 96px); font-weight: 300; line-height: 0.92; letter-spacing: -0.04em; font-variation-settings: 'opsz' 144, 'SOFT' 0, 'WONK' 1; }
+  h1 em { font-variation-settings: 'opsz' 144, 'SOFT' 100, 'WONK' 1; }
+  header p { grid-column: 8 / 13; font-size: 17px; line-height: 1.5; font-weight: 350; font-variation-settings: 'opsz' 18; max-width: 42ch; }
+  .k { color: var(--ink-soft); margin: 18px 0 0; grid-column: 1 / -1; display: flex; gap: 28px; flex-wrap: wrap; }
+
+  .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 56px 32px; margin-top: 44px; }
+  .card { display: grid; gap: 14px; }
+  .shot { position: relative; aspect-ratio: 1440 / 900; border: 1px solid var(--ink); overflow: hidden; background: var(--paper); container-type: inline-size; }
+  .shot iframe { position: absolute; left: 0; top: 0; width: 1440px; height: 900px; border: 0; transform-origin: 0 0; pointer-events: none; }
+  .shot a { position: absolute; inset: 0; z-index: 2; }
+  .shot a:focus-visible { outline-offset: -4px; }
+  .row1 { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; }
+  .row1 h2 { font-size: 34px; font-weight: 350; letter-spacing: -0.02em; line-height: 1; font-variation-settings: 'opsz' 72; }
+  .row1 h2 span { font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; color: var(--ink-soft); margin-right: 12px; vertical-align: 0.6em; }
+  .row1 a { white-space: nowrap; }
+  .row1 a:hover { text-decoration: underline; text-underline-offset: 3px; }
+  .job { font-size: 18px; line-height: 1.45; font-weight: 300; font-style: italic; font-variation-settings: 'opsz' 24, 'SOFT' 50; max-width: 52ch; }
+  .refs { list-style: none; border-top: 1px solid var(--ink-muted); }
+  .refs li { display: grid; grid-template-columns: 170px 1fr; gap: 16px; padding: 8px 0 7px; border-bottom: 1px solid var(--ink-muted); font-size: 14.5px; line-height: 1.45; font-weight: 350; font-variation-settings: 'opsz' 14; }
+  .refs b { font-family: var(--mono); font-weight: 400; font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-soft); padding-top: 3px; }
+
+  .const { border: 1px solid var(--ink-muted); padding: 22px 24px; align-self: start; display: grid; gap: 12px; }
+  .const h2 { font-size: 26px; font-weight: 350; letter-spacing: -0.015em; font-variation-settings: 'opsz' 48; }
+  .const ul { padding-left: 18px; display: grid; gap: 7px; font-size: 15px; line-height: 1.5; font-weight: 350; font-variation-settings: 'opsz' 14; }
+  @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } header p { grid-column: 1 / -1; margin-top: 16px; } h1 { grid-column: 1 / -1; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Homepage, <em>five ways</em></h1>
+    <p>Five directions for the homepage, each built against three references from your collection. The notebook opening stays the key experience in all of them: same book, same geometry as the live transition, different choreography.</p>
+    <div class="k mono"><span>Prototype · not deployed</span><span>Desktop · 1440 × 900 reference</span><span>Keys 1–5 switch · N for notes</span></div>
+  </header>
+
+  <section class="grid" id="grid"></section>
+</div>
+<div class="grain" aria-hidden="true"></div>
+
+<script>
+(async () => {
+const D = [
+  { f: '01-monograph.html', id: '01', name: 'Monograph', job: 'The name and the notebook are the whole first impression. Proportion does the work.',
+    refs: [['Way of Living', 'One object at real scale; its shadow falls away from the cursor like a lamp.'], ['Maiskaia Alla', 'An expressive title in a quiet frame; the notebook stands in front of the name.'], ['Obys', 'Poster-size name, 11px everything else, nothing in between. Weight swells under the cursor.']] },
+  { f: '01-1-monograph-grid.html', id: '1.1', name: 'Monograph · grid', job: '01 set on the live site’s plate: the numbered 12-column ruling and the paper wave grid. The notebook sends a ripple through the plate as it opens and lands.',
+    refs: [['Stameska', 'Structure stays visible; the name locks to columns 1 and 12.'], ['Way of Living', 'One object at real scale, shadow away from the cursor.'], ['Live desk', 'useWaveGrid ported 1:1; the column under the cursor lights its number.']] },
+  { f: '02-index.html', id: '02', name: 'Index', job: 'The contents page comes out of the book. Hovering a title lifts the cover just far enough to show that project inside.',
+    refs: [['Stameska', 'Visible structure: column rulings, a ruled header, register ticks around the object.'], ['Lens', 'An index with three clear type levels, where each row previews its story.'], ['Upstream', 'The project screen is the hero, shown on the notebook’s own page.']] },
+  { f: '03-drawing.html', id: '03', name: 'Drawing', job: 'The architect’s eye: the notebook is measured before it is shown, and the drawing’s title block is the navigation.',
+    refs: [['Okta', 'The rule beside the form: dimensions and extension lines next to the object.'], ['Modern', 'Line drawing and finished object together; the photo develops inside its construction.'], ['Cohere', 'One governing idea makes the system: the title block holds résumé, about and email.']] },
+  { f: '04-peel.html', id: '04', name: 'Peel', job: 'Opening is a gesture you perform: grab the cover, pull, and it decides by distance and speed.',
+    refs: [['Jaz Mingo', 'Physical evidence: the résumé tucked under the cover, a photo under the band.'], ['Trato', 'One handwritten note inside a disciplined layout, where it carries the instruction.'], ['Sonner', 'One behaviour done carefully: follow, resist, settle or open.']] },
+  { f: '05-sentence.html', id: '05', name: 'Sentence', job: 'One sentence introduces you, and its nouns are the navigation. The notebook in the line is the real book.',
+    refs: [['Off the Record', 'Oversized serif; hierarchy from roman vs. italic, not more colour or size.'], ['Perplexity', 'Identity inside the interaction: the sentence is the nav.'], ['Rauno · Craft', 'Small details worth inspecting: the page tilts, the photos fan, the colon ticks.']] },
+];
+const grid = document.getElementById('grid');
+grid.innerHTML = D.map((d, i) => `
+  <article class="card">
+    <div class="shot"><iframe src="${d.f}?embed=1" title="${d.name} preview" loading="lazy" tabindex="-1"></iframe><a href="${d.f}" aria-label="Open ${d.name}"></a></div>
+    <div class="row1"><h2><span>${d.id || String(i + (i > 0 ? 0 : 1)).padStart(2, '0')}</span>${d.name}</h2><a class="mono" href="${d.f}">Open →</a></div>
+    <p class="job">${d.job}</p>
+    <ul class="refs">${d.refs.map((r) => `<li><b>${r[0]}</b><span>${r[1]}</span></li>`).join('')}</ul>
+  </article>`).join('') + `
+  <aside class="const">
+    <h2>The same in all five</h2>
+    <ul>
+      <li>One shared notebook (<code>shared/book.js</code>) using the live transition’s geometry: cover hinged at the spine, back of the cover is the spread’s left page, light from one angle value.</li>
+      <li>Fraunces only for display and text, pushed through its axes (optical size, weight, SOFT, WONK). JetBrains Mono for labels. Caveat once, in 04.</li>
+      <li>Ink and paper only. No cobalt, no new colours.</li>
+      <li>Inside the book: a contents page and a plate for the six current projects, with real titles and subtitles from <code>projects.ts</code>.</li>
+      <li>Reduced motion: every open and close becomes a 240ms cross-fade.</li>
+      <li>Cat roulette is cut everywhere; Yogurt lives on in the About photos (04, 05).</li>
+      <li>01 and 1.1 use the code-built Archive cover; the others keep the photo cover.</li>
+      <li>Inside, nothing is pre-selected: the right page is an overview of all six plates until you point at a title. Close with the tab on the book’s edge, a click on the paper around it, or Esc.</li>
+    </ul>
+  </aside>`;
+
+const fit = () => document.querySelectorAll('.shot').forEach((s) => { s.querySelector('iframe').style.transform = `scale(${s.clientWidth / 1440})`; });
+addEventListener('resize', fit); fit();
+})();
+</script>
+</body>
+</html>

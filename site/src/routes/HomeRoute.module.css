@@ -1,0 +1,332 @@
+/*
+ * HomeRoute — 01 · Monograph.
+ * One object, one name. Proportion does the work: the name at poster scale,
+ * everything else at 11px mono, nothing in between.
+ */
+
+.home {
+  --m: clamp(24px, 4.2vw, 60px);
+  --name: min(17.5vw, 31vh);
+  position: fixed;
+  inset: 0;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+/* The cursor is a lamp: a soft light on the paper under it. */
+.lamp {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: radial-gradient(circle at var(--mx, 50%) var(--my, 40%), rgba(255, 252, 243, 0.75), rgba(255, 252, 243, 0) 38%);
+  mix-blend-mode: soft-light;
+  transition: opacity 600ms var(--ease-page);
+}
+
+.frame {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+}
+
+.top {
+  position: absolute;
+  left: var(--m);
+  right: var(--m);
+  top: 0;
+  height: 64px;
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  column-gap: var(--grid-gutter);
+  align-items: end;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--ink-muted);
+}
+
+.top,
+.aside,
+.n,
+.arrow {
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.c1 { grid-column: 1 / 5; }
+.c2 { grid-column: 5 / 9; text-align: center; }
+.c3 { grid-column: 9 / 13; text-align: right; }
+
+/* The name: Fraunces at optical size 144, WONK on; weight follows the cursor. */
+.name {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  margin: 0;
+  pointer-events: none;
+  font-family: var(--font-display);
+  font-weight: 300;
+}
+
+.line {
+  position: absolute;
+  display: block;
+  white-space: nowrap;
+  font-size: var(--name);
+  line-height: 1;
+  letter-spacing: -0.045em;
+  font-variation-settings: 'opsz' 144, 'SOFT' 0, 'WONK' 1;
+  clip-path: inset(-0.1em -0.2em -0.3em -0.2em);
+  transition: transform 1000ms var(--ease-page), opacity 700ms var(--ease-page);
+}
+
+.l1 { left: calc(var(--m) - 0.05em); top: calc(64px + 2.2vh); }
+.l2 { right: calc(var(--m) - 0.02em); bottom: calc(18px + 2.2vh); font-style: italic; }
+
+/* Letters rise out of their line on a homepage visit. */
+.ch {
+  display: inline-block;
+  animation: rise 1100ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(120ms + var(--i) * 55ms + var(--line) * 140ms);
+}
+
+@keyframes rise {
+  from { transform: translateY(110%); }
+  to { transform: translateY(0); }
+}
+
+.home[data-start='open'] .ch { animation: none; }
+
+.slot {
+  position: absolute;
+  left: 50%;
+  top: calc(50% + 4px);
+  z-index: 3;
+  height: min(54vh, 62vw);
+  aspect-ratio: 0.7395;
+  translate: -50% -50%;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  cursor: pointer;
+}
+
+.slot:focus-visible {
+  outline: 1.5px solid var(--ink);
+  outline-offset: 6px;
+}
+
+.aside {
+  position: absolute;
+  right: var(--m);
+  top: calc(64px + 4.4vh);
+  z-index: 3;
+  display: grid;
+  gap: 6px;
+  text-align: right;
+  color: var(--ink-soft);
+}
+
+.index {
+  position: absolute;
+  left: var(--m);
+  top: calc(50% + 2vh);
+  z-index: 3;
+  width: min(25vw, 360px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--ink-muted);
+}
+
+.index li { border-bottom: 1px solid var(--ink-muted); }
+
+.index a,
+.index button {
+  display: grid;
+  grid-template-columns: 34px 1fr auto;
+  align-items: baseline;
+  width: 100%;
+  padding: 11px 0 10px;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.index a:focus-visible,
+.index button:focus-visible {
+  outline: 1.5px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.n { color: var(--ink-soft); }
+.arrow { transition: transform var(--duration-hover) var(--ease-out); }
+
+.lbl {
+  font-family: var(--font-display);
+  font-size: 19px;
+  font-weight: 350;
+  letter-spacing: -0.005em;
+  font-variation-settings: 'opsz' 24;
+}
+
+.index a:hover .arrow,
+.index button:hover .arrow { transform: translateX(4px); }
+
+.index a:hover .lbl,
+.index button:hover .lbl { font-style: italic; }
+
+/* About: a photo trails the cursor while the link is hovered. */
+.peek {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 20;
+  width: 190px;
+  padding: 8px 8px 30px;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  box-shadow: 0 18px 30px rgba(22, 38, 94, 0.18);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 200ms var(--ease-out);
+}
+
+.peek img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+}
+
+.peek span {
+  position: absolute;
+  left: 10px;
+  bottom: 9px;
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.peek[data-on='true'] { opacity: 1; }
+
+/* The notebook layer arrives a beat after the name. */
+.bookFade {
+  /* its own layer, above the name and labels (frame z 1, lamp z 2) */
+  position: relative;
+  z-index: 10;
+  animation: fadeIn 700ms var(--ease-page) 250ms both;
+}
+.home[data-start='open'] .bookFade { animation: none; }
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ─── While the book is open (or opening/closing), the page steps aside ─── */
+.top,
+.aside,
+.index { transition: opacity 360ms var(--ease-page); }
+
+.home:not([data-book='closed']) .top,
+.home:not([data-book='closed']) .aside,
+.home:not([data-book='closed']) .index { opacity: 0; pointer-events: none; }
+
+.home:not([data-book='closed']) .l1 { transform: translateX(-38vw); opacity: 0; }
+.home:not([data-book='closed']) .l2 { transform: translateX(38vw); opacity: 0; }
+.home:not([data-book='closed']) .lamp { opacity: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ch { animation: none; }
+  .home:not([data-book='closed']) .l1,
+  .home:not([data-book='closed']) .l2 { transform: none; }
+  .lamp { display: none; }
+}
+
+/* ─── Narrow screens: the composition stacks; the page scrolls ─── */
+@media (max-width: 900px) {
+  .home {
+    --m: var(--plate-margin-mobile);
+    --name: 21vw;
+    overflow-y: auto;
+  }
+
+  .lamp,
+  .peek { display: none; }
+
+  .frame {
+    position: relative;
+    inset: auto;
+    min-height: 100%;
+    display: grid;
+    grid-template-rows: auto auto auto auto auto;
+    padding: 0 var(--m) 40px;
+  }
+
+  .top {
+    position: relative;
+    left: auto;
+    right: auto;
+    height: auto;
+    padding: 18px 0 12px;
+    grid-template-columns: 1fr 1fr;
+    row-gap: 4px;
+  }
+
+  .c1 { grid-column: 1; }
+  .c2 { grid-column: 1; text-align: left; grid-row: 2; }
+  .c3 { grid-column: 2; grid-row: 1; }
+
+  .name {
+    position: relative;
+    inset: auto;
+    display: grid;
+    margin-top: 16px;
+  }
+
+  .line,
+  .l1,
+  .l2 {
+    position: relative;
+    left: auto;
+    right: auto;
+    top: auto;
+    bottom: auto;
+  }
+
+  .l2 { justify-self: end; margin-top: -0.12em; }
+
+  .aside {
+    position: relative;
+    right: auto;
+    top: auto;
+    margin-top: 14px;
+    text-align: left;
+  }
+
+  .slot {
+    position: relative;
+    left: auto;
+    top: auto;
+    translate: none;
+    justify-self: center;
+    height: auto;
+    width: min(64vw, 300px);
+    margin: 28px 0 32px;
+  }
+
+  .index {
+    position: relative;
+    left: auto;
+    top: auto;
+    width: 100%;
+  }
+}

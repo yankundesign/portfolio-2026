@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" href="data:," />
+<title>01 · Monograph — homepage prototype</title>
+<!-- Prototype only. Not part of the deployed site. Serve from the repo root (launch config "prototypes"). -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..600&family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,100..900,0..100,0..1;1,9..144,100..900,0..100,0..1&family=JetBrains+Mono:wght@300..500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="shared/base.css" />
+<style>
+  /* One object, one name. Proportion does the work: the name at poster
+   * scale, everything else at 11px, nothing in between. */
+  :root { --m: clamp(24px, 4.2vw, 60px); --name: min(17.5vw, 31vh); }
+
+  .lamp {
+    position: fixed; inset: 0; pointer-events: none; z-index: 2;
+    background: radial-gradient(circle at var(--mx, 50%) var(--my, 40%), rgba(255, 252, 243, 0.75), rgba(255, 252, 243, 0) 38%);
+    mix-blend-mode: soft-light;
+    transition: opacity 600ms var(--ease-paper);
+  }
+
+  .frame { position: fixed; inset: 0; z-index: 1; }
+  .top {
+    position: absolute; left: var(--m); right: var(--m);
+    display: grid; grid-template-columns: repeat(12, 1fr); column-gap: 24px; align-items: end;
+    color: var(--ink);
+  }
+  .top { top: 0; height: 64px; padding-bottom: 14px; border-bottom: 1px solid var(--ink-muted); }
+  .top .c1 { grid-column: 1 / 5; }
+  .top .c2 { grid-column: 5 / 9; text-align: center; }
+  .top .c3 { grid-column: 9 / 13; text-align: right; }
+
+  /* The name: Fraunces at optical size 144, WONK on, weight follows the cursor. */
+  .name { position: absolute; inset: 0; pointer-events: none; font-weight: 300; z-index: 1; }
+  .line {
+    position: absolute; display: block; white-space: nowrap;
+    font-size: var(--name); line-height: 1; letter-spacing: -0.045em;
+    font-variation-settings: 'opsz' 144, 'SOFT' 0, 'WONK' 1;
+    clip-path: inset(-0.1em -0.2em -0.3em -0.2em);
+    transition: transform 1000ms var(--ease-paper), opacity 700ms var(--ease-paper);
+  }
+  .line .ch { display: inline-block; will-change: transform; }
+  .l1 { left: calc(var(--m) - 0.05em); top: calc(64px + 2.2vh); }
+  .l2 { right: calc(var(--m) - 0.02em); bottom: calc(18px + 2.2vh); font-style: italic; }
+
+  .slot {
+    position: absolute; left: 50%; top: calc(50% + 4px); height: min(54vh, 62vw); aspect-ratio: var(--nb-aspect, 0.7395);
+    transform: translate(-50%, -50%); /* centring only — the book reads the box, not the transform */
+    border-radius: 6px; cursor: pointer; z-index: 3;
+  }
+
+  .index {
+    position: absolute; left: var(--m); top: calc(50% + 2vh); z-index: 3;
+    list-style: none; display: grid; gap: 0; width: min(25vw, 360px);
+    border-top: 1px solid var(--ink-muted);
+  }
+  .index li { border-bottom: 1px solid var(--ink-muted); }
+  .index a, .index button {
+    display: grid; grid-template-columns: 34px 1fr auto; align-items: baseline; width: 100%;
+    padding: 11px 0 10px; text-align: left;
+  }
+  .index .n { color: var(--ink-soft); }
+  .index .arrow { transition: transform var(--hover); }
+  .index a:hover .arrow, .index button:hover .arrow { transform: translateX(4px); }
+  .index a:hover .lbl, .index button:hover .lbl { font-style: italic; }
+  .index .lbl { font-family: var(--serif); font-size: 19px; font-weight: 350; letter-spacing: -0.005em; text-transform: none; font-variation-settings: 'opsz' 24; }
+
+  .aside {
+    position: absolute; right: var(--m); top: calc(64px + 4.4vh); z-index: 3; text-align: right;
+    display: grid; gap: 6px; color: var(--ink-soft);
+  }
+
+  /* Hover image for "About" — trails the cursor. */
+  .peek {
+    position: fixed; left: 0; top: 0; width: 190px; z-index: 20; pointer-events: none;
+    border: 1px solid var(--ink); background: var(--paper); padding: 8px 8px 30px;
+    box-shadow: 0 18px 30px rgba(22, 38, 94, 0.18);
+    opacity: 0; transition: opacity 200ms var(--ease-out);
+  }
+  .peek img { width: 100%; aspect-ratio: 1; object-fit: cover; }
+  .peek span { position: absolute; left: 10px; bottom: 9px; }
+  .peek.on { opacity: 1; }
+
+  /* Choreography around the open */
+  .frame > .top, .index, .aside { transition: opacity 360ms var(--ease-paper); }
+  html.nb-open .frame > .top, html.nb-open .index, html.nb-open .aside { opacity: 0; pointer-events: none; }
+  html.nb-open .l1 { transform: translateX(-38vw); opacity: 0; }
+  html.nb-open .l2 { transform: translateX(38vw); opacity: 0; }
+  html.nb-open .lamp { opacity: 0; }
+  html.rm.nb-open .l1, html.rm.nb-open .l2 { transform: none; }
+
+  .intro .ch { transform: translateY(110%); }
+  .intro .frame > .top, .intro .index, .intro .aside { opacity: 0; }
+  .intro .book-layer { opacity: 0; }
+  .book-layer { transition: opacity 700ms var(--ease-paper); }
+</style>
+</head>
+<body class="intro">
+<div class="lamp" aria-hidden="true"></div>
+
+<main class="frame">
+  <header class="top mono">
+    <span class="c1">Yankun Wang</span>
+    <span class="c2">Senior product designer</span>
+    <span class="c3">San Francisco · 2026</span>
+  </header>
+
+  <h1 class="name" aria-label="Yankun Wang">
+    <span class="line l1" aria-hidden="true">Yankun</span>
+    <span class="line l2" aria-hidden="true">Wang</span>
+  </h1>
+
+  <div class="aside mono" aria-label="Status">
+    <span>Field notebook · Vol. V</span>
+    <span>Six projects, 2020–2026</span>
+  </div>
+
+  <button class="slot" type="button" aria-expanded="false" aria-label="Open the notebook: selected work"></button>
+
+  <ul class="index mono" aria-label="Pages">
+    <li><button type="button" data-open><span class="n">01</span><span class="lbl">Works</span><span class="arrow">→</span></button></li>
+    <li><a href="../../site/public/Yankun-Wang-CV-2026.pdf" target="_blank" rel="noopener"><span class="n">02</span><span class="lbl">Résumé</span><span class="arrow">PDF ↗</span></a></li>
+    <li><a href="https://yankun.design/about" target="_blank" rel="noopener" data-peek><span class="n">03</span><span class="lbl">About</span><span class="arrow">→</span></a></li>
+    <li><a href="mailto:yankunux@gmail.com"><span class="n">04</span><span class="lbl">Email</span><span class="arrow">↗</span></a></li>
+  </ul>
+
+</main>
+
+<div class="peek" aria-hidden="true"><img src="../../site/public/images/about/me.png" alt=""><span class="mono">Yankun, 2026</span></div>
+<div class="grain" aria-hidden="true"></div>
+
+<script src="shared/book.js"></script>
+<script src="shared/proto.js"></script>
+<script>
+(async () => {
+const { Book, COVER_VARIANTS, reduced, clamp, lerp } = window.NB;
+const { protoChrome } = window.NBProto;
+
+protoChrome({
+  n: 1,
+  job: 'Make the name and the notebook the whole first impression.',
+  refs: [
+    ['Way of Living', 'one physical object at real scale; its edge and shadow do the work. Shadow falls away from the cursor, like a lamp.'],
+    ['Maiskaia Alla', 'an expressive title sharing the plate with a quiet frame. The notebook stands in front of the name.'],
+    ['Obys', 'decisive proportion: name at poster size, everything else 11px mono, no middle sizes.'],
+  ],
+  look: [
+    'Move the cursor across the name: Fraunces weight and softness swell under it (variable axes, not a font swap).',
+    'Hover the notebook: it tilts toward you; the shadow swings away from the light.',
+    'Click it: the name parts, the cover swings, the spread arrives. Esc closes.',
+    'Hover “About”: a photo trails the cursor.',
+    'Cover: switch K–O (lines), F–J or A–E in the bar, or press [ and ]. The comparison is on covers.html.',
+  ],
+  changed: 'CV and About leave the desk and become rows in a four-line index. The cat roulette, ephemera and the two footer lines are gone. The notebook is the code-built Archive cover.',
+});
+
+const root = document.documentElement;
+const slot = document.querySelector('.slot');
+
+// Split the name into letters so each can carry its own weight.
+const letters = [];
+document.querySelectorAll('.line').forEach((line, li) => {
+  const text = line.textContent;
+  line.textContent = '';
+  [...text].forEach((c, i) => {
+    const s = document.createElement('span');
+    s.className = 'ch';
+    s.textContent = c;
+    line.appendChild(s);
+    letters.push({ el: s, w: 300, soft: 0, line: li, i });
+  });
+});
+
+// Cover variant: ?cover=a…e, the A–E buttons in the prototype bar, or [ and ].
+const ids = COVER_VARIANTS.map((v) => v.id);
+let cover = ids.includes(new URLSearchParams(location.search).get('cover')) ? new URLSearchParams(location.search).get('cover') : 'l';
+const book = new Book({ slot, cover: 'archive', coverVariant: cover });
+const bar = document.querySelector('.proto-bar');
+const pick = (v) => {
+  cover = v;
+  book.setCoverVariant(v);
+  const q = new URLSearchParams(location.search); q.set('cover', v);
+  history.replaceState(null, '', `?${q}`);
+  bar?.querySelectorAll('[data-cv]').forEach((b) => b.setAttribute('aria-pressed', b.dataset.cv === v));
+};
+if (bar) {
+  bar.insertAdjacentHTML('beforeend', `<span class="sep"></span><span class="pname">Cover</span>${COVER_VARIANTS.map((v) => `<button type="button" data-cv="${v.id}" title="${v.name}">${v.id.toUpperCase()}</button>`).join('')}`);
+  bar.querySelectorAll('[data-cv]').forEach((b) => b.addEventListener('click', () => pick(b.dataset.cv)));
+  pick(cover);
+}
+addEventListener('keydown', (e) => {
+  if (e.key !== '[' && e.key !== ']') return;
+  const i = ids.indexOf(cover);
+  pick(ids[(i + (e.key === ']' ? 1 : ids.length - 1)) % ids.length]);
+});
+slot.addEventListener('click', () => book.open());
+document.querySelector('[data-open]').addEventListener('click', () => book.open());
+
+/* ── Pointer: light, tilt, type ── */
+let mx = innerWidth / 2, my = innerHeight * 0.4, inside = false;
+addEventListener('pointermove', (e) => { mx = e.clientX; my = e.clientY; });
+slot.addEventListener('pointerenter', () => { inside = true; });
+slot.addEventListener('pointerleave', () => { inside = false; });
+
+function frame() {
+  const vw = innerWidth, vh = innerHeight;
+  root.style.setProperty('--mx', `${mx}px`);
+  root.style.setProperty('--my', `${my}px`);
+  if (book.state === 'closed' && !reduced()) {
+    const r = slot.getBoundingClientRect();
+    const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    const dx = (mx - cx) / vw, dy = (my - cy) / vh;
+    // the cursor is the lamp: shadow falls away from it
+    book.target.lx = clamp(-dx * 70, -40, 40);
+    book.target.ly = clamp(18 - dy * 30, 6, 34);
+    book.target.tiltY = (inside ? 9 : 3) * clamp(dx * 2, -1, 1);
+    book.target.tiltX = (inside ? -7 : -2) * clamp(dy * 2, -1, 1);
+    book.target.lift = inside ? 0.025 : 0;
+    book.target.blur = inside ? 30 : 22;
+    book.target.shadow = inside ? 0.45 : 0.55;
+
+    const R = vw * 0.2;
+    for (const L of letters) {
+      const b = L.el.getBoundingClientRect();
+      const d = Math.hypot(mx - (b.left + b.width / 2), my - (b.top + b.height * 0.55));
+      const f = Math.exp(-((d / R) ** 2));
+      L.w = lerp(L.w, 300 + 330 * f, 0.14);
+      L.soft = lerp(L.soft, 100 * f, 0.14);
+      L.el.style.fontWeight = L.w.toFixed(1);
+      L.el.style.fontVariationSettings = `'opsz' 144, 'SOFT' ${L.soft.toFixed(1)}, 'WONK' 1`;
+    }
+  }
+  requestAnimationFrame(frame);
+}
+
+/* ── About photo trails the cursor ── */
+const peek = document.querySelector('.peek');
+let px = 0, py = 0, pr = 0;
+document.querySelector('[data-peek]').addEventListener('pointerenter', () => peek.classList.add('on'));
+document.querySelector('[data-peek]').addEventListener('pointerleave', () => peek.classList.remove('on'));
+(function trail() {
+  const nx = lerp(px, mx + 28, 0.16), ny = lerp(py, my - 120, 0.16);
+  pr = lerp(pr, clamp((nx - px) * 0.8, -10, 10), 0.2);
+  px = nx; py = ny;
+  peek.style.transform = `translate(${px}px, ${py}px) rotate(${pr}deg)`;
+  requestAnimationFrame(trail);
+})();
+
+/* ── Intro: letters rise out of their line, the book settles ── */
+await document.fonts.ready;
+book.measure(); book.render();
+book.cur.lift = 0.07; book.cur.shadow = 0; book.cur.blur = 40;
+requestAnimationFrame(() => {
+  document.body.classList.remove('intro');
+  if (!reduced()) {
+    letters.forEach((L, k) => {
+      L.el.animate([{ transform: 'translateY(110%)' }, { transform: 'translateY(0)' }],
+        { duration: 1100, delay: 120 + k * 55 + L.line * 140, easing: 'cubic-bezier(0.16, 1, 0.3, 1)', fill: 'backwards' });
+    });
+  }
+  frame();
+});
+})();
+</script>
+</body>
+</html>

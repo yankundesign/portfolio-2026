@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" href="data:," />
+<title>04 · Peel — homepage prototype</title>
+<!-- Prototype only. Not part of the deployed site. -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..600&family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,100..900,0..100,0..1;1,9..144,100..900,0..100,0..1&family=JetBrains+Mono:wght@300..500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="shared/base.css" />
+<style>
+  /* The notebook as a thing you pick up. Grab the cover and pull:
+   * it follows your hand, resists a little, and either opens or settles back. */
+  :root { --m: clamp(24px, 4.2vw, 60px); }
+
+  .who { position: fixed; left: var(--m); top: calc(var(--m) - 12px); z-index: 3; }
+  .who h1 { font-size: 40px; font-weight: 300; font-style: italic; line-height: 1; letter-spacing: -0.02em; font-variation-settings: 'opsz' 72, 'SOFT' 100, 'WONK' 1; }
+  .who p { margin-top: 10px; color: var(--ink-soft); }
+  .meta { position: fixed; right: var(--m); top: calc(var(--m) - 6px); z-index: 3; text-align: right; display: grid; gap: 5px; color: var(--ink-soft); }
+  .meta a { color: var(--ink); }
+  .meta a:hover { text-decoration: underline; text-underline-offset: 3px; }
+  .foot { position: fixed; left: var(--m); right: var(--m); bottom: calc(var(--m) - 24px); z-index: 3; display: flex; justify-content: space-between; color: var(--ink-soft); }
+
+  .slot { position: fixed; left: 44vw; top: 52vh; height: min(72vh, 52vw); aspect-ratio: 947 / 1380; translate: -50% -50%; z-index: 4; cursor: grab; border-radius: 8px; touch-action: none; }
+  .slot.dragging { cursor: grabbing; }
+
+  /* Résumé tucked under the front cover */
+  .cv {
+    position: fixed; z-index: 5; width: min(32vw, 470px); left: calc(44vw + min(36vh, 26vw) * 0.686 - 150px); top: 30vh;
+    rotate: 5deg; transition: translate 520ms var(--ease-out), rotate 520ms var(--ease-out), opacity 300ms;
+    filter: drop-shadow(0 10px 12px rgba(22, 38, 94, 0.12)) drop-shadow(0 1px 1.5px rgba(22, 38, 94, 0.2));
+  }
+  .cv img { width: 100%; }
+  .cv:hover { translate: 18px -2px; }
+  .cv.out { translate: 46% 6px; rotate: 1deg; }
+  .cv-pdf { position: absolute; right: 0; top: calc(100% + 12px); opacity: 0; transition: opacity 240ms 200ms; pointer-events: none; }
+  .cv.out .cv-pdf { opacity: 1; pointer-events: auto; }
+  .cv-pdf:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+  /* About: a polaroid under the elastic band, which fans into four */
+  .pola-stack { position: fixed; z-index: 20; left: calc(44vw + min(36vh, 26vw) * 0.686 - 128px); top: calc(52vh - min(36vh, 26vw) + 34px); width: 112px; height: 150px; }
+  .pola {
+    position: absolute; left: 0; top: 0; width: 112px; padding: 7px 7px 26px; background: #fbf9f4; border: 1px solid rgba(22, 38, 94, 0.18);
+    box-shadow: 0 8px 14px rgba(22, 38, 94, 0.16), 0 1px 1.5px rgba(22, 38, 94, 0.18);
+    transform: translate(var(--x, 0px), var(--y, 0px)) rotate(var(--r, 7deg)) scale(var(--s, 1));
+    transition: transform 620ms var(--ease-out), box-shadow 300ms, opacity 300ms;
+  }
+  .pola img { width: 100%; aspect-ratio: 1; object-fit: cover; }
+  .pola span { position: absolute; left: 8px; bottom: 7px; font-size: 9px; }
+  .pola-stack > button.pola:first-of-type { cursor: pointer; }
+  .pola.top { z-index: 1; }
+  .pola-stack:not(.fan) .pola:not(.top) { opacity: 0; pointer-events: none; }
+  .pola-stack:not(.fan) .pola.top:hover { --y: -6px; --r: 4deg; box-shadow: 0 16px 22px rgba(22, 38, 94, 0.2), 0 1px 1.5px rgba(22, 38, 94, 0.18); }
+  .pola-stack.fan .pola { --s: 1.6; cursor: pointer; }
+  html.fanned .hand { opacity: 0; }
+
+  /* One handwritten note, where it carries the instruction */
+  .hand { position: fixed; z-index: 6; left: calc(44vw + min(36vh, 26vw) * 0.686 + 34px); top: calc(52vh + min(36vh, 26vw) * 0.42); pointer-events: none; color: var(--ink); }
+  .hand span { font-family: var(--hand); font-size: 30px; font-weight: 500; display: block; rotate: -4deg; translate: 22px 0; }
+  .hand svg { display: block; margin-top: -2px; }
+  .hand path { fill: none; stroke: var(--ink); stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* Choreography */
+  .who, .meta, .foot, .cv, .hand { transition: opacity 360ms var(--ease-paper), translate 520ms var(--ease-out), rotate 520ms var(--ease-out); }
+  html.nb-open .who, html.nb-open .meta, html.nb-open .foot, html.nb-open .cv, html.nb-open .hand { opacity: 0; pointer-events: none; }
+  html.nb-open .pola-stack .pola { opacity: 0; --y: 60px; --r: 22deg; }
+  html.dragging .hand { opacity: 0; }
+  .intro .who, .intro .meta, .intro .foot, .intro .hand { opacity: 0; }
+  .intro .cv { translate: -60px 0; opacity: 0; }
+  .intro .pola-stack .pola { --y: -40px; opacity: 0; }
+  .intro .book-layer { opacity: 0; }
+  .book-layer { transition: opacity 600ms var(--ease-paper); }
+</style>
+</head>
+<body class="intro">
+<header class="who">
+  <h1>Yankun Wang</h1>
+  <p class="mono">Senior product designer · San Francisco</p>
+</header>
+<div class="meta mono">
+  <span>Field notebook · Vol. V</span>
+  <span>2020–2026</span>
+  <a href="mailto:yankunux@gmail.com">Email ↗</a>
+</div>
+
+<button class="slot" type="button" aria-expanded="false" aria-label="Open the notebook: selected work. You can also drag the cover open."></button>
+
+<div class="cv">
+  <button type="button" aria-label="Pull out the résumé" style="display:block;width:100%"><img src="../../site/public/plate/cv.webp" alt="Résumé, one page"></button>
+  <a class="cv-pdf mono" href="../../site/public/Yankun-Wang-CV-2026.pdf" target="_blank" rel="noopener">Résumé · PDF ↗</a>
+</div>
+
+<div class="pola-stack" aria-label="About">
+  <button class="pola top" type="button" aria-label="About: show photos" style="--r:7deg"><img src="../../site/public/images/about/me.png" alt="Yankun"><span class="mono">About</span></button>
+  <div class="pola" style="--r:-3deg"><img src="../../site/public/images/about/outdoor.png" alt="On a glacier"><span class="mono">Outside</span></div>
+  <div class="pola" style="--r:4deg"><img src="../../site/public/images/about/hobby.png" alt="A model kit, half built"><span class="mono">Building</span></div>
+  <div class="pola" style="--r:-6deg"><img src="../../site/public/images/about/yogurt.png" alt="Yogurt the cat"><span class="mono">Yogurt</span></div>
+</div>
+
+<div class="hand" aria-hidden="true">
+  <span>lift the cover</span>
+  <svg width="120" height="70" viewBox="0 0 120 70"><path d="M100 6 C 92 34, 62 54, 14 52"/><path d="M24 44 L 13 52 L 24 60"/></svg>
+</div>
+
+<footer class="foot mono">
+  <span>Currently — building something fun</span>
+  <span>Designed and built with Claude and Codex</span>
+</footer>
+<div class="grain" aria-hidden="true"></div>
+
+<script src="shared/book.js"></script>
+<script src="shared/proto.js"></script>
+<script>
+(async () => {
+const { Book, Spring, ease, clamp, reduced } = window.NB;
+const { protoChrome } = window.NBProto;
+
+protoChrome({
+  n: 4,
+  job: 'Make opening the notebook a physical gesture you perform, not a link you click.',
+  refs: [
+    ['Jaz Mingo’s editorial portfolio', 'physical evidence of making: the résumé is tucked under the cover, a photo is held by the elastic band.'],
+    ['Trato', 'one human mark inside a disciplined system: a single handwritten note, where it carries the instruction.'],
+    ['Emil Kowalski · Sonner', 'one behaviour, done carefully: the cover follows your hand, resists, and decides by distance and speed.'],
+  ],
+  look: [
+    'Grab the cover and drag left. Let go early: it settles back. Pull far or flick: it opens.',
+    'A plain click still opens it (and Enter/Space).',
+    'Hover the résumé: it slides out a little. Click: it pulls clear, with the PDF link.',
+    'Click the polaroid: it fans into four photos.',
+  ],
+  changed: 'CV is the tucked sheet; About is the polaroid under the band. Cat roulette is gone; Yogurt moves into the About photos.',
+});
+
+const root = document.documentElement;
+const slot = document.querySelector('.slot');
+const book = new Book({ slot, restRotate: -3 });
+
+/* ── Drag the cover ── */
+let drag = null, moved = 0;
+const back = new Spring(0, { stiffness: 320, damping: 30, onUpdate: (x) => { if (book.state === 'closed' && !drag) { book.setCover(Math.max(0, x)); book.setCamera(Math.max(0, x) * 0.05); } } });
+
+slot.addEventListener('pointerdown', (e) => {
+  if (book.state !== 'closed' || reduced()) return;
+  slot.setPointerCapture(e.pointerId);
+  book.stopPeek();
+  const r = slot.getBoundingClientRect();
+  drag = { x0: e.clientX, w: r.width, lastX: e.clientX, lastT: performance.now(), v: 0, p: book.p };
+  moved = 0;
+});
+slot.addEventListener('pointermove', (e) => {
+  if (!drag) {
+    // near the fore-edge the cover cracks open a little: an invitation
+    if (book.state === 'closed' && !reduced()) {
+      const r = slot.getBoundingClientRect();
+      const near = (e.clientX - r.left) / r.width > 0.7;
+      book.peek(near ? 0.03 : 0);
+    }
+    return;
+  }
+  const dx = e.clientX - drag.x0;
+  moved = Math.max(moved, Math.abs(dx));
+  if (moved < 4) return;
+  root.classList.add('dragging');
+  slot.classList.add('dragging');
+  const now = performance.now();
+  drag.v = 0.7 * drag.v + 0.3 * ((drag.lastX - e.clientX) / Math.max(1, now - drag.lastT)); // px/ms, leftward +
+  drag.lastX = e.clientX; drag.lastT = now;
+  // resistance: the board is stiff at first, then gives
+  const x = clamp(-dx / (drag.w * 1.35), 0, 1.1);
+  const p = clamp(x < 0.12 ? x * 0.55 : 0.066 + (x - 0.12) * 1.07, 0, 0.98);
+  drag.p = p;
+  book.setCover(p);
+  book.setCamera(p * 0.05);
+  book.target.lift = 0.012;
+});
+const end = () => {
+  if (!drag) return;
+  const { p, v } = drag;
+  drag = null;
+  root.classList.remove('dragging');
+  slot.classList.remove('dragging');
+  book.target.lift = 0;
+  if (moved < 4) return; // a click — handled below
+  if (p > 0.32 || v > 0.55) {
+    book.open({ from: { t: book.t, p }, duration: 700 + 700 * (1 - p), cover: (k) => ease.out(k), camera: (k) => ease.push(k) });
+  } else {
+    back.jump(p);
+    back.set(0);
+  }
+};
+slot.addEventListener('pointerup', end);
+slot.addEventListener('pointercancel', end);
+slot.addEventListener('pointerleave', () => { if (!drag) book.peek(0); });
+slot.addEventListener('click', () => { if (moved < 4 && book.state === 'closed') book.open(); });
+
+/* ── Résumé: slides out ── */
+const cv = document.querySelector('.cv');
+cv.querySelector('button').addEventListener('click', () => {
+  if (cv.classList.contains('out')) window.open(cv.querySelector('a').href, '_blank', 'noopener');
+  cv.classList.add('out');
+});
+document.addEventListener('pointerdown', (e) => { if (!cv.contains(e.target)) cv.classList.remove('out'); });
+
+/* ── About: fan of four ── */
+const stack = document.querySelector('.pola-stack');
+const cards = [...stack.querySelectorAll('.pola')];
+// Targets as viewport fractions (card centres), so the fan always lands on screen.
+const fanTo = [
+  { fx: 0.675, fy: 0.29, r: -5 }, { fx: 0.86, fy: 0.35, r: 3 }, { fx: 0.695, fy: 0.68, r: 4 }, { fx: 0.875, fy: 0.72, r: -4 },
+];
+function fan(on) {
+  stack.classList.toggle('fan', on);
+  root.classList.toggle('fanned', on);
+  const s = stack.getBoundingClientRect();
+  cards.forEach((c, i) => {
+    if (on) {
+      const f = fanTo[i];
+      c.style.setProperty('--x', `${innerWidth * f.fx - (s.left + 56)}px`);
+      c.style.setProperty('--y', `${innerHeight * f.fy - (s.top + 75)}px`);
+      c.style.setProperty('--r', `${f.r}deg`);
+      c.style.transitionDelay = `${i * 50}ms`;
+    }
+    else { c.style.removeProperty('--x'); c.style.removeProperty('--y'); c.style.setProperty('--r', ['7deg', '-3deg', '4deg', '-6deg'][i]); c.style.transitionDelay = `${(3 - i) * 30}ms`; }
+  });
+  cv.style.opacity = on ? 0.25 : '';
+}
+cards[0].addEventListener('click', () => fan(!stack.classList.contains('fan')));
+document.addEventListener('pointerdown', (e) => { if (stack.classList.contains('fan') && !stack.contains(e.target)) fan(false); });
+addEventListener('keydown', (e) => { if (e.key === 'Escape') { fan(false); cv.classList.remove('out'); } });
+book.addEventListener('open-start', () => fan(false));
+
+await document.fonts.ready;
+book.measure(); book.render();
+book.cur.rz = 4; book.cur.lift = 0.05; book.cur.shadow = 0;
+requestAnimationFrame(() => document.body.classList.remove('intro'));
+})();
+</script>
+</body>
+</html>
