@@ -4,6 +4,87 @@ Track design and build decisions as they're made.
 
 ---
 
+## 2026-11-11 · Works page: the raised plate carries its notes; Build with AI back on the sheet
+
+Yankun asked for two changes:
+- Put the Build with AI card back, but not in the contents.
+- The right page felt thin on hover, so add descriptions and the projects' impact.
+
+**Build with AI.** `inContents: false` replaces `hidden`.
+- On desktop: the plate is back on the contact sheet, so the sheet is a full three rows of two again. It is unnumbered and has no contents row. Pointing at it lifts it but raises nothing. It is a normal link, reachable by keyboard.
+- On phones: it comes last in the list, unnumbered.
+
+**The raised plate's notes.** Under the plate's caption:
+- a summary in italic;
+- at most two figures, set in the contact sheet's two columns under a hairline, each with its label;
+- a mono facts line on the page's foot, level with the contents' foot ("Yankun Wang · 2020–2026").
+
+All the text is Yankun's own words or a real figure. Nothing was invented.
+
+| Project | Figures | Source |
+|---|---|---|
+| CHAI | 3% → 18% monthly adoption; 86% drop in zero-result searches | locked metrics in `chaiContent.ts` |
+| Agentic | 2 teams adopted the agentic strategy; 5 prototypes | the case study's glance and the canvas proof, reworded by Yankun |
+| Ebb | 12 s for three breaths, 18 s when a loop is detected; on the App Store | `ebbContent.ts` |
+| ZAO | 16 components, 7 chart instruments | zaoui.dev's own description |
+| SAP Fieldglass | 1,000+ enterprise customers adopted the homepage; 4 role templates | `sapFieldglassContent.ts` |
+
+The figures' kicker is "Impact" where they are results. Otherwise it says what they are: "By design" for Ebb, "So far" for ZAO.
+
+Agentic's status is now "In progress", as Yankun said; it was "Never shipped". The case study's glance still says "Never shipped".
+
+**Motion**
+- The notes play in after the plate: caption, summary, figures, facts, 60 ms apart.
+- They play again when the reader points at another title, because the block is keyed by project.
+- On leaving, they fade out first.
+
+**Fixed while building:** the facts were positioned absolutely, so while the caption slid in (it has a transform) they sat on the figure labels, then jumped to the foot. The caption is now a column that runs to the foot.
+
+**Verified:**
+- Dev and the production build, at 1280×720, 1440×900 and 1920×1080.
+- The facts sit on the foot line at every size, with room above them.
+- 60 fps (p95 16.8 ms).
+- Phone list.
+- No errors.
+
+---
+
+## 2026-11-11 · Works contents: captions, and the row as a solid object
+
+Yankun asked for three changes to the works page: hide Build with AI, add a caption under each project so a reader knows what it is, and make the hover feel like a solid object whose title grows a little.
+
+**Build with AI is hidden.** `hidden: true` in `data/projects.ts` keeps it off the works page and the phone list. Its case study still loads at `/works/build-with-ai`. The contact sheet now holds five plates, so its last row has one.
+
+**Captions.** Each row has one line under its title, in Yankun's own words. They come from the subtitle, impact or canvas context, cut to fit one line:
+- CHAI: "An AI assistant for IT admins"
+- Agentic: "How an admin asks, approves, and watches AI act"
+- Ebb: "A pause between the tap and the feed"
+- ZAO: "Learning design systems by building one with AI"
+- SAP Fieldglass: "Simplified vendor management workflows"
+
+Longer lines wrapped to two lines, with an orphan in one case, so every caption is one line and every row is the same height. The raised plate's caption dropped its subtitle, which repeated the row caption beside it.
+
+**The row as a solid object.** Studied the recent.design interface picks: Morphing UI Controls, SwiftUI Slider, Stock Ticker Card, Fold Toolbar.
+- The move taken: a segmented control's thumb. One solid body travels between options; each option does not light up on its own.
+- The pointed-at row becomes a band of the cover's navy, and its type is stamped on it in paper, like the cover.
+- The band rises out of the row's rule, slides between rows, and sinks back into the rule when the pointer leaves.
+- The band is a paper-on-ink copy of the rows, clipped to the row, so each letter turns as the band crosses it.
+- The title grows 6% from its left edge, and the year still turns to "Read →".
+- Hairline rules and the dimming of the other rows stay. The dimming is lighter: 0.55, was 0.45.
+- The slide has no overshoot: the settle curve's 10% cut into the next row's title.
+
+The hard rule "pointing never swaps a row's style" is replaced by "pointing never moves a row's left edges". Yankun asked for the solid object.
+
+**Verified on dev:**
+- The copy sits on the rows to the pixel.
+- 60 fps through rise, slide, a mid-slide reversal and sink (p95 16.8 ms).
+- Keyboard focus moves the band.
+- Reduced motion: the band fades in and out and cuts between rows.
+- The phone list shows the captions.
+- No errors.
+
+---
+
 ## 2026-11-11 · Craft pass shipped to yankun.design
 
 Yankun asked to apply the craft pass to the site, commit and deploy.

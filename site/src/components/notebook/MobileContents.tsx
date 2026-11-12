@@ -3,7 +3,10 @@ import type { Project } from '../../data/projects';
 import styles from './MobileContents.module.css';
 
 export interface MobileContentsProps {
+  /** Every plate, in order. */
   projects: Project[];
+  /** The numbered contents; a plate outside it is listed without a number. */
+  contents: Project[];
   onOpenProject: (project: Project) => void;
   onClose: () => void;
 }
@@ -14,9 +17,11 @@ const nn = (i: number) => String(i + 1).padStart(2, '0');
  * MobileContents — the works page on narrow screens. A 3D spread at phone
  * width would shrink the contents past reading, so the notebook's page is set
  * as a single column: the same contents, each entry with its plate and line.
+ * A plate that is on the sheet but not in the contents comes last, unnumbered.
  * It arrives with a short paper cross-fade.
  */
-export default function MobileContents({ projects, onOpenProject, onClose }: MobileContentsProps) {
+export default function MobileContents({ projects, contents, onOpenProject, onClose }: MobileContentsProps) {
+  const rowOf = (project: Project) => contents.findIndex((p) => p.slug === project.slug);
   const open = (project: Project) => (e: MouseEvent) => {
     if (project.externalUrl || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
     e.preventDefault();
@@ -31,7 +36,7 @@ export default function MobileContents({ projects, onOpenProject, onClose }: Mob
       </header>
       <h2 className={styles.title}>Contents</h2>
       <ol className={styles.list}>
-        {projects.map((project, i) => (
+        {projects.map((project) => (
           <li key={project.slug}>
             <a
               className={styles.entry}
@@ -41,9 +46,9 @@ export default function MobileContents({ projects, onOpenProject, onClose }: Mob
               <span className={styles.frame}>
                 {project.mockup && <img src={project.mockup} alt="" loading="lazy" draggable={false} />}
               </span>
-              <span className={styles.meta}>{nn(i)} · {project.year}</span>
+              <span className={styles.meta}>{rowOf(project) >= 0 ? `${nn(rowOf(project))} · ` : ''}{project.year}</span>
               <span className={styles.name}>{project.title}</span>
-              <span className={styles.sub}>{project.subtitle}</span>
+              <span className={styles.sub}>{project.caption}</span>
             </a>
           </li>
         ))}

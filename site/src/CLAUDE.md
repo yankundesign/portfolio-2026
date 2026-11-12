@@ -47,6 +47,8 @@ In `src/interactions/`:
 - **`cursorLabel.ts`** (`CursorLabel`): a label that is the cursor over one surface (“Open →”, and “Close ×” via `useFollowLabel`). Position goes in `translate`, size in `transform: scale()` about the pointer, and centring on an inner span. Don't put `scale` and `transform` on one rule: the CSS minifier merges them.
 - **`plateFlight.ts`** (`PlateFlight`, via `usePlateFlight`): on the works page, the plate grows out of its thumbnail and flies home. It animates the frame's box in px, and every flight starts from where the frame is.
 - **`useTrailingPeek`**: the About photo that trails the cursor (its loop runs only while shown).
+- **`contentsStamp.ts`** (`ContentsStamp`, via `useContentsStamp`): on the works page, the row pointed at becomes a solid object. A copy of the rows, paper on ink, sits exactly over the list and is clipped to that row (`clip-path: inset`), so letters turn paper as the band crosses them. It rises out of the row's rule, slides between rows, and sinks back into the rule. Its shadow is a drop-shadow on the copy's wrapper: a separate shadow element ran a frame behind on fast moves.
+- **The raised plate's notes** (in `NotebookContents`, data in `projects.ts` → `notes`): the caption, a summary, at most two figures in the contact sheet's two columns, and a facts line on the page's foot. The caption is a flex column that runs to the foot. Don't position the facts absolutely: while the caption slides in it has a transform, which makes it their containing block. The notes block is keyed by project, so its parts play in again, one after another, on each swap.
 - **`useContentsSelection`**: nothing selected by default, with a short grace period on leave. A thumbnail only marks its row. `last` keeps the plate's picture while it flies home.
 - **`usePlateLoop`**: the preview loop in the raised plate.
 - **Smaller helpers:**
@@ -58,6 +60,7 @@ In `src/interactions/`:
 Reduced motion:
 - The book's open and close become a short cross-fade.
 - The intro, name, lamp, tilt, rule, pendulum, peek and plate flight are off.
+- The contents band fades in and out instead of rising, sliding and sinking.
 - The cursor labels still replace the cursor.
 
 ## Routing

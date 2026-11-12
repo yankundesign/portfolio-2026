@@ -4,14 +4,44 @@
     {
       "name": "site",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["--prefix", "site", "run", "dev", "--", "--port", "5173", "--strictPort"],
+      "runtimeArgs": [
+        "--prefix",
+        "site",
+        "run",
+        "dev",
+        "--",
+        "--port",
+        "5173",
+        "--strictPort"
+      ],
       "port": 5173
     },
     {
       "name": "prototypes",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "5199", "--bind", "127.0.0.1"],
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "5199",
+        "--bind",
+        "127.0.0.1"
+      ],
       "port": 5199
+    },
+    {
+      "name": "site-preview",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "--prefix",
+        "site",
+        "run",
+        "preview",
+        "--",
+        "--port",
+        "4179",
+        "--strictPort"
+      ],
+      "port": 4179
     }
   ]
 }

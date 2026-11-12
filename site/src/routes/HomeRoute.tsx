@@ -4,7 +4,7 @@ import Notebook from '../components/notebook/Notebook';
 import NotebookContents from '../components/notebook/NotebookContents';
 import MobileContents from '../components/notebook/MobileContents';
 import Grain from '../components/shared/Grain';
-import { projects, type Project } from '../data/projects';
+import { contents, projects, type Project } from '../data/projects';
 import { useNotebook, type NotebookState } from '../interactions/useNotebook';
 import { useMonographPointer } from '../interactions/useMonographPointer';
 import { useTrailingPeek } from '../interactions/useTrailingPeek';
@@ -227,12 +227,12 @@ export default function HomeRoute() {
 
       <div className={styles.bookFade}>
         <Notebook engine={engine} state={bookState} onClose={closeWorks} keyboardOpen={modality === 'keyboard'}>
-          <NotebookContents projects={projects} onOpenProject={openProject} />
+          <NotebookContents projects={projects} contents={contents} onOpenProject={openProject} />
         </Notebook>
       </div>
 
       {narrow && wantOpen && (
-        <MobileContents projects={projects} onOpenProject={openProject} onClose={closeWorks} />
+        <MobileContents projects={projects} contents={contents} onOpenProject={openProject} onClose={closeWorks} />
       )}
 
       {/* Over the closed notebook, this label is the cursor. */}

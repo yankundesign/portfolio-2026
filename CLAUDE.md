@@ -12,8 +12,9 @@ Personal portfolio for Yankun, a senior product designer. The site is built arou
    - A four-line index sits beside it: Works, Résumé (PDF), About, Email.
    - The notebook *is* the navigation: there is no nav bar.
 2. **Works** (`/works`): the same notebook, open.
-   - The left page holds the contents, one ruled row per project.
-   - The right page shows all six plates as a contact sheet until the reader points at a title, then that one plate with its subtitle.
+   - The left page holds the contents, one ruled row per project, each with a one-line caption under its title.
+   - Pointing at a row turns it into a solid object: a navy band with the row stamped on it in paper, which slides from row to row.
+   - The right page shows the plates as a contact sheet until the reader points at a title. Then that one plate grows out of its thumbnail with its notes: a summary, at most two figures, and a facts line on the page's foot (`notes` in `data/projects.ts`).
    - `/` and `/works` are one route, `HomeRoute`. The URL decides whether the book is open, and the book animates between the two.
    - On phones (≤ 900px) the works page is a single-column list.
 3. **Project detail** (`/works/:slug`, the case study): a vertical-scroll editorial layout, long-form and well paced.
@@ -133,8 +134,9 @@ When adding a new image:
     - `monographPointer.ts`: the homepage's lamp, tilt, name, rule and “Open →”.
     - `cursorLabel.ts`: labels that replace the cursor.
     - `plateFlight.ts`: the works plate that grows from its thumbnail.
+    - `contentsStamp.ts`: the navy band on the works contents.
   - Hooks:
-    - Pointer and selection: `useMonographPointer`, `useTrailingPeek`, `useContentsSelection`, `useFollowLabel`, `usePlateFlight`, `usePlateLoop`.
+    - Pointer and selection: `useMonographPointer`, `useTrailingPeek`, `useContentsSelection`, `useContentsStamp`, `useFollowLabel`, `usePlateFlight`, `usePlateLoop`.
     - Helpers: `useInputModality`, `useMediaQuery`.
   - `useReducedMotion`.
   - `motion.ts`: easing and tween.
@@ -147,7 +149,7 @@ Engine-style animation code lives in plain classes, not in hook bodies. The stri
 
 **In:**
 - Monograph homepage with the Field Notebook.
-- Works page (the open notebook) listing the six projects in `data/projects.ts`.
+- Works page (the open notebook). The contents list `contents` from `data/projects.ts`: every project not marked `inContents: false`. The contact sheet shows every project. Build with AI is a plate on the sheet, unnumbered, with no contents row; on phones it comes last in the list, unnumbered.
 - Case studies.
 - CV page.
 - About page.
@@ -169,7 +171,9 @@ Note: Smart Search was retired from the canvas in v0.7. It remains a *proof beat
 - The notebook opening is the signature moment — invest craft here.
 - Works page:
   - Nothing is pre-selected; a highlighted default reads as a mistake.
-  - Pointing at a row never shifts it sideways or swaps its style.
+  - Pointing at a row never moves its left edges. The row becomes the navy band, and its title grows a little from its left edge.
+  - Each row has a one-line caption (`caption` in `data/projects.ts`, about 50 characters at most), in Yankun's words.
+  - The raised plate's notes use only real figures and Yankun's words, from the case study or the live project. Never invent a metric.
   - No "FIG." labels.
   - Mono labels are at least 11px.
 - Close controls attach to the thing they close (the tab on the book's fore-edge, the paper around it, Esc), never a distant button.

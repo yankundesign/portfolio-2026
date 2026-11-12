@@ -21,6 +21,19 @@ export interface Project {
   /** Short role label that sits in the museum-label caption beneath the plate. */
   role: string;
   subtitle: string;
+  /**
+   * One line under the title in the works page's contents (and the phone
+   * list): what the project is, in one line (about 50 characters at most).
+   * Yankun's own lines, from the subtitle, impact or canvas context.
+   */
+  caption: string;
+  /**
+   * false: a plate on the works page's contact sheet, but not a row in its
+   * contents (and unnumbered). Defaults to true.
+   */
+  inContents?: boolean;
+  /** What the raised plate says on the works page. Omitted: the plate shows its caption only. */
+  notes?: PlateNotes;
   year: string;
   collaborators: string[];
   /** One-line impact for the project. Carried into stub case studies. */
@@ -75,6 +88,21 @@ export interface Project {
 }
 
 /**
+ * The raised plate's notes on the works page. Yankun's own words and real
+ * figures only, taken from the case study or the live project; never invented.
+ */
+export interface PlateNotes {
+  /** One or two sentences: what it is, or the call that shaped it. */
+  summary: string;
+  /** The mono kicker over the figures: "Impact" where they are results; otherwise what they are. */
+  figuresLabel: string;
+  /** At most two. */
+  figures: { value: string; label: string }[];
+  /** The mono line at the foot of the page: context, role, status. One line: about 40 characters. */
+  facts: string[];
+}
+
+/**
  * Group caption rendered above a set of paired works on the canvas.
  * Lives on the canvas itself, not on the card — this is editorial chrome.
  */
@@ -95,6 +123,17 @@ export const projects: Project[] = [
     title: 'Control Hub AI Assistant',
     role: 'ai assistant for it admins',
     subtitle: 'An AI assistant for IT admins',
+    caption: 'An AI assistant for IT admins',
+    notes: {
+      // chaiContent.ts: metrics and credits; canvasContext
+      summary: 'Turned a low-adoption assistant into a task-aware admin workflow.',
+      figuresLabel: 'Impact',
+      figures: [
+        { value: '3% → 18%', label: 'Monthly adoption' },
+        { value: '86%', label: 'Drop in zero-result searches' },
+      ],
+      facts: ['Cisco Webex', 'Sole design lead', 'Shipped'],
+    },
     year: '2024–2026',
     collaborators: [],
     impact: 'adoption from 3% to 18%',
@@ -122,6 +161,18 @@ export const projects: Project[] = [
     role: 'agentic AI for control hub admins',
     subtitle:
       'Five prototypes, two platform shifts, and the one interaction that survived both',
+    caption: 'How an admin asks, approves, and watches AI act',
+    notes: {
+      // controlHubAgenticContent.ts: glance; the two teams from canvasProofs.
+      // Wording and status set by Yankun on 2026-11-11.
+      summary: 'Not an agent that decides on its own. Steps the admin can check, run from the Assistant they already use.',
+      figuresLabel: 'Impact',
+      figures: [
+        { value: '2 teams', label: 'Adopted my agentic strategy' },
+        { value: '5', label: 'Prototypes, 01–05' },
+      ],
+      facts: ['Tested at WebexOne', 'In progress'],
+    },
     year: '2026',
     collaborators: [],
     impact: 'A direction two teams agreed on',
@@ -149,6 +200,17 @@ export const projects: Project[] = [
     role: 'designer & builder',
     subtitle:
       'A pause between the tap and the feed — that knows when you\'re in a loop.',
+    caption: 'A pause between the tap and the feed',
+    notes: {
+      // ebbContent.ts: header and the “what” and “works” prose
+      summary: 'A personal iOS app that inserts three breaths between opening TikTok or Instagram and entering the feed.',
+      figuresLabel: 'By design',
+      figures: [
+        { value: '12 s', label: 'Three breaths, every time' },
+        { value: '18 s', label: 'When a loop is detected' },
+      ],
+      facts: ['iOS', 'Built by me', 'On the App Store'],
+    },
     year: '2026',
     collaborators: [],
     impact: 'A pause between the tap and the feed',
@@ -176,6 +238,17 @@ export const projects: Project[] = [
     externalUrl: 'https://zaoui.dev/',
     role: 'designer & builder',
     subtitle: 'Learning design systems by building one with AI.',
+    caption: 'Learning design systems by building one with AI',
+    notes: {
+      // zaoui.dev, 2026-11-11
+      summary: 'An experimental design system at the boundary of 2D clarity and 3D presence, built for people and agents.',
+      figuresLabel: 'So far',
+      figures: [
+        { value: '16', label: 'Components, one construction' },
+        { value: '7', label: 'Chart instruments, five rules' },
+      ],
+      facts: ['Design system', 'v0.1', 'In progress'],
+    },
     year: '2026',
     collaborators: [],
     impact: 'A design system for people and agents',
@@ -197,6 +270,17 @@ export const projects: Project[] = [
     title: 'SAP Fieldglass',
     role: 'enterprise dashboard, earlier work',
     subtitle: 'Making a complex system handleable — earlier work',
+    caption: 'Simplified vendor management workflows',
+    notes: {
+      // sapFieldglassContent.ts: header, homepage and outcome prose
+      summary: 'Making a mission-critical workforce platform easier for occasional users.',
+      figuresLabel: 'Impact',
+      figures: [
+        { value: '1,000+', label: 'Enterprise customers adopted the homepage' },
+        { value: '4', label: 'Roles, each with its own template' },
+      ],
+      facts: ['Enterprise SaaS', 'UX designer', 'Shipped'],
+    },
     year: '2020–2024',
     collaborators: [],
     impact: 'Simplified vender management workflows',
@@ -220,6 +304,8 @@ export const projects: Project[] = [
     role: 'ai tools and team systems',
     subtitle:
       'A working shelf of AI builds.',
+    caption: 'A working shelf of AI tools, prompt systems, and team workflows',
+    inContents: false,
     year: '2025–2026',
     collaborators: [],
     impact: 'experiments turned into reusable tools',
@@ -238,6 +324,9 @@ export const projects: Project[] = [
       'A working shelf of AI tools, prompt systems, and team workflows.',
   },
 ];
+
+/** The works page's contents, in this order. The contact sheet shows every project. */
+export const contents: Project[] = projects.filter((p) => p.inContents !== false);
 
 /**
  * Section captions on the canvas surface — pure editorial chrome that groups
