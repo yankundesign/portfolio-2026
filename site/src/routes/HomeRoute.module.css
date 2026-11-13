@@ -168,36 +168,45 @@
   position: absolute;
   left: var(--m);
   top: calc(50% + 2vh);
+  top: round(calc(50% + 2vh), 1px); /* whole pixels, so the drawn rules stay crisp */
   z-index: 3;
   width: min(25vw, 360px);
+}
+
+.index ul {
   margin: 0;
   padding: 0;
   list-style: none;
-  border-top: 1px solid var(--ink-muted);
+  border-top: 1px solid transparent; /* drawn by .strings */
 }
 
 .index li {
   position: relative;
-  border-bottom: 1px solid var(--ink-muted);
+  border-bottom: 1px solid transparent; /* drawn by .strings */
 }
 
-/* Pointing at a row draws its rule in ink, the way the contents rows do. The
- * label never changes style. */
-.index li::after {
-  content: '';
+/* The index's rules, drawn as strings (MonographIndex): plucked where the cursor
+ * crosses them, inked under the row pointed at. */
+.strings {
   position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -1px;
-  height: 1px;
-  background: var(--ink);
-  transform: scaleX(0);
-  transform-origin: 0 50%;
-  transition: transform 520ms var(--ease-settle);
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
 }
 
-.index li:hover::after,
-.index li:focus-within::after { transform: scaleX(1); }
+.strings path {
+  fill: none;
+  stroke: var(--ink-muted);
+  stroke-width: 1;
+}
+
+.strings .ink {
+  stroke: var(--ink);
+  stroke-dasharray: 0 2;
+  transition: opacity var(--duration-hover) var(--ease-out);
+}
 
 .index li:hover .n,
 .index li:focus-within .n { color: var(--ink); }
@@ -224,18 +233,29 @@
 }
 
 .n { color: var(--ink-soft); transition: color var(--duration-hover) var(--ease-out); }
-.arrow { transition: transform 520ms var(--ease-settle); }
 
+/* The label's letters carry their own weight and softness (MonographIndex). A
+ * weight change re-lays out this label only. */
 .lbl {
   font-family: var(--font-display);
   font-size: 19px;
   font-weight: 350;
   letter-spacing: -0.005em;
-  font-variation-settings: 'opsz' 24;
+  font-variation-settings: 'opsz' 24, 'SOFT' 0;
+  contain: layout style;
 }
 
-.index li:hover .arrow,
-.index li:focus-within .arrow { transform: translateX(7px); }
+/* Each arrow moves the way it points: → to the right, ↗ up and to the right. */
+.go {
+  display: inline-block;
+  transition: transform 520ms var(--ease-settle);
+}
+
+.index li:hover .go,
+.index li:focus-within .go { transform: translateX(7px); }
+
+.index li:hover .go[data-dir='ne'],
+.index li:focus-within .go[data-dir='ne'] { transform: translate(4px, -4px); }
 
 /* About: a photo trails the cursor while the link is hovered. */
 .peek {
@@ -363,6 +383,7 @@
   .lamp { display: none; }
   .clock b { animation: none; }
   .openLabel { transform: scale(1); }
+  .index li .go { transform: none; }
 }
 
 /* ─── Narrow screens: the composition stacks; the page scrolls ─── */
@@ -376,6 +397,7 @@
   .lamp,
   .peek,
   .rule,
+  .strings,
   .openLabel { display: none; }
 
   .frame {
@@ -446,4 +468,7 @@
     top: auto;
     width: 100%;
   }
+
+  .index ul { border-top-color: var(--ink-muted); }
+  .index li { border-bottom-color: var(--ink-muted); }
 }

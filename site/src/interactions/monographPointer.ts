@@ -1,6 +1,8 @@
 import { CursorLabel } from './cursorLabel';
 import { clamp } from './motion';
+import { MonographIndex } from './monographIndex';
 import type { NotebookEngine } from './notebookEngine';
+import { PluckedLine, type StringFeel } from './pluckedLine';
 
 /**
  * MonographPointer — the homepage's response to the cursor, in one frame loop.
@@ -18,17 +20,20 @@ import type { NotebookEngine } from './notebookEngine';
  *    Off until the intro has landed and the real pointer has moved; then it
  *    fades in over 400 ms.
  *  - The rule under the top bar rings where the cursor crosses it, with the
- *    cover line's own spring, played in time: e^(−4.4t)·cos(2π·3.2t).
+ *    cover line's own spring, played in time: e^(−4.4t)·cos(2π·3.2t)
+ *    (PluckedLine).
+ *  - The index (MonographIndex): its rules are strings too, its labels swell
+ *    like the name, and pointing at Works cracks the cover as the book does.
  *
  * Every part writes only when its value changes; idle frames do nothing.
  * Reduced motion: no lamp, tilt, name or rule; the label still replaces the cursor.
  */
 
-const RULE_Y = 63.5; // the top bar's hairline, in viewport px (its 64px height, border row)
-const SPRING = { decay: 4.4, freq: 3.2 };
+const RULE_LINE_Y = 15; // the top rule's y inside its svg (the svg sits at 48.5px: the 64px bar's border row)
+const RULE_FEEL: StringFeel = { spread: 90, gain: 8, min: 2.5, max: 12, step: 4 };
+const PEEK = 0.026;
 
 interface Letter { el: HTMLElement; w: number; soft: number; ww: number; ws: number; cx: number; cy: number }
-interface Pluck { x: number; amp: number; t0: number }
 
 export interface MonographParts {
   slot: HTMLElement;
@@ -36,6 +41,7 @@ export interface MonographParts {
   lamp: HTMLElement;
   rule: SVGSVGElement;
   openLabel: HTMLElement;
+  index: HTMLElement;
 }
 
 export class MonographPointer {
@@ -50,6 +56,7 @@ export class MonographPointer {
 
   private mx = 0;
   private my = 0;
+  private lastX = 0;
   private lastY = 0;
   private lastT = 0;
   private dirty = true;
@@ -57,12 +64,13 @@ export class MonographPointer {
   private inside = false;
   private hover = 0;
   private nameGain = 0;
+  private peeking = 0;
 
   private slotBox: DOMRect | null = null;
   private ruleBox: DOMRect | null = null;
   private rulePath: SVGPathElement | null = null;
-  private ruleFlat = false;
-  private plucks: Pluck[] = [];
+  private rule: PluckedLine | null = null;
+  private index: MonographIndex | null = null;
   private letters: Letter[] = [];
   private resizeT = 0;
 
@@ -74,8 +82,12 @@ export class MonographPointer {
     this.parts = parts;
     this.mx = window.innerWidth / 2;
     this.my = window.innerHeight * 0.4;
+    this.lastX = this.mx;
     this.lastY = this.my;
     this.rulePath = parts.rule.querySelector('path');
+    this.rule = this.rulePath ? new PluckedLine([this.rulePath], RULE_FEEL) : null;
+    this.index = new MonographIndex(parts.index);
+    this.index.configure({ reducedMotion: this.reduced });
     this.letters = Array.from(parts.name.querySelectorAll<HTMLElement>('[data-letter]')).map((el) => ({
       el, w: 300, soft: 0, ww: 300, ws: 0, cx: 0, cy: 0,
     }));
@@ -99,6 +111,8 @@ export class MonographPointer {
     window.clearTimeout(this.resizeT);
     this.label?.destroy();
     this.label = null;
+    this.index?.destroy();
+    this.index = null;
     this.parts = null;
   }
 
@@ -107,37 +121,48 @@ export class MonographPointer {
     const wasActive = this.active;
     this.active = opts.active;
     this.reduced = opts.reducedMotion;
+    this.index?.configure({ reducedMotion: this.reduced });
     if (!this.active) {
       this.setInside(false);
+      this.index?.locate(-1, -1);
     } else if (!wasActive) {
       // back from the open book under a pointer that may not move: re-check where it is
       this.measure();
       this.dirty = true;
       // (only a real pointer: the default position, the screen's centre, is on the book)
-      if (this.seen) this.setInside(this.pointInSlot(this.mx, this.my));
+      if (this.seen) {
+        this.setInside(this.pointInSlot(this.mx, this.my));
+        this.index?.locate(this.mx, this.my);
+      }
     }
   }
 
   /** The intro has landed: measure the letters at rest and let the name respond. */
   land(): void {
     this.landed = true;
-    this.measureLetters();
+    this.measure();
   }
 
   /** H3: the rule draws itself across, then rings once from the middle. */
   drawRule(ms: number): void {
-    const path = this.rulePath, box = this.ruleBox;
-    if (!path || !box || this.reduced) return;
-    path.setAttribute('d', `M0 15 L${box.width.toFixed(1)} 15`);
+    this.measure(); // the faces are in now: the index has its real height
+    const path = this.rulePath, box = this.ruleBox, rule = this.rule;
+    if (!path || !box || !rule || this.reduced) return;
+    rule.hold = true;
+    path.setAttribute('d', `M0 ${RULE_LINE_Y} L${box.width.toFixed(1)} ${RULE_LINE_Y}`);
     path.setAttribute('pathLength', '1');
     const draw = path.animate(
       [{ strokeDasharray: '1 1', strokeDashoffset: 1 }, { strokeDasharray: '1 1', strokeDashoffset: 0 }],
       { duration: ms, easing: 'cubic-bezier(0.4, 0, 0.2, 1)' },
     );
-    draw.finished.then(() => {
+    const done = () => {
       path.removeAttribute('pathLength');
-      this.pluck(box.width / 2, 5);
-    }, () => {});
+      rule.hold = false;
+    };
+    draw.finished.then(() => {
+      done();
+      rule.pluck(box.width / 2, 5);
+    }, done);
   }
 
   // ─── measurement (never inside the frame loop's writes) ───
@@ -146,8 +171,9 @@ export class MonographPointer {
     const parts = this.parts;
     if (!parts) return;
     this.slotBox = parts.slot.getBoundingClientRect();
-    this.ruleBox = parts.rule.getBoundingClientRect();
-    this.ruleFlat = false;
+    const box = (this.ruleBox = parts.rule.getBoundingClientRect());
+    this.rule?.place(box.left, box.top + RULE_LINE_Y, box.width, RULE_LINE_Y);
+    this.index?.measure();
     if (this.landed) this.measureLetters();
   }
 
@@ -180,35 +206,42 @@ export class MonographPointer {
   }
 
   private onMove = (e: PointerEvent) => {
-    const now = performance.now();
-    if (this.active && !this.reduced && this.ruleBox) {
-      const r = this.ruleBox;
-      if ((this.lastY - RULE_Y) * (e.clientY - RULE_Y) < 0 && e.clientX > r.left && e.clientX < r.right) {
-        const v = Math.abs(e.clientY - this.lastY) / Math.max(1, now - this.lastT); // px per ms
-        this.pluck(e.clientX - r.left, Math.sign(e.clientY - this.lastY) * clamp(v * 8, 2.5, 12));
-      }
+    const now = performance.now(), x = e.clientX, y = e.clientY;
+    if (this.active && !this.reduced && this.seen) {
+      // every rule the pointer crossed since the last event is plucked where it crossed
+      const ms = now - this.lastT;
+      this.rule?.cross(this.lastX, this.lastY, x, y, ms, now);
+      this.index?.cross(this.lastX, this.lastY, x, y, ms, now);
     }
-    this.mx = e.clientX; this.my = e.clientY;
-    this.lastY = e.clientY; this.lastT = now;
+    this.mx = x; this.my = y;
+    this.lastX = x; this.lastY = y; this.lastT = now;
     this.dirty = true;
     this.seen = true;
-    if (this.active) this.setInside(this.pointInSlot(e.clientX, e.clientY));
+    if (this.active) {
+      this.setInside(this.pointInSlot(x, y));
+      this.index?.locate(x, y);
+    }
   };
 
   private onDown = () => { if (this.inside) this.label?.press(true); };
-  private onLeaveWindow = () => this.setInside(false);
+  private onLeaveWindow = () => {
+    this.setInside(false);
+    this.index?.locate(-1, -1);
+  };
 
   private setInside(inside: boolean) {
     if (inside === this.inside) return;
     this.inside = inside;
     if (inside) this.label?.show(this.mx, this.my);
     else this.label?.hide();
-    this.engine.peek(inside ? 0.026 : 0);
   }
 
-  private pluck(x: number, amp: number) {
-    this.plucks.push({ x, amp, t0: performance.now() });
-    if (this.plucks.length > 6) this.plucks.shift();
+  /** The cover cracks while the book is pointed at, or the index's Works row is. */
+  private syncPeek() {
+    const p = this.active && (this.inside || this.index?.atBook) ? PEEK : 0;
+    if (p === this.peeking) return;
+    this.peeking = p;
+    this.engine.peek(p);
   }
 
   // ─── the frame ───
@@ -257,30 +290,10 @@ export class MonographPointer {
       }
     }
 
-    this.stepRule(now);
+    this.rule?.step(now);
+    this.index?.frame(now, dt, this.mx, this.my, live && this.seen);
+    this.syncPeek();
     this.dirty = false;
     this.raf = requestAnimationFrame(this.frame);
   };
-
-  private stepRule(now: number) {
-    const path = this.rulePath, box = this.ruleBox;
-    if (!path || !box) return;
-    for (let i = this.plucks.length - 1; i >= 0; i--) if (now - this.plucks[i].t0 > 1400) this.plucks.splice(i, 1);
-    if (this.plucks.length) {
-      let d = '';
-      for (let x = 0; x <= box.width; x += 4) {
-        let y = 0;
-        for (const p of this.plucks) {
-          const s = Math.max(0, now - p.t0) / 1000;
-          y += p.amp * Math.exp(-SPRING.decay * s) * Math.cos(2 * Math.PI * SPRING.freq * s) * Math.exp(-(((x - p.x) / 90) ** 2));
-        }
-        d += `${d ? ' L' : 'M'}${x} ${(15 + y).toFixed(2)}`;
-      }
-      path.setAttribute('d', d);
-      this.ruleFlat = false;
-    } else if (!this.ruleFlat && !path.hasAttribute('pathLength')) {
-      path.setAttribute('d', `M0 15 L${box.width.toFixed(1)} 15`);
-      this.ruleFlat = true;
-    }
-  }
 }

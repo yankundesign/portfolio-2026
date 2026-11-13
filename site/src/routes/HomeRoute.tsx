@@ -49,6 +49,18 @@ function Letters({ text, line }: { text: string; line: number }) {
   );
 }
 
+/** An index label, one span per letter so each can carry its own weight (MonographIndex). */
+function Glyphs({ text }: { text: string }) {
+  return (
+    <span className={styles.lbl}>
+      {[...text].map((c, i) => <span key={i} data-glyph>{c}</span>)}
+    </span>
+  );
+}
+
+/** The index's rules as strings: five lines, and the ink of the four under the rows. */
+const ROWS = 4;
+
 /**
  * HomeRoute — the homepage (01 · Monograph) and the works page, as one place.
  *
@@ -75,6 +87,7 @@ export default function HomeRoute() {
   const lampRef = useRef<HTMLDivElement>(null);
   const ruleRef = useRef<SVGSVGElement>(null);
   const openLabelRef = useRef<HTMLDivElement>(null);
+  const indexRef = useRef<HTMLDivElement>(null);
   const firstSync = useRef(true);
 
   // The intro: 'wait' (fonts loading, everything hidden) → 'run' (the rule draws,
@@ -87,7 +100,7 @@ export default function HomeRoute() {
   const engine = useNotebook({ slotRef, reducedMotion, onStateChange: setBookState });
   const { peekRef, show: showPeek, hide: hidePeek } = useTrailingPeek(reducedMotion);
   const pointer = useMonographPointer({
-    engine, slotRef, nameRef, lampRef, ruleRef, openLabelRef,
+    engine, slotRef, nameRef, lampRef, ruleRef, openLabelRef, indexRef,
     active: bookState === 'closed' && !narrow,
     reducedMotion,
   });
@@ -201,28 +214,39 @@ export default function HomeRoute() {
           aria-expanded={wantOpen}
         />
 
-        <ul className={styles.index} aria-label="Pages">
-          <li>
-            <button type="button" onClick={openWorks}>
-              <span className={styles.n}>01</span><span className={styles.lbl}>Works</span><span className={styles.arrow}>→</span>
-            </button>
-          </li>
-          <li>
-            <a href="/Yankun-Wang-CV-2026.pdf" target="_blank" rel="noopener">
-              <span className={styles.n}>02</span><span className={styles.lbl}>Résumé</span><span className={styles.arrow}>PDF ↗</span>
-            </a>
-          </li>
-          <li>
-            <Link to="/about" onPointerEnter={showPeek} onPointerLeave={hidePeek} onClick={hidePeek}>
-              <span className={styles.n}>03</span><span className={styles.lbl}>About</span><span className={styles.arrow}>→</span>
-            </Link>
-          </li>
-          <li>
-            <a href="mailto:yankunux@gmail.com">
-              <span className={styles.n}>04</span><span className={styles.lbl}>Email</span><span className={styles.arrow}>↗</span>
-            </a>
-          </li>
-        </ul>
+        {/* The index: its rules are strings, its labels swell under the cursor (MonographIndex). */}
+        <div ref={indexRef} className={styles.index}>
+          <ul aria-label="Pages">
+            <li data-index-row data-opens-book>
+              <button type="button" onClick={openWorks}>
+                <span className={styles.n}>01</span><Glyphs text="Works" />
+                <span className={styles.arrow}><span className={styles.go}>→</span></span>
+              </button>
+            </li>
+            <li data-index-row>
+              <a href="/Yankun-Wang-CV-2026.pdf" target="_blank" rel="noopener">
+                <span className={styles.n}>02</span><Glyphs text="Résumé" />
+                <span className={styles.arrow}>PDF <span className={styles.go} data-dir="ne">↗</span></span>
+              </a>
+            </li>
+            <li data-index-row>
+              <Link to="/about" onPointerEnter={showPeek} onPointerLeave={hidePeek} onClick={hidePeek}>
+                <span className={styles.n}>03</span><Glyphs text="About" />
+                <span className={styles.arrow}><span className={styles.go}>→</span></span>
+              </Link>
+            </li>
+            <li data-index-row>
+              <a href="mailto:yankunux@gmail.com">
+                <span className={styles.n}>04</span><Glyphs text="Email" />
+                <span className={styles.arrow}><span className={styles.go} data-dir="ne">↗</span></span>
+              </a>
+            </li>
+          </ul>
+          <svg className={styles.strings} aria-hidden="true" data-strings>
+            {Array.from({ length: ROWS + 1 }, (_, j) => <path key={`line-${j}`} data-line={j} />)}
+            {Array.from({ length: ROWS }, (_, i) => <path key={`ink-${i}`} className={styles.ink} data-ink={i} pathLength={1} />)}
+          </svg>
+        </div>
       </main>
 
       <div className={styles.bookFade}>

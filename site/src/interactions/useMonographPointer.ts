@@ -15,6 +15,7 @@ export function useMonographPointer({
   lampRef,
   ruleRef,
   openLabelRef,
+  indexRef,
   active,
   reducedMotion,
 }: {
@@ -24,17 +25,19 @@ export function useMonographPointer({
   lampRef: RefObject<HTMLElement | null>;
   ruleRef: RefObject<SVGSVGElement | null>;
   openLabelRef: RefObject<HTMLElement | null>;
+  indexRef: RefObject<HTMLElement | null>;
   active: boolean;
   reducedMotion: boolean;
 }): MonographPointer {
   const [pointer] = useState(() => new MonographPointer(engine));
 
   useEffect(() => {
-    const slot = slotRef.current, name = nameRef.current, lamp = lampRef.current, rule = ruleRef.current, openLabel = openLabelRef.current;
-    if (!slot || !name || !lamp || !rule || !openLabel) return;
-    pointer.attach({ slot, name, lamp, rule, openLabel });
+    const slot = slotRef.current, name = nameRef.current, lamp = lampRef.current, rule = ruleRef.current;
+    const openLabel = openLabelRef.current, index = indexRef.current;
+    if (!slot || !name || !lamp || !rule || !openLabel || !index) return;
+    pointer.attach({ slot, name, lamp, rule, openLabel, index });
     return () => pointer.detach();
-  }, [pointer, slotRef, nameRef, lampRef, ruleRef, openLabelRef]);
+  }, [pointer, slotRef, nameRef, lampRef, ruleRef, openLabelRef, indexRef]);
 
   useEffect(() => {
     pointer.configure({ active, reducedMotion });
