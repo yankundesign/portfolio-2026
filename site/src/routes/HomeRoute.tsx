@@ -52,8 +52,10 @@ function Letters({ text, line }: { text: string; line: number }) {
 /** An index label, one span per letter so each can carry its own weight (MonographIndex). */
 function Glyphs({ text }: { text: string }) {
   return (
-    <span className={styles.lbl}>
-      {[...text].map((c, i) => <span key={i} data-glyph>{c}</span>)}
+    <span className={styles.lblCell}>
+      <span className={styles.lbl}>
+        {[...text].map((c, i) => <span key={i} data-glyph>{c}</span>)}
+      </span>
     </span>
   );
 }
@@ -97,6 +99,10 @@ export default function HomeRoute() {
   const playIntro = useRef(intro === 'wait');
 
   const [bookState, setBookState] = useState<NotebookState>('closed');
+  // The raised plates' full-size PNGs load from the first time the book is
+  // asked to open (they arrive while the cover swings), never on the homepage.
+  const [platesWanted, setPlatesWanted] = useState(wantOpen);
+  if (wantOpen && !platesWanted) setPlatesWanted(true);
   const engine = useNotebook({ slotRef, reducedMotion, onStateChange: setBookState });
   const { peekRef, show: showPeek, hide: hidePeek } = useTrailingPeek(reducedMotion);
   const pointer = useMonographPointer({
@@ -251,7 +257,7 @@ export default function HomeRoute() {
 
       <div className={styles.bookFade}>
         <Notebook engine={engine} state={bookState} onClose={closeWorks} keyboardOpen={modality === 'keyboard'}>
-          <NotebookContents projects={projects} contents={contents} onOpenProject={openProject} />
+          <NotebookContents projects={projects} contents={contents} onOpenProject={openProject} loadPlates={platesWanted} />
         </Notebook>
       </div>
 

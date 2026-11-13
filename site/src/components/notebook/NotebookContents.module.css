@@ -14,16 +14,26 @@
 .pageLeft { left: 7.5%; width: 37%; }
 .pageRight { left: 55.5%; width: 37.5%; }
 
-/* Entrance: the page's type settles in once the cover lands. */
+/* Entrance. The right page is printed: its ink is there whenever the book is
+ * not shut, so the cover lifts off a page that already has its plates. The
+ * left page lies under the cover's lining until the cover is down; its type
+ * settles in from that moment (the engine marks the pages `data-flat`). */
 .reveal {
   opacity: 0;
   transform: translateY(1.2cqh);
   transition: opacity 420ms var(--ease-out), transform 520ms var(--transition-ease-out-expo);
 }
 
-[data-shown='true'] .reveal {
+[data-shown='true'] .reveal,
+[data-flat] .pageLeft .reveal {
   opacity: 1;
   transform: none;
+}
+
+[data-printed='true'] .pageRight .reveal {
+  opacity: 1;
+  transform: none;
+  transition: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -217,7 +217,8 @@
   grid-template-columns: 34px 1fr auto;
   align-items: baseline;
   width: 100%;
-  padding: 11px 0 10px;
+  /* 56px rows: the label's line, 11px above it and 14.5px below */
+  padding: 11px 0 14.5px;
   border: 0;
   background: none;
   color: var(--ink);
@@ -234,14 +235,23 @@
 
 .n { color: var(--ink-soft); transition: color var(--duration-hover) var(--ease-out); }
 
-/* The label's letters carry their own weight and softness (MonographIndex). A
- * weight change re-lays out this label only. */
-.lbl {
+/* The label's cell sets the type, so its line gives the row its baseline: the
+ * number and the arrow sit on the label's baseline. */
+.lblCell {
   font-family: var(--font-display);
   font-size: 19px;
   font-weight: 350;
   letter-spacing: -0.005em;
   font-variation-settings: 'opsz' 24, 'SOFT' 0;
+}
+
+/* The label's letters carry their own weight and softness (MonographIndex). A
+ * weight change re-lays out this label only. A contained box has no baseline
+ * of its own (the number and arrow used to hang from its bottom edge), so it
+ * fills the cell's line from the top and the cell's line carries the baseline. */
+.lbl {
+  display: inline-block;
+  vertical-align: top;
   contain: layout style;
 }
 

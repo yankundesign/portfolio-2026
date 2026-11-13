@@ -115,6 +115,8 @@ Images in `site/public/` use two formats depending on usage:
 
 **PNG** for `canvas/mockups/*` (the project plates on the works page) and `images/*` (case study screenshots). These are kept lossless so text and fine UI stay crisp at zoom.
 
+Each mockup also has a light copy in `canvas/thumbs/` (640px-wide WebP at q=85, same name). The works page's contact sheet shows the copies; the full PNG loads for the raised plate once the book is first opened, and for the phone list. A new mockup needs its copy made too (`mockupThumb` in `data/projects.ts`).
+
 Where an older WebP has its original PNG beside it in `site/public/`, that PNG is kept so you can revert: swapping `.webp` for `.png` in the source is a one-line change.
 
 When adding a new image:

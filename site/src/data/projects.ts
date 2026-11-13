@@ -327,6 +327,15 @@ export const projects: Project[] = [
   },
 ];
 
+/**
+ * The contact sheet's light copy of a mockup: a 640px-wide WebP (q85) in
+ * `public/canvas/thumbs/`, named after the PNG. The sheet shows plates about
+ * 200–320 CSS px wide; the full PNG is for the raised plate and the phone list.
+ * A new mockup needs its copy made too.
+ */
+export const mockupThumb = (mockup: string): string =>
+  mockup.replace('/canvas/mockups/', '/canvas/thumbs/').replace(/\.png$/, '.webp');
+
 /** The works page's contents, in this order. The contact sheet shows every project. */
 export const contents: Project[] = projects.filter((p) => p.inContents !== false);
 

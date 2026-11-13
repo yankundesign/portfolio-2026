@@ -149,19 +149,22 @@
   opacity: 0;
 }
 
+/* No backing colour: the spread is transparent outside the board, and a
+ * backing there showed as a pale panel past the cover's edge, over its shadow. */
 .back {
   inset: 0;
   transform: rotateY(180deg);
   overflow: hidden;
-  background-color: var(--paper);
   background-position: 0 0;
   background-size: 200% 100%;
   background-repeat: no-repeat;
 }
 
+/* The shade falls on the board only: the front face's box, mirrored. */
 .backShade {
   position: absolute;
-  inset: 0;
+  inset: 3.15% 0 0.6% 0.8%;
+  border-radius: 2.6% 0 0 2.6% / 1.9% 0 0 1.9%;
   background: linear-gradient(90deg, var(--ink), transparent 70%);
   mix-blend-mode: multiply;
   opacity: 0;

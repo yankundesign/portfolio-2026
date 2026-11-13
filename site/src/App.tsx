@@ -10,6 +10,7 @@ import AboutRoute from './routes/AboutRoute'
 import RadioRoute from './routes/RadioRoute'
 import NotFoundRoute from './routes/NotFoundRoute'
 import InkFilters from './components/shared/InkFilters'
+import { projects } from './data/projects'
 import { WashTuneProvider } from './components/shared/WashTuneContext'
 import WashTuneMount from './components/shared/WashTuneMount'
 
@@ -18,9 +19,30 @@ import WashTuneMount from './components/shared/WashTuneMount'
  * open. HomeRoute stays mounted across the two so the notebook can animate
  * between them; every other path renders through Routes as before.
  */
+const SITE = 'Yankun Wang'
+
+/** The tab's title for a path: the page first, then the name. */
+function titleFor(pathname: string): string {
+  const path = pathname.replace(/\/+$/, '') || '/'
+  if (path === '/') return `${SITE} — Senior product designer`
+  if (path === '/works') return `Works — ${SITE}`
+  if (path === '/cv') return `Résumé — ${SITE}`
+  if (path === '/about') return `About — ${SITE}`
+  if (path === '/colophon') return `Colophon — ${SITE}`
+  if (path === '/radio') return `Radio — ${SITE}`
+  if (path.startsWith('/journal/')) return `Journal — ${SITE}`
+  if (path.startsWith('/experiments/')) return SITE
+  const project = /^\/works\/([^/]+)$/.exec(path)
+  const title = project && projects.find((p) => p.slug === project[1])?.title
+  return title ? `${title} — ${SITE}` : `Page not found — ${SITE}`
+}
+
 function AnimatedRoutes() {
   const location = useLocation()
   const isHome = location.pathname === '/' || location.pathname === '/works'
+  useEffect(() => {
+    document.title = titleFor(location.pathname)
+  }, [location.pathname])
   return (
     <AnimatePresence mode="wait">
       {isHome ? <HomeRoute key="home" /> : (

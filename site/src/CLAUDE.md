@@ -35,6 +35,8 @@ In `src/interactions/`:
   - Two numbers drive the book: camera `t` (from the slot on the homepage to the centred spread) and cover `p` (closed to flat).
   - It writes transforms and lighting straight to the DOM, with no React render per frame. Lighting variables go on the two shadows that read them, never on the book (that restyled the whole book every frame). The shadows keep one blur radius.
   - While closed it cracks the cover on request (`peek`, a critically damped spring) and swings the ribbon tail as a damped pendulum.
+  - The right page is printed: its plates are there whenever the book is not shut (`data-printed` on the spread), so the cover lifts off an inked page. The left page lies under the cover's lining until the cover is down (k = 0.85 of the open); the engine then swaps the cover for the whole spread and marks the pages `data-flat`, and the left page's type settles in while the camera finishes.
+  - The back of the cover has no backing colour, and its shade is clipped to the board: either one past the board's edge shows as a pale panel while the cover swings.
   - API: `open()`, `close()`, `showOpen()` (instant, for direct `/works` visits), `aim()` for pointer extras, `peek()`, and `ref(part)` callbacks.
 - **`useNotebook`**: creates the engine once, configures it, and attaches it to the slot element.
 - **`monographPointer.ts`** (`MonographPointer`, via `useMonographPointer`): the homepage's one frame loop.
@@ -94,7 +96,9 @@ Route components wire together layer components and data. Keep them thin.
 ## Image handling
 
 - **Notebook assets:** in `public/notebook/` (cover board, v2 spread, ribbon), as WebP at q85. Geometry is in `data/notebook.ts`. The cover's face is the spread's right-hand board, so nothing stretches when it opens.
-- **Project mockups:** in `public/canvas/mockups/` (PNG). Case study screenshots are in `public/images/{slug}/`.
+- **Project mockups:** in `public/canvas/mockups/` (PNG), each with a light copy in `public/canvas/thumbs/` (640px WebP) for the contact sheet. The raised plate stacks the copy under the PNG, which loads once the book is first opened. Case study screenshots are in `public/images/{slug}/`.
+- **Fonts:** self-hosted in `public/fonts/` (`@font-face` in `styles/typography.css`, three faces preloaded in `index.html`).
+- **Tab titles:** `titleFor` in `App.tsx` sets one per route.
 - **Plate pattern:** 1px ink border, mono caption. The works page drops "fig." and uses `01 · Title`.
 - **Hand-drawn marks:** inline SVG when small.
 - **Lazy-loading:** use `loading="lazy"` on `<img>` tags below the fold.

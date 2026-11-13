@@ -1,5 +1,5 @@
-import { useRef, type CSSProperties, type MouseEvent } from 'react';
-import type { Project } from '../../data/projects';
+import { Fragment, useRef, type CSSProperties, type MouseEvent } from 'react';
+import { mockupThumb, type Project } from '../../data/projects';
 import { useContentsSelection } from '../../interactions/useContentsSelection';
 import { useContentsStamp } from '../../interactions/useContentsStamp';
 import { usePlateFlight } from '../../interactions/usePlateFlight';
@@ -13,20 +13,30 @@ export interface NotebookContentsProps {
   contents: Project[];
   /** Open a case study (internal projects); external ones are plain links. */
   onOpenProject: (project: Project) => void;
+  /**
+   * Load the raised plate's full-size PNGs. False until the book is first
+   * opened, so the homepage doesn't fetch them; until one arrives, the raised
+   * plate shows the contact sheet's light copy.
+   */
+  loadPlates: boolean;
 }
 
 const nn = (i: number) => String(i + 1).padStart(2, '0');
 /** The stagger step for the raised plate's notes. */
 const k = (n: number) => ({ '--k': n }) as CSSProperties;
 
-/** One contents entry: number, title, year (or “Read →”), and its caption. */
+/**
+ * One contents entry: number, title, year, and its caption. Pointed at, the
+ * year turns to “Read →”, or “Visit ↗” where the row leaves the site (the
+ * homepage index marks its outside links the same way).
+ */
 function RowBody({ project, i }: { project: Project; i: number }) {
   return (
     <>
       <span className={styles.n}>{nn(i)}</span>
       <span className={styles.t}>{project.title}</span>
       <span className={styles.y}>{project.year}</span>
-      <span className={styles.go} aria-hidden="true">Read →</span>
+      <span className={styles.go} aria-hidden="true">{project.externalUrl ? 'Visit ↗' : 'Read →'}</span>
       <span className={styles.c}>{project.caption}</span>
     </>
   );
@@ -56,7 +66,7 @@ function RowBody({ project, i }: { project: Project; i: number }) {
  * The contents title and the plates start on one line: the title is trimmed to
  * its caps, so the top of the C sits on the plates' top edge.
  */
-export default function NotebookContents({ projects, contents, onOpenProject }: NotebookContentsProps) {
+export default function NotebookContents({ projects, contents, onOpenProject, loadPlates }: NotebookContentsProps) {
   const { active, source, last, point, release } = useContentsSelection();
   // Only a title raises a plate; a plate on the sheet just marks its row.
   const current = active >= 0 && source === 'contents' ? active : -1;
@@ -142,7 +152,7 @@ export default function NotebookContents({ projects, contents, onOpenProject }: 
                   onPointerLeave={row >= 0 ? release : undefined}
                 >
                   <span className={styles.thumbFrame} data-thumb-frame>
-                    {project.mockup && <img src={project.mockup} alt="" loading="lazy" draggable={false} />}
+                    {project.mockup && <img src={mockupThumb(project.mockup)} alt="" draggable={false} />}
                   </span>
                   <span className={styles.thumbCaption}>
                     {row >= 0 && <span className={styles.capN}>{nn(row)}</span>}
@@ -157,9 +167,14 @@ export default function NotebookContents({ projects, contents, onOpenProject }: 
         <figure className={styles.plate} aria-live="polite">
           <span className={styles.plateSlot} data-plate-slot>
             <span className={styles.plateFrame} data-plate-frame>
+              {/* Each plate is its light copy with the full PNG over it: the PNG
+                  paints nothing until it has loaded, so the copy shows through. */}
               {contents.map((project, i) =>
                 project.mockup ? (
-                  <img key={project.slug} src={project.mockup} alt="" loading="lazy" draggable={false} data-on={i === last} />
+                  <Fragment key={project.slug}>
+                    <img src={mockupThumb(project.mockup)} alt="" draggable={false} data-on={i === last} />
+                    {loadPlates && <img src={project.mockup} alt="" decoding="async" draggable={false} data-on={i === last} />}
+                  </Fragment>
                 ) : null,
               )}
               {playLoop && playing?.preview && (

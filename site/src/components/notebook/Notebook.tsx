@@ -79,6 +79,7 @@ export default function Notebook({ engine, state, onClose, keyboardOpen, childre
             tabIndex={-1}
             inert={!open}
             data-shown={open}
+            data-printed={state !== 'closed'}
           >
             {children}
           </div>

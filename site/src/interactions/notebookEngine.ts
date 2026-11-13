@@ -221,9 +221,19 @@ export class NotebookEngine {
     pages.style.opacity = p > 0.0005 || this.state !== 'closed' ? '1' : '0';
   }
 
+  /**
+   * The cover is down: its lining is the left page now. Show the whole spread
+   * and put the cover away. The pages are marked `data-flat`, which is when the
+   * left page's type starts to settle in, while the camera finishes its push.
+   */
+  private coverDown() {
+    const { pages, cover } = this.el;
+    if (pages) { pages.style.clipPath = 'inset(0 0 0 0)'; pages.setAttribute('data-flat', ''); }
+    if (cover) cover.style.visibility = 'hidden';
+  }
+
   private land() {
-    if (this.el.pages) this.el.pages.style.clipPath = 'inset(0 0 0 0)';
-    if (this.el.cover) this.el.cover.style.visibility = 'hidden';
+    this.coverDown();
     this.setState('open');
   }
 
@@ -245,9 +255,12 @@ export class NotebookEngine {
       return;
     }
     const t0 = this.t, p0 = this.p;
+    let down = false;
     this.run = tween(1500, (k) => {
       this.t = lerp(t0, 1, ease.push(k));
       this.setCover(lerp(p0, 1, ease.swing(clamp((k - 0.1) / 0.75))));
+      // the cover lies flat at k = 0.85, before the camera has finished
+      if (!down && k >= 0.85) { down = true; this.coverDown(); }
       this.render();
     });
     await this.run.promise;
@@ -259,6 +272,8 @@ export class NotebookEngine {
     if (this.state !== 'open') return;
     this.measure();
     this.setState('closing');
+    // the left page's type leaves first, then the cover comes back over its lining
+    this.el.pages?.removeAttribute('data-flat');
     await new Promise((r) => setTimeout(r, this.reduced ? 0 : 200));
     if (this.el.cover) this.el.cover.style.visibility = 'visible';
     if (this.el.pages) this.el.pages.style.clipPath = 'inset(0 0 0 50%)';
