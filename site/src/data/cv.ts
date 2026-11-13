@@ -5,6 +5,9 @@
  * - `intro` is first-person, reflective, written by Yankun.
  * - `role.bullets`, `projects`, and `skillGroups` are résumé-voice, verbatim
  *   from the November 2026 PDF (public/Yankun-Wang-CV-2026.pdf).
+ *
+ * The PDF is rendered from 01-content/resume/resume.html
+ * (node render-resume.cjs). Change both together.
  */
 
 export interface CvRole {
@@ -90,7 +93,8 @@ export const roles: CvRole[] = [
     bullets: [
       'Own end-to-end design for the Control Hub AI Assistant, growing monthly adoption from 3% to 18%.',
       'Designed Smart Search for enterprise admins, cutting search dead ends by 86%.',
-      'Defined and prototyped agentic AI patterns in Control Hub: editable plans, human approval, and audit trails.',
+      'Designed a no-code, canvas-based workflow builder for Control Hub admin automation, extending Webex Flow Designer.',
+      'Defined and prototyped agentic AI patterns for running workflows from the AI Assistant: editable plans, human approval, and audit trails.',
       'Designed Webex developer experience: Control Hub settings for apps, agentic apps, MCP, and integrations.',
       'Defined the UX for Control Hub Workspace MCP for external AI clients.',
       'Moved the team from static mockups to live React prototypes on the product codebase.',

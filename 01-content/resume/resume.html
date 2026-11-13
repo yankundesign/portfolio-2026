@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Yankun Wang – Product Designer – Résumé</title>
+<meta name="author" content="Yankun Wang">
+<meta name="description" content="Résumé of Yankun Wang, product designer: AI products, agentic AI UX, workflow automation, design systems, prototyping in code.">
+<!--
+  Résumé source. Render with:  node render-resume.cjs
+  One column, real text in reading order, standard section names, contact
+  details in the page body (not a header or footer), and fonts with real
+  space glyphs and no ligatures, so ATS parsers read it the way a person does.
+-->
+<style>
+  /* Static font files (Fontsource, OFL), one per weight. Variable fonts, as
+     Google Fonts serves them, come out of Chrome's PDF as Type 3 outlines,
+     which some ATS parsers can't read; static ones embed as real TrueType. */
+  @font-face { font-family: 'Instrument Serif'; font-weight: 400; font-style: normal; font-display: block; src: url(fonts/instrument-serif-latin-400-normal.woff2) format('woff2'); }
+  @font-face { font-family: 'Instrument Serif'; font-weight: 400; font-style: italic; font-display: block; src: url(fonts/instrument-serif-latin-400-italic.woff2) format('woff2'); }
+  @font-face { font-family: 'Instrument Sans'; font-weight: 400; font-style: normal; font-display: block; src: url(fonts/instrument-sans-latin-400-normal.woff2) format('woff2'); }
+  @font-face { font-family: 'Instrument Sans'; font-weight: 500; font-style: normal; font-display: block; src: url(fonts/instrument-sans-latin-500-normal.woff2) format('woff2'); }
+  @font-face { font-family: 'Instrument Sans'; font-weight: 600; font-style: normal; font-display: block; src: url(fonts/instrument-sans-latin-600-normal.woff2) format('woff2'); }
+  @font-face { font-family: 'JetBrains Mono'; font-weight: 400; font-style: normal; font-display: block; src: url(fonts/jetbrains-mono-latin-400-normal.woff2) format('woff2'); }
+  @font-face { font-family: 'JetBrains Mono'; font-weight: 500; font-style: normal; font-display: block; src: url(fonts/jetbrains-mono-latin-500-normal.woff2) format('woff2'); }
+
+  @page { size: letter; margin: 0; }
+
+  :root {
+    --ink: #16265e;
+    --muted: #596388;
+    --accent: #2858d7;
+    --paper: #f4f1ea;
+
+    --serif: 'Instrument Serif', Georgia, serif;
+    --sans: 'Instrument Sans', Helvetica, Arial, sans-serif;
+    --mono: 'JetBrains Mono', Menlo, monospace;
+
+    /* Sizes are set in CSS px; the page is US Letter, 816 × 1056. */
+    --name: 52.5px;
+    --summary: 16px;
+    --company: 15px;
+    --title: 13.9px;
+    --body: 12.2px;
+    --mono-size: 9.6px;
+
+    /* Instrument Serif's space is narrow. Parsers that guess word breaks
+       from the gaps between letters run its words together. This brings its
+       word gap (0.17em) up to the sans's (0.2em), which every parser reads. */
+    --serif-words: 0.035em;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html {
+    background: var(--paper);
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  body {
+    width: 8.5in;
+    padding: 0.47in 0.78in 0.3in;
+    color: var(--ink);
+    background: var(--paper);
+    font-family: var(--sans);
+    font-size: var(--body);
+    line-height: 18px;
+    /* No ligatures: "fi" and "fl" stay two letters for every parser. */
+    font-variant-ligatures: none;
+    font-feature-settings: "liga" 0, "clig" 0, "dlig" 0;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: inherit; text-decoration: none; }
+
+  .serif { font-family: var(--serif); font-weight: 400; word-spacing: var(--serif-words); }
+  .mono { font-family: var(--mono); font-size: var(--mono-size); font-style: normal; letter-spacing: 0.03em; color: var(--muted); word-spacing: normal; }
+
+  /* ---- Name and contact ---- */
+  h1 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: var(--name);
+    line-height: 1;
+    letter-spacing: -0.012em;
+    word-spacing: 0.06em;
+  }
+  h1 em { font-style: italic; }
+
+  .contact {
+    margin-top: 4.5px;
+    padding-bottom: 10.5px;
+    border-bottom: 1px solid var(--ink);
+    font-size: 10.35px;
+    letter-spacing: 0.02em;
+  }
+  .contact .url { color: var(--ink); text-decoration: underline; text-underline-offset: 2px; text-decoration-thickness: 1px; }
+
+  .summary {
+    margin-top: 15.5px;
+    font-size: var(--summary);
+    line-height: 20.7px;
+  }
+  .summary em { font-style: italic; color: var(--accent); }
+
+  /* ---- Sections ---- */
+  section { margin-top: 13.5px; }
+  .summary + section { margin-top: 19px; }
+
+  h2 {
+    padding-bottom: 6.5px;
+    line-height: 12px;
+    border-bottom: 1px solid var(--ink);
+    font-family: var(--mono);
+    font-weight: 500;
+    font-size: 9.35px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+
+  .entry { margin-top: 7px; }
+  .entry + .entry { margin-top: 8px; }
+
+  .head { line-height: 19px; }
+  .title { font-weight: 500; font-size: var(--title); }
+  .company { font-style: italic; font-size: var(--company); line-height: 20px; }
+
+  ul { list-style: none; margin-top: 4px; }
+  /* The bullet is inline, not positioned: Chrome paints positioned boxes in
+     a later pass, which puts every bullet after all the headings in the
+     PDF's text, and parsers that read in that order detach them from their
+     jobs. A hanging indent keeps the wrapped lines aligned. */
+  li {
+    padding-left: 14px;
+    text-indent: -14px;
+    text-wrap: pretty;
+  }
+  li + li { margin-top: 2.3px; }
+  /* Names and terms that read badly split across lines (real spaces kept). */
+  .keep { white-space: nowrap; }
+  li::before {
+    content: "•";
+    display: inline-block;
+    width: 14px;
+    text-indent: 0;
+    color: var(--muted);
+    font-size: 9px;
+    line-height: 1;
+  }
+
+  /* ---- Education and skills ---- */
+  .school { font-weight: 500; font-size: var(--title); line-height: 19px; }
+  .degree { line-height: 19.5px; }
+  .skills p { line-height: 21px; }
+  .skills p:first-of-type { margin-top: 7px; }
+  .skills b { font-weight: 600; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Yankun <em>Wang</em></h1>
+    <p class="contact mono">San Francisco Bay Area, CA | (734) 548-7871 | <a href="mailto:yankunux@gmail.com">yankunux@gmail.com</a> | <a class="url" href="https://yankun.design">https://yankun.design</a></p>
+  </header>
+
+  <p class="summary serif">Product designer who makes complex, <em>invisible</em> systems easy to handle, from research to high-fidelity prototypes in code. Six years on B2B consoles, most recently Webex Control Hub, where IT admins set up devices, apps, and AI.</p>
+
+  <section>
+    <h2>Experience</h2>
+
+    <div class="entry">
+      <p class="head"><span class="title">Product Designer</span><span class="mono"> | Jul 2024 – Present</span></p>
+      <p class="company serif">Cisco Webex<span class="mono"> | Milpitas, CA</span></p>
+      <ul>
+        <li>Own end-to-end design for the Control Hub AI Assistant, growing monthly adoption from 3% to 18%.</li>
+        <li>Designed Smart Search for enterprise admins, cutting search dead ends by 86%.</li>
+        <li>Designed a no-code, canvas-based workflow builder for Control Hub admin automation, extending <span class="keep">Webex Flow Designer</span>.</li>
+        <li>Defined and prototyped agentic AI patterns for running workflows from the AI Assistant: editable plans, <span class="keep">human approval</span>, and audit trails.</li>
+        <li>Designed Webex developer experience: Control Hub settings for apps, agentic apps, MCP, and integrations.</li>
+        <li>Defined the UX for Control Hub Workspace MCP for external AI clients.</li>
+        <li>Moved the team from static mockups to live React prototypes on the product codebase.</li>
+      </ul>
+    </div>
+
+    <div class="entry">
+      <p class="head"><span class="title">UX Designer</span><span class="mono"> | Jul 2020 – Jul 2024</span></p>
+      <p class="company serif">SAP Fieldglass<span class="mono"> | Palo Alto, CA</span></p>
+      <ul>
+        <li>Led design of the modular homepage and built its widget system, plus worker dashboard and profile patterns that surface pending tasks, spend signals, key dates, and role-specific actions; adopted by 1,000+ enterprise customers.</li>
+        <li>Designed AI-assisted hiring and procurement concepts, including resume-ranking visualizations and generated procurement descriptions, to reduce manual decision prep in complex hiring workflows.</li>
+      </ul>
+    </div>
+
+    <div class="entry">
+      <p class="head"><span class="title">UX Design Intern</span><span class="mono"> | May 2019 – Dec 2019</span></p>
+      <p class="company serif">University of Michigan – Center for Academic Innovation<span class="mono"> | Ann Arbor, MI</span></p>
+      <ul>
+        <li>Designed educational web apps and helped build the team’s first design system.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <h2>Independent Projects</h2>
+
+    <div class="entry">
+      <p class="head"><span class="title">Ebb</span><span class="mono"> | Jul 2026</span></p>
+      <p class="company serif">iOS app, live on the App Store<span class="mono"> | <a href="https://yankun.design/works/ebb">yankun.design/works/ebb</a></span></p>
+      <ul>
+        <li>A three-breath pause before TikTok or Instagram opens, designed and built in SwiftUI in two weeks.</li>
+      </ul>
+    </div>
+
+    <div class="entry">
+      <p class="head"><span class="title">ZAO</span><span class="mono"> | Sep 2026 – Present</span></p>
+      <p class="company serif">Agent-friendly design system, in progress<span class="mono"> | <a href="https://zaoui.dev">zaoui.dev</a></span></p>
+      <ul>
+        <li>A React design system that gives AI coding agents fewer choices and clearer rules.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <h2>Education</h2>
+    <div class="entry">
+      <p class="school">University of Michigan – Ann Arbor</p>
+      <p class="degree">Master of Science, Human-Computer Interaction<span class="mono"> | 2020</span></p>
+      <p class="degree">Bachelor of Science, Architecture<span class="mono"> | 2018</span></p>
+    </div>
+  </section>
+
+  <section class="skills">
+    <h2>Skills</h2>
+    <p><b>Design:</b> Interaction design, Prototyping, Design systems, Agentic AI UX, User research, Accessibility</p>
+    <p><b>Build:</b> Figma, React, TypeScript, Tailwind CSS, SwiftUI, Claude, Codex, Cursor</p>
+  </section>
+</main>
+</body>
+</html>
