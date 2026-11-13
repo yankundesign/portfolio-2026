@@ -234,6 +234,34 @@ export const prototypes: readonly Prototype[] = [
           ],
           caption: 'Prototype 05 · my activity cards, down to the path where the workflow stops and says why',
         },
+        /* Up close: one card, from Flow Designer's stock node to its states.
+           Light sheets with no background of their own, so they sit on paper. */
+        {
+          screens: [
+            {
+              kind: 'image',
+              src: `${IMG}/card-before-after.webp`,
+              size: [2000, 760],
+              cutout: true,
+              alt: 'Two activity cards side by side. Left, Webex Flow Designer’s stock node: CPA Detection, “No description defined”, and three error ports (no-input timeout, unmatched entry, undefined error); its note reads “A technical activity with an optional description.” Right, my Control Hub card: Copy supported settings, marked Write, says it copies 8 supported calling settings while preserving identity and personal voicemail details, shows 8 settings selected and Ready to run, with a success path and an error path; its note reads “The work is clear before it runs.”',
+            },
+          ],
+          caption: 'Before and after · Flow Designer’s stock activity, and my Control Hub card',
+          tone: 'paper',
+        },
+        {
+          screens: [
+            {
+              kind: 'image',
+              src: `${IMG}/card-states.webp`,
+              size: [2000, 802],
+              cutout: true,
+              alt: 'One activity card, Copy supported settings, marked Write, in six states. Top row, while it is set up: default, ready to run; selected, outlined in blue, ready to configure; missing a setting, outlined in red, settings none selected and “Choose at least one setting”. Bottom row: running, “Copying selected settings…”; done, “5 copied · 3 already matched”, with the success port lit; failed, outlined in red, “Permission denied · review access”, with the error port lit.',
+            },
+          ],
+          caption: 'One card, six states · while you set it up, while it runs, and after',
+          tone: 'paper',
+        },
       ],
     },
   },
@@ -330,8 +358,8 @@ export const decisions: readonly Decision[] = [
       screens: [
         {
           kind: 'image',
-          src: `${IMG}/audit-log.png`,
-          size: [1228, 728],
+          src: `${IMG}/audit-log.webp`,
+          size: [2000, 1185],
           alt: 'The Control Hub audit log with AI clients (Assistant, Copilot, ChatGPT, an agent) beside admin changes, and an event opened on the right: tagged AI activity, with the AI client, the change type, the configuration and its value change.',
         },
       ],
