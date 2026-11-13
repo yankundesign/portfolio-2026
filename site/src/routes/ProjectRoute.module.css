@@ -101,6 +101,13 @@
     overflow-x: hidden;
   }
 
+  /* hidden makes .page a scroll box of its own, and sticky children then
+     stick to it, not the window: the notebook layout's running head scrolled
+     away on phones. clip trims the same overflow without that. */
+  .page:has([data-layout='notebook']) {
+    overflow-x: clip;
+  }
+
   .main {
     width: 100%;
     max-width: 100%;

@@ -136,6 +136,12 @@
   top: 0;
   z-index: 20;
   background: var(--paper);
+  /* The paper runs the window's full width, not just the article's: boards
+     cast a shadow ~25px past their sides, and it showed beside the head as
+     they scrolled under it. A shadow, clipped to the head's height, adds the
+     width without widening the page (no sideways scroll). */
+  box-shadow: 0 0 0 100vmax var(--paper);
+  clip-path: inset(0 -100vmax);
 }
 
 .headRow {
