@@ -1,3 +1,4 @@
+import { type ReactNode } from 'react';
 import RevealOnScroll from './RevealOnScroll';
 import styles from './TaskPathDiagram.module.css';
 
@@ -7,6 +8,13 @@ export interface TaskPathDiagramProps {
   /** The four stops along the manual path, in order. */
   stops: readonly string[];
   caption: string;
+  /** The section's opening (header, prose), set in the text column above the request. */
+  children?: ReactNode;
+  /**
+   * The drawing alone, with no text column and no request: for layouts that
+   * set the request themselves (the v4 notebook page sets it as a statement).
+   */
+  bare?: boolean;
 }
 
 const COLS = [72, 232, 392, 552];
@@ -32,15 +40,23 @@ const PATH =
 /**
  * Slide 22's drawing: one request, then the twelve pages it takes by hand.
  *
+ * Set as a spread: the section's opening (children) and the request in a
+ * text column, the drawing beside it, so the section is as tall as the
+ * taller of the two rather than both stacked. Narrow, they stack.
+ *
  * The SVG carries the shape (the pile is the problem); the ordered list
  * beneath carries the four stops as real text, so the diagram stays
  * legible at phone width and to screen readers.
  */
-export default function TaskPathDiagram({ request, stops, caption }: TaskPathDiagramProps) {
-  return (
-    <RevealOnScroll as="figure" className={styles.figure}>
-      <div className={styles.layout}>
-        <p className={styles.request}>&ldquo;{request}&rdquo;</p>
+export default function TaskPathDiagram({
+  request,
+  stops,
+  caption,
+  children,
+  bare = false,
+}: TaskPathDiagramProps) {
+  const figure = (
+      <RevealOnScroll as="figure" className={styles.figure}>
         <div className={styles.drawing}>
           <svg
             className={styles.svg}
@@ -73,8 +89,8 @@ export default function TaskPathDiagram({ request, stops, caption }: TaskPathDia
                   )}
                   {stop && (
                     <>
-                      <circle r="13" className={styles.badge} />
-                      <text y="4.5" textAnchor="middle" className={styles.badgeText}>
+                      <circle r="14" className={styles.badge} />
+                      <text y="5" textAnchor="middle" className={styles.badgeText}>
                         {String(stop).padStart(2, '0')}
                       </text>
                     </>
@@ -92,8 +108,21 @@ export default function TaskPathDiagram({ request, stops, caption }: TaskPathDia
             ))}
           </ol>
         </div>
+        <figcaption className={styles.caption}>{caption}</figcaption>
+      </RevealOnScroll>
+  );
+
+  if (bare) return figure;
+
+  return (
+    <div className={styles.spread} data-measure="plate">
+      <div className={styles.text}>
+        {children}
+        <RevealOnScroll as="p" className={styles.request}>
+          &ldquo;{request}&rdquo;
+        </RevealOnScroll>
       </div>
-      <figcaption className={styles.caption}>{caption}</figcaption>
-    </RevealOnScroll>
+      {figure}
+    </div>
   );
 }

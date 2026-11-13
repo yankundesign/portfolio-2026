@@ -11,22 +11,18 @@ import PrototypeMap from './PrototypeMap';
 import PivotDiagram from './PivotDiagram';
 import DecisionRow from './DecisionRow';
 import LayersDiagram from './LayersDiagram';
-import QuoteSpread from './QuoteSpread';
-import GroundedPanels from './GroundedPanels';
 import Credits from './Credits';
 import {
   header,
   glance,
   prose,
   quotes,
-  bridgeSpread,
-  onWorkflows,
   lessons,
   taskRequest,
   taskStops,
   prototypeMap,
   runLoop,
-  runSteps,
+  engine,
   figures,
   videos,
   pivot,
@@ -42,11 +38,13 @@ import styles from './ControlHubAgenticProject.module.css';
  * Control Hub Agentic — project detail page, v2, on the plate system
  * (PlateLayout.module.css; adopted 2026-11-10, see 00-brief/decisions-log.md).
  *
- * Answer first, then the story: the task, where it ended up, how we got
- * there (explore · turn · bridge, five prototypes), the decisions up
- * close, how I worked, where the work went, what I learned. Same chapter
+ * Answer first, then the story: the task, where it ended up (the run,
+ * and the workflow builder behind it), how we got there (explore · turn ·
+ * build, five prototypes), the decisions up close, where the work went,
+ * what I learned. Same chapter
  * layout as CHAI: header, sticky rail, one reading column.
- * Brief: 00-brief/prd-agentic-case-study-v2.md.
+ * Brief: 00-brief/prd-agentic-case-study-v2.md; v3 replaces Bridge with
+ * Build (00-brief/prd-agentic-case-study-v3.md).
  */
 export default function ControlHubAgenticProject() {
   return (
@@ -60,16 +58,18 @@ export default function ControlHubAgenticProject() {
 
           {/* ---- The task ------------------------------------------ */}
           <section id="task" aria-label="The task" className={layout.beat}>
-            <SectionHeader
-              label="The task"
-              title="Admins think in tasks. Control Hub is built around settings."
-            />
-            <ProseBlock paragraphs={[...prose.ask, prose.task[0]]} />
+            {/* Text left, drawing right: the opening sits beside the path. */}
             <TaskPathDiagram
               request={taskRequest}
               stops={taskStops}
               caption="One task, then every page and tab — the manual path"
-            />
+            >
+              <SectionHeader
+                label="The task"
+                title="Admins think in tasks. Control Hub is built around settings."
+              />
+              <ProseBlock paragraphs={[...prose.ask, prose.task[0]]} />
+            </TaskPathDiagram>
             <ProseBlock paragraphs={prose.task.slice(1)} />
           </section>
 
@@ -81,11 +81,18 @@ export default function ControlHubAgenticProject() {
             />
             <ProseBlock paragraphs={prose.answer.slice(0, 1)} />
             <VideoPlate figure={runLoop} />
-            <div className={styles.quad} data-measure="plate">
-              {runSteps.map((step) => (
-                <EditorialPlate key={step.src} figure={step} className={styles.gridPlate} />
-              ))}
-            </div>
+
+            {/* The engine behind the run: the workflow builder. */}
+            <section id="engine" aria-labelledby="engine-title" className={`${styles.prototype} ${layout.block}`}>
+              <h4 id="engine-title" className={layout.subBeatTitle}>
+                <span className={layout.subBeatNumeral}>The engine</span>
+                Every step the Assistant runs is built here
+              </h4>
+              <ProseBlock paragraphs={prose.engine} />
+              <EditorialPlate figure={engine.canvas} />
+              <EditorialPlate figure={engine.cards} />
+            </section>
+
             <ProseBlock paragraphs={prose.answer.slice(1)} />
           </section>
 
@@ -95,7 +102,7 @@ export default function ControlHubAgenticProject() {
             <ProseBlock paragraphs={prose.how} />
             <PrototypeMap
               moves={prototypeMap}
-              caption="Explore · turn · bridge — five prototypes, with Cloud Control underneath"
+              caption="Explore · turn · build — five prototypes, with the platforms underneath"
             />
 
             <h3 className={styles.move} data-measure="plate">Explore</h3>
@@ -164,20 +171,24 @@ export default function ControlHubAgenticProject() {
               <EditorialPlate figure={figures.p04} />
             </section>
 
-            <h3 className={styles.move} data-measure="plate">Bridge</h3>
+            <h3 className={styles.move} data-measure="plate">Build</h3>
 
-            <section id="bridge" aria-label="We have something similar" className={`${styles.anchor} ${layout.block}`}>
-              <QuoteSpread {...bridgeSpread} />
-              <ProseBlock paragraphs={prose.bridge} />
+            <section id="why" aria-labelledby="why-title" className={`${styles.prototype} ${layout.block}`}>
+              <h4 id="why-title" className={layout.subBeatTitle}>
+                <span className={layout.subBeatNumeral}>Why</span>
+                From skills to workflows: the same steps, every time
+              </h4>
+              <ProseBlock paragraphs={prose.why} />
             </section>
 
             <section id="p05" aria-labelledby="p05-title" className={`${styles.prototype} ${layout.block}`}>
               <h4 id="p05-title" className={layout.subBeatTitle}>
                 <span className={layout.subBeatNumeral}>05</span>
-                Workflows can act on Control Hub
+                Workflows: built once, run from the Assistant
               </h4>
-              <ProseBlock paragraphs={prose.p05} />
-              <GroundedPanels {...onWorkflows} />
+              <ProseBlock paragraphs={prose.p05.slice(0, 1)} />
+              <EditorialPlate figure={figures.p05List} />
+              <ProseBlock paragraphs={prose.p05.slice(1)} />
             </section>
           </section>
 
@@ -202,25 +213,11 @@ export default function ControlHubAgenticProject() {
             ))}
           </section>
 
-          {/* ---- How I worked -------------------------------------- */}
-          <section id="craft" aria-label="How I worked" className={layout.proof}>
-            <SectionHeader
-              label="How I worked"
-              title="I designed the states and the rules, not the screens"
-            />
-            <ProseBlock paragraphs={prose.craft} />
-            <div className={styles.pair} data-measure="plate">
-              {/* Rule beside its application (Okta): the playbook first. */}
-              <EditorialPlate figure={figures.studioGuide} className={styles.gridPlate} />
-              <EditorialPlate figure={figures.studio} className={styles.gridPlate} />
-            </div>
-          </section>
-
           {/* ---- Outcome ------------------------------------------- */}
           <section id="outcome" aria-label="Where the work went" className={layout.beat}>
             <SectionHeader label="Outcome" title="Where the work went" />
             <ProseBlock paragraphs={prose.outcome.slice(0, 1)} />
-            <LayersDiagram {...layers} caption="My layer, between the admin’s task and the platform" />
+            <LayersDiagram {...layers} caption="My layer, between the admin’s task and the workflows it runs" />
             <ProseBlock paragraphs={prose.outcome.slice(1)} />
           </section>
 

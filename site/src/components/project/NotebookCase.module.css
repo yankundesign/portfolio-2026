@@ -1,0 +1,1013 @@
+/*
+ * NotebookCase — the notebook case-study layout, shared by Control Hub
+ * Workflows and the Control Hub AI Assistant (NotebookCase.tsx).
+ *
+ * One 12-column grid (24px gutter) inside the page's 60px margins, capped at
+ * 90rem. Two margins with two jobs:
+ *
+ *   1 ── 3 │ 4 ──────────── 9 │ 10 ── 12
+ *   where  │ text             │ evidence
+ *   you are│ (≈ 66 characters)│ beside it
+ *
+ * .l left margin · .t text · .r right margin · .c claim (4–10) ·
+ * .w text edge to the right edge (4–12) · .f full width.
+ * Boards (ClothBoard) and drawings take .f or .w; prose never sits on a board.
+ *
+ * Below 1200px the left margin narrows to two columns and the right margin
+ * folds under the text. Below 720px everything is one column.
+ */
+
+.article {
+  /* One type scale for the whole page: four serif steps and one mono size.
+     xl  the title, and "Should we pause?" (the one rule break)
+     l   chapter words, the two outcome facts, the next project
+     m   every heading-level line: claims, titles, the ticket, quotes,
+         lessons, the subtitle, prototype numerals
+     s   all reading text, notes included
+     Mono labels are --text-caption (11px) throughout. The shared drawings
+     (task path, pivot, layers) read these tokens, with their own sizes as
+     the fallback on other pages. */
+  --type-xl: clamp(3.5rem, 10.6vw, 9.75rem);
+  --type-l: clamp(2.5rem, 4.6vw, 4.25rem);
+  --type-m: clamp(1.5rem, 1.05rem + 1.2vw, 2.125rem);
+  --type-s: clamp(1.0625rem, 0.95rem + 0.3vw, 1.1875rem);
+  --type-mono: var(--text-caption);
+  --gap: var(--grid-gutter);
+  --chapter-space: clamp(4.5rem, 8vw, 7rem);
+  max-width: 90rem;
+  margin: 0 auto;
+  color: var(--ink);
+}
+
+/* ---- Grid ---------------------------------------------------- */
+
+.row {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gap);
+  align-items: start;
+  margin: 0;
+}
+
+.l { grid-column: 1 / 4; }
+.t { grid-column: 4 / 10; }
+.r { grid-column: 10 / 13; }
+.c { grid-column: 4 / 11; }
+.w { grid-column: 4 / 13; }
+.f { grid-column: 1 / -1; }
+
+@media (max-width: 1199px) {
+  .l { grid-column: 1 / 3; }
+  .t,
+  .r { grid-column: 3 / 12; }
+  .c { grid-column: 3 / 12; }
+  .w { grid-column: 3 / 13; }
+}
+
+@media (max-width: 719px) {
+  .row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .l,
+  .t,
+  .r,
+  .c,
+  .w,
+  .f {
+    grid-column: 1 / -1;
+  }
+}
+
+/* ---- Type ---------------------------------------------------- */
+
+.body {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--type-s);
+  font-weight: 330;
+  line-height: 1.6;
+  letter-spacing: 0.002em;
+  color: var(--ink);
+  text-wrap: pretty;
+  hanging-punctuation: first;
+}
+
+.body p {
+  margin: 0;
+}
+
+.body p + p {
+  margin-top: 1em;
+}
+
+.lede {
+  margin: clamp(1.25rem, 2.2vw, 1.75rem) 0 0;
+  font-family: var(--font-body);
+  font-size: var(--type-s);
+  font-weight: 330;
+  line-height: 1.6;
+  text-wrap: pretty;
+  hanging-punctuation: first;
+}
+
+.label {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+/* Prose that follows another block sits a paragraph's breath under it. */
+.row + .row > .body,
+.statement + .row > .body,
+.poster + .row > .body {
+  margin-top: 1.5rem;
+}
+
+/* ---- Running head (the homepage's top bar, kept as the reader scrolls) -- */
+
+.head {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--paper);
+}
+
+.headRow {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gap);
+  align-items: end;
+  height: 64px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--ink-muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.back {
+  grid-column: 1 / 4;
+  justify-self: start;
+  display: inline-flex;
+  gap: 0.6em;
+  color: var(--ink);
+  text-decoration: none;
+  transition: opacity var(--duration-hover) var(--ease-out);
+}
+
+.back:hover {
+  opacity: 0.6;
+}
+
+.back:focus-visible {
+  outline: 1.5px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.headChapter {
+  grid-column: 5 / 9;
+  margin: 0;
+  text-align: center;
+  color: var(--ink);
+}
+
+.headSwap {
+  display: inline-block;
+  animation: headIn 360ms var(--ease-out) both;
+}
+
+@keyframes headIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+.headRight {
+  grid-column: 9 / 13;
+  margin: 0;
+  text-align: right;
+  color: var(--ink-soft);
+}
+
+@media (max-width: 719px) {
+  .headRow {
+    grid-template-columns: auto 1fr;
+    height: 52px;
+    padding-bottom: 12px;
+  }
+
+  .back { grid-column: 1; }
+
+  .headChapter {
+    grid-column: 2;
+    text-align: right;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .headRight { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .headSwap {
+    animation-duration: 160ms;
+  }
+
+  @keyframes headIn {
+    from {
+      opacity: 0;
+    }
+  }
+}
+
+/* ---- Opener ------------------------------------------------- */
+
+.opener {
+  padding-top: clamp(2.5rem, 6vw, 4.5rem);
+}
+
+/* Set like the homepage's name: roman over italic at poster scale, the
+   italic line pushed to the right edge. The subtitle sits in the room the
+   italic line leaves, on its baseline. */
+.titleBlock {
+  position: relative;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: var(--type-xl);
+  line-height: 0.92;
+  letter-spacing: -0.045em;
+  color: var(--ink);
+  font-variation-settings: 'opsz' 144, 'SOFT' 0, 'WONK' 1;
+}
+
+.titleRoman,
+.titleItalic {
+  display: block;
+}
+
+.titleRoman {
+  margin-left: -0.05em;
+}
+
+.titleItalic {
+  font-style: italic;
+  text-align: right;
+  margin-right: -0.02em;
+}
+
+.subtitle {
+  position: absolute;
+  left: 0;
+  bottom: 0.35rem;
+  max-width: min(24rem, 40%);
+  margin: 0;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 300;
+  font-size: var(--type-m);
+  line-height: 1.15;
+  letter-spacing: -0.005em;
+  color: var(--ink);
+  text-wrap: balance;
+  font-variation-settings: 'opsz' 36;
+}
+
+@media (max-width: 899px) {
+  .subtitle {
+    position: static;
+    max-width: 30rem;
+    margin-top: 1.5rem;
+  }
+}
+
+/* Facts: the strip outside the evidence (Actual Source). */
+.facts {
+  margin-top: clamp(2.5rem, 5vw, 3.75rem);
+  row-gap: 1.25rem;
+}
+
+.fact {
+  grid-column: span 3;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--ink-muted);
+}
+
+.fact dt,
+.glanceItem dt {
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.fact dd {
+  margin: 0.45rem 0 0;
+  font-family: var(--font-display);
+  font-size: var(--type-s);
+  font-weight: 350;
+  line-height: 1.6;
+}
+
+.hero {
+  margin-top: clamp(1.75rem, 3vw, 2.5rem);
+}
+
+/* At a glance: three short answers, side by side. */
+.glance {
+  margin-top: clamp(2.75rem, 5vw, 4rem);
+  row-gap: 1.75rem;
+}
+
+.glanceItem {
+  grid-column: span 4;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--ink);
+}
+
+.glanceItem dd {
+  margin: 0.7rem 0 0;
+  max-width: 24em;
+  font-family: var(--font-display);
+  font-size: var(--type-s);
+  font-weight: 330;
+  line-height: 1.6;
+  letter-spacing: -0.006em;
+  text-wrap: pretty;
+}
+
+@media (max-width: 899px) {
+  .fact { grid-column: span 6; }
+  .glanceItem { grid-column: 1 / -1; }
+}
+
+@media (max-width: 719px) {
+  .facts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .fact { grid-column: auto; }
+}
+
+/* ---- Chapter mark (the works page's Contents) ---------------- */
+
+.chapter {
+  margin-top: var(--chapter-space);
+  scroll-margin-top: 5rem;
+}
+
+.mark {
+  align-items: last baseline;
+  padding-bottom: clamp(1rem, 2vw, 1.4rem);
+  border-bottom: 1px solid var(--ink);
+}
+
+.markN {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  letter-spacing: 0.14em;
+  color: var(--ink);
+}
+
+.markOf {
+  color: var(--ink-soft);
+  opacity: 0.7;
+}
+
+.markWord {
+  margin: 0;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 300;
+  font-size: var(--type-l);
+  line-height: 0.95;
+  letter-spacing: -0.025em;
+  color: var(--ink);
+  font-variation-settings: 'opsz' 144, 'SOFT' 50, 'WONK' 1;
+}
+
+.claim {
+  margin: clamp(1.25rem, 2.2vw, 1.75rem) 0 0;
+  max-width: 24em;
+  font-family: var(--font-display);
+  font-weight: 350;
+  font-size: var(--type-m);
+  line-height: 1.15;
+  letter-spacing: -0.018em;
+  color: var(--ink);
+  text-wrap: balance;
+  font-variation-settings: 'opsz' 72;
+}
+
+@media (max-width: 719px) {
+  .markN {
+    margin-bottom: 0.75rem;
+  }
+}
+
+/* ---- Statements --------------------------------------------- */
+
+/* One sentence alone (Stripe Press): space above and below does the framing. */
+.statement {
+  margin: clamp(3rem, 6vw, 4.5rem) 0 clamp(1rem, 2vw, 1.5rem);
+}
+
+.statementPhrase {
+  margin: 0;
+}
+
+.statementPhrase p {
+  margin: 0;
+  max-width: 19em;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 300;
+  font-size: var(--type-m);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  text-indent: -0.42em; /* hang the opening quote */
+  text-wrap: balance;
+  font-variation-settings: 'opsz' 144, 'SOFT' 50, 'WONK' 1;
+}
+
+.statementFrom {
+  margin-top: 1.25rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+/* The turn: the page's one line at poster scale (The Public Theater). */
+.turn {
+  margin-top: clamp(5rem, 10vw, 8rem);
+  scroll-margin-top: 5rem;
+}
+
+.poster {
+  margin: 0 0 clamp(1rem, 2vw, 1.5rem);
+  padding-top: clamp(1rem, 2vw, 1.5rem);
+  border-top: 1px solid var(--ink);
+}
+
+.posterPhrase {
+  margin: 0;
+}
+
+.posterPhrase p {
+  margin: 0;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 300;
+  font-size: var(--type-xl);
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  color: var(--ink);
+  text-wrap: balance;
+  font-variation-settings: 'opsz' 144, 'SOFT' 50, 'WONK' 1;
+}
+
+.posterFrom {
+  margin-top: 1.25rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+/* ---- The task as one spread ------------------------------------
+   The ticket and its cost in the text column, the path it takes beside
+   it, tops on one line (Franchi: stages and evidence in their own
+   territories). Below 1200px they stack. */
+
+.spread {
+  margin-top: clamp(1.75rem, 3vw, 2.5rem);
+  row-gap: 2.25rem;
+}
+
+.spreadText {
+  grid-column: 4 / 8;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.spreadFigure {
+  grid-column: 8 / 13;
+  padding-top: 0.35rem;
+}
+
+.ticket {
+  margin: 0;
+  padding: 1.1rem 0 0;
+  border-top: 1px solid var(--ink);
+}
+
+.ticket blockquote {
+  margin: 0;
+}
+
+.ticket p {
+  margin: 0;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 300;
+  font-size: var(--type-m);
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  text-indent: -0.42em;
+  text-wrap: balance;
+  font-variation-settings: 'opsz' 144, 'SOFT' 50, 'WONK' 1;
+}
+
+.ticketFrom {
+  margin-top: 0.85rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+@media (max-width: 1199px) {
+  .spreadText,
+  .spreadFigure {
+    grid-column: 3 / 12;
+  }
+}
+
+@media (max-width: 719px) {
+  .spreadText,
+  .spreadFigure {
+    grid-column: 1 / -1;
+  }
+}
+
+/* ---- Drawings ----------------------------------------------- */
+
+.diagram {
+  margin-top: clamp(2.5rem, 5vw, 3.5rem);
+}
+
+.diagram figure {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+/* ---- Boards ------------------------------------------------- */
+
+.board {
+  margin-top: clamp(2rem, 4vw, 3rem);
+}
+
+/* Boards in a sequence, with no text between them, sit closer: one run of
+   evidence, not separate beats. */
+.boardNext {
+  margin-top: clamp(1.75rem, 3vw, 2.5rem);
+}
+
+/* Text that continues a module after its first board. */
+.more {
+  margin-top: clamp(2.5rem, 5vw, 3.5rem);
+}
+
+/* ---- Margin labels beside a paragraph ------------------------
+   A mono label in the left margin sits on the paragraph's first line. */
+
+.subLabel {
+  padding-top: 0.5rem;
+}
+
+.more > .body,
+.more > .t.body {
+  margin-top: 0 !important;
+}
+
+.more.reason {
+  margin-top: clamp(2.5rem, 5vw, 3.5rem);
+}
+
+/* The outcome's poster line follows the chapter rule directly: one rule. */
+.outcomePoster > figure {
+  margin-top: clamp(1.5rem, 3vw, 2.25rem);
+  padding-top: 0;
+  border-top: 0;
+}
+
+.inlineLink {
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink);
+  text-decoration: none;
+  border-bottom: 1px solid var(--ink-muted);
+  transition: border-color var(--duration-hover) var(--ease-out);
+}
+
+.inlineLink:hover {
+  border-color: var(--ink);
+}
+
+.inlineLink:focus-visible {
+  outline: 1.5px solid var(--ink);
+  outline-offset: 2px;
+}
+
+/* ---- Sub-beat (the engine) ---------------------------------- */
+
+.sub {
+  margin-top: 1.25rem;
+}
+
+.sub > .body {
+  margin-top: 0 !important;
+}
+
+/* A margin label sits on the first line of the paragraph beside it. */
+.sub > .l {
+  padding-top: 0.5rem;
+}
+
+
+/* ---- Prototype contents (the works page's rows) ------------- */
+
+.toc {
+  list-style: none;
+  margin: clamp(2.5rem, 5vw, 3.5rem) 0 0;
+  padding: 0;
+  border-top: 1px solid var(--ink);
+}
+
+.toc li {
+  border-bottom: 1px solid var(--ink-muted);
+}
+
+.tocRow {
+  display: grid;
+  grid-template-columns: 3rem minmax(0, 1fr) auto;
+  column-gap: 1rem;
+  row-gap: 0.3rem;
+  align-items: baseline;
+  padding: 0.95rem 0 1.05rem;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.tocN {
+  grid-column: 1;
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  letter-spacing: 0.12em;
+  color: var(--ink-soft);
+}
+
+.tocTitle {
+  grid-column: 2;
+  justify-self: start;
+  font-family: var(--font-display);
+  font-size: var(--type-s);
+  font-weight: 350;
+  line-height: 1.6;
+  letter-spacing: -0.01em;
+  transform-origin: 0 50%;
+  transition: transform 460ms var(--ease-settle);
+}
+
+.tocMove {
+  grid-column: 3;
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.tocLine {
+  grid-column: 2 / 4;
+  font-family: var(--font-display);
+  font-size: var(--type-s);
+  font-weight: 300;
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+
+.toc:hover .tocRow:not(:hover) {
+  opacity: 0.55;
+}
+
+.tocRow {
+  transition: opacity var(--duration-hover) var(--ease-out);
+}
+
+.tocRow:hover .tocTitle,
+.tocRow:focus-visible .tocTitle {
+  transform: scale(1.04);
+}
+
+.tocRow:focus-visible {
+  outline: 1.5px solid var(--ink);
+  outline-offset: 2px;
+}
+
+/* ---- Prototype module (Netflix Queue · Stameska) ------------ */
+
+.proto {
+  margin-top: clamp(4.5rem, 8vw, 6.5rem);
+  scroll-margin-top: 5rem;
+}
+
+.protoMark {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin: 0;
+}
+
+.protoN {
+  font-family: var(--font-display);
+  font-weight: 350;
+  font-size: var(--type-m);
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  font-variant-numeric: lining-nums;
+  color: var(--ink);
+  font-variation-settings: 'opsz' 72;
+}
+
+.protoMove {
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.protoTitle {
+  margin: 0 0 1rem;
+  font-family: var(--font-display);
+  font-weight: 350;
+  font-size: var(--type-m);
+  line-height: 1.15;
+  letter-spacing: -0.016em;
+  text-wrap: balance;
+  font-variation-settings: 'opsz' 72;
+}
+
+@media (max-width: 719px) {
+  .protoMark {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+}
+
+/* ---- Reason and its trade-off (Unigrid: one module per kind of
+   information). The reason in the text column, the cost of the call as a
+   note in the right margin, tops on one line. ---------------------- */
+
+.reason {
+  margin-top: 1.25rem;
+  row-gap: 1.5rem;
+}
+
+.reason > .body {
+  margin-top: 0 !important;
+}
+
+.note {
+  margin: 0;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--ink);
+}
+
+.noteText {
+  margin: 0.55rem 0 0;
+  font-family: var(--font-display);
+  font-size: var(--type-s);
+  font-weight: 330;
+  line-height: 1.6;
+  color: var(--ink);
+  text-wrap: pretty;
+}
+
+@media (max-width: 1199px) {
+  .note {
+    max-width: 26rem;
+  }
+}
+
+/* ---- Decisions ---------------------------------------------- */
+
+.decision {
+  margin-top: clamp(3.5rem, 6vw, 5rem);
+  scroll-margin-top: 5rem;
+}
+
+.mark + .row + .decision,
+.chapter > .row + .decision:first-of-type {
+  margin-top: clamp(2.5rem, 4.5vw, 3.5rem);
+}
+
+.decisionN {
+  margin: 0;
+  padding-top: 0.7rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  letter-spacing: 0.14em;
+  color: var(--ink-soft);
+}
+
+.decisionTitle {
+  margin: 0;
+  max-width: 24em;
+  font-family: var(--font-display);
+  font-weight: 350;
+  font-size: var(--type-m);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+  font-variation-settings: 'opsz' 96;
+}
+
+/* ---- Outcome (Maiskaia Alla: scale with a second tier) ------- */
+
+.outcomes {
+  margin-top: clamp(3rem, 6vw, 4.5rem);
+  row-gap: 2rem;
+}
+
+.outcomeItem {
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--ink);
+}
+
+.outcomeItem:first-child { grid-column: 4 / 8; }
+.outcomeItem:last-child { grid-column: 8 / 13; }
+
+.outcomeItem dt {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: var(--type-l);
+  line-height: 1;
+  letter-spacing: -0.035em;
+  font-variation-settings: 'opsz' 144, 'WONK' 1;
+}
+
+.outcomeItem:last-child dt {
+  font-style: italic;
+}
+
+.outcomeItem dd {
+  margin: 0.9rem 0 0;
+  max-width: 20em;
+  font-family: var(--font-display);
+  font-size: var(--type-s);
+  font-weight: 330;
+  line-height: 1.6;
+}
+
+@media (max-width: 1199px) {
+  .outcomeItem:first-child { grid-column: 3 / 8; }
+  .outcomeItem:last-child { grid-column: 8 / 13; }
+}
+
+@media (max-width: 719px) {
+  .outcomeItem:first-child,
+  .outcomeItem:last-child {
+    grid-column: 1 / -1;
+  }
+}
+
+/* ---- Lessons (Productivity Habits: nothing competes) -------- */
+
+.lesson {
+  margin-top: clamp(2.5rem, 5vw, 3.75rem);
+}
+
+.lesson:first-of-type {
+  margin-top: clamp(2rem, 4vw, 3rem);
+}
+
+.lesson > .body {
+  margin-top: 0 !important;
+}
+
+.lessonLine {
+  margin: 0 0 0.6rem;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 300;
+  font-size: var(--type-m);
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  font-variation-settings: 'opsz' 144, 'SOFT' 50, 'WONK' 1;
+}
+
+/* ---- End: credits, next, colophon --------------------------- */
+
+.end {
+  margin-top: var(--chapter-space);
+  border-top: 1px solid var(--ink);
+  padding-top: clamp(1.5rem, 3vw, 2.25rem);
+}
+
+.credits > .l {
+  padding-top: 0.3rem;
+}
+
+.credits dd {
+  font-size: var(--type-s);
+}
+
+.next {
+  margin-top: clamp(4rem, 8vw, 6rem);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.next > .l {
+  padding-top: 1.35rem;
+}
+
+.nextRow {
+  display: grid;
+  grid-template-columns: 3rem minmax(0, 1fr) auto;
+  column-gap: 1rem;
+  row-gap: 0.35rem;
+  align-items: baseline;
+  padding: 1rem 0 1.15rem;
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--ink-muted);
+}
+
+.nextTitle {
+  grid-column: 2;
+  justify-self: start;
+  font-family: var(--font-display);
+  font-size: var(--type-l);
+  font-weight: 300;
+  line-height: 1;
+  letter-spacing: -0.025em;
+  transform-origin: 0 60%;
+  transition: transform 460ms var(--ease-settle);
+  font-variation-settings: 'opsz' 144;
+}
+
+.nextArrow {
+  grid-column: 3;
+  font-family: var(--font-mono);
+  font-size: var(--type-s);
+  transition: transform 320ms var(--ease-settle);
+}
+
+.next:hover .nextTitle,
+.next:focus-visible .nextTitle {
+  transform: scale(1.04);
+}
+
+.next:hover .nextArrow,
+.next:focus-visible .nextArrow {
+  transform: translateX(0.35rem);
+}
+
+.next:focus-visible {
+  outline: 1.5px solid var(--ink);
+  outline-offset: 4px;
+}
+
+.colophon {
+  margin: clamp(4rem, 8vw, 6rem) 0 0;
+  padding-top: 1rem;
+  border-top: 1px solid var(--ink-muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tocTitle,
+  .nextTitle,
+  .nextArrow {
+    transition: none;
+  }
+}

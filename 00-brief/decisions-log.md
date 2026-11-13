@@ -4,6 +4,81 @@ Track design and build decisions as they're made.
 
 ---
 
+## 2026-11-12 · Control Hub Workflows first; CHAI in the same system
+
+Yankun's notes, after the Agentic v4 review:
+
+- **Renamed: Control Hub Agentic → Control Hub Workflows.** The works-page caption reads "The agentic experience admins set up and control". The slug stays `control-hub-agentic`, so existing links still work.
+- **It's project 01; CHAI is 02.** The running heads, the "next" links and the roadmap's link to the agentic work all number themselves from the works page's order.
+- **Impact figures on the works page.** "2 teams · Adopted my agentic strategy" and "5 · Prototypes" are replaced by the case study's own two outcomes: WebexOne (where the run was tested) and Adopted (the builder, by PM and engineering). The page no longer names a second team, so the "2 teams" figure had nothing behind it.
+- **Prototype 05 shows the workflows.** Three boards: the Workflows page, List inactive devices in the builder (Yankun's new screen), and the activity cards.
+- **CHAI v4.** Same layout and type scale as Workflows. The chapters follow CHAI's own roadmap (context, evolution, find, understand, fix, outcome), and the coloured roadmap image is now an ink drawing whose jobs link to their chapters. 3% → 18% is the page's one poster-scale line, with its scope as a margin note. Prose about a quarter shorter (≈860 → ≈650 words), 21 → 14 screens, 17,000 → 13,600px at desktop. Cut: the Control Hub / Webex context slide, the "before" slide, the empty full-page home, the data-analysis still.
+- **Paper boards.** Light artwork that carries its own mat or dark labels (CHAI's 1.0 → 2.0 slide, Smart Search, the widget sheet) sits on a paper board; on cloth its labels vanished.
+
+The v3 pages of both stay at `?v=3` until Yankun signs off. CHAI's v3 still says "Next: Control Hub Agentic"; it goes when v3 does.
+
+---
+
+## 2026-11-12 · Agentic v4: the case study in the notebook's language
+
+Yankun asked for the Agentic case study to be redesigned in the language of the new homepage and works page. Three problems: dark screens on the paper mat looked like holes in the page, the text sections were hard to read, and the page was too much to read and to see. Each section was designed against three references from the inspiration library, one move from each (`00-brief/references/agentic-case-study-v4/README.md`, with study sheets and before/after sheets).
+
+- **Dark screens sit on the notebook's cloth.** Every screen is tipped onto a board of the cover's navy cloth (`ClothBoard`), whole, centred, never past its capture's width, sized to fit the window. Captions stay on paper under the board. The dark UI now belongs to the material around it.
+- **The page is set like the homepage.** A running head with a hairline, which names the current chapter. "Control Hub" roman over "*Agentic*" italic at poster scale. Chapters open like the works page's *Contents*: numeral, italic word, ink rule, one claim.
+- **One grid, two margins.** Text runs in columns 4–9. The left margin says where you are (chapter and prototype numerals, *Trade-off* labels); the right margin holds the one supporting figure.
+- **One rule break.** "Should we pause?" is the only line at poster scale.
+- **Shorter.** About a third less prose, no paragraph over about 50 words. Lines a drawing already says are gone, and so are the timeline map and the section rail. After Yankun's first look, the task became one spread beside its drawing, and each decision a two-line reason with its trade-off in the right margin. After her second, the page went from about twenty serif sizes to four (XL, L, M, S), plus 11px mono; the engine's extra heading went, and the lede is body text.
+
+v4 serves `/works/control-hub-agentic`. v3 stays at `?v=3` for comparison until Yankun signs off, then it and the pieces only it uses (PrototypeMap, AtAGlance, DecisionRow, PullQuote) can go. The copy is Yankun's, shortened; lines drafted for v3 still need her rewrite before ship.
+
+---
+
+## 2026-11-12 · Agentic: Build replaces Bridge
+
+After a closer look, the PM and engineering found that Cloud Control Workflows doesn't work for Control Hub. Yankun then built a workflow builder for Control Hub on the Webex Flow Designer foundation, and the team adopted it. The Agentic page now runs **explore · turn · build**: agent studio → Cloud Control's Agent Builder → skills → workflows and the builder. Per Yankun, the page doesn't mention Cloud Control Workflows, the Meraki quote, or the beat about bridging two teams.
+
+- **Six prototypes, not five.** 05 is the run in the Assistant, which was tested at WebexOne. 06 is the builder, which came later. Keeping them apart means "tested at WebexOne" stays on what was tested.
+- **Why workflows, stated plainly.** A skill can take two paths. A workflow takes the same steps every time, which is what the research brief asked for. This is Yankun's reason.
+- **Authorship on the plate.** The designer's caption says what's Yankun's (the Control Hub activities, the redesigned cards, each activity's settings) and what's Flow Designer's (the foundation). The layers diagram shows the same split.
+- **Lesson 2 stays.** "Know what not to build" now covers both things not built: a second agent builder, and a builder from scratch.
+
+The new copy is drafted from Yankun's answers, for Yankun to rewrite before ship. **Source:** 00-brief/prd-agentic-case-study-v3.md.
+
+**Revision, same day (Yankun's notes).** In the answer, the workflow builder replaces the four run stills: "The engine: Every step the Assistant runs is built here", followed by two builder plates headed Builder → Assistant. How I worked (the widget studio and the playbook) is cut. 06 keeps the workflows list, so no screen appears twice.
+
+**Revision 2, same day.** 05 and 06 are merged into one workflow prototype, 05: built once in the builder, run from the Assistant. The count is back to five. Status reads "In progress" wherever it read "never shipped".
+
+---
+
+## 2026-11-12 · Homepage index: strings, letters and ink
+
+Yankun asked for a more playful, detailed hover on the homepage index (Works, Résumé, About, Email), drawing on the name's letter effect and the top rule's line effect. The index now uses the page's own two devices, each built by one stated rule:
+
+- **The rules are strings.** All five hairlines are built like the top rule (`PluckedLine`).
+  - Crossing one plucks it where the cursor crosses, harder the faster it crosses.
+  - It rings with the cover line's spring, e^(−4.4t)·cos(2π·3.2t).
+  - The displacement falls off as a Gaussian, and the string is pinned at both ends.
+  - A fast sweep down the index strums all five. A click pushes the row's own rule down.
+  - The top rule now uses the same class, so it is pinned at its ends too.
+- **The letters swell like the name.**
+  - Each label's letters gain weight (350 → about 650) and SOFT under the cursor. The field is a Gaussian about two letters wide, so the swell travels along the word as the cursor does.
+  - The row pointed at also gets a little heavier as a whole.
+  - With keyboard focus, the whole word swells a little.
+- **Ink from where you came in.**
+  - The row's rule inks outward from the point where the cursor entered, and gathers back to where it left.
+  - The ink is drawn on the string itself, so it rings with it.
+  - By keyboard it draws from the left and runs out to the right as focus moves down.
+- **Arrows move the way they point.** → slides right; ↗ slides up and to the right. In "PDF ↗" only the arrow moves.
+- **Works cracks the cover.** Pointing at the Works row, or focusing it, cracks the notebook's cover the way pointing at the book does. About still brings up the photo.
+
+Rejected: a sliding arrow loop, which is a stock trope; and a navy band like the works contents, which is too heavy for four lines beside the name.
+
+Reduced motion: no ringing, and the letters don't follow the cursor. The row's rule cross-fades to ink, the label gets a little heavier, and the arrows stay put. Phones keep plain CSS rules.
+
+Checked at 1440×900: 60 fps throughout (p50 16.7 ms, max 16.8 ms), no errors, and the index still responds after opening and closing the book.
+
+---
+
 ## 2026-11-11 · Works page: the raised plate carries its notes; Build with AI back on the sheet
 
 Yankun asked for two changes:

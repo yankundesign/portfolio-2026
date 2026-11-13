@@ -9,7 +9,12 @@ Personal portfolio for Yankun, a senior product designer. The site is built arou
 1. **Homepage** (`/`, "01 · Monograph"):
    - The name "Yankun / *Wang*" is set at poster scale in Fraunces, and each letter's weight and softness follow the cursor.
    - The Field Notebook, a 3D book, stands in front of the name. It tilts toward the cursor, and its shadow falls away from it, as if the cursor were a lamp.
-   - A four-line index sits beside it: Works, Résumé (PDF), About, Email.
+   - A four-line index sits beside it: Works, Résumé (PDF), About, Email. It answers the cursor like the page around it:
+     - Its rules are strings, like the top rule: crossing one plucks it, and a fast sweep strums all five.
+     - Each label's letters swell under the cursor, like the name.
+     - The row's rule inks outward from where the cursor came in.
+     - Each arrow moves the way it points.
+     - Pointing at Works cracks the notebook's cover.
    - The notebook *is* the navigation: there is no nav bar.
 2. **Works** (`/works`): the same notebook, open.
    - The left page holds the contents, one ruled row per project, each with a one-line caption under its title.
@@ -125,13 +130,15 @@ When adding a new image:
   - `SettleCover.tsx`: the front board.
   - `NotebookContents.tsx`: the works spread.
   - `MobileContents.tsx`: the works list on phones.
-- `components/project/`: project detail (vertical scroll, plate and reading layouts).
+- `components/project/`: project detail (vertical scroll, plate and reading layouts). Control Hub Workflows (slug `control-hub-agentic`, project 01) and the Control Hub AI Assistant (`chai`, 02) use the notebook layout: shared pieces in `NotebookCase.tsx` and `NotebookCase.module.css` (running head, opener, chapter marks, a four-step type scale), and every screen on a board (`ClothBoard.tsx`): the cover's navy cloth for dark screens, paper for light artwork with its own mat or labels. Pages: `ControlHubAgenticNotebook.tsx`, `ChaiNotebook.tsx`. Their v3 pages stay at `?v=3`; references in `00-brief/references/agentic-case-study-v4/`.
 - `components/shared/`: reusable pieces (`Grain`, `FigCaption`, ink filters, the wash tuner).
 - `interactions/`:
   - `notebookEngine.ts`: a plain class that drives the book. It works from two numbers, camera `t` and cover `p`, and writes transforms straight to the DOM.
   - `useNotebook.ts`: the thin hook around the engine.
   - Plain classes for per-frame work:
     - `monographPointer.ts`: the homepage's lamp, tilt, name, rule and “Open →”.
+    - `monographIndex.ts`: the homepage index (its strings, letters and ink), run from the pointer's frame loop.
+    - `pluckedLine.ts`: a hairline that rings like a string when the cursor crosses it (the top rule and the index's rules).
     - `cursorLabel.ts`: labels that replace the cursor.
     - `plateFlight.ts`: the works plate that grows from its thumbnail.
     - `contentsStamp.ts`: the navy band on the works contents.

@@ -8,19 +8,24 @@ import type { VideoFigure } from './ebbContent';
  * google-chrome-disco-presentation-outline.md, slides 20–42, rev.
  * 2026-10-23). Headlines are the deck's slide titles. Prose is Yankun's
  * spoken deck notes, condensed into a first draft for Yankun to rewrite.
- * Brief: 00-brief/prd-agentic-case-study-v2.md.
+ * Brief: 00-brief/prd-agentic-case-study-v2.md, with v3 replacing the
+ * Bridge chapter by Build (00-brief/prd-agentic-case-study-v3.md). The
+ * page doesn't mention Cloud Control Workflows (Yankun, 2026-11-12).
+ * v3 drafts, for Yankun to rewrite: glance (landed, status), prose.how,
+ * prose.engine, prose.why, prose.p05, prose.outcome, lessons[1].
  *
  * Status rule: Agentic is never presented as shipped. Prototypes carry
- * their sequence number (01–05), never a month.
+ * their sequence number (01–05), never a month. Status reads “In progress”
+ * (Yankun, 2026-11-12).
  */
 
 export const header = {
   figNumber: 'fig. 02',
   title: 'Control Hub Agentic',
-  subtitle: 'Five prototypes, two platform shifts, and the one interaction that survived both',
+  subtitle: 'Five prototypes, two pivots, and the one interaction that survived both',
   yearRange: '2026',
   context: 'Cisco Webex · Control Hub',
-  role: 'Design lead · prototype, never shipped',
+  role: 'Design lead · prototype, in progress',
   heroVideo: {
     mp4: '/images/control-hub-agentic/run-loop.mp4',
     poster: '/images/control-hub-agentic/run-loop-poster.png',
@@ -40,11 +45,11 @@ export const glance = [
   },
   {
     label: 'Where it landed',
-    text: 'Control Hub’s tasks on Cloud Control Workflows: a direction two teams agreed on, tested at WebexOne.',
+    text: 'Workflows admins build in Control Hub and run from the Assistant. The run was tested at WebexOne; the team adopted the builder.',
   },
   {
     label: 'Status',
-    text: 'Five prototypes, 01–05. Never shipped.',
+    text: 'Five prototypes, 01–05. In progress.',
   },
 ] as const;
 
@@ -60,8 +65,12 @@ export const prose = {
     'Francis picks the task in the Assistant he already uses and names the two devices. He reads a four-step plan. Nothing changes until he runs it. Each step reports as it goes, and the summary says what changed: ATA-2 matches ATA-1.',
     'Getting here took five prototypes, and two turns I didn’t plan for.',
   ],
+  engine: [
+    'Every step Francis sees comes from a workflow, built once in the workflow builder. Each step is a card, and each card’s settings are defined. The Assistant is what admins see. The builder is the engine behind it.',
+    'Here’s its sibling, Clone user settings. It reads both users, checks they’re compatible, copies, verifies, and sums up. If the check fails, it stops and says why.',
+  ],
   how: [
-    'None of these shipped as they are. Each one answered a question the team could decide on. First I explored. Then a hard question made us turn. Then I found a team that already had the engine we needed.',
+    'None of these shipped as they are. Each one answered a question the team could decide on. First I explored. Then a hard question made us turn. Then the work had to run the same way every time, so I built it as workflows.',
   ],
   p01: [
     '“Agentic AI in Control Hub” meant something different to everyone. So I built an agent studio in code, learning to prototype with Cursor as I went. The team could click through it and point at what was right and what was wrong. It turned the idea into something we could question. No live model: the responses were written into the prototype.',
@@ -83,24 +92,22 @@ export const prose = {
     'The trade-off: admins give up full autonomy. That’s fine for now. They’re still learning what AI can do. The PM and engineering agreed it was the right direction, so we built our own instead of waiting.',
   ],
   p04: [
-    'Here’s the model, built. Prototype 04 turns a task into instructions the Assistant follows step by step. I showed it to the wider Cisco design team, and showing it is what found us the next step.',
+    'Here’s the model, built. Prototype 04 turns a task into instructions the Assistant follows step by step.',
   ],
-  bridge: [
-    'The Meraki team built it, and it was on its way into Cloud Control. I asked for a login and built our use case on it before asking anyone to bet on it. Then I brought it back to my team and connected the two teams, so each could learn the other’s concepts. With the PM and the eng lead, we adopted Workflows.',
+  why: [
+    'A skill is instructions the AI interprets. Run it twice and it can take two different paths. That’s fine for an answer. It isn’t fine for a change to someone’s phone line.',
+    'Our brief from the research already asked for it: behave the same way every time. So I moved the tasks from skills to workflows. Fixed steps the admin can read, check and run again.',
   ],
   p05: [
-    'I brought Control Hub’s use cases and worked with both teams to make Workflows usable for us. I added the Webex and Control Hub APIs, so a workflow can act on Control Hub. And I helped design the preview before a workflow runs: a print preview, for a workflow.',
+    'Prototype 05 makes each task a workflow. An admin builds it once in the workflow builder and runs it from the Assistant. Before anything changes, the Assistant shows the steps: a print preview, for a workflow. It’s the run at the top of this page.',
+    'I didn’t start the builder from scratch. Webex already had Flow Designer, so I built on its foundation. What I added is Control Hub: its activities, from users and devices to calling, and the settings each one takes, defined one by one. I redesigned some of the activity cards, so each says what its step does before it runs. I built it in code, in the same prototype as the Assistant.',
   ],
   decisions: [
     'The research line, turned into a brief: easy to find, shows the plan first, shows its work, behaves the same way every time. One decision at a time.',
   ],
-  craft: [
-    'The AI generates the screen, so I didn’t design one screen at a time. I designed the states and the rules: 49 surfaces in a widget studio, reviewed across every use case and lifecycle state. It shares one codebase with the prototypes.',
-    'The PM reviews flows in it. Engineering uses the playbook to guide how the Assistant and workflows behave, and the reusable rules are written for agents too. Four designers have since branched the codebase to explore how workflows apply to their own areas.',
-  ],
   outcome: [
-    'The output wasn’t my screens. It was a direction two teams agreed on. Workflows is the engine. How an admin asks, sees the plan, approves, watches it run and gets the result: that’s the layer I designed, and the part that survived every pivot.',
-    'We tested it at WebexOne and got good feedback.',
+    'The output wasn’t my screens. It was a direction the team adopted: a workflow an admin builds once, reads, and runs from the Assistant. How an admin asks, sees the plan, approves, watches it run and gets the result: that’s the layer I designed, and the part that survived every pivot.',
+    'We tested the run at WebexOne and got good feedback. Then the PM and engineering adopted the builder.',
   ],
 } as const;
 
@@ -111,7 +118,7 @@ export const lessons = [
   },
   {
     line: 'Know what not to build.',
-    text: 'We didn’t build a second agent builder. The engine was already there. Knowing what not to build is part of the design.',
+    text: 'We didn’t build a second agent builder, and I didn’t start a workflow builder from scratch. I built the part only Control Hub needed: its activities and their settings. Knowing what not to build is part of the design.',
   },
 ] as const;
 
@@ -124,35 +131,6 @@ export const quotes = {
     phrase: 'Should we pause?',
     attribution: 'The PM, after the Agent Builder news',
   },
-} as const;
-
-/** Slide 32's spread: the quote on ink, their screen beside it. */
-export const bridgeSpread = {
-  label: 'A Meraki designer',
-  phrase: 'We have something similar.',
-  subline: 'Workflows, built for network automation.',
-  figure: {
-    src: '/images/control-hub-agentic/workflows-canvas.png',
-    caption: 'Cloud Control Workflows · not our design',
-    alt: 'The Cloud Control Workflows editor: an activity list, a no-code canvas of logic blocks for a Meraki wireless report, and workflow properties.',
-  },
-} as const;
-
-/** Slide 33: what I added, standing on Workflows. */
-export const onWorkflows = {
-  panels: [
-    {
-      label: '01 · Webex and Control Hub APIs',
-      src: '/images/control-hub-agentic/workflows-apis.png',
-      alt: 'The Workflows activity list with a Webex Control Hub group: Access, Audit, Groups, Organization, and People, with actions such as Create a Person and Delete a Person.',
-    },
-    {
-      label: '02 · The preview before it runs',
-      src: '/images/control-hub-agentic/plan-current.png',
-      alt: 'The workflow preview in the Assistant: Clone device settings in four steps, copy from ATA-1 to ATA-2, and Run workflow.',
-    },
-  ],
-  ground: 'Workflows · the engine · not our design',
 } as const;
 
 /** The four stops of the manual task — slide 22's diagram, as data. */
@@ -179,11 +157,11 @@ export interface MapStop {
 export interface MapMove {
   move: string;
   stops: readonly MapStop[];
-  /** Cloud Control, drawn underneath as the ground. */
+  /** The platform underneath the move, drawn as the ground. */
   ground?: { label: string; note: string; dashed: boolean };
 }
 
-/** Explore · turn · bridge — the deck's cut timeline map, as the spine of §3. */
+/** Explore · turn · build — the deck's cut timeline map, as the spine of §3. */
 export const prototypeMap: readonly MapMove[] = [
   {
     move: 'Explore',
@@ -203,77 +181,44 @@ export const prototypeMap: readonly MapMove[] = [
     ground: { label: 'Agent Builder', note: 'being built, never built on', dashed: true },
   },
   {
-    move: 'Bridge',
+    move: 'Build',
     stops: [
+      { label: 'Every time', kind: 'tick', href: '#why' },
       { label: '05', kind: 'final', href: '#p05' },
       { label: 'WebexOne', kind: 'tested', href: '#outcome' },
     ],
-    ground: { label: 'Workflows', note: 'built on', dashed: false },
+    ground: { label: 'Flow Designer', note: 'built on', dashed: false },
   },
 ] as const;
 
-// Plate heads (adopted 2026-11-10). The run's own steps index its stills;
-// Explore → Turn → Bridge indexes each prototype. Status comes only from
-// the captions — Agentic is never presented as shipped.
-const RUN = ['Ask', 'Plan', 'Run', 'Result'] as const;
-const MOVES = ['Explore', 'Turn', 'Bridge'] as const;
+// Plate heads (adopted 2026-11-10). Builder → Assistant indexes the answer:
+// the run admins see, and the builder behind it. Explore → Turn → Build
+// indexes each prototype. Status comes only from the captions — Agentic is
+// never presented as shipped.
+const LAYERS = ['Builder', 'Assistant'] as const;
+const MOVES = ['Explore', 'Turn', 'Build'] as const;
 
-function runHead(current: number): PlateHead {
-  return { sequence: { name: 'Run step', items: RUN, current } };
+function layerHead(current: number, label: string, status: string): PlateHead {
+  return { sequence: { name: 'Layer', items: LAYERS, current }, label, status };
 }
 
-function prototypeHead(move: number, n: string): PlateHead {
+function prototypeHead(move: number, n: string, status = 'My design'): PlateHead {
   return {
     sequence: { name: 'Move', items: MOVES, current: move },
     label: `Prototype ${n}`,
-    status: 'My design',
+    status,
   };
 }
 
 export const runLoop: VideoFigure = {
   sources: [{ src: '/images/control-hub-agentic/run-full.mp4', type: 'video/mp4' }],
   poster: '/images/control-hub-agentic/run-full-poster.png',
-  caption: 'Prototype 05 · my design — the full run, on Cloud Control Workflows',
+  caption: 'Prototype 05 · my design — the full run, from the Assistant',
   alt: 'Silent recording of the full run: the admin opens the Assistant, picks the Clone device settings workflow, chooses ATA-1 and ATA-2, reviews the four-step plan, runs it, watches each step complete, and reads the summary.',
   width: 'plate',
   stage: { tone: 'ink', size: [1846, 1114] },
-  head: { label: 'Prototype 05 · the full run', status: 'Never shipped' },
+  head: layerHead(1, 'Prototype 05', 'In progress'),
 };
-
-export const runSteps: readonly Figure[] = [
-  {
-    src: '/images/control-hub-agentic/run-step-ask.png',
-    caption: '01 · Ask — pick the task, name the devices',
-    alt: 'The Assistant asks for the source and destination devices; the admin picks ATA-1 and is choosing ATA-2.',
-    width: 'plate',
-    stage: { sizes: [[1220, 822]] },
-    head: runHead(0),
-  },
-  {
-    src: '/images/control-hub-agentic/run-step-plan.png',
-    caption: '02 · Plan — four steps, nothing changed yet',
-    alt: 'A Clone device settings preview with four steps (read, check compatibility, copy, verify), workflow details and a Run workflow button.',
-    width: 'plate',
-    stage: { sizes: [[1220, 822]] },
-    head: runHead(1),
-  },
-  {
-    src: '/images/control-hub-agentic/run-step-run.png',
-    caption: '03 · Run — each step reports as it goes',
-    alt: 'The four steps running: step one complete, step two in progress, steps three and four not started, with a Stop workflow button.',
-    width: 'plate',
-    stage: { sizes: [[1220, 822]] },
-    head: runHead(2),
-  },
-  {
-    src: '/images/control-hub-agentic/run-step-result.png',
-    caption: '04 · Result — what changed, setting by setting',
-    alt: 'A summary card for ATA-2: six settings applied and verified, with the fax, signaling and audio changes listed as previous and applied values.',
-    width: 'plate',
-    stage: { sizes: [[1220, 822]] },
-    head: runHead(3),
-  },
-];
 
 export const figures = {
   p01: {
@@ -292,21 +237,33 @@ export const figures = {
     stage: { sizes: [[2000, 1455]] },
     head: prototypeHead(1, '04'),
   },
-  studio: {
-    src: '/images/control-hub-agentic/widget-studio.png',
-    caption: 'Widget studio · my review tool — 49 surfaces, one component source',
-    alt: 'The widget studio’s Plan tab: one component source, reviewed across every use case and lifecycle state, showing a sample gateway-swap plan.',
+  p05List: {
+    src: '/images/control-hub-agentic/workflows-list.png',
+    caption: 'Prototype 05 · workflows in Control Hub, Cisco-owned beside the admin’s own · sample data',
+    alt: 'The Workflows page in Control Hub, under AI management: six draft workflows (clone device settings, clone user settings, compare configuration, list inactive devices, map out dependency), each with its scope, and an owner that is either Cisco-owned or an admin.',
     width: 'plate',
-    stage: { sizes: [[2000, 1170]] },
-    head: { label: 'Widget studio', status: 'My review tool' },
+    stage: { sizes: [[1746, 1189]] },
+    head: prototypeHead(2, '05', 'Sample data'),
   },
-  studioGuide: {
-    src: '/images/control-hub-agentic/widget-studio-guide.png',
-    caption: 'The playbook · one use case, Clone & Copy, written as rules',
-    alt: 'The Clone & Copy guide: a use case at a glance table, the experience promise and flow, and an experience-flow sequence from request to validation.',
+} as const satisfies Record<string, Figure>;
+
+/** The engine behind the run: the workflow builder, shown under the run in the answer. */
+export const engine = {
+  canvas: {
+    src: '/images/control-hub-agentic/designer-canvas.png',
+    caption: 'The workflow builder · my Control Hub activities and settings, on the Webex Flow Designer foundation',
+    alt: 'The workflow builder, editing Clone user settings: a library of Control Hub activities on the left; a canvas running Start flow, Get user settings, Check compatibility and a condition; and the Check compatibility settings on the right, with source user, destination user and a compatible output variable.',
     width: 'plate',
-    stage: { sizes: [[847, 764]] },
-    head: { label: 'The playbook · Clone & Copy' },
+    stage: { sizes: [[2140, 1302]] },
+    head: layerHead(0, 'Prototype 05', 'On Flow Designer'),
+  },
+  cards: {
+    src: '/images/control-hub-agentic/designer-cards.png',
+    caption: 'The workflow builder · my cards — each says what its step does, including the path where it stops',
+    alt: 'The rest of the Clone user settings workflow: copy eight supported calling settings, verify them, and generate a summary; on the blocked path, a summary explains why the workflow stopped and ends with a Blocked outcome. The Assistant is open beside the canvas.',
+    width: 'plate',
+    stage: { sizes: [[1964, 1189]] },
+    head: layerHead(0, 'Prototype 05', 'My design'),
   },
 } as const satisfies Record<string, Figure>;
 
@@ -417,7 +374,7 @@ export const pivot = {
   checkLabel: 'Admin checks',
 } as const;
 
-/** Slide 40's drawing: my layer between the admin's task and the platform. */
+/** Slide 40's drawing, v3: my layer between the admin's task and the workflows it runs. */
 export const layers = {
   task: { label: 'The admin’s task', text: taskRequest },
   mine: {
@@ -426,13 +383,13 @@ export const layers = {
     steps: ['Ask', 'Plan', 'Approve', 'Run', 'Report'],
   },
   builtOn: 'Built on',
-  platform: { title: 'Workflows', label: 'Cloud Control · not our design' },
+  platform: { title: 'Workflow designer', label: 'Control Hub activities, my design · Flow Designer foundation' },
   notBuilt: { title: 'Agent Builder', label: 'Not built', note: 'the work we chose not to duplicate' },
 } as const;
 
 export const credits = {
-  design: 'Design lead — interaction model, prototypes 01–05, widget studio and playbook',
-  partners: ['Product management', 'Engineering', 'Research', 'The Meraki Workflows team', 'Design leadership'],
+  design: 'Design lead — interaction model, prototypes 01–05, the Control Hub workflow activities, widget studio and playbook',
+  partners: ['Product management', 'Engineering', 'Research', 'Design leadership'],
 } as const;
 
 export const sections = [
@@ -440,7 +397,6 @@ export const sections = [
   { id: 'answer', label: 'The answer' },
   { id: 'how', label: 'Prototypes' },
   { id: 'decisions', label: 'Decisions' },
-  { id: 'craft', label: 'How I worked' },
   { id: 'outcome', label: 'Outcome' },
   { id: 'lessons', label: 'Lessons' },
   { id: 'credits', label: 'Credits' },

@@ -13,7 +13,8 @@ export interface LayersDiagramProps {
 
 /**
  * Slide 40's drawing, by hand: the admin's task on top, my layer as the
- * ink block, the platform underneath as the ground it's built on. Agent
+ * ink block, the workflow designer underneath as the ground it's built on
+ * (dashed and washed: Flow Designer's foundation, my activities). Agent
  * Builder sits beside the platform, faint and dashed — the work we chose
  * not to duplicate. Arrows run from our work down into theirs.
  */

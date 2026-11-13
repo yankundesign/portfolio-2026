@@ -119,6 +119,47 @@ export interface ProjectGroup {
 
 export const projects: Project[] = [
   {
+    slug: 'control-hub-agentic',
+    title: 'Control Hub Workflows',
+    role: 'agentic AI for control hub admins',
+    subtitle:
+      'Five prototypes, two pivots, and the one interaction that survived both',
+    caption: 'The agentic experience admins set up and control',
+    notes: {
+      // controlHubAgenticNotebook.ts: glance and outcome. Renamed from
+      // Control Hub Agentic and moved first on 2026-11-12 (Yankun). The
+      // figures are the case study's two outcomes; the earlier "2 teams"
+      // figure came out with the page's second team.
+      summary: 'Control Hub’s agentic experience: workflows admins build once, check, and run from the Assistant.',
+      figuresLabel: 'Impact',
+      figures: [
+        { value: 'WebexOne', label: 'Where the run was tested' },
+        { value: 'Adopted', label: 'The builder, by PM and engineering' },
+      ],
+      facts: ['Cisco Webex', 'Design lead', 'In progress'],
+    },
+    year: '2026',
+    collaborators: [],
+    impact: 'A workflow builder the team adopted',
+    figNumber: 1,
+    size: 'main',
+    colStart: 8,
+    colSpan: 4,
+    gridRow: 1,
+    alignVertical: 'start',
+    aspect: '4-5',
+    mockup: '/canvas/mockups/control-hub-agentic-stack.png',
+    preview: {
+      webm: '/canvas/previews/control-hub-agentic-stack-preview.webm',
+      mp4: '/canvas/previews/control-hub-agentic-stack-preview.mp4',
+    },
+    canvasStatus: 'Prototypes 01–05, in progress',
+    canvasTags: ['Cisco Webex', 'Agentic AI', 'Workflows'],
+    canvasProofs: ['Workflow builder adopted by PM and engineering'],
+    canvasContext:
+      'Control Hub’s agentic experience: how an admin asks, approves, and watches a workflow run.',
+  },
+  {
     slug: 'chai',
     title: 'Control Hub AI Assistant',
     role: 'ai assistant for it admins',
@@ -137,7 +178,7 @@ export const projects: Project[] = [
     year: '2024–2026',
     collaborators: [],
     impact: 'adoption from 3% to 18%',
-    figNumber: 1,
+    figNumber: 2,
     size: 'featured',
     colStart: 1,
     colSpan: 6,
@@ -154,45 +195,6 @@ export const projects: Project[] = [
     canvasProofs: ['3% → 18% adoption', '86% drop in no-result searches'],
     canvasContext:
       'Turned a low-adoption assistant into a task-aware admin workflow.',
-  },
-  {
-    slug: 'control-hub-agentic',
-    title: 'Control Hub Agentic',
-    role: 'agentic AI for control hub admins',
-    subtitle:
-      'Five prototypes, two platform shifts, and the one interaction that survived both',
-    caption: 'How an admin asks, approves, and watches AI act',
-    notes: {
-      // controlHubAgenticContent.ts: glance; the two teams from canvasProofs.
-      // Wording and status set by Yankun on 2026-11-11.
-      summary: 'Not an agent that decides on its own. Steps the admin can check, run from the Assistant they already use.',
-      figuresLabel: 'Impact',
-      figures: [
-        { value: '2 teams', label: 'Adopted my agentic strategy' },
-        { value: '5', label: 'Prototypes, 01–05' },
-      ],
-      facts: ['Tested at WebexOne', 'In progress'],
-    },
-    year: '2026',
-    collaborators: [],
-    impact: 'A direction two teams agreed on',
-    figNumber: 2,
-    size: 'main',
-    colStart: 8,
-    colSpan: 4,
-    gridRow: 1,
-    alignVertical: 'start',
-    aspect: '4-5',
-    mockup: '/canvas/mockups/control-hub-agentic-stack.png',
-    preview: {
-      webm: '/canvas/previews/control-hub-agentic-stack-preview.webm',
-      mp4: '/canvas/previews/control-hub-agentic-stack-preview.mp4',
-    },
-    canvasStatus: 'Prototypes 01–05, never shipped',
-    canvasTags: ['Cisco Webex', 'Agentic AI', 'Direction'],
-    canvasProofs: ['Direction adopted by two teams'],
-    canvasContext:
-      'How an admin asks, approves, and watches AI act in Control Hub — landed on Cloud Control Workflows.',
   },
   {
     slug: 'ebb',

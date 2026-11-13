@@ -17,14 +17,15 @@ const MARK: Record<MapStopKind, SketchMarkKind> = {
 };
 
 /**
- * The prototype map, drawn by hand: explore · turn · bridge on one line.
+ * The prototype map, drawn by hand: explore · turn · build on one line.
  *
- * Sequence, not calendar — no months. Prototypes are rings, the research
- * and the pause are ticks, 05 is the solid disc, WebexOne is a ring with a
- * dot. After 05 the line gets heavy: that's the direction. Cloud Control
- * sits underneath as the ground: Agent Builder faint and dashed (being
- * built, never built on), Workflows dashed with a wash (built on). Each
- * stop links to its beat, so the map doubles as the section's index.
+ * Sequence, not calendar — no months. Prototypes are rings, the research,
+ * the pause and the move to workflows are ticks, 05 is the solid disc,
+ * WebexOne is a ring with a dot. The build line is heavy: that's the
+ * direction. Platforms sit underneath as the ground: Agent Builder faint
+ * and dashed (being built, never built on), Flow Designer dashed with a
+ * wash (built on). Each stop links to its beat, so the map doubles as the
+ * section's index.
  */
 export default function PrototypeMap({ moves, caption }: PrototypeMapProps) {
   return (

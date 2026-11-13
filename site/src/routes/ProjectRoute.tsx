@@ -1,7 +1,9 @@
 import { useEffect, useLayoutEffect } from 'react';
 import { Link, useLocation, useParams } from 'react-router';
 import ChaiProject from '../components/project/ChaiProject';
+import ChaiNotebook from '../components/project/ChaiNotebook';
 import ControlHubAgenticProject from '../components/project/ControlHubAgenticProject';
+import ControlHubAgenticNotebook from '../components/project/ControlHubAgenticNotebook';
 import SapFieldglassProject from '../components/project/SapFieldglassProject';
 import BuildWithAiProject from '../components/project/BuildWithAiProject';
 import EbbProject from '../components/project/EbbProject';
@@ -74,22 +76,29 @@ export default function ProjectRoute() {
 
   if (externalUrl) return null;
 
+  // The notebook case studies (Control Hub Workflows, CHAI) carry their own
+  // running head, back link included. Their v3 pages stay at ?v=3.
+  const v3 = new URLSearchParams(location.search).get('v') === '3';
+  const ownsHead = (slug === 'control-hub-agentic' || slug === 'chai') && !v3;
+
   return (
     <div className={styles.page}>
       <Grain />
 
-      <nav className={styles.topNav} aria-label="Primary">
-        <Link to={backToWorks} className={styles.back}>
-          <span aria-hidden="true">←</span>
-          <span className={styles.backLabel}>back to works</span>
-        </Link>
-      </nav>
+      {!ownsHead && (
+        <nav className={styles.topNav} aria-label="Primary">
+          <Link to={backToWorks} className={styles.back}>
+            <span aria-hidden="true">←</span>
+            <span className={styles.backLabel}>back to works</span>
+          </Link>
+        </nav>
+      )}
 
       <main className={styles.main}>
         {slug === 'chai' ? (
-          <ChaiProject />
+          v3 ? <ChaiProject /> : <ChaiNotebook backTo={backToWorks} />
         ) : slug === 'control-hub-agentic' ? (
-          <ControlHubAgenticProject />
+          v3 ? <ControlHubAgenticProject /> : <ControlHubAgenticNotebook backTo={backToWorks} />
         ) : slug === 'build-with-ai' ? (
           <BuildWithAiProject />
         ) : slug === 'sap-fieldglass' ? (

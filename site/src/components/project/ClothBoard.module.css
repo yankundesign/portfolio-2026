@@ -1,0 +1,185 @@
+/*
+ * ClothBoard — a dark screen tipped onto the notebook's navy cloth.
+ *
+ * Every board takes the full measure. The board measures itself (container),
+ * so its margins stay in proportion at every width: 4.5% at the sides and
+ * top, 5.5% below. Inside, the row of screens is centred, and no wider than:
+ *   · --row-max  the width at which a screen would pass its capture's pixels
+ *   · the window's height, so the whole board is on screen at once
+ *     (--k is the row's height over its width; --label-h makes room for the
+ *     stamps above two-screen rows; 10cqw is the board's own margins).
+ */
+
+.figure {
+  margin: 0;
+}
+
+.board {
+  container-type: inline-size;
+  position: relative;
+  border-radius: 6px;
+  background-color: var(--cloth);
+  background-image:
+    /* the lamp: a little more light at the top left, as on the homepage */
+    radial-gradient(130% 110% at 24% 0%, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0) 58%),
+    linear-gradient(var(--cloth-shade), var(--cloth-shade)),
+    var(--cloth-weave);
+  background-size: auto, auto, 400px;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.045),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 1px 2px rgba(22, 38, 94, 0.22),
+    0 34px 64px -40px rgba(22, 38, 94, 0.62);
+}
+
+.inner {
+  padding: 4.5cqw 4.5cqw 5.5cqw;
+}
+
+.row {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--gap);
+  width: min(
+    100%,
+    var(--row-max),
+    max(26rem, calc((100svh - 8rem - 10cqw - var(--label-h)) / var(--k)))
+  );
+  margin: 0 auto;
+}
+
+.slot {
+  flex: 0 0 var(--share);
+  min-width: 0;
+}
+
+.screen {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: var(--cloth);
+  /* a paper hairline keeps the screen's edge on the cloth */
+  box-shadow:
+    0 0 0 1px rgba(235, 230, 217, 0.15),
+    0 22px 40px -24px rgba(2, 6, 22, 0.9);
+}
+
+/* A paper board: the notebook's page, for light artwork with its own mat or
+   labels. A hairline frame, no cloth. */
+.paper {
+  background: var(--paper-soft);
+  box-shadow: inset 0 0 0 1px var(--ink-muted);
+}
+
+.paper .screen {
+  box-shadow:
+    0 0 0 1px rgba(22, 38, 94, 0.08),
+    0 18px 40px -26px rgba(22, 38, 94, 0.45);
+}
+
+.paper .cutout .screen {
+  box-shadow: none;
+}
+
+/* Transparent artwork (cards with no background) sits straight on the
+   cloth: a backing or a shadow would outline empty space. */
+.cutout .screen {
+  background: none;
+  box-shadow: none;
+}
+
+/* An option weighed and dropped: a dashed paper edge, no lift. */
+.dropped .screen {
+  box-shadow: none;
+  outline: 1px dashed rgba(235, 230, 217, 0.5);
+  outline-offset: max(6px, 0.9cqw);
+}
+
+/* Paper pigment pressed into the cloth, as the cover's "Field notebook". */
+.stamp {
+  margin: 0 0 max(0.6rem, 1.1cqw);
+  font-family: var(--font-mono);
+  font-size: max(11px, var(--text-caption));
+  font-weight: 400;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  line-height: 1.3;
+  color: var(--cloth-stamp);
+  text-shadow: 0 -1px 0 rgba(3, 8, 26, 0.55);
+}
+
+/* Caption on paper, under the board; the recording's one control at its end. */
+.caption {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  margin-top: 0.95rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  letter-spacing: 0.04em;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+
+.captionText {
+  max-width: 62em;
+  text-wrap: pretty;
+}
+
+.toggle {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55em;
+  padding: 0.45em 0.75em;
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid var(--ink-muted);
+  border-radius: 2px;
+  cursor: pointer;
+  transition:
+    background-color var(--duration-hover) var(--ease-out),
+    color var(--duration-hover) var(--ease-out),
+    border-color var(--duration-hover) var(--ease-out);
+}
+
+.toggle svg {
+  width: 0.65rem;
+  height: 0.65rem;
+  fill: currentColor;
+}
+
+.toggle:hover {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+
+.toggle:focus-visible {
+  outline: 1.5px solid var(--ink);
+  outline-offset: 2px;
+}
+
+/* Phones: the two screens of a pair stack, each the full row. */
+@media (max-width: 719px) {
+  .row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 7cqw;
+    width: 100%;
+  }
+
+  .slot {
+    flex: none;
+  }
+
+  .caption {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

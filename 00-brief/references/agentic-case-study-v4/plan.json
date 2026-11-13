@@ -1,0 +1,42 @@
+{
+  "A-opener": {
+    "name": "Opener",
+    "job": "Title, the answer at a glance, and the run, before any reading",
+    "refs": ["be-maiskaia-alla-01", "ed-actual-01", "pr-linear-01"]
+  },
+  "B-chapters": {
+    "name": "Chapter openers (system)",
+    "job": "One invariant chapter mark that resets density between sections",
+    "refs": ["ed-kinfolk-03", "ed-gentlewoman-03", "be-lens-editorial-02"]
+  },
+  "C-task": {
+    "name": "The task",
+    "job": "The problem: one admin request and the manual path behind it",
+    "refs": ["ed-stripe-01", "br-masp-02", "ed-franchi-03"]
+  },
+  "D-screens": {
+    "name": "Dark screens (boards)",
+    "job": "Artifact reveal: dark product UI on a paper page without fighting it",
+    "refs": ["ed-actual-04", "ed-hofmann-01", "be-upstream-01"]
+  },
+  "E-prototypes": {
+    "name": "Five prototypes",
+    "job": "Chronology: five numbered prototypes, each one question and one screen",
+    "refs": ["br-netflix-queue-03", "be-stameska-02", "be-jayne-studio-02"]
+  },
+  "F-pivot": {
+    "name": "The turn",
+    "job": "Strategy pivot: a question that stopped the work, then the call",
+    "refs": ["br-public-02", "br-chatelet-03", "br-cohere-north-03"]
+  },
+  "G-decisions": {
+    "name": "Decisions",
+    "job": "Design rationale: where it started, where it ended, and the trade-off",
+    "refs": ["be-emerald24-01", "ed-unigrid-01", "be-jayne-studio-01"]
+  },
+  "H-close": {
+    "name": "Outcome and lessons",
+    "job": "Outcome and reflection after the densest part of the page",
+    "refs": ["br-netflix-queue-04", "be-productivity-habits-02", "be-maiskaia-alla-02"]
+  }
+}
