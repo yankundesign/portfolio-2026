@@ -27,11 +27,12 @@ export interface Board {
   caption: string;
   /**
    * 'cloth' (default): the navy cloth, for dark product screens.
-   * 'paper': the notebook's page, for light artwork that already carries its
-   * own mat or dark labels (composed slides, the widget sheet): on cloth
-   * those labels vanish and the mat reads as a second frame.
+   * 'paper': the notebook's page, for light artwork with dark labels and no
+   * background of its own (the widget sheet): on cloth those labels vanish.
+   * 'bare': no board at all, for a composed slide that already has its own
+   * mat (Smart Search, 1.0 → 2.0): a board around it is a second frame.
    */
-  tone?: 'cloth' | 'paper';
+  tone?: 'cloth' | 'paper' | 'bare';
 }
 
 export interface Chapter {

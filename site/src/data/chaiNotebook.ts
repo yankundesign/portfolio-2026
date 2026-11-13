@@ -87,7 +87,7 @@ export const evolution = {
       },
     ],
     caption: 'CHAI 1.0 → 2.0 · 2024.07 → 2025.05 · 1.0 not my design',
-    tone: 'paper',
+    tone: 'bare',
   } satisfies Board,
   turn: 'That exposed the bigger problem: the more capable CHAI became, the less obvious it was what to ask it. In 3.0 I stopped treating the assistant as one blank box. Clearer entry points and skills meet admins where they already work.',
   boards: [
@@ -127,7 +127,7 @@ export const find = {
       },
     ],
     caption: 'Smart Search · a setting result, and a question that opens CHAI with the search intact',
-    tone: 'paper',
+    tone: 'bare',
   } satisfies Board,
   metrics: [
     { big: `${v3Metrics.noResult.figure}%`, text: v3Metrics.noResult.label },

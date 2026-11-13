@@ -13,7 +13,7 @@ Yankun's notes, after the Agentic v4 review:
 - **Impact figures on the works page.** "2 teams · Adopted my agentic strategy" and "5 · Prototypes" are replaced by the case study's own two outcomes: WebexOne (where the run was tested) and Adopted (the builder, by PM and engineering). The page no longer names a second team, so the "2 teams" figure had nothing behind it.
 - **Prototype 05 shows the workflows.** Three boards: the Workflows page, List inactive devices in the builder (Yankun's new screen), and the activity cards.
 - **CHAI v4.** Same layout and type scale as Workflows. The chapters follow CHAI's own roadmap (context, evolution, find, understand, fix, outcome), and the coloured roadmap image is now an ink drawing whose jobs link to their chapters. 3% → 18% is the page's one poster-scale line, with its scope as a margin note. Prose about a quarter shorter (≈860 → ≈650 words), 21 → 14 screens, 17,000 → 13,600px at desktop. Cut: the Control Hub / Webex context slide, the "before" slide, the empty full-page home, the data-analysis still.
-- **Paper boards.** Light artwork that carries its own mat or dark labels (CHAI's 1.0 → 2.0 slide, Smart Search, the widget sheet) sits on a paper board; on cloth its labels vanished.
+- **Paper boards, and no board.** The widget sheet (transparent, with dark labels) sits on a paper board; on cloth its labels vanished. Composed slides that carry their own mat (Smart Search, 1.0 → 2.0) get no board at all, per Yankun: a board around them was a second frame. They show as themselves, with the plate hairline, starting on the caption's edge.
 
 The v3 pages of both stay at `?v=3` until Yankun signs off. CHAI's v3 still says "Next: Control Hub Agentic"; it goes when v3 does.
 

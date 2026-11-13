@@ -81,6 +81,33 @@
   box-shadow: none;
 }
 
+/* No board: a composed slide with its own mat is shown as itself, at the
+   full measure, with the site's plate hairline and nothing else. */
+.bare {
+  background: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.bare .inner {
+  padding: 0;
+}
+
+/* With no margins to reserve, the slide takes the height they'd have used,
+   and it starts on the caption's edge, like every plate on the site. */
+.bare .row {
+  width: min(
+    100%,
+    var(--row-max),
+    max(26rem, calc((100svh - 8rem - var(--label-h)) / var(--k)))
+  );
+  margin: 0;
+}
+
+.bare .screen {
+  box-shadow: 0 0 0 1px var(--ink-muted);
+}
+
 /* Transparent artwork (cards with no background) sits straight on the
    cloth: a backing or a shadow would outline empty space. */
 .cutout .screen {

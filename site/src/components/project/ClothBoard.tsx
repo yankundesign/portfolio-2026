@@ -57,7 +57,9 @@ export default function ClothBoard({ board, eager = false, className }: ClothBoa
     <RevealOnScroll as="figure" className={[styles.figure, className ?? ''].join(' ').trim()}>
       <div
         ref={frameRef}
-        className={[styles.board, board.tone === 'paper' ? styles.paper : ''].join(' ').trim()}
+        className={[styles.board, board.tone && board.tone !== 'cloth' ? styles[board.tone] : '']
+          .join(' ')
+          .trim()}
         style={vars}
       >
         <div className={styles.inner}>
