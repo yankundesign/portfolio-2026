@@ -238,15 +238,19 @@ function PrototypeModule({ p }: { p: Prototype }) {
       <ClothBoard board={p.board} className={s.board} />
       {p.more && (
         <>
-          <div className={`${s.row} ${s.more}`}>
-            <div className={`${s.t} ${s.body}`}>
-              {p.more.text.map((para) => (
-                <p key={para.slice(0, 24)}>{para}</p>
-              ))}
+          {p.more.text?.length ? (
+            <div className={`${s.row} ${s.more}`}>
+              <div className={`${s.t} ${s.body}`}>
+                {p.more.text.map((para) => (
+                  <p key={para.slice(0, 24)}>{para}</p>
+                ))}
+              </div>
             </div>
-          </div>
+          ) : null}
+          {/* After text, the first board takes a board's space; otherwise
+              they all continue the run from the first board. */}
           {p.more.boards.map((b, i) => (
-            <ClothBoard key={b.caption} board={b} className={i === 0 ? s.board : s.boardNext} />
+            <ClothBoard key={b.caption} board={b} className={i === 0 && p.more?.text?.length ? s.board : s.boardNext} />
           ))}
         </>
       )}

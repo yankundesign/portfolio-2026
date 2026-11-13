@@ -91,8 +91,9 @@ export interface Prototype {
   title: string;
   text: readonly string[];
   board: Board;
-  /** More of the prototype: text, then more boards in sequence. */
-  more?: { text: readonly string[]; boards: readonly Board[] };
+  /** More of the prototype: optional text, then more boards in sequence.
+      With no text, the boards run straight on from the first. */
+  more?: { text?: readonly string[]; boards: readonly Board[] };
 }
 
 export const prototypesLede =
@@ -199,10 +200,18 @@ export const prototypes: readonly Prototype[] = [
       caption: 'Prototype 05 · the Workflows page: Cisco-owned workflows beside the admin’s own · sample data',
     },
     more: {
-      text: [
-        'I didn’t start the builder from scratch. On Webex’s Flow Designer, I added Control Hub’s activities and the settings each one takes, and redesigned the cards so each says what its step does before it runs.',
-      ],
       boards: [
+        {
+          screens: [
+            {
+              kind: 'image',
+              src: `${IMG}/workflow-templates.png`,
+              size: [1635, 1113],
+              alt: 'The Workflow Designer’s first step, Choose a template: a search box, filters for user management and calling, and four template cards (Clone user settings, featured, 6 steps; Compare user calling settings, 3 steps; Review user calling settings, 3 steps; Check user compatibility, 4 steps), each with a small drawing of its flow, its inputs, Preview and Use template.',
+            },
+          ],
+          caption: 'Prototype 05 · four prebuilt templates, each card a drawing of its flow · sample data',
+        },
         {
           screens: [
             {
