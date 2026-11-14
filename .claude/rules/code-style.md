@@ -40,8 +40,8 @@ Three subdirectories in `src/components/`, one per layer, plus `shared/`. The ho
 - Interaction code lives in `src/interactions/`:
   - `notebookEngine.ts`: a plain class that drives the book.
   - `useNotebook`: the thin hook around the engine.
-  - Plain classes: `monographPointer.ts`, `monographIndex.ts`, `pluckedLine.ts`, `cursorLabel.ts`, `plateFlight.ts`, `contentsStamp.ts`.
-  - Hooks: `useMonographPointer`, `useTrailingPeek`, `useContentsSelection`, `useContentsStamp`, `useFollowLabel`, `usePlateFlight`, `usePlateLoop`, `useInputModality`, `useMediaQuery`, `useReducedMotion`, `useRunningHead`, `useBoardVideo`.
+  - Plain classes: `monographPointer.ts`, `monographIndex.ts`, `pluckedLine.ts`, `cursorLabel.ts`, `plateFlight.ts`, `plateCarry.ts` (the plate carried between the works page and a case study), `contentsStamp.ts`, `ruleStrings.ts` (the case studies' ringing rules), `screenView.ts` (a board's screen enlarged).
+  - Hooks: `useMonographPointer`, `useTrailingPeek`, `useContentsSelection`, `useContentsStamp`, `useFollowLabel`, `usePlateFlight`, `usePlateLoop`, `usePlateLanding`, `useInputModality`, `useMediaQuery`, `useReducedMotion`, `useRunningHead`, `useBoardVideo`, `useInspect`.
   - `motion.ts`: easing and tween.
 - Each hook returns state and handlers that components consume.
 - Per-frame, imperative animation belongs in a plain class or inside effects, not in hook bodies. The project's React hooks lint rules reject refs read or written during render.

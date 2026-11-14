@@ -1,0 +1,32 @@
+/* SpringRule — the cover's line as a closing rule. 72px tall, baseline at 36. */
+.wrap {
+  height: 72px;
+}
+
+.line {
+  display: block;
+  width: 100%;
+  overflow: visible;
+}
+
+.line path {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset 1600ms var(--ease-page);
+}
+
+.line[data-drawn='true'] path {
+  stroke-dashoffset: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .line path {
+    stroke-dashoffset: 0;
+    transition: none;
+  }
+}

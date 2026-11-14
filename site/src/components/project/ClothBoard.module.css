@@ -64,6 +64,38 @@
     0 22px 40px -24px rgba(2, 6, 22, 0.9);
 }
 
+/* A still is a button inside a ScreenInspector: it enlarges on click. */
+.inspect {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: inherit;
+  cursor: zoom-in;
+}
+
+.inspect:focus-visible {
+  outline: 1.5px solid var(--cloth-stamp);
+  outline-offset: 4px;
+}
+
+.paper .inspect:focus-visible,
+.bare .inspect:focus-visible {
+  outline-color: var(--ink);
+}
+
+.vh {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 /* A paper board: the notebook's page, for light artwork with its own mat or
    labels. A hairline frame, no cloth. */
 .paper {
@@ -144,6 +176,8 @@
   margin-top: 0.95rem;
   font-family: var(--font-mono);
   font-size: var(--text-caption);
+  /* 400, not the page's 300: captions say whose design it is and what is sample data */
+  font-weight: 400;
   letter-spacing: 0.04em;
   line-height: 1.55;
   color: var(--ink-soft);

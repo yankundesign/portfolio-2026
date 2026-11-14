@@ -15,6 +15,7 @@ Personal portfolio for Yankun, a senior product designer. The site is built arou
      - The row's rule inks outward from where the cursor came in.
      - Each arrow moves the way it points.
      - Pointing at Works cracks the notebook's cover.
+   - One sentence in the top right corner states a conviction about the work, in the cover title's italic: "A good tool goes quiet in the hand. I work until the AI does too." It is a belief, not a bio, and it never describes a product as hard or messy (a hiring manager reads that as their product). The cover says what the object is; nothing else on the page repeats it.
    - The notebook *is* the navigation: there is no nav bar.
 2. **Works** (`/works`): the same notebook, open.
    - The left page holds the contents, one ruled row per project, each with a one-line caption under its title.
@@ -46,7 +47,7 @@ Key constraints from the guideline:
 - Motion is weighted and paper-like. Respect `prefers-reduced-motion`: the notebook's open and close become a short cross-fade. No scroll-jacking.
 - 12-column grid (1280px max, 24px gutter, 60px margin) for the homepage and project detail pages.
 - Notebook cover ("Settle"):
-  - Paper-coloured type stamped on navy cloth: "Field Notebook", "Selected work", "2020–2026".
+  - Paper-coloured type stamped on navy cloth: "Field Notebook", "Selected work", "2024–2026".
   - One line, a damped spring that draws itself in.
   - No edition number, no "Vol.", no name on the cover: the homepage already sets the name at poster scale.
 
@@ -133,7 +134,14 @@ When adding a new image:
   - `NotebookContents.tsx`: the works spread.
   - `MobileContents.tsx`: the works list on phones.
 - `components/project/`: project detail (vertical scroll, plate and reading layouts). Control Hub Workflows (slug `control-hub-agentic`, project 01) and the Control Hub AI Assistant (`chai`, 02) use the notebook layout: shared pieces in `NotebookCase.tsx` and `NotebookCase.module.css` (running head, opener, chapter marks, a four-step type scale), and every screen on a board (`ClothBoard.tsx`): the cover's navy cloth for dark screens, paper for light artwork with its own mat or labels. Pages: `ControlHubAgenticNotebook.tsx`, `ChaiNotebook.tsx`. Their v3 pages stay at `?v=3`; references in `00-brief/references/agentic-case-study-v4/`.
-- `components/shared/`: reusable pieces (`Grain`, `FigCaption`, ink filters, the wash tuner).
+- `components/shared/`: reusable pieces (`Grain`, `FigCaption`, ink filters, the wash tuner, `StringRule`, `SpringRule`).
+- In the notebook case studies:
+  - Every still on a board enlarges on click (`ScreenInspector.tsx`, `screenView.ts`): it grows out of its place to twice its size on a field of the board's own material, and moves under the pointer where it is larger than the window. Recordings keep Play / Pause.
+  - The chapter rules are strings, as on the homepage (`StringRule`, `ruleStrings.ts`): they draw in from the left and ring where the cursor crosses them.
+  - The cover's spring line closes the page (`SpringRule`).
+  - Boards are set down on the page (`RevealOnScroll variant="set"`); quotes appear in place (`variant="ink"`). Nothing fades up.
+  - The opener's facts are one mono line, like the raised plate's foot on the works page.
+  - Opened from the works page, the opening board is that page's plate: the frame is picked up, flies across the change of page and lands as the board, its picture changing on the way (`plateCarry.ts`, `PlateCarrier.tsx`, mounted once in `App.tsx`). “← Works” from the top of the page carries the board home to its thumbnail. Reduced motion, phones and the older layouts change page plainly.
 - `interactions/`:
   - `notebookEngine.ts`: a plain class that drives the book. It works from two numbers, camera `t` and cover `p`, and writes transforms straight to the DOM.
   - `useNotebook.ts`: the thin hook around the engine.
@@ -143,9 +151,10 @@ When adding a new image:
     - `pluckedLine.ts`: a hairline that rings like a string when the cursor crosses it (the top rule and the index's rules).
     - `cursorLabel.ts`: labels that replace the cursor.
     - `plateFlight.ts`: the works plate that grows from its thumbnail.
+    - `plateCarry.ts`: the same plate carried into its case study's opening board, and the board carried home to its thumbnail.
     - `contentsStamp.ts`: the navy band on the works contents.
   - Hooks:
-    - Pointer and selection: `useMonographPointer`, `useTrailingPeek`, `useContentsSelection`, `useContentsStamp`, `useFollowLabel`, `usePlateFlight`, `usePlateLoop`.
+    - Pointer and selection: `useMonographPointer`, `useTrailingPeek`, `useContentsSelection`, `useContentsStamp`, `useFollowLabel`, `usePlateFlight`, `usePlateLoop`, `usePlateLanding`.
     - Helpers: `useInputModality`, `useMediaQuery`.
   - `useReducedMotion`.
   - `motion.ts`: easing and tween.

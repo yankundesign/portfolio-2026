@@ -31,7 +31,7 @@ export default function SettleCover() {
         <path pathLength={1} d={SPRING_PATH} />
       </svg>
       <span className={styles.title}>Selected work</span>
-      <span className={styles.years}>2020–2026</span>
+      <span className={styles.years}>2024–2026</span>
     </div>
   );
 }

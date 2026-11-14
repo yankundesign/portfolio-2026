@@ -11,13 +11,21 @@ export interface RevealOnScrollProps {
   translate?: number;
   /** Fraction of element that must be visible to trigger. */
   threshold?: number;
+  /**
+   * How it arrives. 'rise' (default): fades in, moving up. 'set': set down on
+   * the page, as the notebook is on the homepage (it comes down a little and
+   * settles with the cover's spring). 'ink': fades in where it is.
+   */
+  variant?: 'rise' | 'set' | 'ink';
+  /** Already in place: shown at once, with no arrival of its own (a plate is landing on it). */
+  shown?: boolean;
   /** Wrapper element tag. */
   as?: 'div' | 'figure' | 'section' | 'aside' | 'blockquote' | 'p' | 'header' | 'li';
   className?: string;
 }
 
 /**
- * Gentle fade + translate-up when the element enters the viewport.
+ * Brings an element in when it enters the viewport (see `variant`).
  *
  * Respects `prefers-reduced-motion` — revealed immediately, no transform.
  * Each element animates once.
@@ -27,6 +35,8 @@ export default function RevealOnScroll({
   delay = 0,
   translate = 20,
   threshold = 0.2,
+  variant = 'rise',
+  shown = false,
   as: Tag = 'div',
   className,
 }: RevealOnScrollProps) {
@@ -43,13 +53,15 @@ export default function RevealOnScroll({
     };
   }, [inView, delay]);
 
-  const revealed = reducedMotion || delayedIn;
+  const revealed = reducedMotion || shown || delayedIn;
 
   return (
     <Tag
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ref={ref as any}
-      className={[styles.reveal, revealed ? styles.revealed : '', className ?? ''].join(' ').trim()}
+      className={[styles.reveal, variant === 'rise' ? '' : styles[variant], revealed ? styles.revealed : '', shown ? styles.shown : '', className ?? '']
+        .filter(Boolean)
+        .join(' ')}
       style={
         reducedMotion
           ? undefined

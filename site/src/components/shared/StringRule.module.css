@@ -1,0 +1,39 @@
+/*
+ * StringRule — the svg is 30px tall with the line at 15px (RULE_Y), so the
+ * line lies on its parent's 1px border and has room to ring either way.
+ */
+.rule {
+  position: absolute;
+  left: 0;
+  bottom: -15px;
+  width: 100%;
+  height: 30px;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.rule.top {
+  bottom: auto;
+  top: -15px;
+}
+
+.rule path {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1;
+  /* drawn in from the left: the path's length is 1 */
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset 900ms var(--transition-ease-out-expo);
+}
+
+.rule[data-drawn='true'] path {
+  stroke-dashoffset: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rule path {
+    stroke-dashoffset: 0;
+    transition: none;
+  }
+}

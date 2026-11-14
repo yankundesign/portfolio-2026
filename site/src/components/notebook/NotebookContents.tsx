@@ -1,9 +1,10 @@
-import { Fragment, useRef, type CSSProperties, type MouseEvent } from 'react';
+import { Fragment, useEffect, useRef, type CSSProperties, type MouseEvent } from 'react';
 import { mockupThumb, type Project } from '../../data/projects';
 import { useContentsSelection } from '../../interactions/useContentsSelection';
 import { useContentsStamp } from '../../interactions/useContentsStamp';
 import { usePlateFlight } from '../../interactions/usePlateFlight';
 import { usePlateLoop } from '../../interactions/usePlateLoop';
+import { plateCarry, type PlateSource } from '../../interactions/plateCarry';
 import styles from './NotebookContents.module.css';
 
 export interface NotebookContentsProps {
@@ -11,8 +12,12 @@ export interface NotebookContentsProps {
   projects: Project[];
   /** The contents rows: the projects that are in the contents, in order. */
   contents: Project[];
-  /** Open a case study (internal projects); external ones are plain links. */
-  onOpenProject: (project: Project) => void;
+  /**
+   * Open a case study (internal projects); external ones are plain links.
+   * `plate` is the project's plate as it is on screen, raised or on the sheet,
+   * so it can be carried into the case study (PlateCarry).
+   */
+  onOpenProject: (project: Project, plate?: PlateSource) => void;
   /**
    * Load the raised plate's full-size PNGs. False until the book is first
    * opened, so the homepage doesn't fetch them; until one arrives, the raised
@@ -80,6 +85,39 @@ export default function NotebookContents({ projects, contents, onOpenProject, lo
   usePlateFlight(pageRef, plateOf(current));
   useContentsStamp(tocRef, active);
 
+  // A title pointed at may be opened next: have its case study's opening still ready.
+  const pointed = playing?.slug;
+  useEffect(() => { if (pointed) plateCarry.expect(pointed); }, [pointed]);
+
+  // Back from the top of a case study: its opening board is carried home to
+  // its thumbnail on the sheet. Nothing is selected; the thumbnail takes over.
+  useEffect(() => {
+    const slug = plateCarry.returning;
+    const frame = slug
+      ? pageRef.current?.querySelectorAll<HTMLElement>('[data-thumb-frame]')[projects.findIndex((p) => p.slug === slug)]
+      : null;
+    if (!frame) return;
+    plateCarry.home(frame);
+    return () => plateCarry.leave(frame);
+  }, [projects]);
+
+  /** The project's plate where it is right now: the raised frame, or its thumbnail on the sheet. */
+  const plateOn = (project: Project): PlateSource | undefined => {
+    const page = pageRef.current;
+    if (!page || !project.mockup) return undefined;
+    const raised = page.dataset.fly && shown?.slug === project.slug
+      ? page.querySelector<HTMLElement>('[data-plate-frame]')
+      : null;
+    const onSheet = page.querySelectorAll<HTMLElement>('[data-thumb-frame]')[projects.findIndex((p) => p.slug === project.slug)];
+    const frame = raised ?? onSheet;
+    if (!frame) return undefined;
+    const r = frame.getBoundingClientRect();
+    return {
+      from: { left: r.left, top: r.top, width: r.width, height: r.height },
+      loop: raised?.querySelector<HTMLVideoElement>('video[data-playing]') ?? null,
+    };
+  };
+
   const linkProps = (project: Project) => {
     if (project.externalUrl) return { href: project.externalUrl };
     return {
@@ -87,7 +125,7 @@ export default function NotebookContents({ projects, contents, onOpenProject, lo
       onClick: (e: MouseEvent) => {
         if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
         e.preventDefault();
-        onOpenProject(project);
+        onOpenProject(project, plateOn(project));
       },
     };
   };
@@ -129,7 +167,7 @@ export default function NotebookContents({ projects, contents, onOpenProject, lo
         </div>
         <div className={`${styles.foot} ${styles.reveal}`} style={{ transitionDelay: '420ms' }}>
           <span>Yankun Wang</span>
-          <span>2020–2026</span>
+          <span>2024–2026</span>
         </div>
       </section>
 

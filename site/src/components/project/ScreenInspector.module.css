@@ -1,0 +1,155 @@
+/*
+ * ScreenInspector — a board's screen at full size, on a field of the board's
+ * own material. Sizes and position are written by ScreenView.
+ */
+
+.field {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  overflow: hidden;
+  cursor: pointer;
+  outline: none;
+  overscroll-behavior: contain;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Touch: the screen scrolls under the finger instead of following a pointer.
+   Where it is shorter or narrower than the window it sits in the middle. */
+.field[data-mode='scroll'] {
+  display: flex;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  background-color: var(--cloth);
+  background-image:
+    radial-gradient(130% 110% at 24% 0%, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0) 58%),
+    linear-gradient(var(--cloth-shade), var(--cloth-shade)),
+    var(--cloth-weave);
+  background-size: auto, auto, 400px;
+}
+
+.field[data-tone='paper'] .scrim,
+.field[data-tone='bare'] .scrim {
+  background: var(--paper);
+}
+
+.screen {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: block;
+  max-width: none;
+  transform-origin: 0 0;
+  background: var(--cloth);
+  box-shadow:
+    0 0 0 1px rgba(235, 230, 217, 0.15),
+    0 40px 80px -40px rgba(2, 6, 22, 0.9);
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.field[data-tone='paper'] .screen,
+.field[data-tone='bare'] .screen {
+  background: var(--paper);
+  box-shadow:
+    0 0 0 1px var(--ink-muted),
+    0 40px 80px -48px rgba(22, 38, 94, 0.5);
+}
+
+.screen.cutout {
+  background: none;
+  box-shadow: none;
+}
+
+.field[data-mode='scroll'] .screen {
+  position: relative;
+  flex: none;
+  margin: auto;
+  border: 16px solid transparent; /* the field's margin, kept at both ends of the scroll */
+  background-clip: padding-box;
+  box-sizing: content-box;
+  /* the hairline stays on the screen's own edge, inside that margin */
+  box-shadow: none;
+  outline: 1px solid rgba(235, 230, 217, 0.15);
+  outline-offset: -16px;
+}
+
+.field[data-mode='scroll'][data-tone='paper'] .screen,
+.field[data-mode='scroll'][data-tone='bare'] .screen {
+  box-shadow: none;
+  outline-color: var(--ink-muted);
+}
+
+.field[data-mode='scroll'] .screen.cutout {
+  outline: none;
+}
+
+/* “Close ×” is the cursor over the field, as around the open notebook: it
+ * grows out of the pointer. Position in `translate` (ScreenView, inline), size
+ * in `transform: scale()` on this element, centring on the inner span; kept on
+ * separate elements and properties so a minifier can't fold them together. */
+.close {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 1;
+  pointer-events: none;
+  transform-origin: 0 0;
+  transform: scale(0.35);
+  opacity: 0;
+  transition: opacity 150ms cubic-bezier(0.4, 0, 1, 1), transform 190ms cubic-bezier(0.4, 0, 1, 1);
+}
+
+.close > span {
+  display: block;
+  padding: 7px 10px 6px;
+  border-radius: 999px;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  box-shadow: 0 6px 16px rgba(8, 14, 34, 0.3);
+  transform: translate(-50%, -50%);
+}
+
+.field[data-tone='paper'] .close > span,
+.field[data-tone='bare'] .close > span {
+  background: var(--ink-lift);
+  color: var(--paper);
+}
+
+.close[data-on='true'] {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 120ms var(--ease-out), transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Opened by keyboard or touch: no pointer to follow, so the label waits in the
+ * field's top right corner. */
+.close[data-on='parked'] {
+  left: auto;
+  right: 20px;
+  top: 20px;
+  opacity: 1;
+  transform: none;
+}
+
+.close[data-on='parked'] > span {
+  transform: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .field { cursor: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .close { transform: scale(1); transition: opacity 120ms var(--ease-out); }
+}

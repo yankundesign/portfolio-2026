@@ -10,6 +10,7 @@ import AboutRoute from './routes/AboutRoute'
 import RadioRoute from './routes/RadioRoute'
 import NotFoundRoute from './routes/NotFoundRoute'
 import InkFilters from './components/shared/InkFilters'
+import PlateCarrier from './components/shared/PlateCarrier'
 import { projects } from './data/projects'
 import { WashTuneProvider } from './components/shared/WashTuneContext'
 import WashTuneMount from './components/shared/WashTuneMount'
@@ -77,6 +78,8 @@ export default function App() {
         {/* Global SVG filter defs — referenced by url(#…) from any element. */}
         <InkFilters />
         <AnimatedRoutes />
+        {/* The works page's plate, while it is carried into a case study. */}
+        <PlateCarrier />
         {/* In-production tuning overlay. Mounts only when ?tune=wash is in the
          * URL on initial render, so production traffic pays no overhead. */}
         <WashTuneMount />

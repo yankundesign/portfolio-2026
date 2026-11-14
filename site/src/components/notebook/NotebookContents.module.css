@@ -479,6 +479,8 @@
 .pageRight[data-fly] .plateFrame { visibility: visible; }
 .pageRight:not([data-fly]) .plateFrame img { transition: none; }
 .thumbFrame[data-lifted] { visibility: hidden; }
+/* A case study's opening board is on its way home to this thumbnail (PlateCarry). */
+.thumbFrame[data-carried] { visibility: hidden; }
 
 .pageRight[data-back] .thumb {
   opacity: 0;

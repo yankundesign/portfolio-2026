@@ -1,4 +1,5 @@
 import ClothBoard from './ClothBoard';
+import ScreenInspector from './ScreenInspector';
 import TaskPathDiagram from './TaskPathDiagram';
 import PivotDiagram from './PivotDiagram';
 import LayersDiagram from './LayersDiagram';
@@ -58,15 +59,17 @@ export default function ControlHubAgenticNotebook({ backTo }: ControlHubAgenticN
   const [p01, p02, p03, p04, p05] = prototypes;
 
   return (
+    <ScreenInspector>
     <article className={s.article} data-layout="notebook">
       <RunningHead
+        slug="control-hub-agentic"
         backTo={backTo}
         chapterIds={CHAPTER_IDS}
         chapters={chapters}
         title="Control Hub Workflows"
         ofTotal={position.ofTotal}
       />
-      <CaseOpener header={header} glance={glance} />
+      <CaseOpener slug="control-hub-agentic" header={header} glance={glance} />
 
       {/* ---- 01 The task ----------------------------------------- */}
       <section id="task" className={s.chapter} aria-labelledby="task-word">
@@ -210,6 +213,7 @@ export default function ControlHubAgenticNotebook({ backTo }: ControlHubAgenticN
 
       <CaseEnd credits={credits} next={position.next} ofTotal={position.ofTotal} />
     </article>
+    </ScreenInspector>
   );
 }
 

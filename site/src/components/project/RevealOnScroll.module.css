@@ -4,12 +4,32 @@
   transition:
     opacity var(--duration-transition, 480ms) var(--ease-out),
     transform var(--duration-transition, 480ms) var(--ease-out);
-  will-change: opacity, transform;
+}
+
+/* Set down on the page: it comes down a little, a touch large, and settles
+   with the cover's spring. The notebook arrives this way on the homepage. */
+.set {
+  transform: translateY(-0.75rem) scale(1.012);
+  transform-origin: 50% 70%;
+  transition:
+    opacity 220ms var(--ease-out),
+    transform 820ms var(--ease-settle);
+}
+
+/* Ink: type appears where it is. */
+.ink {
+  transform: none;
+  transition: opacity 560ms var(--ease-out);
 }
 
 .revealed {
   opacity: 1;
-  transform: translateY(0);
+  transform: none;
+}
+
+/* Already in place (a plate is landing on it): nothing of its own to play. */
+.shown {
+  transition: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

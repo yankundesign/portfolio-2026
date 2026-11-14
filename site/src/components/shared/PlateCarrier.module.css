@@ -1,0 +1,63 @@
+/*
+ * PlateCarrier — a frame in the air between two pages. Its box is written by
+ * PlateCarry. Above the pages and the running head, under the screen
+ * inspector's field and the grain.
+ */
+.carry {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 50;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.carry[data-on] {
+  visibility: visible;
+  /* off the page: it casts the shadow the board has on it */
+  animation: carried 180ms var(--ease-out) both;
+}
+
+@keyframes carried {
+  from { box-shadow: 0 0 0 rgba(22, 38, 94, 0), 0 0 0 0 rgba(22, 38, 94, 0); }
+  to { box-shadow: 0 1px 2px rgba(22, 38, 94, 0.22), 0 34px 64px -40px rgba(22, 38, 94, 0.62); }
+}
+
+/* The works page's plate: its picture, with a hairline flush to it. */
+.plate {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border: 1px solid var(--ink-muted);
+  border-radius: inherit;
+  background: var(--paper);
+}
+
+.plate img,
+.plate canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.plate img:not([src]),
+.plate canvas:not([data-on]) { display: none; }
+
+/* The opening board's copy (on the way back): laid out at the board's own
+   size and scaled to the carrier's box, so it keeps its proportions inside. */
+.copy {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+}
+
+/* Carrying a board: the plate's picture waits, and comes back over it in flight. */
+.carry[data-on='board'] .plate { opacity: 0; }
+.carry[data-on='plate'] .copy { display: none; }

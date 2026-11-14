@@ -20,7 +20,7 @@
 .article {
   /* One type scale for the whole page: four serif steps and one mono size.
      xl  the title, and "Should we pause?" (the one rule break)
-     l   chapter words, the two outcome facts, the next project
+     l   chapter words, the next project
      m   every heading-level line: claims, titles, the ticket, quotes,
          lessons, the subtitle, prototype numerals
      s   all reading text, notes included
@@ -299,19 +299,48 @@
   }
 }
 
-/* Facts: the strip outside the evidence (Actual Source). */
+/* Facts: one mono line, as on the raised plate's foot on the works page
+   (context · role · status). The labels stay for screen readers; a strip of
+   label-over-value boxes read as a résumé box. */
 .facts {
-  margin-top: clamp(2.5rem, 5vw, 3.75rem);
-  row-gap: 1.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.9em;
+  margin: clamp(2.25rem, 4.5vw, 3.25rem) 0 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  line-height: 1.5;
+  color: var(--ink-soft);
 }
 
 .fact {
-  grid-column: span 3;
-  padding-top: 0.85rem;
-  border-top: 1px solid var(--ink-muted);
+  display: flex;
 }
 
-.fact dt,
+/* The dot follows its fact, so a wrapped line never starts with one. */
+.fact:not(:last-child)::after {
+  content: '·';
+  margin-left: 0.9em;
+  color: var(--ink-soft);
+}
+
+.fact dt {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.fact dd {
+  margin: 0;
+  color: var(--ink);
+}
+
 .glanceItem dt {
   font-family: var(--font-mono);
   font-size: var(--text-caption);
@@ -320,16 +349,34 @@
   color: var(--ink-soft);
 }
 
-.fact dd {
-  margin: 0.45rem 0 0;
-  font-family: var(--font-display);
-  font-size: var(--type-s);
-  font-weight: 350;
-  line-height: 1.6;
+.hero {
+  margin-top: clamp(1rem, 1.6vw, 1.35rem);
 }
 
-.hero {
-  margin-top: clamp(1.75rem, 3vw, 2.5rem);
+/* Reached from the works page, the opening board is that page's plate,
+   carried here (PlateCarry). The page's type inks in around it while it
+   flies: the head, the title, the facts, then the answers under the board. */
+@keyframes arrive {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.article:has(.opener[data-arriving]) .headRow,
+.opener[data-arriving] .titleBlock,
+.opener[data-arriving] .facts,
+.opener[data-arriving] .glance {
+  animation: arrive 520ms var(--ease-out) both;
+}
+
+.opener[data-arriving] .titleBlock { animation-delay: 80ms; }
+.opener[data-arriving] .facts { animation-delay: 220ms; }
+.opener[data-arriving] .glance { animation-delay: 460ms; }
+
+/* “← Works” from the top of the page: the opening board is carried home, and
+   the page lets go of it (PlateCarry sets data-leaving; done within 180 ms). */
+.article[data-leaving] {
+  opacity: 0;
+  transition: opacity 170ms var(--ease-page);
 }
 
 /* At a glance: three short answers, side by side. */
@@ -356,16 +403,7 @@
 }
 
 @media (max-width: 899px) {
-  .fact { grid-column: span 6; }
   .glanceItem { grid-column: 1 / -1; }
-}
-
-@media (max-width: 719px) {
-  .facts {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .fact { grid-column: auto; }
 }
 
 /* ---- Chapter mark (the works page's Contents) ---------------- */
@@ -376,9 +414,10 @@
 }
 
 .mark {
+  position: relative;
   align-items: last baseline;
   padding-bottom: clamp(1rem, 2vw, 1.4rem);
-  border-bottom: 1px solid var(--ink);
+  border-bottom: 1px solid transparent; /* drawn by StringRule */
 }
 
 .markN {
@@ -868,22 +907,22 @@
 .outcomeItem:first-child { grid-column: 4 / 8; }
 .outcomeItem:last-child { grid-column: 8 / 13; }
 
+/* The label is a mono kicker and the sentence carries the result. Set at
+   display size, "WebexOne" and "Adopted" were words standing in for figures;
+   the chapter's claim above is the line at scale. */
 .outcomeItem dt {
-  font-family: var(--font-display);
-  font-weight: 300;
-  font-size: var(--type-l);
-  line-height: 1;
-  letter-spacing: -0.035em;
-  font-variation-settings: 'opsz' 144, 'WONK' 1;
-}
-
-.outcomeItem:last-child dt {
-  font-style: italic;
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  line-height: 1.5;
+  color: var(--ink-soft);
 }
 
 .outcomeItem dd {
-  margin: 0.9rem 0 0;
-  max-width: 20em;
+  margin: 0.7rem 0 0;
+  max-width: 24em;
   font-family: var(--font-display);
   font-size: var(--type-s);
   font-weight: 330;
@@ -929,10 +968,10 @@
 
 /* ---- End: credits, next, colophon --------------------------- */
 
+/* The closing rule is the cover's line (SpringRule): its baseline sits where
+   the border was, 36px into its 72px box. */
 .end {
-  margin-top: var(--chapter-space);
-  border-top: 1px solid var(--ink);
-  padding-top: clamp(1.5rem, 3vw, 2.25rem);
+  margin-top: calc(var(--chapter-space) - 36px);
 }
 
 .credits > .l {

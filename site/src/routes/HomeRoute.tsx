@@ -11,6 +11,7 @@ import { useTrailingPeek } from '../interactions/useTrailingPeek';
 import { useInputModality } from '../interactions/useInputModality';
 import { useMediaQuery } from '../interactions/useMediaQuery';
 import { useReducedMotion } from '../interactions/useReducedMotion';
+import { plateCarry, type PlateSource } from '../interactions/plateCarry';
 import styles from './HomeRoute.module.css';
 
 const NARROW = '(max-width: 900px)';
@@ -20,6 +21,13 @@ const NARROW = '(max-width: 900px)';
 const FACES = ["300 100px Fraunces", "italic 300 100px Fraunces", "400 12px 'JetBrains Mono'"];
 
 const SF_TIME = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Los_Angeles', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+
+/**
+ * The one sentence the page says about the work: a conviction, not a bio
+ * (chosen by Yankun, 2026-11-13). It speaks of the work, never of how hard a
+ * product is. Two sentences, each on its own line.
+ */
+const POINT_OF_VIEW = ['A good tool goes quiet in the hand.', 'I work until the AI does too.'];
 
 /** San Francisco time in the top bar, the colon breathing. */
 function LocalTime() {
@@ -98,7 +106,12 @@ export default function HomeRoute() {
   const [intro, setIntro] = useState<'wait' | 'run' | 'done'>(() => (wantOpen || reducedMotion ? 'done' : 'wait'));
   const playIntro = useRef(intro === 'wait');
 
-  const [bookState, setBookState] = useState<NotebookState>('closed');
+  // A visit that starts on the open book (a direct link, or back from a case
+  // study) starts with the page already stepped aside. Starting 'closed' showed
+  // the name and the index for a moment and slid them away again.
+  const [bookState, setBookState] = useState<NotebookState>(
+    () => (wantOpen && !window.matchMedia(NARROW).matches ? 'open' : 'closed'),
+  );
   // The raised plates' full-size PNGs load from the first time the book is
   // asked to open (they arrive while the cover swings), never on the homepage.
   const [platesWanted, setPlatesWanted] = useState(wantOpen);
@@ -169,13 +182,22 @@ export default function HomeRoute() {
     else navigate('/');
   }, [location.state, navigate]);
 
-  const openProject = useCallback((project: Project) => {
-    navigate(`/works/${project.slug}`, { state: { fromCanvas: '/works' } });
-  }, [navigate]);
+  // Opening a case study from the spread: where its opener has a board, the
+  // plate is picked up and carried there (PlateCarry). The notebook lets go of
+  // it and fades, then the page changes under the plate.
+  const [leaving, setLeaving] = useState(false);
+  // Coming back with a case study's opening board in the air: the notebook fades in under it.
+  const [returning] = useState(() => plateCarry.returning !== null);
+  const openProject = useCallback((project: Project, plate?: PlateSource) => {
+    if (plateCarry.carrying) return;
+    const go = () => navigate(`/works/${project.slug}`, { state: { fromCanvas: '/works' } });
+    if (!plate || narrow || reducedMotion || !plateCarry.lands(project.slug)) { go(); return; }
+    void plateCarry.take(project.slug, plate, () => setLeaving(true)).then(go);
+  }, [navigate, narrow, reducedMotion]);
 
   useEffect(() => {
     if (!wantOpen) return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') closeWorks(); };
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape' && !plateCarry.carrying) closeWorks(); };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [wantOpen, closeWorks]);
@@ -189,6 +211,8 @@ export default function HomeRoute() {
       data-book={narrow ? (wantOpen ? 'open' : 'closed') : bookState}
       data-start={wantOpen ? 'open' : 'closed'}
       data-intro={intro}
+      data-leaving={leaving || undefined}
+      data-returning={returning || undefined}
     >
       <div ref={lampRef} className={styles.lamp} aria-hidden="true" />
 
@@ -206,10 +230,10 @@ export default function HomeRoute() {
           <span className={`${styles.line} ${styles.l2}`} aria-hidden="true"><Letters text="Wang" line={1} /></span>
         </h1>
 
-        <div className={styles.aside}>
-          <span>Field Notebook</span>
-          <span>Selected work, 2020–2026</span>
-        </div>
+        {/* The cover already says what the object is, so this corner says what the work is. */}
+        <p className={styles.aside}>
+          {POINT_OF_VIEW.map((sentence) => <span key={sentence}>{sentence} </span>)}
+        </p>
 
         <button
           ref={slotRef}

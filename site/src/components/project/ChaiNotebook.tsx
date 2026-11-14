@@ -1,5 +1,6 @@
 import { Link } from 'react-router';
 import ClothBoard from './ClothBoard';
+import ScreenInspector from './ScreenInspector';
 import RoadmapDrawing from './RoadmapDrawing';
 import { RunningHead, CaseOpener, ChapterMark, Statement, PosterLine, MarginNote, CaseEnd } from './NotebookCase';
 import { contents } from '../../data/projects';
@@ -45,15 +46,17 @@ const workflows = casePosition(roadmapNext.slug, contents);
  */
 export default function ChaiNotebook({ backTo }: ChaiNotebookProps) {
   return (
+    <ScreenInspector>
     <article className={s.article} data-layout="notebook">
       <RunningHead
+        slug="chai"
         backTo={backTo}
         chapterIds={CHAPTER_IDS}
         chapters={chapters}
         title="Control Hub AI Assistant"
         ofTotal={position.ofTotal}
       />
-      <CaseOpener header={header} glance={glance} />
+      <CaseOpener slug="chai" header={header} glance={glance} />
 
       {/* ---- 01 Context ------------------------------------------ */}
       <section id="context" className={s.chapter} aria-labelledby="context-word">
@@ -175,5 +178,6 @@ export default function ChaiNotebook({ backTo }: ChaiNotebookProps) {
 
       <CaseEnd credits={credits} next={position.next} ofTotal={position.ofTotal} />
     </article>
+    </ScreenInspector>
   );
 }

@@ -55,7 +55,7 @@ export default function MobileContents({ projects, contents, onOpenProject, onCl
       </ol>
       <footer className={styles.foot}>
         <span>Yankun Wang</span>
-        <span>2020–2026</span>
+        <span>2024–2026</span>
       </footer>
     </div>
   );
