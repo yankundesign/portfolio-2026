@@ -32,7 +32,8 @@ export interface ProjectHeaderAction {
 }
 
 export interface ProjectHeaderProps {
-  figNumber: string;
+  /** The mono line over the title (“fig. 01”). Left out, the title opens the page. */
+  figNumber?: string;
   title: string;
   subtitle: string;
   yearRange: string;
@@ -139,9 +140,11 @@ export default function ProjectHeader({
 
   return (
     <header className={styles.header}>
-      <p className={styles.figNumber} aria-hidden="true">
-        {figNumber}
-      </p>
+      {figNumber && (
+        <p className={styles.figNumber} aria-hidden="true">
+          {figNumber}
+        </p>
+      )}
       <h1 className={styles.title}>{title}</h1>
       <p className={styles.subtitle}>
         <em>{subtitle}</em>

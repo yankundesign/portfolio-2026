@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
-import { InspectContext, type InspectRequest } from '../../interactions/useInspect';
+import { BoardGroundContext, InspectContext, type InspectRequest } from '../../interactions/useInspect';
+import type { BoardGround } from '../../data/notebookCase';
 import { ScreenView } from '../../interactions/screenView';
 import { useReducedMotion } from '../../interactions/useReducedMotion';
 import styles from './ScreenInspector.module.css';
@@ -10,22 +11,32 @@ import styles from './ScreenInspector.module.css';
  *
  * Wrap a case study in it; every image on a ClothBoard then enlarges on click
  * (or Enter). The screen grows out of its place on the board onto a field of
- * the board's own material (cloth for dark screens, paper for light artwork),
- * to twice its size on the page, and moves under the pointer where it is
- * larger than the window. A click, Esc, the wheel or scrolling sends it back.
- * Over the field the cursor is “Close ×”, as around the open notebook.
+ * the board's own material (the case study's ground, or paper for light
+ * artwork), to twice its size on the page, and moves under the pointer where
+ * it is larger than the window. A click, Esc, the wheel or scrolling sends it
+ * back. Over the field the cursor is “Close ×”, as around the open notebook.
+ *
+ * `ground` is what the page's boards are made of (haze for Workflows, vellum
+ * for CHAI): every board without a tone of its own takes it.
  *
  * Measuring, motion and listeners live in ScreenView (interactions/).
  */
-export default function ScreenInspector({ children }: { children: ReactNode }) {
+export interface ScreenInspectorProps {
+  ground?: BoardGround;
+  children: ReactNode;
+}
+
+export default function ScreenInspector({ ground = 'cloth', children }: ScreenInspectorProps) {
   const [request, setRequest] = useState<InspectRequest | null>(null);
   const closed = useCallback(() => setRequest(null), []);
 
   return (
-    <InspectContext.Provider value={setRequest}>
-      {children}
-      {request && <Enlarged key={request.src} request={request} onClosed={closed} />}
-    </InspectContext.Provider>
+    <BoardGroundContext.Provider value={ground}>
+      <InspectContext.Provider value={setRequest}>
+        {children}
+        {request && <Enlarged key={request.src} request={request} onClosed={closed} />}
+      </InspectContext.Provider>
+    </BoardGroundContext.Provider>
   );
 }
 

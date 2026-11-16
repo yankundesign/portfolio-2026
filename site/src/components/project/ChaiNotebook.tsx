@@ -46,7 +46,7 @@ const workflows = casePosition(roadmapNext.slug, contents);
  */
 export default function ChaiNotebook({ backTo }: ChaiNotebookProps) {
   return (
-    <ScreenInspector>
+    <ScreenInspector ground="vellum">
     <article className={s.article} data-layout="notebook">
       <RunningHead
         slug="chai"

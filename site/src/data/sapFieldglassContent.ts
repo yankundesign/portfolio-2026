@@ -1,4 +1,5 @@
 import type { Figure } from './chaiContent';
+import type { Board } from './notebookCase';
 
 /**
  * SAP Fieldglass case study content.
@@ -8,7 +9,6 @@ import type { Figure } from './chaiContent';
  */
 
 export const header = {
-  figNumber: 'fig. 04',
   title: 'SAP Fieldglass',
   subtitle:
     'Making a mission-critical workforce platform easier for occasional users.',
@@ -25,10 +25,6 @@ export const prose = {
   opening: [
     'SAP Fieldglass is an enterprise SaaS platform for managing external workers, vendors, and statements of work at scale.',
     'My work focused on a simple tension: hiring managers were a major user group, but many of them did not live in the product every day. Fieldglass had to make the next action obvious without asking them to become power users.',
-  ],
-  reframe: [
-    'The first asks were narrower: update homepage widgets for SAP UI5, improve Global Search, and refresh worker details. Research pointed to a different opportunity. Search was hard to improve without heavy backend work, and it still did not help users decide what to do next.',
-    'I regrouped with the PM and engineering lead and proposed a dashboard direction instead: role-based templates, surfaced work items, worker signals, and actions grounded where the user already was.',
   ],
   homepage: [
     'I mapped four core personas - Hiring Manager, PMO, Financial Approver, and System Admin - to their top jobs, then translated those jobs into template layouts.',
@@ -53,53 +49,90 @@ export const prose = {
 } as const;
 
 export const figures = {
-  searchReframe: {
-    src: '/images/sap-fieldglass/worker-dashboard.png',
-    caption: 'fig. 04.01 - reframing the ask from search to dashboard navigation',
-    alt: 'A comparison slide showing Global Search on the left and a proposed Worker Dashboard and Worker Profile path on the right.',
-    width: 'column',
-  },
-  personaMapping: {
-    src: '/images/sap-fieldglass/homepage-layout.png',
-    caption: 'fig. 04.02 - persona mapping translated tasks into role-based templates',
-    alt: 'Persona boards for PMO, hiring manager, procurement manager, and admin user, with key tasks and homepage widget needs.',
-    width: 'column',
-  },
   widgetSystem: {
     src: '/images/sap-fieldglass/homepage-widgets.png',
-    caption: 'fig. 04.03 - widget audit and redesign principles',
+    caption: 'Widget audit and redesign principles',
     alt: 'A design principles slide showing revamped SAP Fieldglass widgets for action-oriented hierarchy and accessibility.',
-    width: 'column',
-  },
-  homepageOutcome: {
-    src: '/images/sap-fieldglass/homepage-outcome.png',
-    caption: 'fig. 04.04 - role-based homepage outcome',
-    alt: 'Several SAP Fieldglass role-based dashboard concepts arranged as overlapping product screens.',
     width: 'column',
   },
   todos: {
     src: '/images/sap-fieldglass/worker-todos.png',
-    caption: 'fig. 04.05 - in-place actions for worker tasks',
+    caption: 'In-place actions for worker tasks',
     alt: 'SAP Fieldglass dashboard detail showing a To-dos section for worker-related tasks and actions.',
     width: 'column',
   },
   insights: {
     src: '/images/sap-fieldglass/worker-insights.png',
-    caption: 'fig. 04.06 - worker insights without running a report',
+    caption: 'Worker insights without running a report',
     alt: 'SAP Fieldglass worker insights dashboard showing key metrics for hiring managers.',
     width: 'column',
   },
   profile: {
     src: '/images/sap-fieldglass/worker-profile.png',
-    caption: 'fig. 04.07 - worker profile overview reorganized into cards',
+    caption: 'Worker profile overview reorganized into cards',
     alt: 'SAP Fieldglass worker profile page with overview cards for action items, spend, duration, timesheets, and documents.',
     width: 'column',
   },
 } as const satisfies Record<string, Figure>;
 
+/**
+ * The four role templates, one to a board, on the case study's ground
+ * (ClothBoard). Each is a whole page at the column's width, taller than the
+ * window (`tall`). The role names are the personas' from the research boards.
+ */
+export const homepageBoards: readonly Board[] = [
+  {
+    caption: 'Role-based homepage: PMO User',
+    tall: true,
+    screens: [
+      {
+        kind: 'image',
+        src: '/images/sap-fieldglass/homepage-pmo.png',
+        size: [1446, 1766],
+        alt: 'The SAP Fieldglass homepage for a PMO user: pinned links, My Work Items, a PMO Monitor of critical and warning counts, an announcement, in-progress items, interviews, reports, a reference library and linked accounts.',
+      },
+    ],
+  },
+  {
+    caption: 'Role-based homepage: Contingent Hiring Manager',
+    tall: true,
+    screens: [
+      {
+        kind: 'image',
+        src: '/images/sap-fieldglass/homepage-hiring-manager.png',
+        size: [1446, 1766],
+        alt: 'The SAP Fieldglass homepage for a contingent hiring manager: pinned links, My Work Items, a get-started card, an announcement, My Workers with health status, My Job Postings, interviews, reports and a reference library.',
+      },
+    ],
+  },
+  {
+    caption: 'Role-based homepage: Procurement Manager',
+    tall: true,
+    screens: [
+      {
+        kind: 'image',
+        src: '/images/sap-fieldglass/homepage-procurement.png',
+        size: [1446, 1282],
+        alt: 'The SAP Fieldglass homepage for a procurement manager: statement-of-work links, a work items count, recent reports, an announcement, My Statements of Work with health status and a spend chart.',
+      },
+    ],
+  },
+  {
+    caption: 'Role-based homepage: Admin User',
+    tall: true,
+    screens: [
+      {
+        kind: 'image',
+        src: '/images/sap-fieldglass/homepage-admin.png',
+        size: [1446, 1282],
+        alt: 'The SAP Fieldglass homepage for an admin user: pinned links, dashboards, recent reports, a report table and two charts.',
+      },
+    ],
+  },
+];
+
 export const sections = [
   { id: 'opening', label: 'Opening' },
-  { id: 'reframe', label: 'Reframe' },
   { id: 'homepage', label: 'Homepage' },
   { id: 'worker', label: 'Worker' },
   { id: 'profile', label: 'Profile' },

@@ -4,6 +4,25 @@ Track design and build decisions as they're made.
 
 ---
 
+## 2026-11-16 · Case-study boards: Haze for Workflows, Vellum for CHAI
+
+**Decision:** The boards behind the screens leave the cover's navy cloth. Each case study has one ground:
+
+- **Control Hub Workflows: Haze.** Ink's own hue (268° in OKLCH) at lighter weights, brightest under the lamp at the top left. Rings spread from the lamp every 7px, under film grain.
+- **Control Hub AI Assistant: Vellum.** Ink mixed into paper at 15%, lit by the same lamp. It holds CHAI's dark and light screens alike.
+
+Screens are untouched apart from a small window corner (up to 9px). Board margins go from 4.5% to 6%. Paper boards (transparent card artwork) and bare slides stay as they were. The enlarged view's field matches the board's ground.
+
+**Why:** Dark screens on dark cloth had little edge, and the weave sat behind the UI. Yankun's references were soft gradient and grey mats with a clear window edge (Cursor, Linear, Braintrust).
+
+**Trade-off accepted:** Haze's mid blues stretch the two-colour palette. They are tokens (`--haze-*`), all on ink's hue, the same reasoning as `--ink-lift`.
+
+**Considered and dropped:** Dither (the lamp's falloff as 1-bit ink dots) and Night (ink deepened to near black, with a floor of light).
+
+**Source:** `03-prototype-explore/case-study-backdrops/index.html` (all four, with today's cloth for comparison).
+
+---
+
 ## 2026-11-12 · Control Hub Workflows first; CHAI in the same system
 
 Yankun's notes, after the Agentic v4 review:

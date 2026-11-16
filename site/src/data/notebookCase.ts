@@ -22,17 +22,35 @@ export interface BoardScreen {
   cutout?: boolean;
 }
 
+/**
+ * The ground a case study's screens sit on. One per case study, set where the
+ * page wraps itself in ScreenInspector.
+ * 'haze': ink's own hue lifted toward the lamp, with rings and film grain
+ * (Control Hub Workflows).
+ * 'vellum': ink mixed into paper at 15%, for dark and light screens alike (CHAI).
+ * 'cloth': the cover's navy cloth, the first ground; no page uses it now.
+ */
+export type BoardGround = 'cloth' | 'haze' | 'vellum';
+
+/** What a board is made of: the case study's ground, or one of the two exceptions. */
+export type BoardTone = BoardGround | 'paper' | 'bare';
+
 export interface Board {
   screens: readonly BoardScreen[];
   caption: string;
   /**
-   * 'cloth' (default): the navy cloth, for dark product screens.
+   * Unset (most boards): the case study's ground.
    * 'paper': the notebook's page, for light artwork with dark labels and no
-   * background of its own (the widget sheet): on cloth those labels vanish.
+   * background of its own (the widget sheet): on a dark ground those labels vanish.
    * 'bare': no board at all, for a composed slide that already has its own
    * mat (Smart Search, 1.0 → 2.0): a board around it is a second frame.
    */
-  tone?: 'cloth' | 'paper' | 'bare';
+  tone?: BoardTone;
+  /**
+   * A whole page, read by scrolling (the Fieldglass homepages): the screen
+   * takes the board's width, and the window's height no longer holds it back.
+   */
+  tall?: boolean;
 }
 
 export interface Chapter {

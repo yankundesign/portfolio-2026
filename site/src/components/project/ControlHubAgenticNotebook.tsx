@@ -59,7 +59,7 @@ export default function ControlHubAgenticNotebook({ backTo }: ControlHubAgenticN
   const [p01, p02, p03, p04, p05] = prototypes;
 
   return (
-    <ScreenInspector>
+    <ScreenInspector ground="haze">
     <article className={s.article} data-layout="notebook">
       <RunningHead
         slug="control-hub-agentic"

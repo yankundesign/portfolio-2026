@@ -38,6 +38,53 @@
   background: var(--paper);
 }
 
+/* The two grounds, as on the board (ClothBoard.module.css): the lamp at the
+   top left, haze's rings, and film grain. */
+.field[data-tone='haze'] .scrim {
+  background-color: var(--haze);
+  background-image:
+    radial-gradient(115% 120% at 24% 0%, var(--haze-lamp) 0%, var(--haze-light) 34%, rgba(61, 85, 160, 0) 74%),
+    linear-gradient(155deg, var(--haze-mid) 30%, var(--haze-deep) 100%);
+  background-size: auto;
+}
+
+.field[data-tone='vellum'] .scrim {
+  background-color: var(--vellum);
+  background-image:
+    radial-gradient(120% 105% at 24% 0%, rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0) 62%),
+    linear-gradient(160deg, rgba(22, 38, 94, 0) 45%, rgba(22, 38, 94, 0.1) 100%);
+  background-size: auto;
+}
+
+.field[data-tone='haze'] .scrim::before,
+.field[data-tone='haze'] .scrim::after,
+.field[data-tone='vellum'] .scrim::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.field[data-tone='haze'] .scrim::before {
+  background-image: repeating-radial-gradient(
+    circle at 24% 0%,
+    rgba(255, 255, 255, 0) 0,
+    rgba(255, 255, 255, 0.07) 3.5px,
+    rgba(255, 255, 255, 0) 7px
+  );
+}
+
+.field[data-tone='haze'] .scrim::after,
+.field[data-tone='vellum'] .scrim::after {
+  background-image: var(--grain-film);
+  mix-blend-mode: overlay;
+  opacity: 0.5;
+}
+
+.field[data-tone='vellum'] .scrim::after {
+  opacity: 0.22;
+}
+
 .screen {
   position: absolute;
   left: 0;
@@ -61,6 +108,19 @@
     0 40px 80px -48px rgba(22, 38, 94, 0.5);
 }
 
+.field[data-tone='haze'] .screen {
+  box-shadow:
+    0 0 0 1px rgba(244, 241, 234, 0.16),
+    14px 46px 84px -30px rgba(8, 13, 38, 0.85);
+}
+
+.field[data-tone='vellum'] .screen {
+  background: var(--vellum);
+  box-shadow:
+    0 0 0 1px rgba(22, 38, 94, 0.1),
+    14px 46px 84px -34px rgba(22, 38, 94, 0.55);
+}
+
 .screen.cutout {
   background: none;
   box-shadow: none;
@@ -80,9 +140,14 @@
 }
 
 .field[data-mode='scroll'][data-tone='paper'] .screen,
-.field[data-mode='scroll'][data-tone='bare'] .screen {
+.field[data-mode='scroll'][data-tone='bare'] .screen,
+.field[data-mode='scroll'][data-tone='vellum'] .screen {
   box-shadow: none;
   outline-color: var(--ink-muted);
+}
+
+.field[data-mode='scroll'][data-tone='haze'] .screen {
+  box-shadow: none;
 }
 
 .field[data-mode='scroll'] .screen.cutout {
@@ -121,7 +186,8 @@
 }
 
 .field[data-tone='paper'] .close > span,
-.field[data-tone='bare'] .close > span {
+.field[data-tone='bare'] .close > span,
+.field[data-tone='vellum'] .close > span {
   background: var(--ink-lift);
   color: var(--paper);
 }

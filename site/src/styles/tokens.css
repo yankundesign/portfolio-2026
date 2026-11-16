@@ -22,6 +22,21 @@
   --cloth-shade: rgba(13, 21, 50, 0.6);
   --cloth-stamp: rgba(235, 230, 217, 0.82);
   --cloth-weave: url('/notebook/cloth-navy.webp');
+  /* Two more grounds for the case-study boards, one per case study (2026-11-16).
+   * Both are lit by the homepage's lamp, at the top left.
+   * Vellum (CHAI): ink mixed into paper at 15% in OKLab. It holds dark and
+   * light screens alike.
+   * Haze (Workflows): ink's own hue (268° in OKLCH; ink is 0.29 / 0.10 / 268)
+   * at lighter weights, from --haze-lamp under the lamp down to --haze-deep in
+   * the far corner. The same ink, lifted, as --ink-lift is. */
+  --vellum: #ced0d5;
+  --haze-lamp: #bccaec;   /* L 0.84 */
+  --haze-light: #7e96d7;  /* L 0.68 */
+  --haze-mid: #455eaa;    /* L 0.50 */
+  --haze: #3d5398;        /* L 0.46, the ground's base */
+  --haze-deep: #192967;   /* L 0.31 */
+  /* Neutral film grain, laid over a ground with `overlay`. */
+  --grain-film: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
 
   /* Typography */
   --font-display: 'Fraunces', serif;

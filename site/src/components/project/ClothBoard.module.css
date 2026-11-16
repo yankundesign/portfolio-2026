@@ -1,13 +1,18 @@
 /*
- * ClothBoard — a dark screen tipped onto the notebook's navy cloth.
+ * ClothBoard — a product screen tipped onto a board.
+ *
+ * The board is made of the case study's ground: haze (Control Hub Workflows)
+ * or vellum (CHAI), both below; the navy cloth is the base they replace.
+ * 'paper' and 'bare' are the two exceptions a board can ask for.
  *
  * Every board takes the full measure. The board measures itself (container),
- * so its margins stay in proportion at every width: 4.5% at the sides and
- * top, 5.5% below. Inside, the row of screens is centred, and no wider than:
+ * so its margins stay in proportion at every width (--pad-*): 6% at the sides
+ * and top, 6.5% below (4.5% and 5.5% on cloth and paper). Inside, the row of
+ * screens is centred, and no wider than:
  *   · --row-max  the width at which a screen would pass its capture's pixels
  *   · the window's height, so the whole board is on screen at once
  *     (--k is the row's height over its width; --label-h makes room for the
- *     stamps above two-screen rows; 10cqw is the board's own margins).
+ *     stamps above two-screen rows).
  */
 
 .figure {
@@ -15,6 +20,10 @@
 }
 
 .board {
+  /* cqw here is read where the value is used: inside the board */
+  --pad-top: 4.5cqw;
+  --pad-side: 4.5cqw;
+  --pad-foot: 5.5cqw;
   container-type: inline-size;
   position: relative;
   border-radius: 6px;
@@ -33,7 +42,7 @@
 }
 
 .inner {
-  padding: 4.5cqw 4.5cqw 5.5cqw;
+  padding: var(--pad-top) var(--pad-side) var(--pad-foot);
 }
 
 .row {
@@ -43,9 +52,14 @@
   width: min(
     100%,
     var(--row-max),
-    max(26rem, calc((100svh - 8rem - 10cqw - var(--label-h)) / var(--k)))
+    max(26rem, calc((100svh - 8rem - var(--pad-top) - var(--pad-foot) - var(--label-h)) / var(--k)))
   );
   margin: 0 auto;
+}
+
+/* A whole page, read by scrolling: the window's height doesn't hold it back. */
+.tall .row {
+  width: min(100%, var(--row-max));
 }
 
 .slot {
@@ -83,8 +97,13 @@
 }
 
 .paper .inspect:focus-visible,
-.bare .inspect:focus-visible {
+.bare .inspect:focus-visible,
+.vellum .inspect:focus-visible {
   outline-color: var(--ink);
+}
+
+.haze .inspect:focus-visible {
+  outline-color: var(--paper);
 }
 
 .vh {
@@ -94,6 +113,117 @@
   overflow: hidden;
   clip-path: inset(50%);
   white-space: nowrap;
+}
+
+/*
+ * The two grounds. Both are lit by one lamp at the top left, as on the
+ * homepage, and a screen's shadow falls away from it, down and to the right.
+ * Their extra layers (rings, grain) sit behind the screens. The one thing
+ * added to a capture is the window's own corner.
+ */
+.haze,
+.vellum {
+  --pad-top: 6cqw;
+  --pad-side: 6cqw;
+  --pad-foot: 6.5cqw;
+  isolation: isolate;
+}
+
+.haze::before,
+.haze::after,
+.vellum::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.haze .screen,
+.vellum .screen {
+  border-radius: clamp(3px, 0.75cqw, 9px);
+}
+
+/* Haze (Control Hub Workflows): ink's own hue, lifted toward the lamp. */
+.haze {
+  background-color: var(--haze);
+  background-image:
+    radial-gradient(115% 120% at 24% 0%, var(--haze-lamp) 0%, var(--haze-light) 34%, rgba(61, 85, 160, 0) 74%),
+    linear-gradient(155deg, var(--haze-mid) 30%, var(--haze-deep) 100%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+/* rings spread from the lamp, one every 7px */
+.haze::before {
+  background-image: repeating-radial-gradient(
+    circle at 24% 0%,
+    rgba(255, 255, 255, 0) 0,
+    rgba(255, 255, 255, 0.07) 3.5px,
+    rgba(255, 255, 255, 0) 7px
+  );
+}
+
+.haze::after {
+  background-image: var(--grain-film);
+  mix-blend-mode: overlay;
+  opacity: 0.5;
+}
+
+.haze .screen {
+  box-shadow:
+    0 0 0 1px rgba(244, 241, 234, 0.16),
+    6px 16px 30px -12px rgba(8, 13, 38, 0.5),
+    14px 46px 84px -30px rgba(8, 13, 38, 0.85);
+}
+
+.haze .stamp {
+  color: rgba(244, 241, 234, 0.92);
+  text-shadow: none;
+}
+
+.haze .dropped .screen {
+  box-shadow: none;
+}
+
+/* Vellum (CHAI): ink mixed into paper at 15%, for dark and light screens alike. */
+.vellum {
+  background-color: var(--vellum);
+  background-image:
+    radial-gradient(120% 105% at 24% 0%, rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0) 62%),
+    linear-gradient(160deg, rgba(22, 38, 94, 0) 45%, rgba(22, 38, 94, 0.1) 100%);
+  box-shadow: inset 0 0 0 1px rgba(22, 38, 94, 0.07);
+}
+
+.vellum::after {
+  background-image: var(--grain-film);
+  mix-blend-mode: overlay;
+  opacity: 0.22;
+}
+
+.vellum .screen {
+  background: var(--vellum);
+  box-shadow:
+    0 0 0 1px rgba(22, 38, 94, 0.1),
+    2px 3px 6px rgba(22, 38, 94, 0.1),
+    6px 16px 30px -12px rgba(22, 38, 94, 0.3),
+    14px 46px 84px -34px rgba(22, 38, 94, 0.55);
+}
+
+.vellum .stamp {
+  color: var(--ink-soft);
+  text-shadow: none;
+}
+
+.vellum .dropped .screen {
+  box-shadow: none;
+  outline-color: rgba(22, 38, 94, 0.5);
+}
+
+.haze .cutout .screen,
+.vellum .cutout .screen {
+  background: none;
+  box-shadow: none;
 }
 
 /* A paper board: the notebook's page, for light artwork with its own mat or

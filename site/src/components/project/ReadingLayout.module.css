@@ -152,6 +152,17 @@
   margin: 0 0 clamp(2rem, 4vw, 3rem);
 }
 
+/* A board of product screens (ClothBoard) in the reading column: the plates'
+   own spacing; boards in a run sit a little closer, as in the notebook layout. */
+
+.board {
+  margin: clamp(2.5rem, 5vw, 4rem) 0;
+}
+
+.board + .board {
+  margin-top: clamp(1.75rem, 3vw, 2.5rem);
+}
+
 /* Report Analysis sub-beats (6.1, 6.2).
    Sub-headers are smaller than SectionHeader and sit above their prose
    + plates. A faint horizontal rule above each marks the break without

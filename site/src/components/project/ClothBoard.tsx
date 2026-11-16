@@ -1,9 +1,9 @@
 import { useRef, type CSSProperties, type MouseEvent } from 'react';
 import RevealOnScroll from './RevealOnScroll';
 import { useBoardVideo } from '../../interactions/useBoardVideo';
-import { useInspect } from '../../interactions/useInspect';
+import { useBoardGround, useInspect } from '../../interactions/useInspect';
 import type { PlateLanding } from '../../interactions/usePlateLanding';
-import type { Board, BoardScreen } from '../../data/notebookCase';
+import type { Board, BoardScreen, BoardTone } from '../../data/notebookCase';
 import styles from './ClothBoard.module.css';
 
 export interface ClothBoardProps {
@@ -16,14 +16,14 @@ export interface ClothBoardProps {
 }
 
 /* The gap between two screens, as a share of the row. The board's margins
-   (4.5% at the sides and top, 5.5% below: a tipped-in plate) live in CSS. */
+   (6% at the sides and top, 6.5% below: a tipped-in plate) live in CSS. */
 const GAP = 0.045;
 
 /**
  * One still on a board (a recording's poster too, when the recording can't
  * play). Inside a ScreenInspector it is a button that enlarges the screen.
  */
-function Still({ screen, tone, eager }: { screen: BoardScreen; tone: NonNullable<Board['tone']>; eager: boolean }) {
+function Still({ screen, tone, eager }: { screen: BoardScreen; tone: BoardTone; eager: boolean }) {
   const inspect = useInspect();
   const src = screen.kind === 'video' ? screen.poster : screen.src;
   const still = (
@@ -55,15 +55,19 @@ function Still({ screen, tone, eager }: { screen: BoardScreen; tone: NonNullable
 }
 
 /**
- * A dark product screen tipped onto a board of the notebook's navy cloth,
- * the cloth of the homepage cover (references: Actual Source's bounded
- * evidence, Hofmann's dark field, Upstream's whole interface; see
- * 00-brief/references/agentic-case-study-v4/README.md).
+ * A product screen tipped onto a board. The board is made of the case study's
+ * ground (useBoardGround): haze for Control Hub Workflows, vellum for CHAI.
+ * The first ground was the cover's navy cloth, which gave the component its
+ * name (references: Actual Source's bounded evidence, Hofmann's dark field,
+ * Upstream's whole interface; see
+ * 00-brief/references/agentic-case-study-v4/README.md). The grounds were
+ * chosen from 03-prototype-explore/case-study-backdrops/.
  *
  * Every board takes the full measure; the screens sit centred on it. Screens
  * are never cropped and never shown wider than their capture: the row stops
  * growing when a screen reaches its native width, or when the board would be
- * taller than the window. Two screens share one row, each at its weight,
+ * taller than the window (a `tall` board, a whole page read by scrolling,
+ * drops that second limit). Two screens share one row, each at its weight,
  * bottoms on one line, each with a stamp above it.
  *
  * The caption sits under the board on paper, with the one Play / Pause
@@ -89,7 +93,8 @@ export default function ClothBoard({ board, eager = false, className, landing }:
   const rowMax = Math.min(...screens.map((s, i) => s.size[0] / shares[i]));
   const labelled = screens.some((s) => s.label);
   const hasVideo = screens.some((s) => s.kind === 'video');
-  const tone = board.tone ?? 'cloth';
+  const ground = useBoardGround();
+  const tone = board.tone ?? ground;
 
   const vars = {
     '--k': k.toFixed(4),
@@ -102,9 +107,9 @@ export default function ClothBoard({ board, eager = false, className, landing }:
     <RevealOnScroll as="figure" variant="set" threshold={0.12} shown={landing?.arriving} className={[styles.figure, className ?? ''].join(' ').trim()}>
       <div
         ref={frameRef}
-        className={[styles.board, board.tone && board.tone !== 'cloth' ? styles[board.tone] : '']
-          .join(' ')
-          .trim()}
+        className={[styles.board, tone !== 'cloth' ? styles[tone] : '', board.tall ? styles.tall : '']
+          .filter(Boolean)
+          .join(' ')}
         style={vars}
         data-opening-board={landing ? '' : undefined}
       >
